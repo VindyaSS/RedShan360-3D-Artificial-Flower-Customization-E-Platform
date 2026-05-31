@@ -1,5 +1,5 @@
 # RedShan360-3D-Artificial-Flower-Customization-E-Platform
-This is a frontend of web-based artificial flower customization and e-commerce platform featuring 3D product customization, 360° product visualization, secure online ordering, and centralized business management.
+This is the frontend of web-based artificial flower customization and e-commerce platform featuring 3D product customization, 360° product visualization, secure online ordering, and centralized business management.
 # Installation
 
 1. Clone the repository
