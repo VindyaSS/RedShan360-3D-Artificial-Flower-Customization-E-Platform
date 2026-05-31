@@ -1,3 +1,4 @@
+import employeeDashboard from "./pages/Employee/employeeDashboard";
 
 
 function App() {
@@ -7,7 +8,19 @@ function App() {
     <Router>
       <div>
         <Routes>
-          
+                    <Route path="/employeeDashboard" element={< employeeDashboard/>} />
+
+
+
+
+
+
+          {/* Protected Routes */}
+            {/*for example */}
+              {/*<Route
+                  path="/EmployeeHome"
+                  element={isLoggedIn ? <LHome /> : <Navigate to="/login" />}
+              />*/}
 
         </Routes>
 
