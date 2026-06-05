@@ -1,33 +1,7 @@
-import employeeDashboard from "./pages/Employee/employeeDashboard";
-
+import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
 
 function App() {
-
-
-  return (
-    <Router>
-      <div>
-        <Routes>
-                    <Route path="/employeeDashboard" element={< employeeDashboard/>} />
-
-
-
-
-
-
-          {/* Protected Routes */}
-            {/*for example */}
-              {/*<Route
-                  path="/EmployeeHome"
-                  element={isLoggedIn ? <LHome /> : <Navigate to="/login" />}
-              />*/}
-
-        </Routes>
-
-      </div>
-
-    </Router>
-  )
+  return <GuestUserDashboard />;
 }
 
-export default App
+export default App;
