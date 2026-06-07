@@ -24,6 +24,8 @@ import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
 import SideNavigation from './components/managerComponent/sideNavigation';
 import MOrderTable from './components/managerComponent/MPendingOrderTable';
 import MTabs from './components/managerComponent/mTabs';
+import MmanageOrders from './pages/Manager/MmanageOrders';
+import MOCards from './components/managerComponent/MOrderCard';
  {/* Rout try by Vindya-end */}
 
  
@@ -57,6 +59,9 @@ function App() {
           <Route path="/sideNavigation" element={<SideNavigation />} />
           <Route path="/mOrderTable" element={<MOrderTable />} />
           <Route path="/mTabs" element={<MTabs />} />
+          <Route path="/mManageOrders" element={<MmanageOrders />} />
+          <Route path="/mOCards" element={<MOCards />} />
+
            {/* Rout try by Vindya-end */}
           
           
