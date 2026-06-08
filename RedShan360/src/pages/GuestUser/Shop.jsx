@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { Star, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Heart } from 'lucide-react';
 
 // Local Image Imports
 import crimsonSilkPeony from '../../../public/images/crimson_silk_peony.jpg';
@@ -15,7 +15,7 @@ import mauveRadianceDahlia from '../../../public/images/mauve_radiance_dahlia.jp
 
 const Shop = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   // Wishlist state loaded from localStorage
   const [wishlist, setWishlist] = useState(() => {
     const saved = localStorage.getItem('redshan360_wishlist');
@@ -34,7 +34,7 @@ const Shop = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  
+
   // Filter States
   const [selectedCategories, setSelectedCategories] = useState({
     silk: true,
@@ -80,7 +80,7 @@ const Shop = () => {
       color: 'white',
       type: 'bouquet',
       subtitle: 'Luxe Velvet Series',
-      price: '$142.00',
+      price: 'Rs.4200.00',
       numericPrice: 142,
       rating: 4.8,
       image: moonlightVelvetTulip,
@@ -92,7 +92,7 @@ const Shop = () => {
       color: 'beige',
       type: 'arrangement',
       subtitle: 'Everlasting Dried Flora',
-      price: '$98.00',
+      price: 'Rs3500.00',
       numericPrice: 98,
       rating: 5.0,
       image: etherealPampasCloud,
@@ -104,7 +104,7 @@ const Shop = () => {
       color: 'pink',
       type: 'single-stem',
       subtitle: 'Spring Silk Collection',
-      price: '$210.00',
+      price: 'Rs.1700.00',
       numericPrice: 210,
       rating: 4.7,
       image: sakuraSpringBloom,
@@ -116,7 +116,7 @@ const Shop = () => {
       color: 'burgundy',
       type: 'centerpiece',
       subtitle: 'Signature Single Stem',
-      price: '$75.00',
+      price: 'Rs2750.00',
       numericPrice: 75,
       rating: 4.9,
       image: architecturalProtea,
@@ -128,7 +128,7 @@ const Shop = () => {
       color: 'grey',
       type: 'bouquet',
       subtitle: 'Velvet Bloom Bouquet',
-      price: '$168.00',
+      price: 'Rs.2500.00',
       numericPrice: 168,
       rating: 4.6,
       image: mauveRadianceDahlia,
@@ -219,25 +219,25 @@ const Shop = () => {
   return (
     <div className="min-h-screen bg-[#fcf9f8] text-[#1a1a1a]" style={{ fontFamily: 'Inter, Montserrat, sans-serif' }}>
       {/* Navbar - solid state on shop page */}
-      <Navbar 
-        isScrolled={isScrolled} 
-        mobileMenuOpen={mobileMenuOpen} 
-        setMobileMenuOpen={setMobileMenuOpen} 
-        navItems={navItems} 
+      <Navbar
+        isScrolled={isScrolled}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        navItems={navItems}
         onWishlistClick={() => setShowWishlistOnly((prev) => !prev)}
       />
 
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-[120px] pb-20">
         <div className="flex flex-col lg:flex-row gap-12">
-          
+
           {/* Sidebar Column */}
           <aside className="w-full lg:w-64 flex-shrink-0">
             <div className="flex justify-between items-center pb-4 border-b border-[#d9d2d0]/50 mb-6">
               <h2 className="text-xl font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Filters
               </h2>
-              <button 
+              <button
                 onClick={handleClearAll}
                 className="text-xs font-semibold text-[#1a1a1a]/60 hover:text-[#8c5e5e] transition-colors"
               >
@@ -258,7 +258,7 @@ const Shop = () => {
                   { key: 'vases', label: 'Artisanal Vases' }
                 ].map((cat) => (
                   <label key={cat.key} className="flex items-center gap-3 cursor-pointer text-sm font-medium text-[#1a1a1a]/80">
-                    <input 
+                    <input
                       type="checkbox"
                       checked={selectedCategories[cat.key]}
                       onChange={() => handleCategoryChange(cat.key)}
@@ -280,9 +280,8 @@ const Shop = () => {
                   <button
                     key={color.id}
                     onClick={() => setSelectedColor(selectedColor === color.id ? null : color.id)}
-                    className={`w-7 h-7 rounded-full transition-transform duration-200 relative ${
-                      selectedColor === color.id ? 'scale-110 ring-2 ring-[#8c5e5e] ring-offset-2' : 'hover:scale-105'
-                    } ${color.border ? 'border border-[#d9d2d0]' : ''}`}
+                    className={`w-7 h-7 rounded-full transition-transform duration-200 relative ${selectedColor === color.id ? 'scale-110 ring-2 ring-[#8c5e5e] ring-offset-2' : 'hover:scale-105'
+                      } ${color.border ? 'border border-[#d9d2d0]' : ''}`}
                     style={{ backgroundColor: color.hex }}
                     aria-label={`Filter by ${color.label}`}
                   />
@@ -295,20 +294,20 @@ const Shop = () => {
               <h3 className="text-xs uppercase tracking-[0.15em] font-bold text-[#1a1a1a]/55 mb-4">
                 Price Range
               </h3>
-              <input 
-                type="range" 
-                min="0" 
-                max="1000" 
+              <input
+                type="range"
+                min="0"
+                max="50000"
                 value={priceRange}
                 onChange={(e) => setPriceRange(Number(e.target.value))}
                 className="w-full h-1 bg-[#eae6e3] rounded-lg appearance-none cursor-pointer accent-[#8c5e5e] focus:outline-none"
               />
               <div className="flex justify-between items-center text-xs font-semibold text-[#1a1a1a]/60 mt-2">
-                <span>$0</span>
-                <span>$1,000+</span>
+                <span>Rs500</span>
+                <span>Rs50000+</span>
               </div>
               <div className="text-xs text-[#8c5e5e] font-semibold mt-1.5 text-center">
-                Max Price: ${priceRange === 1000 ? '1,000+' : priceRange}
+                Max Price: Rs{priceRange === 500 ? '5,0000+' : priceRange}
               </div>
             </div>
 
@@ -322,11 +321,10 @@ const Shop = () => {
                   <button
                     key={type.id}
                     onClick={() => setSelectedProductType(selectedProductType === type.id ? null : type.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all duration-300 ${
-                      selectedProductType === type.id 
-                        ? 'bg-[#8c5e5e] text-white' 
-                        : 'bg-[#f4f0ed] text-[#1a1a1a]/70 hover:bg-[#eae6e3]'
-                    }`}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all duration-300 ${selectedProductType === type.id
+                      ? 'bg-[#8c5e5e] text-white'
+                      : 'bg-[#f4f0ed] text-[#1a1a1a]/70 hover:bg-[#eae6e3]'
+                      }`}
                   >
                     {type.label}
                   </button>
@@ -337,13 +335,13 @@ const Shop = () => {
 
           {/* Products Column */}
           <main className="flex-1">
-            
+
             {/* Header / Info Row */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-4 border-b border-[#d9d2d0]/30">
               <div>
                 {showWishlistOnly && (
-                  <button 
-                    onClick={() => setShowWishlistOnly(false)} 
+                  <button
+                    onClick={() => setShowWishlistOnly(false)}
                     className="text-xs text-[#8c5e5e] hover:underline font-semibold mb-2 block"
                   >
                     &larr; Back to All Arrangements
@@ -359,7 +357,7 @@ const Shop = () => {
 
               <div className="flex items-center gap-2.5 font-sans">
                 <span className="text-xs font-semibold text-[#1a1a1a]/60">Sort by:</span>
-                <select 
+                <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-transparent text-sm font-semibold text-[#8c5e5e] outline-none cursor-pointer border-b border-transparent hover:border-[#8c5e5e] pb-0.5 transition-all"
@@ -380,15 +378,15 @@ const Shop = () => {
                   {showWishlistOnly ? 'Your wishlist is empty.' : 'No arrangements match your filter criteria.'}
                 </p>
                 {showWishlistOnly ? (
-                  <button 
-                    onClick={() => setShowWishlistOnly(false)} 
+                  <button
+                    onClick={() => setShowWishlistOnly(false)}
                     className="mt-4 px-5 py-2.5 rounded-sm bg-[#8c5e5e] hover:bg-[#7d4d50] text-white font-medium text-xs tracking-wider uppercase transition-all duration-300"
                   >
                     Explore Arrangements
                   </button>
                 ) : (
-                  <button 
-                    onClick={handleClearAll} 
+                  <button
+                    onClick={handleClearAll}
                     className="mt-4 px-5 py-2.5 rounded-sm bg-[#8c5e5e] hover:bg-[#7d4d50] text-white font-medium text-xs tracking-wider uppercase transition-all duration-300"
                   >
                     Clear All Filters
@@ -401,26 +399,25 @@ const Shop = () => {
                   <div key={product.id} className="group flex flex-col font-sans">
                     {/* Product Image Container */}
                     <div className="relative overflow-hidden bg-[#f4f0ed] rounded-sm aspect-[3/4] mb-4">
-                      <img 
-                        src={product.image} 
+                      <img
+                        src={product.image}
                         alt={product.title}
                         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                         loading="lazy"
                       />
-                      
+
                       {/* Wishlist Button */}
-                      <button 
+                      <button
                         onClick={() => toggleWishlist(product.id)}
                         className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white flex items-center justify-center transition-colors duration-300"
                         aria-label="Add to Wishlist"
                       >
-                        <Heart 
-                          size={16} 
-                          className={`transition-colors duration-300 ${
-                            wishlist[product.id] 
-                              ? 'fill-[#8c5e5e] text-[#8c5e5e]' 
-                              : 'text-[#1a1a1a]/75 hover:text-[#8c5e5e]'
-                          }`} 
+                        <Heart
+                          size={16}
+                          className={`transition-colors duration-300 ${wishlist[product.id]
+                            ? 'fill-[#8c5e5e] text-[#8c5e5e]'
+                            : 'text-[#1a1a1a]/75 hover:text-[#8c5e5e]'
+                            }`}
                         />
                       </button>
                     </div>
@@ -430,7 +427,7 @@ const Shop = () => {
                       <h3 className="font-semibold text-[15px] text-[#1a1a1a] tracking-tight leading-snug">
                         {product.title}
                       </h3>
-                      
+
                       {/* Rating */}
                       <div className="flex items-center gap-1 text-[11px] font-bold text-[#1a1a1a]/80 shrink-0">
                         <Star size={12} className="fill-[#8c5e5e] text-[#8c5e5e]" />
@@ -441,7 +438,7 @@ const Shop = () => {
                     <p className="text-xs font-semibold text-[#1a1a1a]/50 mb-2">
                       {product.subtitle}
                     </p>
-                    
+
                     <p className="text-sm font-bold text-[#8c5e5e] mt-auto">
                       {product.price}
                     </p>
@@ -453,7 +450,7 @@ const Shop = () => {
             {/* Pagination */}
             {sortedProducts.length > 0 && (
               <div className="flex items-center justify-center gap-2 mt-16 font-sans">
-                <button className="w-9 h-9 rounded-full border border-[#d9d2d0]/60 flex items-center justify-center hover:bg-[#f4f0ed] transition-colors" aria-label="Previous page">
+                {/*<button className="w-9 h-9 rounded-full border border-[#d9d2d0]/60 flex items-center justify-center hover:bg-[#f4f0ed] transition-colors" aria-label="Previous page">
                   <ChevronLeft size={16} />
                 </button>
                 <button className="w-9 h-9 rounded-full bg-[#7d4d50] text-white flex items-center justify-center font-semibold text-sm">
@@ -471,7 +468,7 @@ const Shop = () => {
                 </button>
                 <button className="w-9 h-9 rounded-full border border-[#d9d2d0]/60 flex items-center justify-center hover:bg-[#f4f0ed] transition-colors" aria-label="Next page">
                   <ChevronRight size={16} />
-                </button>
+                </button>*/}
               </div>
             )}
 
