@@ -4,13 +4,13 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Star, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Local Image Imports
-import crimsonSilkPeony from '../../../public/images/crimson_silk_peony.jpg';
-import moonlightVelvetTulip from '../../../public/images/moonlight_velvet_tulip.jpg';
-import etherealPampasCloud from '../../../public/images/ethereal_pampas_cloud.jpg';
-import sakuraSpringBloom from '../../../public/images/sakura_spring_bloom.jpg';
-import architecturalProtea from '../../../public/images/architectural_protea.jpg';
-import mauveRadianceDahlia from '../../../public/images/mauve_radiance_dahlia.jpg';
+// Local Image Paths (served from public/images/)
+const crimsonSilkPeony = '/images/crimson_silk_peony.jpg';
+const moonlightVelvetTulip = '/images/moonlight_velvet_tulip.jpg';
+const etherealPampasCloud = '/images/ethereal_pampas_cloud.jpg';
+const sakuraSpringBloom = '/images/sakura_spring_bloom.jpg';
+const architecturalProtea = '/images/architectural_protea.jpg';
+const mauveRadianceDahlia = '/images/mauve_radiance_dahlia.jpg';
 
 
 const Shop = () => {
