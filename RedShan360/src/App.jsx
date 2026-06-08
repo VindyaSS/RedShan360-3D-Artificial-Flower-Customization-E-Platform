@@ -3,6 +3,8 @@ import EmployeeDashboard from "./pages/Employee/employeeDashboard";
 import LoginPage from "./pages/Login_Register/Login_Page";
 import RegistrationPage from "./pages/Login_Register/Registration";
 import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
+import Shop from './pages/GuestUser/Shop';
+
 import BoquetCustomization from './pages/Customization/Boquet_Customization';
 
 
@@ -38,8 +40,13 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
+
+          <Route path="/shop" element={<Shop />} />
+          
+
           <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
           <Route path="/customization" element={<BoquetCustomization />} />
+
 
 
 
