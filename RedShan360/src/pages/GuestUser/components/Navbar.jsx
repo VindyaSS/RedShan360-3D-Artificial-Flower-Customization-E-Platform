@@ -1,4 +1,5 @@
 import { Search, Heart, ShoppingCart, User, Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems }) => {
   return (
@@ -9,11 +10,11 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems }) => 
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
         <div className="flex justify-between items-center h-[80px] gap-4">
-          <a href="/guestUserDashboard" className="flex-shrink-0">
+          <Link to="/guestUserDashboard" className="flex-shrink-0">
             <h1 className="text-[26px] md:text-[28px] font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
               RedShan<span className="text-[#8c5e5e] italic font-normal">360</span>
             </h1>
-          </a>
+          </Link>
 
           <div className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
