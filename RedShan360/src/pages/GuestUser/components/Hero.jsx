@@ -11,7 +11,7 @@ const Hero = () => {
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(250,248,246,0.9) 35%, rgba(250,248,246,0.5) 60%, transparent 100%)' }} />
       <div className="relative h-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-28 flex items-center">
         <div className="max-w-2xl text-[#1a1a1a] text-left">
-          <h2 className="text-5xl md:text-[80px] leading-[1.08] mb-6 font-bold tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h2 className="text-5xl md:text-[80px] leading-[1.08] mb-6 font-bold tracking-tight" style={{ fontFamily: 'Playfair Display, serif', color: '#000000' }}>
             Everlasting
             <br />
             <span className="text-[#8c5e5e] italic font-normal">Elegance</span>

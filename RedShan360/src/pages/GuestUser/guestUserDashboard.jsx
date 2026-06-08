@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import CategoryGrid from './components/CategoryGrid';
@@ -7,10 +7,17 @@ import FeaturedProducts from './components/FeaturedProducts';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 
+import crimsonMuse from '../../../public/images/crimson_silk_peony.jpg';
+import serenityWhite from '../../../public/images/serenity_white.jpg';
+import wildHearth from '../../../public/images/wild_hearth.jpg';
+
 const GuestUserDashboard = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [wishlist, setWishlist] = useState({});
+  const [wishlist, setWishlist] = useState(() => {
+    const saved = localStorage.getItem('redshan360_wishlist');
+    return saved ? JSON.parse(saved) : {};
+  });
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -19,7 +26,12 @@ const GuestUserDashboard = () => {
   }, []);
 
   const toggleWishlist = (id) => {
-    setWishlist((prev) => ({ ...prev, [id]: !prev[id] }));
+    setWishlist((prev) => {
+      const updated = { ...prev, [id]: !prev[id] };
+      localStorage.setItem('redshan360_wishlist', JSON.stringify(updated));
+      window.dispatchEvent(new Event('wishlist-updated'));
+      return updated;
+    });
   };
 
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
@@ -30,14 +42,14 @@ const GuestUserDashboard = () => {
       title: 'The Crimson Muse',
       description: 'Signature silk roses & velvet anemones',
       price: '$149.00',
-      image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=900&h=1200&fit=crop',
+      image: crimsonMuse,
     },
     {
       id: 2,
       title: 'Serenity White',
       description: "Premium calla lilies & baby's breath",
       price: '$185.00',
-      image: 'https://images.unsplash.com/photo-1596436889106-be35e843f974?w=900&h=1200&fit=crop',
+      image: serenityWhite,
       badge: 'BESTSELLER',
     },
     {
@@ -45,7 +57,7 @@ const GuestUserDashboard = () => {
       title: 'Wild Hearth',
       description: 'Hand-finished silk & dried textures',
       price: '$120.00',
-      image: 'https://images.unsplash.com/photo-1595855759920-86582396756a?w=900&h=1200&fit=crop',
+      image: wildHearth,
     },
   ];
 
