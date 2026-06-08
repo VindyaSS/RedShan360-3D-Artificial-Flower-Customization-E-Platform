@@ -4,6 +4,8 @@ import EmployeeDashboard from "./pages/Employee/employeeDashboard";
 import LoginPage from "./components/Login_Register/Login_Page";
 import RegistrationPage from "./components/Login_Register/Registration";
 import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
+import Shop from './pages/GuestUser/Shop';
+
 
 
 
@@ -39,6 +41,7 @@ function App() {
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
           <Route path="/guestUserDashboard" element={<GuestUserDashboard/>}/>
+          <Route path="/shop" element={<Shop />} />
           
 
 
