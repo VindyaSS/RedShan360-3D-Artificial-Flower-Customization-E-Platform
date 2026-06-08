@@ -7,9 +7,9 @@ import FeaturedProducts from './components/FeaturedProducts';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 
-import crimsonMuse from '../../../public/images/crimson_silk_peony.jpg';
-import serenityWhite from '../../../public/images/serenity_white.jpg';
-import wildHearth from '../../../public/images/wild_hearth.jpg';
+import crimsonMuse from '../../assets/crimson_silk_peony.jpg';
+import serenityWhite from '../../assets/serenity_white.jpg';
+import wildHearth from '../../assets/wild_hearth.jpg';
 
 const GuestUserDashboard = () => {
   const [isScrolled, setIsScrolled] = useState(false);

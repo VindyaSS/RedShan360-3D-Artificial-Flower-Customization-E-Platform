@@ -4,6 +4,8 @@ import LoginPage from "./pages/Login_Register/Login_Page";
 import RegistrationPage from "./pages/Login_Register/Registration";
 import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
 import BoquetCustomization from './pages/Customization/Boquet_Customization';
+import Shop from './pages/GuestUser/Shop';
+
 
 
 
@@ -40,6 +42,7 @@ function App() {
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
           <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
           <Route path="/customization" element={<BoquetCustomization />} />
+          <Route path="/shop" element={<Shop />} />
 
 
 
