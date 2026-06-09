@@ -23,7 +23,10 @@ const Shop = () => {
   // Listen to url param ?wishlist=true and clean up
   useEffect(() => {
     if (searchParams.get('wishlist') === 'true') {
-      setSearchParams({});
+      const timer = setTimeout(() => {
+        setSearchParams({});
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [searchParams, setSearchParams]);
 

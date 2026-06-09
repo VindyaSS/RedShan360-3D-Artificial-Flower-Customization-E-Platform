@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { products } from '../../data/products';
+import CartDrawer from '../GuestUser/components/CartDrawer';
 import { 
   Search, 
   Heart, 
@@ -111,6 +113,33 @@ export default function BoquetCustomization() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cartCount, setCartCount] = useState(0);
   const [isWishlistActive, setIsWishlistActive] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Synchronize cart count from localStorage and listen to updates
+  useEffect(() => {
+    const updateCartCount = () => {
+      const savedCart = localStorage.getItem('redshan360_cart');
+      if (savedCart) {
+        const cartList = JSON.parse(savedCart);
+        const validItems = cartList.filter((item) => item.isCustom || products.some((p) => p.id === item.id));
+        setCartCount(validItems.reduce((acc, item) => acc + item.quantity, 0));
+      } else {
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+
+    const handleOpenCart = () => setIsCartOpen(true);
+
+    window.addEventListener('cart-updated', updateCartCount);
+    window.addEventListener('open-cart', handleOpenCart);
+
+    return () => {
+      window.removeEventListener('cart-updated', updateCartCount);
+      window.removeEventListener('open-cart', handleOpenCart);
+    };
+  }, []);
   const [activeCategory, setActiveCategory] = useState({
     'premium-blooms': true,
     'bouquet-styles': false,
@@ -207,7 +236,40 @@ export default function BoquetCustomization() {
 
   // Cart action
   const handleAddToCart = () => {
-    setCartCount(prev => prev + 1);
+    const savedCart = localStorage.getItem('redshan360_cart');
+    const cartList = savedCart ? JSON.parse(savedCart) : [];
+
+    // Generate a unique ID for this specific curation
+    const customBouquetId = 'custom-' + Date.now();
+
+    // Map selected stems to descriptive names
+    const selectedStemsDetails = selectedStems
+      .map(item => {
+        const dbItem = STEMS_DATABASE.find(s => s.id === item.stemId);
+        return dbItem ? `${item.quantity}x ${dbItem.name}` : '';
+      })
+      .filter(Boolean)
+      .join(', ');
+
+    const customBouquetItem = {
+      id: customBouquetId,
+      isCustom: true,
+      title: 'Custom Bouquet Arrangement',
+      price: '$' + estimatedTotal.toFixed(2),
+      numericPrice: estimatedTotal,
+      image: '/peonies_vase.png',
+      selectedColor: selectedStemsDetails || 'Custom Curation',
+      quantity: 1,
+    };
+
+    cartList.push(customBouquetItem);
+
+    localStorage.setItem('redshan360_cart', JSON.stringify(cartList));
+
+    // Dispatch events to trigger UI reactivity
+    window.dispatchEvent(new Event('cart-updated'));
+    window.dispatchEvent(new Event('open-cart'));
+
     triggerToast('🛒 Custom arrangement added to shopping cart!');
   };
 
@@ -267,11 +329,17 @@ export default function BoquetCustomization() {
             <Search size={20} />
           </button>
           
-          <button className="relative p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300" aria-label="Cart">
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300" 
+            aria-label="Cart"
+          >
             <ShoppingCart size={20} />
-            <span className="absolute top-0 right-0 min-w-[16px] h-[16px] rounded-full bg-[#563c37] text-[9px] text-white font-bold flex items-center justify-center px-1">
-              {cartCount}
-            </span>
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-0 min-w-[16px] h-[16px] rounded-full bg-[#563c37] text-[9px] text-white font-bold flex items-center justify-center px-1">
+                {cartCount}
+              </span>
+            )}
           </button>
         </div>
       </header>
@@ -963,6 +1031,9 @@ export default function BoquetCustomization() {
 
         </div>
       </footer>
+
+      {/* Shared Cart Drawer Overlay */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
     </div>
   );
