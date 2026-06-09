@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, Heart, ShoppingCart, User, Menu, X } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { products } from '../../../data/products';
+import CartDrawer from './CartDrawer';
 
 const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWishlistClick }) => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Synchronize cart and wishlist counts
   const updateCounts = () => {
@@ -21,7 +23,9 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
     const savedCart = localStorage.getItem('redshan360_cart');
     if (savedCart) {
       const cartList = JSON.parse(savedCart);
-      const count = cartList.reduce((acc, item) => acc + item.quantity, 0);
+      // Filter out cart items that do not correspond to active products
+      const validItems = cartList.filter((item) => item.isCustom || products.some((p) => p.id === item.id));
+      const count = validItems.reduce((acc, item) => acc + item.quantity, 0);
       setCartCount(count);
     } else {
       setCartCount(0);
@@ -31,7 +35,10 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
     const savedWishlist = localStorage.getItem('redshan360_wishlist');
     if (savedWishlist) {
       const wishlistObj = JSON.parse(savedWishlist);
-      const count = Object.values(wishlistObj).filter(Boolean).length;
+      // Only count wishlisted items that correspond to valid active product IDs
+      const count = Object.keys(wishlistObj).filter(
+        (key) => wishlistObj[key] === true && products.some((p) => p.id === Number(key))
+      ).length;
       setWishlistCount(count);
     } else {
       setWishlistCount(0);
@@ -41,13 +48,17 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   useEffect(() => {
     updateCounts();
 
+    const handleOpenCart = () => setIsCartOpen(true);
+
     // Listen to custom events from details/shop pages
     window.addEventListener('cart-updated', updateCounts);
     window.addEventListener('wishlist-updated', updateCounts);
+    window.addEventListener('open-cart', handleOpenCart);
 
     return () => {
       window.removeEventListener('cart-updated', updateCounts);
       window.removeEventListener('wishlist-updated', updateCounts);
+      window.removeEventListener('open-cart', handleOpenCart);
     };
   }, []);
 
@@ -226,6 +237,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
             {/* Shopping Cart Badge Button */}
             <button 
+              onClick={() => setIsCartOpen(true)}
               className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300" 
               aria-label="shopping_cart"
             >
@@ -294,7 +306,14 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 )}
               </button>
 
-              <button className="relative p-2 rounded-full bg-[#f4f0ed]" aria-label="Cart">
+              <button 
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setIsCartOpen(true);
+                }}
+                className="relative p-2 rounded-full bg-[#f4f0ed]" 
+                aria-label="Cart"
+              >
                 <ShoppingCart size={18} />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[#8c5e5e] text-[9px] text-white font-semibold flex items-center justify-center">
@@ -310,6 +329,9 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
           </div>
         )}
       </div>
+
+      {/* Cart side drawer overlay */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </nav>
   );
 };

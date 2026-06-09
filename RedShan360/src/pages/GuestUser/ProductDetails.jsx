@@ -9,7 +9,7 @@ import { products } from '../../data/products';
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  
+
   // Gallery states
   const [activeImage, setActiveImage] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
@@ -22,7 +22,7 @@ const ProductDetails = () => {
   const [show360Modal, setShow360Modal] = useState(false);
   const [rotationIndex, setRotationIndex] = useState(0);
   const [isRotating, setIsRotating] = useState(false);
-  
+
   // Review states
   const [reviewsList, setReviewsList] = useState([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -42,7 +42,7 @@ const ProductDetails = () => {
       setActiveImage(currentProduct.image);
       setSelectedColor(currentProduct.colors[0]?.name || '');
       setQuantity(1);
-      
+
       // Load reviews (check if reviews are in localStorage for this product)
       const savedReviews = localStorage.getItem(`redshan360_reviews_${id}`);
       if (savedReviews) {
@@ -65,10 +65,10 @@ const ProductDetails = () => {
     if (!product) return;
     const savedWishlist = localStorage.getItem('redshan360_wishlist');
     const wishlistObj = savedWishlist ? JSON.parse(savedWishlist) : {};
-    
+
     const updatedStatus = !isWishlisted;
     setIsWishlisted(updatedStatus);
-    
+
     wishlistObj[product.id] = updatedStatus;
     localStorage.setItem('redshan360_wishlist', JSON.stringify(wishlistObj));
     window.dispatchEvent(new Event('wishlist-updated'));
@@ -78,15 +78,15 @@ const ProductDetails = () => {
   const handleAddToCart = () => {
     if (!product) return;
     setIsAddingToCart(true);
-    
+
     setTimeout(() => {
       setIsAddingToCart(false);
       setAddedToCart(true);
-      
+
       // Save item to cart in localStorage
       const savedCart = localStorage.getItem('redshan360_cart');
       const cartList = savedCart ? JSON.parse(savedCart) : [];
-      
+
       // Check if item already exists with the same selected color
       const existingItemIndex = cartList.findIndex(
         (item) => item.id === product.id && item.selectedColor === selectedColor
@@ -167,7 +167,7 @@ const ProductDetails = () => {
   if (!product) {
     return (
       <div className="min-h-screen bg-[#fcf9f8] flex flex-col font-sans">
-        <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => {}} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
+        <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
         <div className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-6">
           <h2 className="text-3xl font-bold font-playfair text-[#1a1a1a] mb-4">Arrangement Not Found</h2>
           <p className="text-sm text-[#1a1a1a]/60 mb-8">The botanical piece you are looking for does not exist or has been cataloged differently.</p>
@@ -184,18 +184,18 @@ const ProductDetails = () => {
   const complementaryPieces = products.filter((p) => p.id !== product.id).slice(0, 5);
 
   // Calculate dynamic average rating and review count
-  const averageRating = reviewsList.length > 0 
+  const averageRating = reviewsList.length > 0
     ? (reviewsList.reduce((acc, r) => acc + r.rating, 0) / reviewsList.length).toFixed(1)
     : product.rating;
   const totalReviewsCount = reviewsList.length;
 
   return (
     <div className="min-h-screen bg-[#fcf9f8] text-[#1a1a1a] font-sans">
-      <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => {}} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
+      <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
 
       {/* Main product area */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-[120px] pb-24">
-        
+
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-10 uppercase">
           <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
@@ -206,19 +206,18 @@ const ProductDetails = () => {
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-          
+
           {/* Left Column: Image Gallery */}
           <div className="lg:col-span-7 flex flex-col md:flex-row gap-5">
-            
+
             {/* Gallery Thumbnails (Desktop side-align, Mobile bottom-align) */}
             <div className="flex md:flex-col flex-row gap-3 order-2 md:order-1 overflow-x-auto md:overflow-x-visible">
               {product.thumbnails.map((thumb, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveImage(thumb)}
-                  className={`w-16 h-20 md:w-20 md:h-24 flex-shrink-0 bg-[#f4f0ed] rounded-sm overflow-hidden border transition-all duration-300 ${
-                    activeImage === thumb ? 'border-[#8c5e5e] shadow-md scale-[1.02]' : 'border-transparent hover:border-[#8c5e5e]/40'
-                  }`}
+                  className={`w-16 h-20 md:w-20 md:h-24 flex-shrink-0 bg-[#f4f0ed] rounded-sm overflow-hidden border transition-all duration-300 ${activeImage === thumb ? 'border-[#8c5e5e] shadow-md scale-[1.02]' : 'border-transparent hover:border-[#8c5e5e]/40'
+                    }`}
                   aria-label={`View gallery image ${index + 1}`}
                 >
                   <img src={thumb} alt="" className="w-full h-full object-cover" />
@@ -243,9 +242,8 @@ const ProductDetails = () => {
                 >
                   <Heart
                     size={16}
-                    className={`transition-colors duration-300 ${
-                      isWishlisted ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-[#1a1a1a]/75'
-                    }`}
+                    className={`transition-colors duration-300 ${isWishlisted ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-[#1a1a1a]/75'
+                      }`}
                   />
                 </button>
               </div>
@@ -265,20 +263,20 @@ const ProductDetails = () => {
 
           {/* Right Column: Product Detail Panel */}
           <div className="lg:col-span-5 flex flex-col justify-start text-left">
-            
+
             {/* Reviews Summary */}
             <div className="flex items-center gap-1.5 mb-3">
               <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
                 {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    size={14} 
-                    className={i < Math.round(Number(averageRating)) ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'} 
+                  <Star
+                    key={i}
+                    size={14}
+                    className={i < Math.round(Number(averageRating)) ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'}
                   />
                 ))}
               </div>
-              <a 
-                href="#reviews" 
+              <a
+                href="#reviews"
                 className="text-[11px] font-bold text-[#1a1a1a]/60 hover:text-[#8c5e5e] underline transition-colors"
               >
                 ({totalReviewsCount} Reviews)
@@ -289,7 +287,7 @@ const ProductDetails = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] tracking-tight leading-tight mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
               {product.title}
             </h1>
-            
+
             {/* Collection tag */}
             <p className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8c5e5e] mb-6">
               {product.subtitle}
@@ -318,11 +316,10 @@ const ProductDetails = () => {
                   <button
                     key={color.name}
                     onClick={() => setSelectedColor(color.name)}
-                    className={`w-8 h-8 rounded-full border transition-all duration-300 relative flex items-center justify-center ${
-                      selectedColor === color.name
+                    className={`w-8 h-8 rounded-full border transition-all duration-300 relative flex items-center justify-center ${selectedColor === color.name
                         ? 'border-[#8c5e5e] scale-110 ring-2 ring-[#8c5e5e]/20 ring-offset-2'
                         : 'border-[#d9d2d0] hover:scale-105'
-                    }`}
+                      }`}
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                   >
@@ -365,9 +362,8 @@ const ProductDetails = () => {
               <button
                 onClick={handleAddToCart}
                 disabled={isAddingToCart}
-                className={`flex-1 flex items-center justify-center gap-2.5 py-4 px-6 rounded-sm bg-[#8c5e5e] text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${
-                  isAddingToCart ? 'bg-[#7d4d50]/70 cursor-not-allowed' : 'hover:bg-[#7d4d50] active:scale-[0.98]'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2.5 py-4 px-6 rounded-sm bg-[#8c5e5e] text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${isAddingToCart ? 'bg-[#7d4d50]/70 cursor-not-allowed' : 'hover:bg-[#7d4d50] active:scale-[0.98]'
+                  }`}
               >
                 {isAddingToCart ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -383,14 +379,13 @@ const ProductDetails = () => {
                   </>
                 )}
               </button>
-              
+
               <button
                 onClick={toggleWishlist}
-                className={`w-14 h-14 border border-[#d9d2d0] rounded-sm flex items-center justify-center transition-all duration-300 shadow-sm ${
-                  isWishlisted 
+                className={`w-14 h-14 border border-[#d9d2d0] rounded-sm flex items-center justify-center transition-all duration-300 shadow-sm ${isWishlisted
                     ? 'border-[#8c5e5e] bg-[#8c5e5e]/5 text-[#8c5e5e]'
                     : 'hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-[#1a1a1a]/70'
-                }`}
+                  }`}
                 aria-label="Toggle Wishlist"
               >
                 <Heart size={18} className={isWishlisted ? 'fill-[#8c5e5e]' : ''} />
@@ -426,10 +421,10 @@ const ProductDetails = () => {
                 <div className="flex flex-col">
                   <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
                     {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        size={12} 
-                        className={i < Math.round(Number(averageRating)) ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'} 
+                      <Star
+                        key={i}
+                        size={12}
+                        className={i < Math.round(Number(averageRating)) ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'}
                       />
                     ))}
                   </div>
@@ -437,7 +432,7 @@ const ProductDetails = () => {
                 </div>
               </div>
             </div>
-            
+
             <button
               onClick={() => setShowReviewModal(true)}
               className="px-6 py-3 border border-[#8c5e5e] text-[#8c5e5e] hover:bg-[#8c5e5e] hover:text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-sm shrink-0"
@@ -471,10 +466,10 @@ const ProductDetails = () => {
 
                     <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
                       {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          size={11} 
-                          className={i < review.rating ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'} 
+                        <Star
+                          key={i}
+                          size={11}
+                          className={i < review.rating ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'}
                         />
                       ))}
                     </div>
@@ -511,7 +506,7 @@ const ProductDetails = () => {
                 Complementary Pieces
               </h2>
             </div>
-            
+
             {/* Nav arrows */}
             <div className="flex items-center gap-2 shrink-0">
               <button
@@ -532,14 +527,14 @@ const ProductDetails = () => {
           </div>
 
           {/* Related Products Slider list */}
-          <div 
+          <div
             ref={carouselRef}
             className="flex gap-8 overflow-x-auto scroll-smooth no-scrollbar pb-6 text-left select-none"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {complementaryPieces.map((piece) => (
-              <Link 
-                key={piece.id} 
+              <Link
+                key={piece.id}
                 to={`/product/${piece.id}`}
                 className="min-w-[260px] md:min-w-[280px] max-w-[280px] flex-shrink-0 group flex flex-col font-sans hover:-translate-y-1 transition-transform duration-300"
               >
@@ -577,7 +572,7 @@ const ProductDetails = () => {
       {show360Modal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-[#fcf9f8] w-full max-w-2xl rounded-sm shadow-2xl relative overflow-hidden border border-[#d9d2d0]/30 animate-slide-up flex flex-col">
-            
+
             {/* Modal Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b border-[#d9d2d0]/30">
               <div>
@@ -586,7 +581,7 @@ const ProductDetails = () => {
                 </h3>
                 <p className="text-[10px] text-[#1a1a1a]/50 uppercase tracking-widest font-semibold mt-0.5">{product.title}</p>
               </div>
-              <button 
+              <button
                 onClick={() => { setShow360Modal(false); setIsRotating(false); }}
                 className="p-1.5 hover:bg-[#f4f0ed] rounded-full text-[#1a1a1a]/60 hover:text-[#8c5e5e] transition-all"
                 aria-label="Close modal"
@@ -597,7 +592,7 @@ const ProductDetails = () => {
 
             {/* Visualizer Area */}
             <div className="p-8 flex-1 flex flex-col items-center justify-center min-h-[350px] relative bg-[#faf8f6]">
-              
+
               {/* Product Frame */}
               <div className="w-64 aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative shadow-md select-none border border-[#d9d2d0]/20">
                 <img
@@ -605,7 +600,7 @@ const ProductDetails = () => {
                   alt=""
                   className="w-full h-full object-cover pointer-events-none"
                 />
-                
+
                 {/* 360 Badge overlay */}
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest flex items-center gap-1.5 backdrop-blur-sm shadow-sm select-none">
                   <RotateCw size={9} className={isRotating ? 'animate-spin' : ''} />
@@ -631,15 +626,14 @@ const ProductDetails = () => {
             <div className="flex justify-between items-center px-6 py-4 bg-[#f4f0ed]/50 border-t border-[#d9d2d0]/25">
               <button
                 onClick={() => setIsRotating((prev) => !prev)}
-                className={`px-4 py-2 border rounded-sm text-xs font-bold tracking-wider transition-all duration-300 ${
-                  isRotating 
-                    ? 'bg-[#8c5e5e] text-white border-transparent' 
+                className={`px-4 py-2 border rounded-sm text-xs font-bold tracking-wider transition-all duration-300 ${isRotating
+                    ? 'bg-[#8c5e5e] text-white border-transparent'
                     : 'border-[#d9d2d0] text-[#1a1a1a]/70 hover:border-[#8c5e5e] hover:text-[#8c5e5e]'
-                }`}
+                  }`}
               >
                 {isRotating ? 'PAUSE ROTATION' : 'AUTO ROTATE'}
               </button>
-              
+
               <button
                 onClick={() => { setShow360Modal(false); setIsRotating(false); }}
                 className="px-5 py-2 bg-[#1a1a1a] hover:bg-[#8c5e5e] text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 shadow-sm"
@@ -655,7 +649,7 @@ const ProductDetails = () => {
       {/* Review Submission Modal */}
       {showReviewModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <form 
+          <form
             onSubmit={handleReviewSubmit}
             className="bg-[#fcf9f8] w-full max-w-md rounded-sm shadow-2xl relative overflow-hidden border border-[#d9d2d0]/30 animate-slide-up text-left flex flex-col"
           >
@@ -667,7 +661,7 @@ const ProductDetails = () => {
                 </h3>
                 <p className="text-[10px] text-[#1a1a1a]/50 uppercase tracking-widest font-semibold mt-0.5">{product.title}</p>
               </div>
-              <button 
+              <button
                 type="button"
                 onClick={() => setShowReviewModal(false)}
                 className="p-1.5 hover:bg-[#f4f0ed] rounded-full text-[#1a1a1a]/60 hover:text-[#8c5e5e] transition-all"
@@ -679,7 +673,7 @@ const ProductDetails = () => {
 
             {/* Modal Body */}
             <div className="p-6 space-y-5 flex-1">
-              
+
               {/* Rating picker */}
               <div>
                 <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-2">
@@ -704,7 +698,7 @@ const ProductDetails = () => {
 
               {/* Name field */}
               <div>
-                <label 
+                <label
                   htmlFor="reviewName"
                   className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-2"
                 >
@@ -723,7 +717,7 @@ const ProductDetails = () => {
 
               {/* Textarea field */}
               <div>
-                <label 
+                <label
                   htmlFor="reviewText"
                   className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-2"
                 >
@@ -751,7 +745,7 @@ const ProductDetails = () => {
               >
                 Cancel
               </button>
-              
+
               <button
                 type="submit"
                 className="px-6 py-2.5 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 shadow-md active:scale-95"
