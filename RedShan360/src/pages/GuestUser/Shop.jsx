@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Star, Heart } from 'lucide-react';
-
-// Local Image Imports
-import crimsonSilkPeony from '../../assets/crimson_silk_peony.jpg';
-import moonlightVelvetTulip from '../../assets/moonlight_velvet_tulip.jpg';
-import etherealPampasCloud from '../../assets/ethereal_pampas_cloud.jpg';
-import sakuraSpringBloom from '../../assets/sakura_spring_bloom.jpg';
-import architecturalProtea from '../../assets/architectural_protea.jpg';
-import mauveRadianceDahlia from '../../assets/mauve_radiance_dahlia.jpg';
+import { products as initialProducts } from '../../data/products';
 
 
 const Shop = () => {
@@ -60,80 +53,7 @@ const Shop = () => {
 
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
 
-  const initialProducts = [
-    {
-      id: 1,
-      title: 'Crimson Silk Peony',
-      category: 'silk',
-      color: 'pink',
-      type: 'bouquet',
-      subtitle: 'Hand-crafted Silk Collection',
-      price: 'Rs.1750.00',
-      numericPrice: 21, // approx USD equivalent or raw numeric value for filtering
-      rating: 4.9,
-      image: crimsonSilkPeony,
-    },
-    {
-      id: 2,
-      title: 'Moonlight Velvet Tulip',
-      category: 'velvet',
-      color: 'white',
-      type: 'bouquet',
-      subtitle: 'Luxe Velvet Series',
-      price: 'Rs.4200.00',
-      numericPrice: 142,
-      rating: 4.8,
-      image: moonlightVelvetTulip,
-    },
-    {
-      id: 3,
-      title: 'Ethereal Pampas Cloud',
-      category: 'dried',
-      color: 'beige',
-      type: 'arrangement',
-      subtitle: 'Everlasting Dried Flora',
-      price: 'Rs3500.00',
-      numericPrice: 98,
-      rating: 5.0,
-      image: etherealPampasCloud,
-    },
-    {
-      id: 4,
-      title: 'Sakura Spring Bloom',
-      category: 'silk',
-      color: 'pink',
-      type: 'single-stem',
-      subtitle: 'Spring Silk Collection',
-      price: 'Rs.1700.00',
-      numericPrice: 210,
-      rating: 4.7,
-      image: sakuraSpringBloom,
-    },
-    {
-      id: 5,
-      title: 'Architectural Protea',
-      category: 'vases',
-      color: 'burgundy',
-      type: 'centerpiece',
-      subtitle: 'Signature Single Stem',
-      price: 'Rs2750.00',
-      numericPrice: 75,
-      rating: 4.9,
-      image: architecturalProtea,
-    },
-    {
-      id: 6,
-      title: 'Mauve Radiance Dahlia',
-      category: 'velvet',
-      color: 'grey',
-      type: 'bouquet',
-      subtitle: 'Velvet Bloom Bouquet',
-      price: 'Rs.2500.00',
-      numericPrice: 168,
-      rating: 4.6,
-      image: mauveRadianceDahlia,
-    },
-  ];
+  const [productsState, setProductsState] = useState(initialProducts);
 
   const toggleWishlist = (id) => {
     setWishlist((prev) => {
@@ -396,20 +316,26 @@ const Shop = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 mt-8">
                 {sortedProducts.map((product) => (
-                  <div key={product.id} className="group flex flex-col font-sans">
+                  <div key={product.id} className="group flex flex-col font-sans relative">
                     {/* Product Image Container */}
-                    <div className="relative overflow-hidden bg-[#f4f0ed] rounded-sm aspect-[3/4] mb-4">
-                      <img
-                        src={product.image}
-                        alt={product.title}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        loading="lazy"
-                      />
+                    <div className="relative overflow-hidden bg-[#f4f0ed] rounded-sm aspect-[3/4] mb-4 border border-[#d9d2d0]/15 shadow-sm">
+                      <Link to={`/product/${product.id}`} className="block w-full h-full">
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                          loading="lazy"
+                        />
+                      </Link>
 
                       {/* Wishlist Button */}
                       <button
-                        onClick={() => toggleWishlist(product.id)}
-                        className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white flex items-center justify-center transition-colors duration-300"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleWishlist(product.id);
+                        }}
+                        className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white flex items-center justify-center transition-colors duration-300 z-10"
                         aria-label="Add to Wishlist"
                       >
                         <Heart
@@ -424,9 +350,11 @@ const Shop = () => {
 
                     {/* Product Info */}
                     <div className="flex justify-between items-start gap-2 mb-1">
-                      <h3 className="font-semibold text-[15px] text-[#1a1a1a] tracking-tight leading-snug">
-                        {product.title}
-                      </h3>
+                      <Link to={`/product/${product.id}`} className="hover:text-[#8c5e5e] transition-colors min-w-0">
+                        <h3 className="font-semibold text-[15px] text-[#1a1a1a] tracking-tight leading-snug truncate group-hover:text-[#8c5e5e] transition-colors">
+                          {product.title}
+                        </h3>
+                      </Link>
 
                       {/* Rating */}
                       <div className="flex items-center gap-1 text-[11px] font-bold text-[#1a1a1a]/80 shrink-0">

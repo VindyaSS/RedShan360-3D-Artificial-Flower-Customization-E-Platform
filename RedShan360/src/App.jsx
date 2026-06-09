@@ -5,6 +5,9 @@ import RegistrationPage from "./pages/Login_Register/Registration";
 import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
 import BoquetCustomization from './pages/Customization/Boquet_Customization';
 import Shop from './pages/GuestUser/Shop';
+import ProductDetails from './pages/GuestUser/ProductDetails';
+import ScrollToTop from './components/ScrollToTop';
+
 
 
 
@@ -34,15 +37,17 @@ import MOCards from './components/managerComponent/MOrderCard';
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<GuestUserDashboard />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
           <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
           <Route path="/customization" element={<BoquetCustomization />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
 
 
 
