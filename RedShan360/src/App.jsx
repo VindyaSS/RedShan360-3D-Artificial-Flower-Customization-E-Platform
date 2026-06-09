@@ -7,6 +7,7 @@ import BoquetCustomization from './pages/Customization/Boquet_Customization';
 import Shop from './pages/GuestUser/Shop';
 import ProductDetails from './pages/GuestUser/ProductDetails';
 import ScrollToTop from './components/ScrollToTop';
+import CategoryPage from './pages/GuestUser/CategoryPage';
 
 
 
@@ -48,6 +49,7 @@ function App() {
           <Route path="/customization" element={<BoquetCustomization />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/category/:slug" element={<CategoryPage />} />
 
 
 

@@ -35,10 +35,10 @@ const GuestUserDashboard = () => {
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
 
   const categories = [
-    { name: 'Roses', tag: 'THE ETERNAL MUSE', image: '/images/cat_roses.png' },
-    { name: 'Lilies', tag: 'MAJESTIC GRACE', image: '/images/cat_lilies.png' },
-    { name: 'Peonies', tag: 'OPULENT BLOOMS', image: '/images/cat_peonies.png' },
-    { name: 'Orchids', tag: 'EXOTIC ALLURE', image: '/images/cat_orchids.png' },
+    { name: 'Bouquets', tag: 'THE ETERNAL MUSE', image: '/images/cat_roses.png', slug: 'bouquets' },
+    { name: 'Head Dresses', tag: 'MAJESTIC GRACE', image: '/images/cat_lilies.png', slug: 'head-dresses' },
+    { name: 'Wedding Collections', tag: 'OPULENT BLOOMS', image: '/images/cat_peonies.png', slug: 'wedding-collections' },
+    { name: 'Individual Flowers', tag: 'EXOTIC ALLURE', image: '/images/cat_orchids.png', slug: 'individual-flowers' },
   ];
 
   return (
