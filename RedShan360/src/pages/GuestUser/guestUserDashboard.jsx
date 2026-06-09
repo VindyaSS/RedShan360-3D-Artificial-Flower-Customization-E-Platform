@@ -7,9 +7,7 @@ import FeaturedProducts from './components/FeaturedProducts';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 
-import crimsonMuse from '../../assets/crimson_silk_peony.jpg';
-import serenityWhite from '../../assets/serenity_white.jpg';
-import wildHearth from '../../assets/wild_hearth.jpg';
+import { products } from '../../data/products';
 
 const GuestUserDashboard = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -35,31 +33,6 @@ const GuestUserDashboard = () => {
   };
 
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
-
-  const products = [
-    {
-      id: 1,
-      title: 'The Crimson Muse',
-      description: 'Signature silk roses & velvet anemones',
-      price: '$149.00',
-      image: crimsonMuse,
-    },
-    {
-      id: 2,
-      title: 'Serenity White',
-      description: "Premium calla lilies & baby's breath",
-      price: '$185.00',
-      image: serenityWhite,
-      badge: 'BESTSELLER',
-    },
-    {
-      id: 3,
-      title: 'Wild Hearth',
-      description: 'Hand-finished silk & dried textures',
-      price: '$120.00',
-      image: wildHearth,
-    },
-  ];
 
   const categories = [
     { name: 'Roses', tag: 'THE ETERNAL MUSE', image: '/images/cat_roses.png' },
