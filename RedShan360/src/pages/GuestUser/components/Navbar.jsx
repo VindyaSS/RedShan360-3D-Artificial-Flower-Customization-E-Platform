@@ -134,9 +134,8 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 h-[80px] transition-all duration-300 ${
-        isScrolled ? 'bg-[#faf8f6]/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
-      }`}
+      className={`fixed top-0 w-full z-50 h-[80px] transition-all duration-300 ${isScrolled ? 'bg-[#faf8f6]/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
         <div className="flex justify-between items-center h-[80px] gap-4">
@@ -153,11 +152,10 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 key={item}
                 to={getRoute(item)}
                 onClick={(e) => handleNavClick(item, e)}
-                className={`text-xs uppercase tracking-widest font-semibold transition-colors duration-300 relative py-1.5 ${
-                  isActive(item)
-                    ? 'text-[#8c5e5e] after:content-[\'\'] after:absolute after:left-0 after:-bottom-0.5 after:w-full after:h-[1.5px] after:bg-[#8c5e5e]'
-                    : 'text-[#1a1a1a]/75 hover:text-[#8c5e5e]'
-                }`}
+                className={`text-xs uppercase tracking-widest font-semibold transition-colors duration-300 relative py-1.5 ${isActive(item)
+                  ? 'text-[#8c5e5e] after:content-[\'\'] after:absolute after:left-0 after:-bottom-0.5 after:w-full after:h-[1.5px] after:bg-[#8c5e5e]'
+                  : 'text-[#1a1a1a]/75 hover:text-[#8c5e5e]'
+                  }`}
               >
                 {item}
               </Link>
@@ -166,7 +164,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
           {/* Desktop Search & Icons */}
           <div className="hidden lg:flex items-center gap-3">
-            
+
             {/* Search Input Container */}
             <div ref={searchContainerRef} className="relative">
               <div className="flex items-center gap-2 bg-[#f4f0ed] rounded-sm px-4 py-2 w-60 border border-[#1a1a1a]/5 focus-within:border-[#8c5e5e]/30 transition-all duration-300">
@@ -238,9 +236,9 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             </button>
 
             {/* Shopping Cart Badge Button */}
-            <button 
+            <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300" 
+              className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300"
               aria-label="shopping_cart"
             >
               <ShoppingCart size={18} className="text-[#1a1a1a]" />
@@ -273,31 +271,30 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 key={item}
                 to={getRoute(item)}
                 onClick={(e) => handleNavClick(item, e)}
-                className={`block text-sm uppercase tracking-widest font-semibold ${
-                  isActive(item) ? 'text-[#8c5e5e]' : 'text-[#1a1a1a] hover:text-[#8c5e5e]'
-                }`}
+                className={`block text-sm uppercase tracking-widest font-semibold ${isActive(item) ? 'text-[#8c5e5e]' : 'text-[#1a1a1a] hover:text-[#8c5e5e]'
+                  }`}
               >
                 {item}
               </Link>
             ))}
             <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
-              <button 
+              <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   navigate('/shop');
                 }}
-                className="p-2 rounded-full bg-[#f4f0ed]" 
+                className="p-2 rounded-full bg-[#f4f0ed]"
                 aria-label="Search"
               >
                 <Search size={18} />
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   navigate('/shop?wishlist=true');
                 }}
-                className="p-2 rounded-full bg-[#f4f0ed] relative" 
+                className="p-2 rounded-full bg-[#f4f0ed] relative"
                 aria-label="Wishlist"
               >
                 <Heart size={18} />
@@ -308,12 +305,12 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 )}
               </button>
 
-              <button 
+              <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setIsCartOpen(true);
                 }}
-                className="relative p-2 rounded-full bg-[#f4f0ed]" 
+                className="relative p-2 rounded-full bg-[#f4f0ed]"
                 aria-label="Cart"
               >
                 <ShoppingCart size={18} />

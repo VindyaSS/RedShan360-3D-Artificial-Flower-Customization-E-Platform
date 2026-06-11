@@ -26,14 +26,16 @@ const CartDrawer = ({ isOpen, onClose }) => {
     return () => window.removeEventListener('cart-updated', loadCart);
   }, []);
 
-  // Scroll Management: Lock body scroll when drawer is open
+  // Scroll Management: Lock body scroll and apply blur class when drawer is open
   useEffect(() => {
     if (isOpen) {
       const originalOverflow = window.getComputedStyle(document.body).overflow;
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('cart-open');
       
       return () => {
         document.body.style.overflow = originalOverflow;
+        document.body.classList.remove('cart-open');
       };
     }
   }, [isOpen]);
@@ -84,7 +86,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-hidden font-sans">
+    <div className="cart-drawer-container fixed inset-0 z-[100] overflow-hidden font-sans">
       
       {/* 1. Backdrop Overlay (isolated z-40 blur layer) */}
       <div 

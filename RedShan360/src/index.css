@@ -167,3 +167,15 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Background Blur when Cart is Open */
+body.cart-open #root nav ~ *:not(.cart-drawer-container),
+body.cart-open #root header ~ *:not(.cart-drawer-container) {
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+#root nav ~ *,
+#root header ~ * {
+  transition: filter 0.3s ease-in-out;
+}
