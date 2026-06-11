@@ -102,6 +102,8 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
     if (lowerItem === 'home') return '/guestUserDashboard';
     if (lowerItem === 'shop') return '/shop';
     if (lowerItem === 'customization') return '/customization';
+    if (lowerItem === 'about') return '/about';
+    if (lowerItem === 'contact') return '/contact';
     return `/guestUserDashboard#${lowerItem}`;
   };
 
