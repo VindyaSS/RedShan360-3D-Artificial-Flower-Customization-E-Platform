@@ -2,12 +2,12 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Center, Environment } from '@react-three/drei';
 import { Suspense } from 'react';
 
-function Model() {
-    const { scene } = useGLTF('/models/redrose.glb');
+function Model({ url }) {
+    const { scene } = useGLTF(url);
     return <primitive object={scene} scale={1.2} />;
 }
 
-export default function Product3DViewer() {
+export default function Product3DViewer({ model }) {
     return (
         <div style={{ width: '100%', height: '500px' }}>
             <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
@@ -20,7 +20,7 @@ export default function Product3DViewer() {
                     <Environment preset="studio" />
 
                     <Center>
-                        <Model />
+                        <Model url={model || '/models/redrose.glb'} />
                     </Center>
                 </Suspense>
 
