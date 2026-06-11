@@ -8,6 +8,8 @@ import Shop from './pages/GuestUser/Shop';
 import ProductDetails from './pages/GuestUser/ProductDetails';
 import ScrollToTop from './components/ScrollToTop';
 import CategoryPage from './pages/GuestUser/CategoryPage';
+import AboutPage from './pages/GuestUser/AboutPage';
+import ContactPage from './pages/GuestUser/ContactPage';
 
 
 
@@ -50,6 +52,8 @@ function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
 
 
