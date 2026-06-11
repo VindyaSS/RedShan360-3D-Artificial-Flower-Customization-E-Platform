@@ -38,11 +38,15 @@ const AboutPage = () => {
       <section className="relative h-[85vh] md:h-[90vh] flex items-center justify-start overflow-hidden bg-luxury-beige">
         {/* Hero Background Image */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src="/images/about_hero.png" 
-            alt="About Us Banner" 
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
             className="w-full h-full object-cover object-center animate-fade-in"
-          />
+          >
+            <source src="/videos/video2.mp4" type="video/mp4" />
+          </video>
           {/* Subtle soft gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#faf8f6]/70 via-[#faf8f6]/40 to-transparent md:from-[#faf8f6]/85" />
         </div>
