@@ -1,0 +1,189 @@
+.admin-topbar {
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  font-family: "Inter", sans-serif;
+}
+
+/* ===== SEARCH ===== */
+.topbar-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.search-icon {
+  width: 20px;
+  height: 20px;
+}
+.topbar-search input {
+  width: 70%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  font-size: 15px;
+  outline: none;
+  background: #f6f3f2;
+}
+.topbar-search input:focus {
+  border-color: #8a6365;
+}
+
+/* ===== ACTIONS ===== */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.icon-btn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #f6f3f2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: 0.3s;
+}
+.icon-btn img {
+  width: 20px;
+  height: 20px;
+}
+.icon-btn:hover {
+  background: #e9dddd;
+}
+.badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #c0392b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+
+/* ===== PROFILE CARD ===== */
+.admin-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: 30px;
+  background: #f6f3f2;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.admin-card:hover {
+  background: #e9dddd;
+}
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #8a6365;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+.profile-info h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.profile-info p {
+  margin: 0;
+  font-size: 12px;
+  color: #777;
+}
+
+/* ===== PROFILE MODAL ===== */
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.profile-modal {
+  width: 420px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 18px;
+}
+.profile-modal h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #8a6365;
+}
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.profile-details label {
+  font-size: 14px;
+  color: #444;
+  display: flex;
+  flex-direction: column;
+}
+.profile-details input {
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+.profile-pic-edit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.profile-pic-edit img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+.edit-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #8a6365;
+  color: #fff;
+  cursor: pointer;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+.save-btn, .close-btn {
+  flex: 1;
+  margin: 0 5px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.save-btn {
+  background: #27ae60;
+  color: #fff;
+}
+.close-btn {
+  background: #c0392b;
+  color: #fff;
+}

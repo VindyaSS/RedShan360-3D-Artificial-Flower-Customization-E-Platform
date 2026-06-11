@@ -1,0 +1,72 @@
+.admin-user-table-container {
+  background: white;
+  border-radius: 0 0 15px 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.admin-user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-user-table th {
+  background: #f8f6f5;
+  color: #555;
+  text-align: left;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-user-table td {
+  padding: 16px;
+  border-top: 1px solid #eeeeee;
+  font-size: 14px;
+}
+
+.admin-user-table tr:hover {
+  background: #fafafa;
+}
+
+.status-dropdown {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+.status-dropdown:focus {
+  border-color: #7a5255;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.view-btn {
+  background: #e8f1ff;
+  color: #0057d8;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.edit-btn {
+  background: #fff3dc;
+  color: #c58a00;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.view-btn:hover,
+.edit-btn:hover {
+  opacity: 0.85;
+}

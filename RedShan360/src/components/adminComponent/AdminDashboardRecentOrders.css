@@ -1,0 +1,53 @@
+.recent-orders {
+  background: #fff;
+  margin: 30px;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.recent-orders h3 {
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: #2d2d2d;
+}
+
+.recent-orders table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recent-orders th {
+  text-align: left;
+  padding: 12px;
+  background: #f8f6f5;
+  font-size: 14px;
+  color: #555;
+}
+
+.recent-orders td {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  font-size: 14px;
+}
+
+.recent-orders tr:hover {
+  background: #fafafa;
+}
+
+.status.completed {
+  color: #27ae60;
+  font-weight: 600;
+}
+.status.processing {
+  color: #f39c12;
+  font-weight: 600;
+}
+.status.pending {
+  color: #2980b9;
+  font-weight: 600;
+}
+.status.cancelled {
+  color: #c0392b;
+  font-weight: 600;
+}
