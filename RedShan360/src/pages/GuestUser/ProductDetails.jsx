@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import { products } from '../../data/products';
+import Product3DViewer from '../../components/Product3DViewer';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -22,6 +23,7 @@ const ProductDetails = () => {
   const [show360Modal, setShow360Modal] = useState(false);
   const [rotationIndex, setRotationIndex] = useState(0);
   const [isRotating, setIsRotating] = useState(false);
+  const [viewMode3D, setViewMode3D] = useState(false);
 
   // Review states
   const [reviewsList, setReviewsList] = useState([]);
@@ -30,6 +32,7 @@ const ProductDetails = () => {
   const [newReviewName, setNewReviewName] = useState('');
   const [newReviewText, setNewReviewText] = useState('');
   const [visibleReviewsCount, setVisibleReviewsCount] = useState(2);
+  const [modelPath, setModelPath] = useState("/models/redrose.glb");
 
   // Carousel slider ref for complementary pieces
   const carouselRef = useRef(null);
@@ -37,13 +40,21 @@ const ProductDetails = () => {
   // Load product data based on ID
   useEffect(() => {
     const currentProduct = products.find((p) => p.id === Number(id));
+
     if (currentProduct) {
       setProduct(currentProduct);
       setActiveImage(currentProduct.image);
       setSelectedColor(currentProduct.colors[0]?.name || '');
       setQuantity(1);
 
-      // Load reviews (check if reviews are in localStorage for this product)
+      // ✅ SET MODEL PATH HERE
+      setModelPath(
+        currentProduct?.title === "Velvet Rose Trio"
+          ? "/models/redrose.glb"
+          : currentProduct?.model || "/models/redrose.glb"
+      );
+
+      // Load reviews
       const savedReviews = localStorage.getItem(`redshan360_reviews_${id}`);
       if (savedReviews) {
         setReviewsList(JSON.parse(savedReviews));
@@ -51,10 +62,11 @@ const ProductDetails = () => {
         setReviewsList(currentProduct.reviews || []);
       }
 
-      // Check wishlist status
+      // Wishlist
       const savedWishlist = localStorage.getItem('redshan360_wishlist');
       const wishlistObj = savedWishlist ? JSON.parse(savedWishlist) : {};
       setIsWishlisted(!!wishlistObj[currentProduct.id]);
+
     } else {
       setProduct(null);
     }
@@ -251,7 +263,10 @@ const ProductDetails = () => {
               {/* 360° View Trigger Button */}
               {product.has360 && (
                 <button
-                  onClick={() => setShow360Modal(true)}
+                  onClick={() => {
+                    setShow360Modal(true);
+                    setViewMode3D(true);
+                  }}
                   className="flex items-center gap-2.5 mt-5 px-6 py-2.5 rounded-full border border-[#d9d2d0] hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-xs font-bold tracking-widest text-[#1a1a1a]/70 hover:text-[#8c5e5e] transition-all duration-300 shadow-sm"
                 >
                   <RotateCw size={14} className="animate-spin-slow" />
@@ -317,8 +332,8 @@ const ProductDetails = () => {
                     key={color.name}
                     onClick={() => setSelectedColor(color.name)}
                     className={`w-8 h-8 rounded-full border transition-all duration-300 relative flex items-center justify-center ${selectedColor === color.name
-                        ? 'border-[#8c5e5e] scale-110 ring-2 ring-[#8c5e5e]/20 ring-offset-2'
-                        : 'border-[#d9d2d0] hover:scale-105'
+                      ? 'border-[#8c5e5e] scale-110 ring-2 ring-[#8c5e5e]/20 ring-offset-2'
+                      : 'border-[#d9d2d0] hover:scale-105'
                       }`}
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
@@ -383,8 +398,8 @@ const ProductDetails = () => {
               <button
                 onClick={toggleWishlist}
                 className={`w-14 h-14 border border-[#d9d2d0] rounded-sm flex items-center justify-center transition-all duration-300 shadow-sm ${isWishlisted
-                    ? 'border-[#8c5e5e] bg-[#8c5e5e]/5 text-[#8c5e5e]'
-                    : 'hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-[#1a1a1a]/70'
+                  ? 'border-[#8c5e5e] bg-[#8c5e5e]/5 text-[#8c5e5e]'
+                  : 'hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-[#1a1a1a]/70'
                   }`}
                 aria-label="Toggle Wishlist"
               >
@@ -593,33 +608,49 @@ const ProductDetails = () => {
             {/* Visualizer Area */}
             <div className="p-8 flex-1 flex flex-col items-center justify-center min-h-[350px] relative bg-[#faf8f6]">
 
-              {/* Product Frame */}
-              <div className="w-64 aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative shadow-md select-none border border-[#d9d2d0]/20">
-                <img
-                  src={product.thumbnails[rotationIndex]}
-                  alt=""
-                  className="w-full h-full object-cover pointer-events-none"
-                />
-
-                {/* 360 Badge overlay */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest flex items-center gap-1.5 backdrop-blur-sm shadow-sm select-none">
-                  <RotateCw size={9} className={isRotating ? 'animate-spin' : ''} />
-                  <span>FRAME {rotationIndex + 1}/{product.thumbnails.length}</span>
+              {viewMode3D ? (
+                // ✅ 3D VIEW (React Three Fiber)
+                <div className="w-full h-[400px] flex items-center justify-center">
+                  <Product3DViewer model={modelPath} />
                 </div>
-              </div>
+              ) : (
+                // ✅ YOUR EXISTING 2D 360 VIEW (UNCHANGED)
+                <>
+                  {/* Product Frame */}
+                  <div className="w-64 aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative shadow-md select-none border border-[#d9d2d0]/20">
+                    <img
+                      src={product.thumbnails[rotationIndex]}
+                      alt=""
+                      className="w-full h-full object-cover pointer-events-none"
+                    />
 
-              {/* Slider for frames */}
-              <div className="w-full max-w-xs mt-6 px-1 flex flex-col gap-2">
-                <input
-                  type="range"
-                  min="0"
-                  max={product.thumbnails.length - 1}
-                  value={rotationIndex}
-                  onChange={(e) => { setRotationIndex(Number(e.target.value)); setIsRotating(false); }}
-                  className="w-full h-1 bg-[#eae6e3] rounded-lg appearance-none cursor-pointer accent-[#8c5e5e] focus:outline-none"
-                />
-                <span className="text-[10px] text-[#1a1a1a]/45 font-bold tracking-wider text-center">Drag slider or toggle play below to rotate</span>
-              </div>
+                    {/* 360 Badge overlay */}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest flex items-center gap-1.5 backdrop-blur-sm shadow-sm select-none">
+                      <RotateCw size={9} className={isRotating ? 'animate-spin' : ''} />
+                      <span>FRAME {rotationIndex + 1}/{product.thumbnails.length}</span>
+                    </div>
+                  </div>
+
+                  {/* Slider for frames */}
+                  <div className="w-full max-w-xs mt-6 px-1 flex flex-col gap-2">
+                    <input
+                      type="range"
+                      min="0"
+                      max={product.thumbnails.length - 1}
+                      value={rotationIndex}
+                      onChange={(e) => {
+                        setRotationIndex(Number(e.target.value));
+                        setIsRotating(false);
+                      }}
+                      className="w-full h-1 bg-[#eae6e3] rounded-lg appearance-none cursor-pointer accent-[#8c5e5e] focus:outline-none"
+                    />
+                    <span className="text-[10px] text-[#1a1a1a]/45 font-bold tracking-wider text-center">
+                      Drag slider or toggle play below to rotate
+                    </span>
+                  </div>
+                </>
+              )}
+
             </div>
 
             {/* Modal Controls */}
@@ -627,8 +658,8 @@ const ProductDetails = () => {
               <button
                 onClick={() => setIsRotating((prev) => !prev)}
                 className={`px-4 py-2 border rounded-sm text-xs font-bold tracking-wider transition-all duration-300 ${isRotating
-                    ? 'bg-[#8c5e5e] text-white border-transparent'
-                    : 'border-[#d9d2d0] text-[#1a1a1a]/70 hover:border-[#8c5e5e] hover:text-[#8c5e5e]'
+                  ? 'bg-[#8c5e5e] text-white border-transparent'
+                  : 'border-[#d9d2d0] text-[#1a1a1a]/70 hover:border-[#8c5e5e] hover:text-[#8c5e5e]'
                   }`}
               >
                 {isRotating ? 'PAUSE ROTATION' : 'AUTO ROTATE'}

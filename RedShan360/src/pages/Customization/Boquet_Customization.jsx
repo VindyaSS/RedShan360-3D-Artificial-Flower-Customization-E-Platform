@@ -257,7 +257,7 @@ export default function BoquetCustomization() {
       title: 'Custom Bouquet Arrangement',
       price: '$' + estimatedTotal.toFixed(2),
       numericPrice: estimatedTotal,
-      image: '/peonies_vase.png',
+      image: '/images/peonies_vase.png',
       selectedColor: selectedStemsDetails || 'Custom Curation',
       quantity: 1,
     };
