@@ -26,6 +26,7 @@ import MOrderTable from './components/managerComponent/MPendingOrderTable';
 import MTabs from './components/managerComponent/mTabs';
 import MmanageOrders from './pages/Manager/MmanageOrders';
 import MOCards from './components/managerComponent/MOrderCard';
+import ManagerOverview from './pages/Manager/ManagerOverview';
  {/* Rout try by Vindya-end */}
 
  
@@ -61,6 +62,9 @@ function App() {
           <Route path="/mTabs" element={<MTabs />} />
           <Route path="/mManageOrders" element={<MmanageOrders />} />
           <Route path="/mOCards" element={<MOCards />} />
+          <Route path="/mOCards" element={<MOCards />} />
+          <Route path="/managerOverview" element={<ManagerOverview />} />
+          
 
            {/* Rout try by Vindya-end */}
           

@@ -221,3 +221,36 @@ padding: 12px 100px;
     overflow-x: auto;
     padding-left: 270px;
 }
+
+
+.MOrderCard {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Default (Desktop): 3 cards per row */
+.MOrderCard > * {
+  flex: 1 1 calc(33.333% - 20px);
+  max-width: calc(33.333% - 20px);
+}
+
+/* Tablet: 2 cards per row */
+@media (max-width: 1024px) {
+  .MOrderCard {
+    width: 90%;
+  }
+  .MOrderCard > * {
+    flex: 1 1 calc(50% - 20px);
+    max-width: calc(50% - 20px);
+  }
+}
+
+/* Mobile: 1 card per row */
+@media (max-width: 640px) {
+  .MOrderCard > * {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
