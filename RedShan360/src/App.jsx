@@ -4,6 +4,9 @@ import EmployeeDashboard from "./pages/Employee/employeeDashboard";
 import LoginPage from "./components/Login_Register/Login_Page";
 import RegistrationPage from "./components/Login_Register/Registration";
 import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
+import AdminUserManagement from "./pages/Admin/AdminUserManagement";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+
 
 
 function App() {
@@ -16,7 +19,8 @@ function App() {
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
             <Route path="/guestUserDashboard" element={<GuestUserDashboard/>}/>
-
+            <Route path="/adminDashboard" element={<AdminDashboard />} />
+            <Route path="/adminUserManagement" element={<AdminUserManagement />} />
           {/* Protected Routes */}
           {/*for example */}
           {/*<Route
@@ -24,6 +28,7 @@ function App() {
               element={isLoggedIn ? <LHome /> : <Navigate to="/login" />}
           />*/}
         </Routes>
+        
       </div>
     </Router>
   );
