@@ -3,6 +3,9 @@ import EmployeeDashboard from "./pages/Employee/employeeDashboard";
 import LoginPage from "./pages/Login_Register/Login_Page";
 import RegistrationPage from "./pages/Login_Register/Registration";
 import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
+
+
+
 import BoquetCustomization from './pages/Customization/Boquet_Customization';
 import Shop from './pages/GuestUser/Shop';
 import ProductDetails from './pages/GuestUser/ProductDetails';
@@ -10,7 +13,8 @@ import ScrollToTop from './components/ScrollToTop';
 import CategoryPage from './pages/GuestUser/CategoryPage';
 import AboutPage from './pages/GuestUser/AboutPage';
 import ContactPage from './pages/GuestUser/ContactPage';
-
+import AdminUserManagement from "./pages/Admin/AdminUserManagement";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 
 
@@ -37,6 +41,7 @@ import MOCards from './components/managerComponent/MOrderCard';
 {/* Rout try by Vindya-end */ }
 
 
+
 function App() {
   return (
     <Router>
@@ -47,6 +52,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
+
           <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
           <Route path="/customization" element={<BoquetCustomization />} />
           <Route path="/shop" element={<Shop />} />
@@ -54,7 +60,9 @@ function App() {
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
-
+<Route path="/guestUserDashboard" element={<GuestUserDashboard/>}/>
+            <Route path="/adminDashboard" element={<AdminDashboard />} />
+            <Route path="/adminUserManagement" element={<AdminUserManagement />} />
 
 
 
@@ -87,6 +95,7 @@ function App() {
               element={isLoggedIn ? <LHome /> : <Navigate to="/login" />}
           />*/}
         </Routes>
+        
       </div>
     </Router>
   );

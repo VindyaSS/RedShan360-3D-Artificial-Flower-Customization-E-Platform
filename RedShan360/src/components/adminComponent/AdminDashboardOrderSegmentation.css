@@ -1,0 +1,45 @@
+.order-segmentation-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.order-segmentation-card h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #2d2d2d;
+}
+
+.donut-wrapper {
+  width: 260px;
+  height: 260px;
+  margin: 0 auto;
+}
+
+.efficiency {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #7a5255;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .donut-wrapper {
+    width: 200px;
+    height: 200px;
+  }
+
+  .order-segmentation-card h3 {
+    font-size: 16px;
+  }
+
+  .efficiency {
+    font-size: 14px;
+  }
+}
