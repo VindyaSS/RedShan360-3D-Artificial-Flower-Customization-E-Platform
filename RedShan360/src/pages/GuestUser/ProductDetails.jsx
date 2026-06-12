@@ -1,0 +1,770 @@
+import { useState, useEffect, useRef } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Star, Heart, ShoppingBag, ArrowLeft, ArrowRight, RotateCw, Check, ShieldCheck, HelpCircle, Truck, Leaf, X } from 'lucide-react';
+import Navbar from './components/Navbar';
+import Newsletter from './components/Newsletter';
+import Footer from './components/Footer';
+import { products } from '../../data/products';
+
+const ProductDetails = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+
+  // Gallery states
+  const [activeImage, setActiveImage] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  // 360 Viewer states
+  const [show360Modal, setShow360Modal] = useState(false);
+  const [rotationIndex, setRotationIndex] = useState(0);
+  const [isRotating, setIsRotating] = useState(false);
+
+  // Review states
+  const [reviewsList, setReviewsList] = useState([]);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [newReviewName, setNewReviewName] = useState('');
+  const [newReviewText, setNewReviewText] = useState('');
+  const [visibleReviewsCount, setVisibleReviewsCount] = useState(2);
+
+  // Carousel slider ref for complementary pieces
+  const carouselRef = useRef(null);
+
+  // Load product data based on ID
+  useEffect(() => {
+    const currentProduct = products.find((p) => p.id === Number(id));
+    if (currentProduct) {
+      setProduct(currentProduct);
+      setActiveImage(currentProduct.image);
+      setSelectedColor(currentProduct.colors[0]?.name || '');
+      setQuantity(1);
+
+      // Load reviews (check if reviews are in localStorage for this product)
+      const savedReviews = localStorage.getItem(`redshan360_reviews_${id}`);
+      if (savedReviews) {
+        setReviewsList(JSON.parse(savedReviews));
+      } else {
+        setReviewsList(currentProduct.reviews || []);
+      }
+
+      // Check wishlist status
+      const savedWishlist = localStorage.getItem('redshan360_wishlist');
+      const wishlistObj = savedWishlist ? JSON.parse(savedWishlist) : {};
+      setIsWishlisted(!!wishlistObj[currentProduct.id]);
+    } else {
+      setProduct(null);
+    }
+  }, [id]);
+
+  // Wishlist Toggle
+  const toggleWishlist = () => {
+    if (!product) return;
+    const savedWishlist = localStorage.getItem('redshan360_wishlist');
+    const wishlistObj = savedWishlist ? JSON.parse(savedWishlist) : {};
+
+    const updatedStatus = !isWishlisted;
+    setIsWishlisted(updatedStatus);
+
+    wishlistObj[product.id] = updatedStatus;
+    localStorage.setItem('redshan360_wishlist', JSON.stringify(wishlistObj));
+    window.dispatchEvent(new Event('wishlist-updated'));
+  };
+
+  // Add to Cart
+  const handleAddToCart = () => {
+    if (!product) return;
+    setIsAddingToCart(true);
+
+    setTimeout(() => {
+      setIsAddingToCart(false);
+      setAddedToCart(true);
+
+      // Save item to cart in localStorage
+      const savedCart = localStorage.getItem('redshan360_cart');
+      const cartList = savedCart ? JSON.parse(savedCart) : [];
+
+      // Check if item already exists with the same selected color
+      const existingItemIndex = cartList.findIndex(
+        (item) => item.id === product.id && item.selectedColor === selectedColor
+      );
+
+      if (existingItemIndex > -1) {
+        cartList[existingItemIndex].quantity += quantity;
+      } else {
+        cartList.push({
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          numericPrice: product.numericPrice,
+          image: product.image,
+          selectedColor: selectedColor,
+          quantity: quantity,
+        });
+      }
+
+      localStorage.setItem('redshan360_cart', JSON.stringify(cartList));
+      window.dispatchEvent(new Event('cart-updated'));
+
+      // Reset success state after 2 seconds
+      setTimeout(() => {
+        setAddedToCart(false);
+      }, 2000);
+    }, 800);
+  };
+
+  // Review submission
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!newReviewName.trim() || !newReviewText.trim()) return;
+
+    const newReview = {
+      id: Date.now(),
+      name: newReviewName,
+      verified: true,
+      date: 'Just now',
+      rating: newReviewRating,
+      text: newReviewText,
+    };
+
+    const updatedReviews = [newReview, ...reviewsList];
+    setReviewsList(updatedReviews);
+    localStorage.setItem(`redshan360_reviews_${id}`, JSON.stringify(updatedReviews));
+
+    // Reset review form
+    setNewReviewName('');
+    setNewReviewText('');
+    setNewReviewRating(5);
+    setShowReviewModal(false);
+  };
+
+  // Auto Rotation for 360 View Modal
+  useEffect(() => {
+    let interval;
+    if (isRotating && show360Modal && product?.thumbnails) {
+      interval = setInterval(() => {
+        setRotationIndex((prev) => (prev + 1) % product.thumbnails.length);
+      }, 300);
+    }
+    return () => clearInterval(interval);
+  }, [isRotating, show360Modal, product]);
+
+  // Complementary pieces scroll handlers
+  const scrollCarousel = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = 300;
+      carouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  // If product not found
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-[#fcf9f8] flex flex-col font-sans">
+        <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
+        <div className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-6">
+          <h2 className="text-3xl font-bold font-playfair text-[#1a1a1a] mb-4">Arrangement Not Found</h2>
+          <p className="text-sm text-[#1a1a1a]/60 mb-8">The botanical piece you are looking for does not exist or has been cataloged differently.</p>
+          <Link to="/shop" className="px-6 py-3 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white rounded-sm text-xs font-semibold uppercase tracking-wider transition-all duration-300">
+            Back to Collections
+          </Link>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Get complementary pieces (exclude current product)
+  const complementaryPieces = products.filter((p) => p.id !== product.id).slice(0, 5);
+
+  // Calculate dynamic average rating and review count
+  const averageRating = reviewsList.length > 0
+    ? (reviewsList.reduce((acc, r) => acc + r.rating, 0) / reviewsList.length).toFixed(1)
+    : product.rating;
+  const totalReviewsCount = reviewsList.length;
+
+  return (
+    <div className="min-h-screen bg-[#fcf9f8] text-[#1a1a1a] font-sans">
+      <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
+
+      {/* Main product area */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-[120px] pb-24">
+
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-10 uppercase">
+          <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
+          <span>/</span>
+          <Link to="/shop" className="hover:text-[#8c5e5e] transition-colors">Shop</Link>
+          <span>/</span>
+          <span className="text-[#8c5e5e] truncate max-w-[200px]">{product.title}</span>
+        </nav>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+
+          {/* Left Column: Image Gallery */}
+          <div className="lg:col-span-7 flex flex-col md:flex-row gap-5">
+
+            {/* Gallery Thumbnails (Desktop side-align, Mobile bottom-align) */}
+            <div className="flex md:flex-col flex-row gap-3 order-2 md:order-1 overflow-x-auto md:overflow-x-visible">
+              {product.thumbnails.map((thumb, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveImage(thumb)}
+                  className={`w-16 h-20 md:w-20 md:h-24 flex-shrink-0 bg-[#f4f0ed] rounded-sm overflow-hidden border transition-all duration-300 ${activeImage === thumb ? 'border-[#8c5e5e] shadow-md scale-[1.02]' : 'border-transparent hover:border-[#8c5e5e]/40'
+                    }`}
+                  aria-label={`View gallery image ${index + 1}`}
+                >
+                  <img src={thumb} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+
+            {/* Main Interactive Product Image */}
+            <div className="flex-1 order-1 md:order-2 flex flex-col items-center">
+              <div className="w-full aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative group shadow-sm border border-[#d9d2d0]/25">
+                <img
+                  src={activeImage}
+                  alt={product.title}
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] animate-fade-in"
+                />
+
+                {/* Favorite toggle overlay for mobile */}
+                <button
+                  onClick={toggleWishlist}
+                  className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm shadow-md hover:bg-white w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105"
+                  aria-label="Add to Wishlist"
+                >
+                  <Heart
+                    size={16}
+                    className={`transition-colors duration-300 ${isWishlisted ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-[#1a1a1a]/75'
+                      }`}
+                  />
+                </button>
+              </div>
+
+              {/* 360° View Trigger Button */}
+              {product.has360 && (
+                <button
+                  onClick={() => setShow360Modal(true)}
+                  className="flex items-center gap-2.5 mt-5 px-6 py-2.5 rounded-full border border-[#d9d2d0] hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-xs font-bold tracking-widest text-[#1a1a1a]/70 hover:text-[#8c5e5e] transition-all duration-300 shadow-sm"
+                >
+                  <RotateCw size={14} className="animate-spin-slow" />
+                  <span>360° VIEW</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column: Product Detail Panel */}
+          <div className="lg:col-span-5 flex flex-col justify-start text-left">
+
+            {/* Reviews Summary */}
+            <div className="flex items-center gap-1.5 mb-3">
+              <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={14}
+                    className={i < Math.round(Number(averageRating)) ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'}
+                  />
+                ))}
+              </div>
+              <a
+                href="#reviews"
+                className="text-[11px] font-bold text-[#1a1a1a]/60 hover:text-[#8c5e5e] underline transition-colors"
+              >
+                ({totalReviewsCount} Reviews)
+              </a>
+            </div>
+
+            {/* Product Title */}
+            <h1 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] tracking-tight leading-tight mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+              {product.title}
+            </h1>
+
+            {/* Collection tag */}
+            <p className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8c5e5e] mb-6">
+              {product.subtitle}
+            </p>
+
+            {/* Price tag */}
+            <p className="text-2xl md:text-3xl font-semibold text-[#1a1a1a] mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+              {product.price}
+            </p>
+
+            {/* Divider */}
+            <div className="border-t border-[#d9d2d0]/50 my-2"></div>
+
+            {/* Description */}
+            <p className="text-sm leading-relaxed text-[#1a1a1a]/75 my-6 font-normal">
+              {product.description}
+            </p>
+
+            {/* Color selection options */}
+            <div className="mb-6">
+              <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-3">
+                COLOR: <span className="text-[#1a1a1a] font-black">{selectedColor}</span>
+              </span>
+              <div className="flex items-center gap-3">
+                {product.colors.map((color) => (
+                  <button
+                    key={color.name}
+                    onClick={() => setSelectedColor(color.name)}
+                    className={`w-8 h-8 rounded-full border transition-all duration-300 relative flex items-center justify-center ${selectedColor === color.name
+                        ? 'border-[#8c5e5e] scale-110 ring-2 ring-[#8c5e5e]/20 ring-offset-2'
+                        : 'border-[#d9d2d0] hover:scale-105'
+                      }`}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  >
+                    {selectedColor === color.name && (
+                      <span className="absolute w-1.5 h-1.5 rounded-full bg-[#1a1a1a]" style={{ backgroundColor: color.hex === '#ffffff' ? '#1a1a1a' : '#ffffff' }} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="mb-8">
+              <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-3">
+                QUANTITY
+              </span>
+              <div className="inline-flex items-center border border-[#d9d2d0] bg-white rounded-sm">
+                <button
+                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                  className="px-3.5 py-2 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
+                  aria-label="Decrease quantity"
+                >
+                  &mdash;
+                </button>
+                <span className="w-12 text-center text-xs font-bold font-mono select-none">
+                  {quantity}
+                </span>
+                <button
+                  onClick={() => setQuantity((prev) => prev + 1)}
+                  className="px-3.5 py-2 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Actions: Add to Cart and Wishlist */}
+            <div className="flex gap-3 mb-8 w-full">
+              <button
+                onClick={handleAddToCart}
+                disabled={isAddingToCart}
+                className={`flex-1 flex items-center justify-center gap-2.5 py-4 px-6 rounded-sm bg-[#8c5e5e] text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${isAddingToCart ? 'bg-[#7d4d50]/70 cursor-not-allowed' : 'hover:bg-[#7d4d50] active:scale-[0.98]'
+                  }`}
+              >
+                {isAddingToCart ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                ) : addedToCart ? (
+                  <>
+                    <Check size={14} />
+                    <span>Added to Cart!</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag size={14} />
+                    <span>Add to Cart</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={toggleWishlist}
+                className={`w-14 h-14 border border-[#d9d2d0] rounded-sm flex items-center justify-center transition-all duration-300 shadow-sm ${isWishlisted
+                    ? 'border-[#8c5e5e] bg-[#8c5e5e]/5 text-[#8c5e5e]'
+                    : 'hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-[#1a1a1a]/70'
+                  }`}
+                aria-label="Toggle Wishlist"
+              >
+                <Heart size={18} className={isWishlisted ? 'fill-[#8c5e5e]' : ''} />
+              </button>
+            </div>
+
+            {/* Product Meta Flags */}
+            <div className="flex flex-row flex-wrap gap-x-6 gap-y-2.5 pt-5 border-t border-[#d9d2d0]/40 font-sans text-xs text-[#1a1a1a]/60">
+              <div className="flex items-center gap-2">
+                <Truck size={14} className="text-[#8c5e5e]" />
+                <span>Global Shipping</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Leaf size={14} className="text-[#8c5e5e]" />
+                <span>Sustainable Fibers</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Customer Stories Section */}
+        <section id="reviews" className="mt-32 pt-20 border-t border-[#d9d2d0]/50 scroll-mt-24">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 mb-12">
+            <div className="text-left">
+              <h2 className="text-3xl font-bold tracking-tight text-[#1a1a1a] mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Customer Stories
+              </h2>
+              <div className="flex items-center gap-3">
+                <span className="text-4xl font-extrabold text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  {averageRating}
+                </span>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={12}
+                        className={i < Math.round(Number(averageRating)) ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-[#1a1a1a]/55 font-bold tracking-wide mt-0.5">Based on {totalReviewsCount} reviews</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowReviewModal(true)}
+              className="px-6 py-3 border border-[#8c5e5e] text-[#8c5e5e] hover:bg-[#8c5e5e] hover:text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-sm shrink-0"
+            >
+              Write a Review
+            </button>
+          </div>
+
+          {/* Customer Reviews Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+            {reviewsList.slice(0, visibleReviewsCount).map((review) => (
+              <div key={review.id} className="p-8 rounded-sm bg-[#faf8f6] border border-[#d9d2d0]/20 flex flex-col justify-between shadow-sm relative animate-fade-in hover:shadow-md transition-shadow duration-300">
+                <div>
+                  <div className="flex justify-between items-start gap-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#f4f0ed] border border-[#d9d2d0]/30 flex items-center justify-center font-bold text-[#8c5e5e] text-xs">
+                        {review.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="font-semibold text-sm text-[#1a1a1a]">{review.name}</h4>
+                          {review.verified && (
+                            <span className="inline-flex items-center gap-0.5 bg-[#f5e6e8] text-[#8c5e5e] text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-sm">
+                              <ShieldCheck size={8} /> Verified Buyer
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[9px] text-[#1a1a1a]/40 font-semibold uppercase tracking-wider mt-0.5">{review.date}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={11}
+                          className={i < review.rating ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className="text-xs leading-relaxed italic text-[#1a1a1a]/80 font-normal">
+                    "{review.text}"
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {reviewsList.length > visibleReviewsCount && (
+            <div className="flex justify-center mt-12">
+              <button
+                onClick={() => setVisibleReviewsCount((prev) => Math.min(reviewsList.length, prev + 2))}
+                className="flex items-center gap-1.5 py-2 px-4 border-b border-transparent hover:border-[#8c5e5e] text-[#8c5e5e] text-xs font-bold uppercase tracking-widest transition-all duration-300"
+              >
+                <span>Load More Reviews</span>
+                <span className="text-[9px]">&darr;</span>
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* Related / Complementary Pieces Section */}
+        <section className="mt-32 pt-20 border-t border-[#d9d2d0]/50 relative">
+          <div className="flex justify-between items-end gap-6 mb-12">
+            <div className="text-left">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-3">Harmonious Pairings</p>
+              <h2 className="text-3xl font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Complementary Pieces
+              </h2>
+            </div>
+
+            {/* Nav arrows */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => scrollCarousel('left')}
+                className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
+                aria-label="Scroll left"
+              >
+                <ArrowLeft size={14} className="text-[#1a1a1a]/70" />
+              </button>
+              <button
+                onClick={() => scrollCarousel('right')}
+                className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
+                aria-label="Scroll right"
+              >
+                <ArrowRight size={14} className="text-[#1a1a1a]/70" />
+              </button>
+            </div>
+          </div>
+
+          {/* Related Products Slider list */}
+          <div
+            ref={carouselRef}
+            className="flex gap-8 overflow-x-auto scroll-smooth no-scrollbar pb-6 text-left select-none"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {complementaryPieces.map((piece) => (
+              <Link
+                key={piece.id}
+                to={`/product/${piece.id}`}
+                className="min-w-[260px] md:min-w-[280px] max-w-[280px] flex-shrink-0 group flex flex-col font-sans hover:-translate-y-1 transition-transform duration-300"
+              >
+                <div className="relative aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden mb-4 border border-[#d9d2d0]/15">
+                  <img
+                    src={piece.image}
+                    alt={piece.title}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
+                </div>
+
+                <div className="px-1 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-[15px] text-[#1a1a1a] tracking-tight group-hover:text-[#8c5e5e] transition-colors leading-snug mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+                      {piece.title}
+                    </h3>
+                    <p className="text-[10px] font-semibold tracking-wider text-[#1a1a1a]/45 uppercase mb-2">
+                      {piece.subtitle}
+                    </p>
+                  </div>
+                  <p className="text-sm font-bold text-[#8c5e5e] mt-auto">
+                    {piece.price}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+      </div>
+
+      {/* 360° Drag & Auto Rotation Viewer Modal */}
+      {show360Modal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#fcf9f8] w-full max-w-2xl rounded-sm shadow-2xl relative overflow-hidden border border-[#d9d2d0]/30 animate-slide-up flex flex-col">
+
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-[#d9d2d0]/30">
+              <div>
+                <h3 className="text-lg font-bold text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  360° Botanical Visualizer
+                </h3>
+                <p className="text-[10px] text-[#1a1a1a]/50 uppercase tracking-widest font-semibold mt-0.5">{product.title}</p>
+              </div>
+              <button
+                onClick={() => { setShow360Modal(false); setIsRotating(false); }}
+                className="p-1.5 hover:bg-[#f4f0ed] rounded-full text-[#1a1a1a]/60 hover:text-[#8c5e5e] transition-all"
+                aria-label="Close modal"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Visualizer Area */}
+            <div className="p-8 flex-1 flex flex-col items-center justify-center min-h-[350px] relative bg-[#faf8f6]">
+
+              {/* Product Frame */}
+              <div className="w-64 aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative shadow-md select-none border border-[#d9d2d0]/20">
+                <img
+                  src={product.thumbnails[rotationIndex]}
+                  alt=""
+                  className="w-full h-full object-cover pointer-events-none"
+                />
+
+                {/* 360 Badge overlay */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest flex items-center gap-1.5 backdrop-blur-sm shadow-sm select-none">
+                  <RotateCw size={9} className={isRotating ? 'animate-spin' : ''} />
+                  <span>FRAME {rotationIndex + 1}/{product.thumbnails.length}</span>
+                </div>
+              </div>
+
+              {/* Slider for frames */}
+              <div className="w-full max-w-xs mt-6 px-1 flex flex-col gap-2">
+                <input
+                  type="range"
+                  min="0"
+                  max={product.thumbnails.length - 1}
+                  value={rotationIndex}
+                  onChange={(e) => { setRotationIndex(Number(e.target.value)); setIsRotating(false); }}
+                  className="w-full h-1 bg-[#eae6e3] rounded-lg appearance-none cursor-pointer accent-[#8c5e5e] focus:outline-none"
+                />
+                <span className="text-[10px] text-[#1a1a1a]/45 font-bold tracking-wider text-center">Drag slider or toggle play below to rotate</span>
+              </div>
+            </div>
+
+            {/* Modal Controls */}
+            <div className="flex justify-between items-center px-6 py-4 bg-[#f4f0ed]/50 border-t border-[#d9d2d0]/25">
+              <button
+                onClick={() => setIsRotating((prev) => !prev)}
+                className={`px-4 py-2 border rounded-sm text-xs font-bold tracking-wider transition-all duration-300 ${isRotating
+                    ? 'bg-[#8c5e5e] text-white border-transparent'
+                    : 'border-[#d9d2d0] text-[#1a1a1a]/70 hover:border-[#8c5e5e] hover:text-[#8c5e5e]'
+                  }`}
+              >
+                {isRotating ? 'PAUSE ROTATION' : 'AUTO ROTATE'}
+              </button>
+
+              <button
+                onClick={() => { setShow360Modal(false); setIsRotating(false); }}
+                className="px-5 py-2 bg-[#1a1a1a] hover:bg-[#8c5e5e] text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 shadow-sm"
+              >
+                Close Visualizer
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Review Submission Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <form
+            onSubmit={handleReviewSubmit}
+            className="bg-[#fcf9f8] w-full max-w-md rounded-sm shadow-2xl relative overflow-hidden border border-[#d9d2d0]/30 animate-slide-up text-left flex flex-col"
+          >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-[#d9d2d0]/30">
+              <div>
+                <h3 className="text-lg font-bold text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Write a Review
+                </h3>
+                <p className="text-[10px] text-[#1a1a1a]/50 uppercase tracking-widest font-semibold mt-0.5">{product.title}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowReviewModal(false)}
+                className="p-1.5 hover:bg-[#f4f0ed] rounded-full text-[#1a1a1a]/60 hover:text-[#8c5e5e] transition-all"
+                aria-label="Close modal"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5 flex-1">
+
+              {/* Rating picker */}
+              <div>
+                <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-2">
+                  Rating
+                </span>
+                <div className="flex items-center gap-1.5 text-lg">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setNewReviewRating(star)}
+                      className="text-[#8c5e5e] transition-transform duration-200 hover:scale-110"
+                    >
+                      <Star
+                        size={22}
+                        className={star <= newReviewRating ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-300'}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Name field */}
+              <div>
+                <label
+                  htmlFor="reviewName"
+                  className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-2"
+                >
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  id="reviewName"
+                  required
+                  placeholder="e.g., Eleanor M."
+                  value={newReviewName}
+                  onChange={(e) => setNewReviewName(e.target.value)}
+                  className="w-full bg-[#f4f0ed]/50 border border-[#d9d2d0] rounded-sm px-4 py-3 text-xs text-[#1a1a1a] placeholder:text-[#1a1a1a]/30 focus:outline-none focus:border-[#8c5e5e] focus:bg-white transition-all duration-300"
+                />
+              </div>
+
+              {/* Textarea field */}
+              <div>
+                <label
+                  htmlFor="reviewText"
+                  className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-2"
+                >
+                  Review Details
+                </label>
+                <textarea
+                  id="reviewText"
+                  required
+                  rows="4"
+                  placeholder="Tell us about the texture, lifelike detail, styling options, or packaging..."
+                  value={newReviewText}
+                  onChange={(e) => setNewReviewText(e.target.value)}
+                  className="w-full bg-[#f4f0ed]/50 border border-[#d9d2d0] rounded-sm px-4 py-3 text-xs text-[#1a1a1a] placeholder:text-[#1a1a1a]/30 focus:outline-none focus:border-[#8c5e5e] focus:bg-white transition-all duration-300 resize-none leading-relaxed"
+                />
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end items-center gap-3 px-6 py-4 bg-[#f4f0ed]/50 border-t border-[#d9d2d0]/25">
+              <button
+                type="button"
+                onClick={() => setShowReviewModal(false)}
+                className="px-4 py-2 text-xs font-bold text-[#1a1a1a]/70 hover:text-[#8c5e5e] tracking-wider transition-all"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 shadow-md active:scale-95"
+              >
+                Submit Review
+              </button>
+            </div>
+
+          </form>
+        </div>
+      )}
+
+      {/* Newsletter */}
+      <Newsletter />
+
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
+};
+
+export default ProductDetails;

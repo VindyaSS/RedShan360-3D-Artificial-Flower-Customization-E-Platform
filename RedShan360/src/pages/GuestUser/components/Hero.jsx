@@ -1,17 +1,24 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
-    <section
-      className="relative h-[850px] bg-cover bg-center overflow-hidden"
-      style={{
-        backgroundImage: 'url(/images/hero_bouquet.png)',
-      }}
-    >
+    <section className="relative h-[850px] overflow-hidden">
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="/videos/video.mp4" type="video/mp4" />
+      </video>
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(250,248,246,0.9) 35%, rgba(250,248,246,0.5) 60%, transparent 100%)' }} />
       <div className="relative h-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-28 flex items-center">
         <div className="max-w-2xl text-[#1a1a1a] text-left">
-          <h2 className="text-5xl md:text-[80px] leading-[1.08] mb-6 font-bold tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h2 className="text-5xl md:text-[80px] leading-[1.08] mb-6 font-bold tracking-tight" style={{ fontFamily: 'Playfair Display, serif', color: '#000000' }}>
             Everlasting
             <br />
             <span className="text-[#8c5e5e] italic font-normal">Elegance</span>
@@ -21,10 +28,16 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-row gap-4">
-            <button className="px-8 py-3.5 rounded-sm bg-[#7d4d50] hover:bg-[#6b3f42] text-white font-medium transition-all duration-300 text-sm tracking-wide shadow-sm">
+            <button
+              onClick={() => navigate('/shop')}
+              className="px-8 py-3.5 rounded-sm bg-[#7d4d50] hover:bg-[#563c37] text-white font-medium transition-all duration-300 text-sm tracking-wide shadow-sm"
+            >
               Shop Now
             </button>
-            <button className="px-8 py-3.5 rounded-sm border border-[#7d4d50]/70 text-[#1a1a1a] font-medium hover:bg-[#7d4d50]/5 transition-all duration-300 text-sm tracking-wide">
+            <button
+              onClick={() => navigate('/customization')}
+              className="px-8 py-3.5 rounded-sm border border-[#7d4d50]/70 text-[#1a1a1a] font-medium hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-all duration-300 text-sm tracking-wide"
+            >
               Customize Bouquet
             </button>
           </div>

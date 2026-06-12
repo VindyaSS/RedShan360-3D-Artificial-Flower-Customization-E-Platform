@@ -1,0 +1,223 @@
+---------------------------------------------------sideNavigation------------------------------------------------------------------ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.profile {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile h3 {
+    margin-top: 8px;
+    color: #333;
+    font-weight: bold;
+}
+
+.profile p {
+    color: #7C535714;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: #FAF9F5;
+    border-right: 1px solid #ddd;
+    transition: 0.3s;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+
+nav ul {
+    list-style: none;
+}
+
+nav ul li {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+nav ul li a {
+    display: flex;
+    color: #333;
+    font-weight: bold;
+    padding: 15px;
+    transition: 0.3s;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    gap: 8px
+}
+
+nav ul li a:hover {
+    background: #d1c3bd;
+    color: #333;
+
+}
+
+.logout {
+    padding: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.logout a {
+    display: flex;
+
+    color: #333;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    gap: 8px
+}
+
+.logout a:hover {
+    color: #333;
+}
+
+
+@media (min-width: 992px) {
+    .sidebar {
+        left: 0;
+    }
+
+    .menu-btn {
+        display: none;
+    }
+
+    .overlay {
+        display: none;
+    }
+}
+
+----------------------------------------------------------------------------------mOrderTable---------------------------------------------------------------------------
+.MPtable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid ;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+.MPtable th,
+.MPtable td {
+padding: 12px 100px;
+  font-size: 14px;
+  background-color: #D4C2C34D;
+  color: #333;
+  font-weight: bold;
+
+}
+
+.MPtable td p {
+  color: #333;
+  margin: 0;
+}
+
+.MPtable th {
+  background-color: #D4C2C3;
+  color: #333;
+  text-align: left;
+}
+
+.MPtable tr:hover td {
+  background-color: #975656;
+  transition: background-color 0.3s ease;
+}
+
+.MPtable a,
+.MPtable .link {
+  color: #D4C2C34D ;
+  text-decoration: none ;
+}
+
+.MPtable a:hover,
+.MPtable .link:hover {
+  text-decoration: underline ;
+}
+
+/* Special class for red links */
+.AAtable .link-red {
+  color: #ff0000 ;
+}
+
+
+/*---------------------------------------- AManageProfiles,AdminStore ----------------------------------------*/
+.AMPBody {
+  width: 80%;
+  margin: 0 auto; /* Center horizontally */
+}
+.AMPTopic {
+  color: black;
+}
+
+/* Special class for red links */
+------------------------------------------------------------------------------mTabs---------------------------------------------------------------
+
+.tabs-container {
+  border: 1px solid #FAF9F5;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  justify-content: center;
+}
+
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid #FAF9F5;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: #FAF9F5;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover {
+  background: #ecfdf5;
+  color: #333;
+}
+
+.tab-btn.active {
+  color: #333;
+  border-bottom: 3px solid #333;
+}
+
+.tab-content {
+  padding: 60px;
+  line-height: 1.6;
+  color: #475569;
+  display: flex;
+  justify-content: center;
+}
+
+--------------------------------------------------------------------MmanageOrders----------------------------------------------------------
+
+.MPage {
+  display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.Mpart1 {
+   width: 250px;
+    flex-shrink: 0;
+      flex: 2;
+
+}
+
+.Mpart2 {
+  flex: 1;
+    overflow-x: auto;
+    padding-left: 270px;
+}
