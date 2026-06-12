@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const CategoryGrid = ({ categories }) => {
   return (
@@ -18,7 +19,7 @@ const CategoryGrid = ({ categories }) => {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((category, idx) => (
-            <div key={idx} className="group relative aspect-[3/4] rounded-sm overflow-hidden shadow-sm cursor-pointer">
+            <Link to={`/category/${category.slug}`} key={idx} className="group relative aspect-[3/4] rounded-sm overflow-hidden shadow-sm cursor-pointer block">
               <img src={category.image} alt={category.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent transition-colors duration-300" />
               <div className="absolute inset-x-0 bottom-0 p-5 text-left">
@@ -27,7 +28,7 @@ const CategoryGrid = ({ categories }) => {
                 </h4>
                 <p className="text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-white/95 font-medium mt-1">{category.tag}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

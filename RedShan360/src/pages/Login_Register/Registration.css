@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 /* Scope overrides for Vite template's container */
-#root:has(.login-page-wrapper) {
+#root:has(.registration-page-wrapper) {
   width: 100% !important;
   max-width: 100% !important;
   border-inline: none !important;
@@ -11,7 +11,7 @@
   background-color: #FAF9F5;
 }
 
-.login-page-wrapper {
+.registration-page-wrapper {
   font-family: 'Plus Jakarta Sans', sans-serif;
   color: #333333;
   background-color: #FAF9F5;
@@ -22,7 +22,7 @@
 }
 
 /* Header Styles */
-.login-header {
+.registration-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -123,17 +123,17 @@
 }
 
 /* Main Split Section */
-.login-main {
+.registration-main {
   display: flex;
   flex: 1;
   min-height: calc(100vh - 180px);
 }
 
-/* Left panel (peonies image) */
-.login-visual-panel {
+/* Left panel (roses image) */
+.registration-visual-panel {
   flex: 1;
   position: relative;
-  background-image: url('/peonies_vase.png');
+  background-image: url('/images/roses_vase.png');
   background-size: cover;
   background-position: center;
   min-height: 600px;
@@ -173,7 +173,7 @@
 }
 
 /* Right panel (form) */
-.login-form-panel {
+.registration-form-panel {
   flex: 1;
   display: flex;
   align-items: center;
@@ -182,9 +182,9 @@
   background-color: #faf9f6;
 }
 
-.login-form-card {
+.registration-form-card {
   width: 100%;
-  max-width: 440px;
+  max-width: 460px;
 }
 
 .form-title {
@@ -200,6 +200,18 @@
   color: #666666;
   margin: 0 0 32px 0;
   line-height: 1.5;
+}
+
+/* Row wrapper for side-by-side fields */
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .form-group {
@@ -221,19 +233,6 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: #4a4a4a;
-}
-
-.forgot-password-link {
-  font-size: 12px;
-  font-weight: 500;
-  color: #744F51;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.forgot-password-link:hover {
-  color: #5e3f41;
-  text-decoration: underline;
 }
 
 .input-wrapper {
@@ -264,49 +263,13 @@
   color: #a0a0a0;
 }
 
-.remember-me-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
+.validation-error {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 6px;
 }
 
-.checkbox-custom {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 1px solid #e5e4e7;
-  border-radius: 4px;
-  background-color: #ffffff;
-  display: inline-grid;
-  place-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.checkbox-custom:checked {
-  background-color: #744F51;
-  border-color: #744F51;
-}
-
-.checkbox-custom:checked::before {
-  content: "";
-  width: 10px;
-  height: 6px;
-  border-left: 2px solid white;
-  border-bottom: 2px solid white;
-  transform: rotate(-45deg) translate(1px, -1px);
-}
-
-.remember-me-label {
-  font-size: 13px;
-  color: #555555;
-  cursor: pointer;
-  user-select: none;
-}
-
-.login-btn {
+.registration-btn {
   width: 100%;
   height: 48px;
   background-color: #744F51;
@@ -322,23 +285,24 @@
   justify-content: center;
   gap: 8px;
   transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  margin-top: 12px;
 }
 
-.login-btn:hover {
+.registration-btn:hover {
   background-color: #5e3f41;
   box-shadow: 0 4px 12px rgba(116, 79, 81, 0.2);
 }
 
-.login-btn:active {
+.registration-btn:active {
   transform: scale(0.99);
 }
 
-.login-btn-arrow {
+.registration-btn-arrow {
   transition: transform 0.2s ease;
   display: inline-flex;
 }
 
-.login-btn:hover .login-btn-arrow {
+.registration-btn:hover .registration-btn-arrow {
   transform: translateX(4px);
 }
 
@@ -364,62 +328,27 @@
   letter-spacing: 1px;
 }
 
-/* Social Buttons */
-.social-buttons-container {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.social-btn {
-  flex: 1;
-  height: 44px;
-  background-color: #ffffff;
-  border: 1px solid #e5e4e7;
-  border-radius: 8px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #333333;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.social-btn:hover {
-  border-color: #744F51;
-  background-color: #faf9f6;
-}
-
-.social-btn-logo {
-  display: flex;
-  align-items: center;
-}
-
-/* Register link */
-.register-container {
+/* Login link container */
+.login-link-container {
   text-align: center;
   font-size: 14px;
   color: #555555;
 }
 
-.register-link {
+.login-link {
   color: #744F51;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
-.register-link:hover {
+.login-link:hover {
   color: #5e3f41;
   text-decoration: underline;
 }
 
 /* Footer Styles */
-.login-footer {
+.registration-footer {
   background-color: #faf9f6;
   border-top: 1px solid #f0efeb;
   padding: 32px 40px;
@@ -505,19 +434,19 @@
 
 /* Responsive Breakpoints */
 @media (max-width: 1024px) {
-  .login-main {
+  .registration-main {
     flex-direction: column;
   }
   
-  .login-visual-panel {
+  .registration-visual-panel {
     min-height: 400px;
   }
   
-  .login-form-panel {
+  .registration-form-panel {
     padding: 48px 24px;
   }
   
-  .login-header {
+  .registration-header {
     padding: 16px 24px;
   }
   
@@ -527,7 +456,17 @@
 }
 
 @media (max-width: 768px) {
-  .login-footer {
+  .form-row {
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 0;
+  }
+  
+  .form-row .form-group {
+    margin-bottom: 20px;
+  }
+
+  .registration-footer {
     flex-direction: column;
     align-items: center;
     text-align: center;
