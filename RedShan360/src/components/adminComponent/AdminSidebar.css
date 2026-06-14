@@ -59,6 +59,17 @@
   background: #f2e8e8;
   color: #8a6365;
   font-weight: 600;
+  position: relative;
+}
+.menu-item.active::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #8a6365;
+  border-radius: 0 4px 4px 0;
 }
 .menu-icon img {
   width: 18px;
