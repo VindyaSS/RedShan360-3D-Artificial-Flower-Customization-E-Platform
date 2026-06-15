@@ -61,15 +61,15 @@ export default function RegistrationPage() {
         <div className="header-left">
           <a href="/" className="logo-text">RedShan360</a>
         </div>
-        
-        <nav className="header-nav">
+
+        {/*<nav className="header-nav">
           <a href="/" className="nav-link">Home</a>
           <a href="/shop" className="nav-link">Shop</a>
           <a href="/customization" className="nav-link">Customization</a>
           <a href="/about" className="nav-link">About</a>
           <a href="/contact" className="nav-link">Contact</a>
         </nav>
-        
+
         <div className="header-right">
           <div className="search-bar-container">
             <span className="search-icon">
@@ -78,14 +78,14 @@ export default function RegistrationPage() {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
             </span>
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              className="search-input" 
+            <input
+              type="text"
+              placeholder="Search..."
+              className="search-input"
               id="registration-header-search"
             />
           </div>
-          
+
           <div className="header-icons">
             <button className="icon-btn" aria-label="Shopping Cart" id="registration-btn-cart">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -106,7 +106,7 @@ export default function RegistrationPage() {
               </svg>
             </button>
           </div>
-        </div>
+        </div>*/}
       </header>
 
       {/* MAIN SPLIT SECTION */}
@@ -305,8 +305,8 @@ export default function RegistrationPage() {
           </div>
           <div className="secure-checkout-badge">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="m9 11 2 2 4-4"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="m9 11 2 2 4-4" />
             </svg>
             Secure Checkout
           </div>
