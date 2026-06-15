@@ -133,7 +133,7 @@
 .registration-visual-panel {
   flex: 1;
   position: relative;
-  background-image: url('/roses_vase.png');
+  background-image: url('/images/roses_vase.png');
   background-size: cover;
   background-position: center;
   min-height: 600px;

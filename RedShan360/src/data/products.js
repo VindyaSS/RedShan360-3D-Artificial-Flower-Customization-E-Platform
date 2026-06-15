@@ -23,7 +23,7 @@ export const products = [
     image: crimsonSilkPeony,
     thumbnails: [
       crimsonSilkPeony,
-      '/peonies_vase.png',
+      '/images/peonies_vase.png',
       '/images/cat_peonies.png'
     ],
     description: 'Crafted with surgical precision from the finest premium silk, our Everlasting Peony captures the ethereal beauty of nature without the impermanence. Featuring hand-painted details and flexible architectural stems.',
@@ -138,7 +138,7 @@ export const products = [
     thumbnails: [
       sakuraSpringBloom,
       crimsonSilkPeony,
-      '/peonies_vase.png'
+      '/images/peonies_vase.png'
     ],
     description: 'Inspired by Japanese cherry blossoms, these delicate silk stems bring a fresh, modern touch of spring into your home year-round. Featuring flexible branches.',
     colors: [
@@ -207,8 +207,8 @@ export const products = [
     image: mauveRadianceDahlia,
     thumbnails: [
       mauveRadianceDahlia,
-      '/peonies_vase.png',
-      '/roses_vase.png'
+      '/images/peonies_vase.png',
+      '/images/roses_vase.png'
     ],
     description: 'A rich bouquet of velvet dahlias in dusty mauve tones. Perfect for adding a warm, sophisticated pop of color to neutral spaces.',
     colors: [
@@ -243,7 +243,7 @@ export const products = [
     thumbnails: [
       '/images/cat_orchids.png',
       serenityWhite,
-      '/peonies_vase.png'
+      '/images/peonies_vase.png'
     ],
     description: 'A minimalist white orchid stem presented in a modern matte black ceramic pot. Truly timeless and elegant.',
     colors: [
@@ -273,11 +273,11 @@ export const products = [
     numericPrice: 6500,
     rating: 4.8,
     reviewCount: 112,
-    image: '/roses_vase.png',
+    image: '/images/roses_vase.png',
     thumbnails: [
-      '/roses_vase.png',
+      '/images/roses_vase.png',
       crimsonSilkPeony,
-      '/peonies_vase.png'
+      '/images/peonies_vase.png'
     ],
     description: 'Three long-stemmed velvet roses in a rich crimson hue, meticulously detailed to represent real fresh-cut roses.',
     colors: [
