@@ -13,6 +13,7 @@ export default function MCompletedOrderTable(props) {
                         <th>{props.t2}</th>
                         <th>{props.t3}</th>
                         <th>{props.t4}</th>
+                        <th colSpan="2">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -22,10 +23,11 @@ export default function MCompletedOrderTable(props) {
                             <td>{completedorder.CustomerName}</td>
                             <td>{completedorder.OrderName}</td>
                             <td>{completedorder.Price}</td>
+                            <td colSpan="2">
+                                <button className="btn-dispatch">Dispatching to Courier</button>
+                            </td>
                         </tr>
                     ))}
-
-
 
                 </tbody>
             </table>
