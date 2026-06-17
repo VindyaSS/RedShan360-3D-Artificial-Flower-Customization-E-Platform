@@ -12,9 +12,9 @@ const CategoryGrid = ({ categories }) => {
               Shop by Variety
             </h3>
           </div>
-          <a href="#" className="text-xs uppercase tracking-wider font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] border-b border-[#1a1a1a] pb-0.5 transition-colors duration-300">
+          {/*<a href="#" className="text-xs uppercase tracking-wider font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] border-b border-[#1a1a1a] pb-0.5 transition-colors duration-300">
             View All Categories
-          </a>
+          </a>*/}
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">

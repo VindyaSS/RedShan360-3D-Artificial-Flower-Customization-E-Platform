@@ -39,7 +39,14 @@ import MOrderTable from './components/managerComponent/MPendingOrderTable';
 import MTabs from './components/managerComponent/mTabs';
 import MmanageOrders from './pages/Manager/MmanageOrders';
 import MOCards from './components/managerComponent/MOrderCard';
+
+import ManagerOverview from './pages/Manager/ManagerOverview';
+import MOrderGraph from './components/managerComponent/MOrderGraph';
+import MmanageEmployees from './pages/Manager/ManageEmployees';
+import MPreOrderModal from './components/managerComponent/MPreOrderModal';
 {/* Rout try by Vindya-end */ }
+
+
 
 
 
@@ -61,10 +68,12 @@ function App() {
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+
           <Route path="/guestUserDashboard" element={<GuestUserDashboard/>}/>
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/adminUserManagement" element={<AdminUserManagement />} />
           <Route path="/adminOrderManagement" element={<AdminOrderManagement />} />
+
 
 
 
@@ -86,6 +95,12 @@ function App() {
           <Route path="/mTabs" element={<MTabs />} />
           <Route path="/mManageOrders" element={<MmanageOrders />} />
           <Route path="/mOCards" element={<MOCards />} />
+          <Route path="/mOCards" element={<MOCards />} />
+          <Route path="/managerOverview" element={<ManagerOverview />} />
+          <Route path="/mOrderGraph" element={<MOrderGraph />} />
+          <Route path="/mManageEmployees" element={<MmanageEmployees />} />
+          <Route path="/mPreOrderModal" element={<MPreOrderModal />} />
+
 
           {/* Rout try by Vindya-end */}
 
@@ -97,7 +112,7 @@ function App() {
               element={isLoggedIn ? <LHome /> : <Navigate to="/login" />}
           />*/}
         </Routes>
-        
+
       </div>
     </Router>
   );

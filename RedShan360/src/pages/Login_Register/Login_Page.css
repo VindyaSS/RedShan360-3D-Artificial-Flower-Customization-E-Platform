@@ -133,7 +133,7 @@
 .login-visual-panel {
   flex: 1;
   position: relative;
-  background-image: url('/peonies_vase.png');
+  background-image: url('/images/peonies_vase.png');
   background-size: cover;
   background-position: center;
   min-height: 600px;

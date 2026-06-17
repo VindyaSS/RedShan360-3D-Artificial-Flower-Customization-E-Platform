@@ -40,8 +40,8 @@ export default function LoginPage() {
         <div className="header-left">
           <a href="/" className="logo-text">RedShan360</a>
         </div>
-        
-        <nav className="header-nav">
+
+        {/*<nav className="header-nav">
           <a href="/" className="nav-link">Home</a>
           <a href="/shop" className="nav-link">Shop</a>
           <a href="/customization" className="nav-link">Customization</a>
@@ -85,7 +85,7 @@ export default function LoginPage() {
               </svg>
             </button>
           </div>
-        </div>
+        </div>*/}
       </header>
 
       {/* MAIN SPLIT SECTION */}
@@ -194,10 +194,10 @@ export default function LoginPage() {
               <button className="social-btn" id="btn-google-login">
                 <span className="social-btn-logo">
                   <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7l2.78 2.16c1.63-1.5 2.57-3.71 2.57-6.3a8.1 8.1 0 0 0-.21-2.19z"/>
-                    <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.78-2.16c-.77.52-1.76.83-2.92.83-2.25 0-4.15-1.52-4.83-3.57L1.58 13.06A8.99 8.99 0 0 0 9 18z"/>
-                    <path fill="#FBBC05" d="M4.17 10.92A5.39 5.39 0 0 1 3.86 9c0-.67.11-1.32.31-1.92L1.31 5.3A8.99 8.99 0 0 0 1.31 12.7l2.86-1.78z"/>
-                    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.4C13.46.97 11.43 0 9 0 5.46 0 2.45 2.03 1.31 5.3l2.86 1.78C4.85 5.1 6.75 3.58 9 3.58z"/>
+                    <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7l2.78 2.16c1.63-1.5 2.57-3.71 2.57-6.3a8.1 8.1 0 0 0-.21-2.19z" />
+                    <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.78-2.16c-.77.52-1.76.83-2.92.83-2.25 0-4.15-1.52-4.83-3.57L1.58 13.06A8.99 8.99 0 0 0 9 18z" />
+                    <path fill="#FBBC05" d="M4.17 10.92A5.39 5.39 0 0 1 3.86 9c0-.67.11-1.32.31-1.92L1.31 5.3A8.99 8.99 0 0 0 1.31 12.7l2.86-1.78z" />
+                    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.4C13.46.97 11.43 0 9 0 5.46 0 2.45 2.03 1.31 5.3l2.86 1.78C4.85 5.1 6.75 3.58 9 3.58z" />
                   </svg>
                 </span>
                 Google
@@ -205,7 +205,7 @@ export default function LoginPage() {
               <button className="social-btn" id="btn-apple-login">
                 <span className="social-btn-logo">
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14.6 9.4c0-2.3 1.9-3.4 1.9-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.8-3.5.8s-1.9-.8-3.1-.8c-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.5.8 1.1 1.7 2.4 2.9 2.3 1.1 0 1.6-.7 2.9-.7s1.8.7 2.9.7c1.2 0 2-.1 2.8-1.2.9-1.3 1.2-2.6 1.3-2.7 0 0-2.4-.9-2.4-3.7zM12.1 2.5c.6-.7 1-1.8.9-2.8-.9 0-2 .6-2.6 1.3-.5.6-.9 1.7-.8 2.7 1 .1 1.9-.5 2.5-1.2z"/>
+                    <path d="M14.6 9.4c0-2.3 1.9-3.4 1.9-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.8-3.5.8s-1.9-.8-3.1-.8c-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.5.8 1.1 1.7 2.4 2.9 2.3 1.1 0 1.6-.7 2.9-.7s1.8.7 2.9.7c1.2 0 2-.1 2.8-1.2.9-1.3 1.2-2.6 1.3-2.7 0 0-2.4-.9-2.4-3.7zM12.1 2.5c.6-.7 1-1.8.9-2.8-.9 0-2 .6-2.6 1.3-.5.6-.9 1.7-.8 2.7 1 .1 1.9-.5 2.5-1.2z" />
                   </svg>
                 </span>
                 Apple
@@ -242,8 +242,8 @@ export default function LoginPage() {
           </div>
           <div className="secure-checkout-badge">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="m9 11 2 2 4-4"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="m9 11 2 2 4-4" />
             </svg>
             Secure Checkout
           </div>

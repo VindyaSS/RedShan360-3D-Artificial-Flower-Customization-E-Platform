@@ -16,6 +16,10 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
+  const mobileProfileDropdownRef = useRef(null);
 
   // Synchronize cart and wishlist counts
   const updateCounts = () => {
@@ -89,6 +93,28 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Click outside listener for profile dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+      if (mobileProfileDropdownRef.current && !mobileProfileDropdownRef.current.contains(event.target)) {
+        setIsMobileProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setIsProfileOpen(false);
+    setIsMobileProfileOpen(false);
+    setMobileMenuOpen(false);
+    navigate('/login');
+  };
 
   const handleSearchResultClick = (productId) => {
     setSearchQuery('');
@@ -250,9 +276,28 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             </button>
 
             {/* Profile Button */}
-            <button className="p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300" aria-label="person">
-              <User size={18} className="text-[#1a1a1a]" />
-            </button>
+            <div ref={profileDropdownRef} className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className={`p-2 rounded-full transition-colors duration-300 ${
+                  isProfileOpen ? 'bg-[#f4f0ed]' : 'hover:bg-[#f4f0ed]'
+                }`}
+                aria-label="person"
+              >
+                <User size={18} className="text-[#1a1a1a]" />
+              </button>
+
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-1 text-left animate-fade-in">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-[#1a1a1a] hover:bg-[#f4f0ed] transition-colors duration-200 font-medium"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Hamburger Menu Trigger */}
@@ -321,9 +366,28 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 )}
               </button>
 
-              <button className="p-2 rounded-full bg-[#f4f0ed]" aria-label="Profile">
-                <User size={18} />
-              </button>
+              <div ref={mobileProfileDropdownRef} className="relative">
+                <button
+                  onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
+                  className={`p-2 rounded-full bg-[#f4f0ed] transition-colors duration-300 ${
+                    isMobileProfileOpen ? 'bg-[#eadeda]' : ''
+                  }`}
+                  aria-label="Profile"
+                >
+                  <User size={18} />
+                </button>
+
+                {isMobileProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-1 text-left animate-fade-in">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-[#1a1a1a] hover:bg-[#f4f0ed] transition-colors duration-200 font-medium"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
