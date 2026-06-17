@@ -15,6 +15,7 @@ import AboutPage from './pages/GuestUser/AboutPage';
 import ContactPage from './pages/GuestUser/ContactPage';
 import AdminUserManagement from "./pages/Admin/AdminUserManagement";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminOrderManagement from "./pages/admin/AdminOrderManagement";
 
 
 
@@ -67,9 +68,12 @@ function App() {
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
+
+          <Route path="/guestUserDashboard" element={<GuestUserDashboard/>}/>
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/adminUserManagement" element={<AdminUserManagement />} />
+          <Route path="/adminOrderManagement" element={<AdminOrderManagement />} />
+
 
 
 
