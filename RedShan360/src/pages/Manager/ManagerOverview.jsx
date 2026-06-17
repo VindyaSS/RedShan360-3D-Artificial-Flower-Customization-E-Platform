@@ -152,7 +152,7 @@ export default function ManagerOverview() {
                                 Mrecentorders={Mrecentorders}
                             />
                         </div>
-                        
+
                         <div className="tabs-container" style={{ padding: "24px", flex: 1 }}>
                             <h3 style={{
                                 fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -161,7 +161,7 @@ export default function ManagerOverview() {
                                 color: "#1a1a1a",
                                 marginBottom: "16px"
                             }}>
-                                Employees working on Orders
+                                Employees Working On Orders
                             </h3>
 
                             <MworkingEmployeeTable
