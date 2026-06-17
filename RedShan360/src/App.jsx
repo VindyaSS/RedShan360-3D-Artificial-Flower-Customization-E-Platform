@@ -41,6 +41,8 @@ import MOCards from './components/managerComponent/MOrderCard';
 
 import ManagerOverview from './pages/Manager/ManagerOverview';
 import MOrderGraph from './components/managerComponent/MOrderGraph';
+import MmanageEmployees from './pages/Manager/ManageEmployees';
+import MPreOrderModal from './components/managerComponent/MPreOrderModal';
 {/* Rout try by Vindya-end */ }
 
 
@@ -92,6 +94,8 @@ function App() {
           <Route path="/mOCards" element={<MOCards />} />
           <Route path="/managerOverview" element={<ManagerOverview />} />
           <Route path="/mOrderGraph" element={<MOrderGraph />} />
+          <Route path="/mManageEmployees" element={<MmanageEmployees />} />
+          <Route path="/mPreOrderModal" element={<MPreOrderModal />} />
 
 
           {/* Rout try by Vindya-end */}
