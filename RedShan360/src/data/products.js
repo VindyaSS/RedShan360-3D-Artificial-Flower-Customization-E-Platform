@@ -127,7 +127,7 @@ export const products = [
     title: 'Sakura Spring Bloom',
     category: 'silk',
     color: 'pink',
-    type: 'single-stem',
+    type: 'bouquet',
     subtitle: 'Spring Silk Collection',
     price: 'Rs 1500.00',
     numericPrice: 1500,

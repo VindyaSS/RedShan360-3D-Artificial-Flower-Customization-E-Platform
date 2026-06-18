@@ -48,10 +48,17 @@ const ProductDetails = () => {
       setQuantity(1);
 
       // ✅ SET MODEL PATH HERE
+      const modelMapping = {
+        "Pink Roses Bouquet": "/models/Pinkrosesboquet.glb",
+        "Red Chrysanthemums": "/models/redChrysanthemums.glb",
+        "Purple Carnation": "/models/purplrcarnation.glb",
+        "Pink Chrysanthemums": "/models/pinkChrysanthemums.glb",
+        "Lily Headdress": "/models/LilyHeadDress.glb",
+        "Red Rose": "/models/redrose.glb",
+        "Pink Lily": "/models/Liliflowerpink.glb"
+      };
       setModelPath(
-        currentProduct?.title === "Red Rose"
-          ? "/models/redrose.glb"
-          : currentProduct?.model || "/models/redrose.glb"
+        modelMapping[currentProduct?.title] || currentProduct?.model || "/models/redrose.glb"
       );
 
       // Load reviews

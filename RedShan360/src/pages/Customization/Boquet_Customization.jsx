@@ -23,35 +23,17 @@ import {
   Sparkles
 } from 'lucide-react';
 
-// Predefined stems database with rich details and Unsplash image URLs
+// Predefined stems database with rich details and local/system images
 const STEMS_DATABASE = [
-  {
-    id: 'crimson-rose',
-    name: 'Crimson Rose',
+  ...products.filter(p => p.type === 'single-stem').map(p => ({
+    id: p.id.toString(),
+    name: p.title,
     category: 'premium-blooms',
-    price: 24.00,
-    image: 'https://images.unsplash.com/photo-1550950158-d0d960dff51b?auto=format&fit=crop&w=150&h=150&q=80',
-    color: '#a82c2c',
-    description: 'Deep red, layered classical velvet rose'
-  },
-  {
-    id: 'blushing-peony',
-    name: 'Blushing Peony',
-    category: 'premium-blooms',
-    price: 18.00,
-    image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=150&h=150&q=80',
-    color: '#f0cbd0',
-    description: 'Delicate light pink ruffled peony blossom'
-  },
-  {
-    id: 'ethereal-orchid',
-    name: 'Ethereal Orchid',
-    category: 'premium-blooms',
-    price: 32.00,
-    image: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=150&h=150&q=80',
-    color: '#f5e6f5',
-    description: 'Graceful white and amethyst cascading orchid'
-  },
+    price: p.numericPrice ? p.numericPrice / 100 : 20.00,
+    image: p.image,
+    color: p.colors[0]?.hex || '#a82c2c',
+    description: p.description
+  })),
   {
     id: 'spiral-handtied',
     name: 'Hand-tied Spiral Style',
@@ -789,9 +771,9 @@ export default function BoquetCustomization() {
                         const dbItem = STEMS_DATABASE.find(s => s.id === selection.stemId);
                         if (!dbItem || dbItem.category !== 'premium-blooms') return null;
 
-                        const isRose = dbItem.id === 'crimson-rose';
-                        const isPeony = dbItem.id === 'blushing-peony';
-                        const isOrchid = dbItem.id === 'ethereal-orchid';
+                        const isRose = dbItem.id === 'crimson-rose' || dbItem.name?.toLowerCase().includes('rose') || dbItem.name?.toLowerCase().includes('sakura');
+                        const isPeony = dbItem.id === 'blushing-peony' || dbItem.name?.toLowerCase().includes('chrysanthemum') || dbItem.name?.toLowerCase().includes('carnation') || dbItem.name?.toLowerCase().includes('peony');
+                        const isOrchid = dbItem.id === 'ethereal-orchid' || dbItem.name?.toLowerCase().includes('orchid') || dbItem.name?.toLowerCase().includes('lily') || dbItem.name?.toLowerCase().includes('headdress');
                         const color = dbItem.color;
 
                         return Array.from({ length: selection.quantity }).map((_, fIdx) => {
