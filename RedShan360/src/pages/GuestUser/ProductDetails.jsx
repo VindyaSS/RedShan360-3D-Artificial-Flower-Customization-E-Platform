@@ -49,7 +49,7 @@ const ProductDetails = () => {
 
       // ✅ SET MODEL PATH HERE
       setModelPath(
-        currentProduct?.title === "Velvet Rose Trio"
+        currentProduct?.title === "Red Rose"
           ? "/models/redrose.glb"
           : currentProduct?.model || "/models/redrose.glb"
       );
@@ -232,7 +232,7 @@ const ProductDetails = () => {
                     }`}
                   aria-label={`View gallery image ${index + 1}`}
                 >
-                  <img src={thumb} alt="" className="w-full h-full object-cover" />
+                  <img src={thumb} alt="" className="w-full h-full object-contain" />
                 </button>
               ))}
             </div>
@@ -243,7 +243,7 @@ const ProductDetails = () => {
                 <img
                   src={activeImage}
                   alt={product.title}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] animate-fade-in"
+                  className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.03] animate-fade-in"
                 />
 
                 {/* Favorite toggle overlay for mobile */}

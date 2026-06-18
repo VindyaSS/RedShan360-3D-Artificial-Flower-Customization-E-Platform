@@ -326,7 +326,7 @@ const Shop = () => {
                         <img
                           src={product.image}
                           alt={product.title}
-                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                          className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                           loading="lazy"
                         />
                       </Link>
