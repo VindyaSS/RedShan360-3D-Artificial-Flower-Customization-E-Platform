@@ -11,6 +11,8 @@ export default function BouquetScene({
   wrappingId = null,
   ribbonId = null,
   selectedFlowerId = null,
+  selectedSwapFlowerId = null,
+  isSwapMode = false,
   onSelectFlower = null,
   onUpdateFlowerTransform = null,
   stemsDatabase = []
@@ -28,6 +30,8 @@ export default function BouquetScene({
             key={flower.id}
             flower={flower}
             isSelected={isSelected}
+            isSwapFirst={flower.id === selectedSwapFlowerId}
+            isSwapMode={isSwapMode}
             onSelectFlower={onSelectFlower}
             onUpdateFlowerTransform={onUpdateFlowerTransform}
             stemsDatabase={stemsDatabase}

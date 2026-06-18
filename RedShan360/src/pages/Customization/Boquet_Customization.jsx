@@ -22,7 +22,8 @@ import {
   Calendar, 
   Truck,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Shuffle
 } from 'lucide-react';
 
 // Predefined stems database with rich details and local/system images
@@ -191,6 +192,67 @@ export default function BoquetCustomization() {
   const [toastMessage, setToastMessage] = useState('');
   const [flowers, setFlowers] = useState([]);
   const [selectedFlowerId, setSelectedFlowerId] = useState(null);
+  const [isSwapMode, setIsSwapMode] = useState(false);
+  const [selectedSwapFlowerId, setSelectedSwapFlowerId] = useState(null);
+
+  // Swap locations of two flowers
+  const swapFlowers = (id1, id2) => {
+    setFlowers(prevFlowers => {
+      const f1 = prevFlowers.find(f => f.id === id1);
+      const f2 = prevFlowers.find(f => f.id === id2);
+
+      if (!f1 || !f2) return prevFlowers;
+
+      const updated = prevFlowers.map(f => {
+        if (f.id === id1) {
+          return {
+            ...f,
+            position: [...f2.position],
+            rotation: [...f2.rotation],
+            scale: [...f2.scale],
+            isManuallyEdited: true // Lock positions post-swap
+          };
+        }
+        if (f.id === id2) {
+          return {
+            ...f,
+            position: [...f1.position],
+            rotation: [...f1.rotation],
+            scale: [...f1.scale],
+            isManuallyEdited: true // Lock positions post-swap
+          };
+        }
+        return f;
+      });
+
+      triggerToast('Flowers swapped successfully!');
+      setSelectedSwapFlowerId(null);
+      return updated;
+    });
+  };
+
+  // Selection coordination handler for standard and swap modes
+  const handleSelectFlower = (flowerId) => {
+    if (!flowerId) {
+      if (!isSwapMode) setSelectedFlowerId(null);
+      return;
+    }
+
+    if (isSwapMode) {
+      if (!selectedSwapFlowerId) {
+        setSelectedSwapFlowerId(flowerId);
+        triggerToast('Select second flower to swap');
+      } else {
+        if (selectedSwapFlowerId === flowerId) {
+          setSelectedSwapFlowerId(null);
+        } else {
+          swapFlowers(selectedSwapFlowerId, flowerId);
+        }
+      }
+    } else {
+      setSelectedFlowerId(flowerId);
+    }
+  };
 
   // Update position and rotation for manually edited flowers
   const handleUpdateFlowerTransform = (flowerId, position, rotation) => {
@@ -364,6 +426,8 @@ export default function BoquetCustomization() {
     setSelectedStems([]);
     setFlowers([]);
     setSelectedFlowerId(null);
+    setIsSwapMode(false);
+    setSelectedSwapFlowerId(null);
     setRotationDegree(0);
     setZoomLevel('normal');
     triggerToast('Interactive canvas has been reset');
@@ -418,6 +482,20 @@ export default function BoquetCustomization() {
       image: '/images/peonies_vase.png',
       selectedColor: selectedStemsDetails || 'Custom Curation',
       quantity: 1,
+      // Save full custom 3D bouquet configuration!
+      bouquetDesign: {
+        flowers: flowers.map(f => ({
+          flowerId: f.id,
+          stemId: f.stemId,
+          position: f.position,
+          rotation: f.rotation,
+          scale: f.scale,
+          isManuallyEdited: f.isManuallyEdited
+        })),
+        style: selectedStyle,
+        wrappingId,
+        ribbonId
+      }
     };
 
     cartList.push(customBouquetItem);
@@ -739,7 +817,9 @@ export default function BoquetCustomization() {
                 ribbonId={ribbonId}
                 stemsDatabase={STEMS_DATABASE}
                 selectedFlowerId={selectedFlowerId}
-                onSelectFlower={setSelectedFlowerId}
+                selectedSwapFlowerId={selectedSwapFlowerId}
+                isSwapMode={isSwapMode}
+                onSelectFlower={handleSelectFlower}
                 onUpdateFlowerTransform={handleUpdateFlowerTransform}
               />
             </div>
@@ -762,6 +842,32 @@ export default function BoquetCustomization() {
                 aria-label="Toggle zoom"
               >
                 {zoomLevel === 'zoomed' ? <ZoomOut size={16} /> : <ZoomIn size={16} />}
+              </button>
+
+              <button 
+                onClick={() => {
+                  setIsSwapMode(prev => {
+                    const next = !prev;
+                    if (next) {
+                      setSelectedFlowerId(null); // Clear normal selection
+                      setSelectedSwapFlowerId(null);
+                      triggerToast('Swap Mode Enabled: Click two flowers to swap');
+                    } else {
+                      setSelectedSwapFlowerId(null);
+                      triggerToast('Swap Mode Disabled');
+                    }
+                    return next;
+                  });
+                }}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                  isSwapMode 
+                    ? 'bg-[#563c37] text-white shadow-md' 
+                    : 'bg-transparent text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9]'
+                }`}
+                title="Swap flower positions"
+                aria-label="Swap flower positions"
+              >
+                <Shuffle size={16} />
               </button>
 
               <button 
