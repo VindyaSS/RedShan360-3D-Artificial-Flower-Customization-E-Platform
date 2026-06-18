@@ -1,17 +1,22 @@
 // Local Image Imports
 import crimsonSilkPeony from '../assets/crimson_silk_peony.jpg';
-import moonlightVelvetTulip from '../assets/moonlight_velvet_tulip.jpg';
-import etherealPampasCloud from '../assets/ethereal_pampas_cloud.jpg';
+import redChrysanthemums from '../assets/red_chrysanthemum.png';
 import sakuraSpringBloom from '../assets/sakura_spring_bloom.jpg';
-import architecturalProtea from '../assets/architectural_protea.jpg';
 import mauveRadianceDahlia from '../assets/mauve_radiance_dahlia.jpg';
 import serenityWhite from '../assets/serenity_white.jpg';
 import wildHearth from '../assets/wild_hearth.jpg';
+import redRose from '../assets/red_rose.png';
+import purplecarnation
+  from '../assets/purple_carnation.png';
+import pinkChrysanthemums from '../assets/pink_chrysanthemum.png';
+import lilyHeaddress from '../assets/lily_headdress.jpg';
+import pinkLilyStem from '../assets/pink_lily.jpg';
+import pinkRosesBouquet from '../assets/pink_roses_bouquet.png';
 
 export const products = [
   {
     id: 1,
-    title: 'Everlasting Silk Peony',
+    title: 'Pink Roses Bouquet',
     category: 'silk',
     color: 'pink',
     type: 'bouquet',
@@ -20,11 +25,9 @@ export const products = [
     numericPrice: 15000,
     rating: 4.8,
     reviewCount: 124,
-    image: crimsonSilkPeony,
+    image: pinkRosesBouquet,
     thumbnails: [
-      crimsonSilkPeony,
-      '/images/peonies_vase.png',
-      '/images/cat_peonies.png'
+      pinkRosesBouquet
     ],
     description: 'Crafted with surgical precision from the finest premium silk, our Everlasting Peony captures the ethereal beauty of nature without the impermanence. Featuring hand-painted details and flexible architectural stems.',
     colors: [
@@ -55,7 +58,7 @@ export const products = [
   },
   {
     id: 2,
-    title: 'Moonlight Velvet Tulip',
+    title: 'Red Chrysanthemums',
     category: 'velvet',
     color: 'white',
     type: 'bouquet',
@@ -64,11 +67,9 @@ export const products = [
     numericPrice: 11420,
     rating: 4.8,
     reviewCount: 86,
-    image: moonlightVelvetTulip,
+    image: redChrysanthemums,
     thumbnails: [
-      moonlightVelvetTulip,
-      serenityWhite,
-      '/images/cat_lilies.png'
+      redChrysanthemums
     ],
     description: 'An exquisite arrangement of velvet-textured tulips, hand-stitched for an elegant velvet finish. Designed to reflect soft moonlight in high-end spaces.',
     colors: [
@@ -90,20 +91,18 @@ export const products = [
   },
   {
     id: 3,
-    title: 'Ethereal Pampas Cloud',
+    title: 'Purple Carnation',
     category: 'dried',
     color: 'beige',
     type: 'arrangement',
     subtitle: 'Everlasting Dried Flora',
-    price: 'Rs 9800.00',
-    numericPrice: 9800,
+    price: 'Rs 800.00',
+    numericPrice: 800,
     rating: 5.0,
     reviewCount: 42,
-    image: etherealPampasCloud,
+    image: purplecarnation,
     thumbnails: [
-      etherealPampasCloud,
-      wildHearth,
-      '/images/visualizer_360.png'
+      purplecarnation
     ],
     description: 'A whimsical cloud of natural dried pampas grass and preserved botanicals, styled in an organic, rustic-modern fashion. Perfect for boho-chic decor.',
     colors: [
@@ -111,7 +110,7 @@ export const products = [
       { name: 'Natural Sand', hex: '#c7b1a9' }
     ],
     features: ['Real Preserved Flora', 'Sustainable Fibers'],
-    has360: false,
+    has360: true,
     reviews: [
       {
         id: 301,
@@ -160,20 +159,18 @@ export const products = [
   },
   {
     id: 5,
-    title: 'Architectural Protea',
-    category: 'vases',
-    color: 'burgundy',
+    title: 'Pink Chrysanthemums',
+    category: 'velvet',
+    color: 'pink',
     type: 'centerpiece',
     subtitle: 'Signature Single Stem',
     price: 'Rs 2750.00',
     numericPrice: 2750,
     rating: 4.9,
     reviewCount: 56,
-    image: architecturalProtea,
+    image: pinkChrysanthemums,
     thumbnails: [
-      architecturalProtea,
-      mauveRadianceDahlia,
-      '/images/cat_orchids.png'
+      pinkChrysanthemums
     ],
     description: 'An exotic protea bloom with structural leaves and a bold burgundy color palette, making it a dramatic centerpiece for minimalist styling.',
     colors: [
@@ -181,7 +178,7 @@ export const products = [
       { name: 'Olive Green', hex: '#8c8d7b' }
     ],
     features: ['Unique Exotic Sculpting', 'Global Shipping'],
-    has360: false,
+    has360: true,
     reviews: [
       {
         id: 501,
@@ -230,7 +227,7 @@ export const products = [
   },
   {
     id: 7,
-    title: 'Silk Orchid Stem',
+    title: 'Lily Headdress',
     category: 'silk',
     color: 'white',
     type: 'single-stem',
@@ -239,18 +236,16 @@ export const products = [
     numericPrice: 3420,
     rating: 4.9,
     reviewCount: 94,
-    image: '/images/cat_orchids.png',
+    image: lilyHeaddress,
     thumbnails: [
-      '/images/cat_orchids.png',
-      serenityWhite,
-      '/images/peonies_vase.png'
+      lilyHeaddress
     ],
     description: 'A minimalist white orchid stem presented in a modern matte black ceramic pot. Truly timeless and elegant.',
     colors: [
       { name: 'Pure White', hex: '#ffffff' }
     ],
     features: ['Ceramic Pot Included', 'UV Resistant'],
-    has360: false,
+    has360: true,
     reviews: [
       {
         id: 701,
@@ -264,7 +259,7 @@ export const products = [
   },
   {
     id: 8,
-    title: 'Velvet Rose Trio',
+    title: 'Red Rose',
     category: 'velvet',
     color: 'burgundy',
     type: 'bouquet',
@@ -273,11 +268,9 @@ export const products = [
     numericPrice: 6500,
     rating: 4.8,
     reviewCount: 112,
-    image: '/images/roses_vase.png',
+    image: redRose,
     thumbnails: [
-      '/images/roses_vase.png',
-      crimsonSilkPeony,
-      '/images/peonies_vase.png'
+      redRose
     ],
     description: 'Three long-stemmed velvet roses in a rich crimson hue, meticulously detailed to represent real fresh-cut roses.',
     colors: [
@@ -332,7 +325,7 @@ export const products = [
   },
   {
     id: 10,
-    title: 'Imperial Magnolia',
+    title: 'Pink Lily',
     category: 'silk',
     color: 'white',
     type: 'single-stem',
@@ -341,10 +334,9 @@ export const products = [
     numericPrice: 7800,
     rating: 4.9,
     reviewCount: 63,
-    image: serenityWhite,
+    image: pinkLilyStem,
     thumbnails: [
-      serenityWhite,
-      '/images/cat_lilies.png'
+      pinkLilyStem
     ],
     description: 'An impressive single-stem magnolia bloom with thick, waxy white petals and realistic woody branch detailing.',
     colors: [
