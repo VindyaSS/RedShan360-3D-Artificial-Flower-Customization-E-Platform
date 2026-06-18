@@ -20,6 +20,7 @@ export const products = [
     category: 'silk',
     color: 'pink',
     type: 'bouquet',
+    subcategory: 'anniversary',
     subtitle: 'The Bloom Collection',
     price: 'Rs 15000.00',
     numericPrice: 15000,
@@ -128,6 +129,7 @@ export const products = [
     category: 'silk',
     color: 'pink',
     type: 'bouquet',
+    subcategory: 'birthday',
     subtitle: 'Spring Silk Collection',
     price: 'Rs 1500.00',
     numericPrice: 1500,
@@ -196,6 +198,7 @@ export const products = [
     category: 'velvet',
     color: 'grey',
     type: 'bouquet',
+    subcategory: 'convocation',
     subtitle: 'Velvet Bloom Bouquet',
     price: 'Rs 4110.00',
     numericPrice: 4110,
@@ -355,5 +358,74 @@ export const products = [
         text: 'The size of the bloom is majestic. Looks beautiful on my dining room console.'
       }
     ]
+  },
+  {
+    id: 11,
+    title: 'Red Romance Bouquet',
+    category: 'silk',
+    color: 'burgundy',
+    type: 'bouquet',
+    subcategory: 'anniversary',
+    subtitle: 'Velvet Love Series',
+    price: 'Rs 9500.00',
+    numericPrice: 9500,
+    rating: 4.9,
+    reviewCount: 88,
+    image: redRose,
+    thumbnails: [redRose],
+    description: 'An elegant arrangement of crimson red roses crafted from premium velvet, perfectly arranged to express timeless love and romance.',
+    colors: [
+      { name: 'Crimson Red', hex: '#6b3b3b' },
+      { name: 'Pastel Pink', hex: '#e8b4b8' }
+    ],
+    features: ['Luxury Packaging', 'Velvet Roses'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 12,
+    title: 'Golden Celebration Bouquet',
+    category: 'silk',
+    color: 'yellow',
+    type: 'bouquet',
+    subcategory: 'birthday',
+    subtitle: 'Celebration Series',
+    price: 'Rs 12000.00',
+    numericPrice: 12000,
+    rating: 4.7,
+    reviewCount: 45,
+    image: pinkRosesBouquet,
+    thumbnails: [pinkRosesBouquet],
+    description: 'A cheerful celebration arrangement combining hand-painted silk flowers in bright gold and pink tones, ideal for birthdays and happy occasions.',
+    colors: [
+      { name: 'Pale Yellow', hex: '#fbfbe3' },
+      { name: 'Soft White', hex: '#ffffff' }
+    ],
+    features: ['Gift Card Included', 'Vibrant Aesthetics'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 13,
+    title: 'Graduation Glory Bouquet',
+    category: 'silk',
+    color: 'white',
+    type: 'bouquet',
+    subcategory: 'convocation',
+    subtitle: 'Achievement Series',
+    price: 'Rs 8500.00',
+    numericPrice: 8500,
+    rating: 4.8,
+    reviewCount: 62,
+    image: serenityWhite,
+    thumbnails: [serenityWhite],
+    description: 'A stately bouquet of pure white orchids and lilies symbolizing honor, success, and high achievements. Perfect for graduation ceremonies.',
+    colors: [
+      { name: 'Soft White', hex: '#ffffff' },
+      { name: 'Ivory White', hex: '#fcf9f8' }
+    ],
+    features: ['Sustainable Fibers', 'UV Protection'],
+    has360: false,
+    reviews: []
   }
 ];
