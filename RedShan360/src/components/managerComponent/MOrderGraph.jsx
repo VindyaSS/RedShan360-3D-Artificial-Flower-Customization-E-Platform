@@ -57,16 +57,26 @@ export default function MOrderGraph() {
                 labels: {
                     color: "#555",
                     font: {
-                        family: "Arial",
+                        family: "'Plus Jakarta Sans', sans-serif",
                         size: 12,
                         weight: "600",
                     },
                 },
             },
             tooltip: {
-                backgroundColor: "#1a1a1a",
+                backgroundColor: "#744F51",
+                titleFont: {
+                    family: "'Plus Jakarta Sans', sans-serif",
+                    size: 13,
+                    weight: "600",
+                },
+                bodyFont: {
+                    family: "'Plus Jakarta Sans', sans-serif",
+                    size: 12,
+                },
                 padding: 12,
                 cornerRadius: 8,
+                displayColors: false,
             },
         },
         scales: {
@@ -76,6 +86,11 @@ export default function MOrderGraph() {
                 },
                 ticks: {
                     color: "#777",
+                    font: {
+                        family: "'Plus Jakarta Sans', sans-serif",
+                        size: 11,
+                        weight: "500",
+                    },
                 },
             },
             y: {
@@ -84,14 +99,27 @@ export default function MOrderGraph() {
                 },
                 ticks: {
                     color: "#777",
+                    font: {
+                        family: "'Plus Jakarta Sans', sans-serif",
+                        size: 11,
+                        weight: "500",
+                    },
                 },
             },
         },
     };
 
     return (
-        <div style={{ padding: "20px" }}>
-            <h3 style={{ marginBottom: "10px", fontWeight: "bold" }}>Order Analytics (Monthly)</h3>
+        <div className="tabs-container" style={{ padding: "24px" }}>
+            <h3 style={{
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontSize: "16px",
+                fontWeight: "700",
+                color: "#1a1a1a",
+                marginBottom: "16px"
+            }}>
+                Order Analytics (Monthly)
+            </h3>
 
             {/* IMPORTANT: fixed height container */}
             <div style={{ height: "350px", width: "100%" }}>
