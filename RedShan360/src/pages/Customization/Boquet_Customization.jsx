@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { products } from '../../data/products';
+import { arrangeBouquet, relaxOverlaps } from '../../components/bouquet/LayoutEngine';
+import BouquetCanvas from '../../components/bouquet/BouquetCanvas';
 import CartDrawer from '../GuestUser/components/CartDrawer';
 import { 
   Search, 
@@ -187,6 +189,125 @@ export default function BoquetCustomization() {
   const [rotationDegree, setRotationDegree] = useState(0);
   const [showFlash, setShowFlash] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [flowers, setFlowers] = useState([]);
+  const [selectedFlowerId, setSelectedFlowerId] = useState(null);
+
+  // Update position and rotation for manually edited flowers
+  const handleUpdateFlowerTransform = (flowerId, position, rotation) => {
+    setFlowers(prevFlowers => {
+      const updated = prevFlowers.map(f => {
+        if (f.id === flowerId) {
+          return {
+            ...f,
+            position,
+            rotation,
+            isManuallyEdited: true
+          };
+        }
+        return f;
+      });
+      return relaxOverlaps(updated, STEMS_DATABASE, 10);
+    });
+  };
+
+  // Compute selected options from selectedStems array
+  const selectedStyle = useMemo(() => {
+    const hasSpiral = selectedStems.some(s => s.stemId === 'spiral-handtied');
+    return hasSpiral ? 'spiral-handtied' : 'classic-dome';
+  }, [selectedStems]);
+
+  const wrappingId = useMemo(() => {
+    const wrap = selectedStems.find(s => {
+      const dbItem = STEMS_DATABASE.find(item => item.id === s.stemId);
+      return dbItem?.category === 'wrapping-accents' && s.stemId !== 'velvet-ribbon';
+    });
+    return wrap ? wrap.stemId : null;
+  }, [selectedStems]);
+
+  const ribbonId = useMemo(() => {
+    const hasRibbon = selectedStems.some(s => s.stemId === 'velvet-ribbon');
+    return hasRibbon ? 'velvet-ribbon' : null;
+  }, [selectedStems]);
+
+  // Sync selectedStems quantities to 3D individual flowers array
+  useEffect(() => {
+    setFlowers((prevFlowers) => {
+      let updatedFlowers = [...prevFlowers];
+      let needsRearrange = false;
+
+      // Filter out non-flower selections from stems database (exclude styles/ribbons/wraps)
+      const validStems = selectedStems.filter(s => {
+        const dbItem = STEMS_DATABASE.find(item => item.id === s.stemId);
+        return dbItem && dbItem.category !== 'bouquet-styles' && dbItem.category !== 'wrapping-accents';
+      });
+
+      // 1. Add missing flower instances
+      validStems.forEach((item) => {
+        const currentCount = updatedFlowers.filter(f => f.stemId === item.stemId).length;
+        const diff = item.quantity - currentCount;
+        
+        if (diff > 0) {
+          for (let i = 0; i < diff; i++) {
+            updatedFlowers.push({
+              id: `${item.stemId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              stemId: item.stemId,
+              position: [0, 2.5, 0],
+              rotation: [0, 0, 0],
+              scale: [1, 1, 1],
+              isManuallyEdited: false
+            });
+          }
+          needsRearrange = true;
+        }
+      });
+
+      // 2. Remove excess flower instances
+      const targetQuantities = {};
+      validStems.forEach(item => {
+        targetQuantities[item.stemId] = item.quantity;
+      });
+
+      const groupedFlowers = {};
+      updatedFlowers.forEach(f => {
+        if (!groupedFlowers[f.stemId]) groupedFlowers[f.stemId] = [];
+        groupedFlowers[f.stemId].push(f);
+      });
+
+      Object.keys(groupedFlowers).forEach(stemId => {
+        const targetCount = targetQuantities[stemId] || 0;
+        const currentCount = groupedFlowers[stemId].length;
+        const diff = currentCount - targetCount;
+
+        if (diff > 0) {
+          // Prioritize removing non-manually edited ones
+          groupedFlowers[stemId].sort((a, b) => {
+            if (a.isManuallyEdited && !b.isManuallyEdited) return -1;
+            if (!a.isManuallyEdited && b.isManuallyEdited) return 1;
+            return 0;
+          });
+
+          for (let i = 0; i < diff; i++) {
+            const toRemove = groupedFlowers[stemId].pop();
+            updatedFlowers = updatedFlowers.filter(f => f.id !== toRemove.id);
+          }
+          needsRearrange = true;
+        }
+      });
+
+      // 3. Clear non-selected items from state
+      const validStemIds = validStems.map(s => s.stemId);
+      const preCleanupCount = updatedFlowers.length;
+      updatedFlowers = updatedFlowers.filter(f => validStemIds.includes(f.stemId));
+      if (updatedFlowers.length !== preCleanupCount) {
+        needsRearrange = true;
+      }
+
+      if (needsRearrange) {
+        return arrangeBouquet(updatedFlowers, selectedStyle, STEMS_DATABASE);
+      }
+      return updatedFlowers;
+    });
+  }, [selectedStems, selectedStyle]);
 
   // Search and filter stems
   const filteredStems = useMemo(() => {
@@ -241,6 +362,8 @@ export default function BoquetCustomization() {
   // Canvas Toolbar operations
   const handleReset = () => {
     setSelectedStems([]);
+    setFlowers([]);
+    setSelectedFlowerId(null);
     setRotationDegree(0);
     setZoomLevel('normal');
     triggerToast('Interactive canvas has been reset');
@@ -609,329 +732,16 @@ export default function BoquetCustomization() {
             </div>
 
             {/* 3D Viewport wrapper */}
-            <div className="flex-grow flex items-center justify-center relative select-none">
-              
-              {/* Silhouette template inside center (renders when canvas has no stems) */}
-              {selectedStems.length === 0 && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04]">
-                  <svg width="240" height="240" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#563c37]">
-                    <circle cx="50" cy="40" r="16" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3"/>
-                    <circle cx="38" cy="32" r="14" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3"/>
-                    <circle cx="62" cy="32" r="14" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3"/>
-                    <circle cx="32" cy="50" r="15" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3"/>
-                    <circle cx="68" cy="50" r="15" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3"/>
-                    <path d="M50 45 V 85" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
-                    <path d="M42 46 L 25 80" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
-                    <path d="M58 46 L 75 80" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
-                  </svg>
-                </div>
-              )}
-
-              {/* Graphic bouquet viewer */}
-              <div 
-                className={`relative flex items-center justify-center transition-transform duration-500 ease-out origin-center ${
-                  zoomLevel === 'zoomed'
-                    ? 'scale-[0.95] sm:scale-[1.25]'
-                    : 'scale-[0.75] sm:scale-100'
-                }`}
-              >
-                <div 
-                  className="relative flex flex-col items-center justify-center w-[300px] h-[380px]"
-                  style={{
-                    transform: `rotate(${rotationDegree}deg)`,
-                    transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)'
-                  }}
-                >
-                  
-                  {/* BOUQUET STYLES VISUALIZATIONS */}
-                  {selectedStems.map((selection, idx) => {
-                    const dbItem = STEMS_DATABASE.find(s => s.id === selection.stemId);
-                    if (!dbItem || dbItem.category !== 'bouquet-styles') return null;
-
-                    // Base design overlay depending on selected bouquet style structure
-                    const isClassicDome = dbItem.id === 'classic-dome';
-                    return (
-                      <div 
-                        key={selection.stemId}
-                        className={`absolute inset-0 flex items-center justify-center pointer-events-none opacity-40`}
-                      >
-                        {isClassicDome ? (
-                          // Semi-transparent classic dome grid guide
-                          <svg width="240" height="240" viewBox="0 0 100 100" fill="none" className="text-[#8c5e5e]">
-                            <path d="M10 50 A 40 40 0 0 1 90 50 Z" stroke="currentColor" strokeWidth="0.75" strokeDasharray="2 2" fill="none" />
-                            <path d="M20 50 A 30 30 0 0 1 80 50 Z" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" fill="none" />
-                          </svg>
-                        ) : (
-                          // Spiral structure guides
-                          <svg width="240" height="240" viewBox="0 0 100 100" fill="none" className="text-[#563c37]">
-                            <path d="M50 50 C 40 30, 20 20, 10 15" stroke="currentColor" strokeWidth="0.75" strokeDasharray="3 3"/>
-                            <path d="M50 50 C 60 30, 80 20, 90 15" stroke="currentColor" strokeWidth="0.75" strokeDasharray="3 3"/>
-                            <path d="M50 50 C 35 40, 15 45, 5 40" stroke="currentColor" strokeWidth="0.75" strokeDasharray="3 3"/>
-                            <path d="M50 50 C 65 40, 85 45, 95 40" stroke="currentColor" strokeWidth="0.75" strokeDasharray="3 3"/>
-                          </svg>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {/* STEMS LAYERS */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <svg width="280" height="280" viewBox="0 0 100 100" className="overflow-visible">
-                      
-                      {/* Foliage Back-Layer (Emerald Fern or Eucalyptus back leaves) */}
-                      {selectedStems.map((selection, idx) => {
-                        const dbItem = STEMS_DATABASE.find(s => s.id === selection.stemId);
-                        if (!dbItem || dbItem.category !== 'decorative-foliage') return null;
-
-                        const stemsCount = selection.quantity;
-                        const isFern = dbItem.id === 'emerald-fern';
-                        const color = dbItem.color;
-
-                        return Array.from({ length: Math.min(stemsCount * 2, 8) }).map((_, stemIdx) => {
-                          const angle = ((stemIdx * 45) + (isFern ? 15 : 30)) * Math.PI / 180;
-                          const length = 45;
-                          const x2 = 50 + length * Math.sin(angle);
-                          const y2 = 65 - length * Math.cos(angle);
-
-                          return (
-                            <g key={`${selection.stemId}-${stemIdx}`} className="opacity-80 transition-all duration-300">
-                              {/* Branch line */}
-                              <line x1="50" y1="65" x2={x2} y2={y2} stroke={color} strokeWidth="1.2" />
-                              
-                              {/* Foliage leaves */}
-                              {isFern ? (
-                                // Fern branching leaves
-                                Array.from({ length: 6 }).map((_, leafIdx) => {
-                                  const t = (leafIdx + 1) / 7;
-                                  const leafX = 50 + (length * t) * Math.sin(angle);
-                                  const leafY = 65 - (length * t) * Math.cos(angle);
-                                  const rot = (angle * 180 / Math.PI);
-                                  return (
-                                    <path 
-                                      key={leafIdx}
-                                      d="M -1,-2 C -3,-1 -3,1 -1,2 C 1,2 3,1 3,-1 Z"
-                                      transform={`translate(${leafX}, ${leafY}) rotate(${rot + 90}) scale(0.8)`}
-                                      fill={color}
-                                    />
-                                  );
-                                })
-                              ) : (
-                                // Eucalyptus round leaves
-                                Array.from({ length: 4 }).map((_, leafIdx) => {
-                                  const t = (leafIdx + 1) / 5;
-                                  const leafX = 50 + (length * t) * Math.sin(angle);
-                                  const leafY = 65 - (length * t) * Math.cos(angle);
-                                  return (
-                                    <circle 
-                                      key={leafIdx}
-                                      cx={leafX}
-                                      cy={leafY}
-                                      r="2.5"
-                                      fill={color}
-                                      stroke="#a4c4b6"
-                                      strokeWidth="0.3"
-                                    />
-                                  );
-                                })
-                              )}
-                            </g>
-                          );
-                        });
-                      })}
-
-                      {/* Main Flower Stems (Rose/Peony/Orchid stems pointing down) */}
-                      {selectedStems.map((selection) => {
-                        const dbItem = STEMS_DATABASE.find(s => s.id === selection.stemId);
-                        if (!dbItem || dbItem.category !== 'premium-blooms') return null;
-
-                        return Array.from({ length: selection.quantity }).map((_, fIdx) => {
-                          const shift = ((fIdx - (selection.quantity - 1) / 2) * 12);
-                          const x2 = 50 + shift;
-                          const y2 = 25 + Math.abs(shift) * 0.4;
-                          return (
-                            <line 
-                              key={`${selection.stemId}-${fIdx}`}
-                              x1="50" 
-                              y1="65" 
-                              x2={x2} 
-                              y2={y2} 
-                              stroke="#6a8270" 
-                              strokeWidth="1.5" 
-                            />
-                          );
-                        });
-                      })}
-                    </svg>
-                  </div>
-
-                  {/* FLOWER HEADS (Rendered dynamically in absolute position layers above stems) */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <svg width="280" height="280" viewBox="0 0 100 100" className="overflow-visible">
-                      {selectedStems.map((selection) => {
-                        const dbItem = STEMS_DATABASE.find(s => s.id === selection.stemId);
-                        if (!dbItem || dbItem.category !== 'premium-blooms') return null;
-
-                        const isRose = dbItem.id === 'crimson-rose' || dbItem.name?.toLowerCase().includes('rose') || dbItem.name?.toLowerCase().includes('sakura');
-                        const isPeony = dbItem.id === 'blushing-peony' || dbItem.name?.toLowerCase().includes('chrysanthemum') || dbItem.name?.toLowerCase().includes('carnation') || dbItem.name?.toLowerCase().includes('peony');
-                        const isOrchid = dbItem.id === 'ethereal-orchid' || dbItem.name?.toLowerCase().includes('orchid') || dbItem.name?.toLowerCase().includes('lily') || dbItem.name?.toLowerCase().includes('headdress');
-                        const color = dbItem.color;
-
-                        return Array.from({ length: selection.quantity }).map((_, fIdx) => {
-                          // Flower placement calculations: spiral layout based on index
-                          const order = fIdx + 1;
-                          const radius = order === 1 ? 0 : 18 + (order * 2.5);
-                          const angle = (order * 115) * Math.PI / 180;
-                          
-                          const fx = 50 + radius * Math.cos(angle);
-                          const fy = 42 + radius * Math.sin(angle);
-
-                          return (
-                            <g key={`${selection.stemId}-${fIdx}`} className="transition-all duration-500 scale-[1.1] hover:scale-[1.25]">
-                              {isRose && (
-                                // Crimson Rose detailed petal vector
-                                <g transform={`translate(${fx}, ${fy})`}>
-                                  <circle cx="0" cy="0" r="7.5" fill={color} />
-                                  <path d="M-6,-2 C-7,-5 -4,-8 0,-8 C4,-8 7,-5 6,-2 C5,1 2,2 0,2 C-2,2 -5,1 -6,-2 Z" fill="#8f1b1b" />
-                                  <path d="M-4,4 C-7,2 -7,-2 -4,-4 C-1,-6 4,-5 5,-2 C6,1 4,4 1,5 C-1,5 -3,5 -4,4 Z" fill="#751515" opacity="0.9" />
-                                  <path d="M-3,-1 C-3,-3 -1,-4 1,-4 C3,-4 4,-2 3,0 C2,1 1,2 0,2 C-1,2 -2,1 -3,-1 Z" fill="#b83c3c" />
-                                  <circle cx="0" cy="-0.5" r="1.5" fill="#e25c5c" />
-                                </g>
-                              )}
-                              {isPeony && (
-                                // Fluffy Blushing Peony
-                                <g transform={`translate(${fx}, ${fy})`}>
-                                  <circle cx="0" cy="0" r="9.5" fill={color} stroke="#fcdde1" strokeWidth="0.3" />
-                                  {/* Ruffled peony petals */}
-                                  {Array.from({ length: 8 }).map((_, petalIdx) => {
-                                    const rot = petalIdx * 45;
-                                    return (
-                                      <path 
-                                        key={petalIdx}
-                                        d="M -3.5,-5.5 C -5.5,-3.5 -5.5,-0.5 -3.5,1.5 C -1.5,2.5 1.5,1.5 2.5,-0.5 C 3.5,-2.5 2.5,-5.5 0.5,-6.5 Z"
-                                        transform={`rotate(${rot}) scale(0.85)`}
-                                        fill={color}
-                                        opacity="0.85"
-                                        stroke="#f2bcc4"
-                                        strokeWidth="0.2"
-                                      />
-                                    );
-                                  })}
-                                  <circle cx="0" cy="0" r="3.2" fill="#e89bb0" />
-                                  <circle cx="0" cy="0" r="1.5" fill="#fbe3b5" />
-                                </g>
-                              )}
-                              {isOrchid && (
-                                // Ethereal Orchid
-                                <g transform={`translate(${fx}, ${fy}) rotate(15)`}>
-                                  {/* Back sepals */}
-                                  <path d="M0,0 L-7,-7 C-9,-5 -9,-1 -6,2 Z" fill="#ffffff" stroke="#ecd7ec" strokeWidth="0.3" />
-                                  <path d="M0,0 L7,-7 C9,-5 9,-1 6,2 Z" fill="#ffffff" stroke="#ecd7ec" strokeWidth="0.3" />
-                                  <path d="M0,0 L0,9 C-3,11 3,11 0,9 Z" fill="#ffffff" stroke="#ecd7ec" strokeWidth="0.3" />
-                                  {/* Wing petals */}
-                                  <path d="M-1,-2 C-5,-5 -8,-2 -6,2 C-4,6 -1,4 -1,-2 Z" transform="rotate(-30)" fill={color} />
-                                  <path d="M1,-2 C5,-5 8,-2 6,2 C4,6 1,4 1,-2 Z" transform="rotate(30)" fill={color} />
-                                  {/* Orchid Lip/Center */}
-                                  <path d="M-2.5,0 C-3.5,2.5 -1.5,5.5 0,5.5 C1.5,5.5 3.5,2.5 2.5,0 Z" fill="#c070c0" />
-                                  <circle cx="0" cy="1.5" r="1.2" fill="#ffd700" />
-                                </g>
-                              )}
-                            </g>
-                          );
-                        });
-                      })}
-                    </svg>
-                  </div>
-
-                  {/* VASE GRAPHIC AND WATER (Rendered on top so stems are inside the glass) */}
-                  <div className="absolute bottom-6 flex flex-col items-center justify-center pointer-events-none">
-                    <svg width="120" height="150" viewBox="0 0 100 125" className="overflow-visible">
-                      <defs>
-                        {/* Shimmer gradient for crystal vase */}
-                        <linearGradient id="glass-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6"/>
-                          <stop offset="30%" stopColor="#eef7f9" stopOpacity="0.35"/>
-                          <stop offset="70%" stopColor="#d5edf1" stopOpacity="0.4"/>
-                          <stop offset="100%" stopColor="#a8d3da" stopOpacity="0.75"/>
-                        </linearGradient>
-                        <linearGradient id="water-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#a5dce4" stopOpacity="0.6"/>
-                          <stop offset="100%" stopColor="#78c9d4" stopOpacity="0.35"/>
-                        </linearGradient>
-                      </defs>
-
-                      {/* Water Level */}
-                      <path 
-                        d="M 22,62 C 22,62 30,65 50,65 C 70,65 78,62 78,62 L 72,112 C 72,112 65,116 50,116 C 35,116 28,112 28,112 Z" 
-                        fill="url(#water-grad)"
-                      />
-
-                      {/* Stems inside the water (refraction overlay) */}
-                      {selectedStems.length > 0 && (
-                        <g opacity="0.45" stroke="#485c4d" strokeWidth="1.8" strokeLinecap="round">
-                          <line x1="45" y1="63" x2="40" y2="105" />
-                          <line x1="53" y1="63" x2="58" y2="108" />
-                          <line x1="50" y1="63" x2="49" y2="112" />
-                        </g>
-                      )}
-
-                      {/* Vase Body */}
-                      <path 
-                        d="M 28,32 C 28,32 35,36 50,36 C 65,36 72,32 72,32 L 78,60 C 82,78 74,115 72,116 C 70,117 65,120 50,120 C 35,120 30,117 28,116 C 26,115 18,78 22,60 Z" 
-                        fill="url(#glass-grad)" 
-                        stroke="#ffffff" 
-                        strokeWidth="1.2"
-                      />
-
-                      {/* Vase Neck Highlights */}
-                      <ellipse cx="50" cy="34" rx="21" ry="3.5" fill="none" stroke="#ffffff" strokeWidth="0.8" opacity="0.8" />
-                      <ellipse cx="50" cy="34" rx="15" ry="2" fill="none" stroke="#a3d5dd" strokeWidth="0.5" opacity="0.5" />
-
-                      {/* Reflections and Shines */}
-                      <path d="M 25,62 Q 22,85 32,110" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-                      <path d="M 75,62 Q 78,85 68,110" fill="none" stroke="#a3d5dd" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
-                      <path d="M 45,117 Q 50,119 55,117" fill="none" stroke="#ffffff" strokeWidth="1.2" opacity="0.8" />
-
-                      {/* WRAPPING & ACCENTS LAYER ON VASE */}
-                      {selectedStems.map((selection) => {
-                        const dbItem = STEMS_DATABASE.find(s => s.id === selection.stemId);
-                        if (!dbItem || dbItem.category !== 'wrapping-accents') return null;
-
-                        const isRibbon = dbItem.id === 'velvet-ribbon';
-                        const color = dbItem.color;
-
-                        return (
-                          <g key={selection.stemId} className="transition-all duration-300">
-                            {isRibbon ? (
-                              // Bow Ribbon on Neck
-                              <g transform="translate(50, 48)">
-                                <ellipse cx="0" cy="0" rx="14" ry="3.5" fill={color} stroke="#ffffff" strokeWidth="0.3" />
-                                {/* Bow wings */}
-                                <path d="M0,0 C -8,-6 -14,-4 -12,2 C -10,6 -4,2 0,0 Z" fill={color} stroke="#3b1b1b" strokeWidth="0.3" />
-                                <path d="M0,0 C 8,-6 14,-4 12,2 C 10,6 4,2 0,0 Z" fill={color} stroke="#3b1b1b" strokeWidth="0.3" />
-                                {/* Ribbon Tails */}
-                                <path d="M-2,0 L -8,18 L -3,18 Z" fill={color} />
-                                <path d="M2,0 L 8,18 L 3,18 Z" fill={color} />
-                                <circle cx="0" cy="0" r="3" fill="#8f4545" />
-                              </g>
-                            ) : (
-                              // Wrapping paper envelope at the lower half
-                              <path 
-                                d="M 12,65 L 28,124 L 50,128 L 72,124 L 88,65 C 88,65 50,75 12,65 Z" 
-                                fill={color} 
-                                opacity="0.85" 
-                                stroke="#b09572" 
-                                strokeWidth="0.5"
-                              />
-                            )}
-                          </g>
-                        );
-                      })}
-                    </svg>
-                  </div>
-
-                </div>
-              </div>
-
+            <div className="flex-grow flex items-center justify-center relative select-none h-[300px] sm:h-[400px] md:h-[480px]">
+              <BouquetCanvas
+                flowers={flowers}
+                wrappingId={wrappingId}
+                ribbonId={ribbonId}
+                stemsDatabase={STEMS_DATABASE}
+                selectedFlowerId={selectedFlowerId}
+                onSelectFlower={setSelectedFlowerId}
+                onUpdateFlowerTransform={handleUpdateFlowerTransform}
+              />
             </div>
 
             {/* FLOATING CONTROLS TOOLBAR */}
