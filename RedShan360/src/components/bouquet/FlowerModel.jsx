@@ -113,6 +113,12 @@ function FernModel({ scale }) {
   );
 }
 
+// GLB Model Loader Component to avoid conditional hook call (useGLTF)
+function GLBModel({ url, scale }) {
+  const { scene } = useGLTF(url);
+  return <Clone object={scene} scale={scale} castShadow receiveShadow />;
+}
+
 // Main Flower Model renderer wrapper
 export default function FlowerModel({ 
   flower, 
@@ -127,9 +133,6 @@ export default function FlowerModel({
   const glbUrl = MODEL_MAPPING[stemId];
   const groupRef = useRef();
   const stemRef = useRef();
-
-  // Load model if it exists
-  const { scene } = glbUrl ? useGLTF(glbUrl) : { scene: null };
 
   // Adjust model orientation offset depending on GLB geometry defaults
   const rotationOffset = useMemo(() => {
@@ -247,12 +250,7 @@ export default function FlowerModel({
         ) : (
           // Render cached GLB clone
           <group rotation={rotationOffset}>
-            <Clone 
-              object={scene} 
-              scale={modelScale} 
-              castShadow 
-              receiveShadow 
-            />
+            <GLBModel url={glbUrl} scale={modelScale} />
           </group>
         )}
 
