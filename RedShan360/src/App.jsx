@@ -43,7 +43,8 @@ import MOCards from './components/managerComponent/MOrderCard';
 import ManagerOverview from './pages/Manager/ManagerOverview';
 import MOrderGraph from './components/managerComponent/MOrderGraph';
 import MmanageEmployees from './pages/Manager/ManageEmployees';
-import MPreOrderModal from './components/managerComponent/MPreOrderModal';
+import MmanageProducts from './pages/Manager/ManageProducts';
+import EcustomizedProducts from './pages/Employee/EcustomizedProducts';
 {/* Rout try by Vindya-end */ }
 
 
@@ -69,7 +70,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
 
-          <Route path="/guestUserDashboard" element={<GuestUserDashboard/>}/>
+          <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/adminUserManagement" element={<AdminUserManagement />} />
           <Route path="/adminOrderManagement" element={<AdminOrderManagement />} />
@@ -99,8 +100,8 @@ function App() {
           <Route path="/managerOverview" element={<ManagerOverview />} />
           <Route path="/mOrderGraph" element={<MOrderGraph />} />
           <Route path="/mManageEmployees" element={<MmanageEmployees />} />
-          <Route path="/mPreOrderModal" element={<MPreOrderModal />} />
-
+          <Route path="/mManageProducts" element={<MmanageProducts />} />
+          <Route path="/eCustomizedProducts" element={<EcustomizedProducts />} />
 
           {/* Rout try by Vindya-end */}
 
