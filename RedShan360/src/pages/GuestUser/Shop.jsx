@@ -36,7 +36,8 @@ const Shop = () => {
     silk: true,
     velvet: false,
     dried: false,
-    vases: false
+    vases: false,
+    headdress: false
   });
   const [selectedColor, setSelectedColor] = useState(null);
   const [priceRange, setPriceRange] = useState(1000);
@@ -79,7 +80,8 @@ const Shop = () => {
       silk: false,
       velvet: false,
       dried: false,
-      vases: false
+      vases: false,
+      headdress: false
     });
     setSelectedColor(null);
     setPriceRange(1000);
@@ -178,7 +180,8 @@ const Shop = () => {
                   { key: 'silk', label: 'Silk Collections' },
                   { key: 'velvet', label: 'Velvet Petals' },
                   { key: 'dried', label: 'Dried Everlastings' },
-                  { key: 'vases', label: 'Artisanal Vases' }
+                  { key: 'vases', label: 'Artisanal Vases' },
+                  { key: 'headdress', label: 'Headdresses' }
                 ].map((cat) => (
                   <label key={cat.key} className="flex items-center gap-3 cursor-pointer text-sm font-medium text-[#1a1a1a]/80">
                     <input
