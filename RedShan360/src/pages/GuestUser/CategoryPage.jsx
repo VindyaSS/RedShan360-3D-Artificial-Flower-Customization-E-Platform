@@ -80,9 +80,9 @@ const CategoryPage = () => {
       case 'bouquets':
         return product.type === 'bouquet';
       case 'head-dresses':
-        return product.category === 'dried' || product.type === 'arrangement';
+        return (product.category === 'dried' || product.type === 'arrangement') && product.type !== 'single-stem';
       case 'wedding-collections':
-        return product.category === 'velvet' || product.type === 'centerpiece';
+        return (product.category === 'velvet' || product.type === 'centerpiece') && product.type !== 'single-stem';
       case 'individual-flowers':
         return product.type === 'single-stem';
       default:
@@ -102,7 +102,7 @@ const CategoryPage = () => {
 
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-[120px] pb-20">
-        
+
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
           <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
