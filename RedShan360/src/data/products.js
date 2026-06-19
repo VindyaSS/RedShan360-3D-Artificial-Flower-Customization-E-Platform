@@ -13,6 +13,18 @@ import lilyHeaddress from '../assets/lily_headdress.jpg';
 import pinkLilyStem from '../assets/pink_lily.jpg';
 import pinkRosesBouquet from '../assets/pink_roses_bouquet.png';
 
+// Head Dresses Image Imports
+import roseCrownHeadDress from '../assets/images/head-dresses/rose-crown-head-dress.png';
+import pearlBlossomFloralCrown from '../assets/images/head-dresses/pearl-blossom-floral-crown.png';
+import bridalFlowerTiara from '../assets/images/head-dresses/bridal-flower-tiara.png';
+import whiteOrchidWeddingCrown from '../assets/images/head-dresses/white-orchid-wedding-crown.png';
+import luxuryWeddingFlowerHalo from '../assets/images/head-dresses/luxury-wedding-flower-halo.png';
+import pinkCelebrationFloralCrown from '../assets/images/head-dresses/pink-celebration-floral-crown.png';
+import rainbowBlossomHeadDress from '../assets/images/head-dresses/rainbow-blossom-head-dress.png';
+import birthdayPrincessCrown from '../assets/images/head-dresses/birthday-princess-crown.png';
+import pastelGardenFloralHeadband from '../assets/images/head-dresses/pastel-garden-floral-headband.png';
+import floralPartyHeadDress from '../assets/images/head-dresses/floral-party-head-dress.png';
+
 export const products = [
   {
     id: 1,
@@ -425,6 +437,232 @@ export const products = [
       { name: 'Ivory White', hex: '#fcf9f8' }
     ],
     features: ['Sustainable Fibers', 'UV Protection'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 14,
+    title: 'Rose Crown Head Dress',
+    category: 'silk',
+    color: 'pink',
+    type: 'head-dress',
+    subcategory: 'wedding',
+    subtitle: 'Bridal Royalty Series',
+    price: 'Rs 5500.00',
+    numericPrice: 5500,
+    rating: 4.9,
+    reviewCount: 88,
+    image: roseCrownHeadDress,
+    thumbnails: [roseCrownHeadDress],
+    description: 'A beautiful luxury rose crown handcrafted from premium silk roses. Designed to add majestic bridal elegance on your dream wedding day.',
+    colors: [
+      { name: 'Soft Pink', hex: '#f5ccd4' },
+      { name: 'Cream White', hex: '#ffffff' }
+    ],
+    features: ['Handcrafted Silk', 'Adjustable Ribbon Fit'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 15,
+    title: 'Pearl Blossom Floral Crown',
+    category: 'silk',
+    color: 'white',
+    type: 'head-dress',
+    subcategory: 'wedding',
+    subtitle: 'Bridal Majesty Series',
+    price: 'Rs 6200.00',
+    numericPrice: 6200,
+    rating: 4.8,
+    reviewCount: 42,
+    image: pearlBlossomFloralCrown,
+    thumbnails: [pearlBlossomFloralCrown],
+    description: 'An elegant floral crown featuring premium white blossoms and delicate pearl accents, bringing graceful style to bridal ensembles.',
+    colors: [
+      { name: 'Pure White', hex: '#ffffff' },
+      { name: 'Ivory Cream', hex: '#fcf9f8' }
+    ],
+    features: ['Premium Faux Pearls', 'Comfortable Hair Base'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 16,
+    title: 'Elegant Bridal Flower Tiara',
+    category: 'silk',
+    color: 'white',
+    type: 'head-dress',
+    subcategory: 'wedding',
+    subtitle: 'Classic Wedding Series',
+    price: 'Rs 4800.00',
+    numericPrice: 4800,
+    rating: 4.7,
+    reviewCount: 31,
+    image: bridalFlowerTiara,
+    thumbnails: [bridalFlowerTiara],
+    description: 'A gorgeous wedding tiara crafted with cream rose buds and delicate baby\'s breath, providing a subtle, sophisticated bridal charm.',
+    colors: [
+      { name: 'Cream White', hex: '#fcf9f8' }
+    ],
+    features: ['Wired Metal Base', 'Handmade Detail'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 17,
+    title: 'White Orchid Wedding Crown',
+    category: 'silk',
+    color: 'white',
+    type: 'head-dress',
+    subcategory: 'wedding',
+    subtitle: 'Exotic Bridal Series',
+    price: 'Rs 7000.00',
+    numericPrice: 7000,
+    rating: 5.0,
+    reviewCount: 15,
+    image: whiteOrchidWeddingCrown,
+    thumbnails: [whiteOrchidWeddingCrown],
+    description: 'A stately head dress of hyper-realistic white orchid blooms and fresh green leaves, perfect for destination or garden weddings.',
+    colors: [
+      { name: 'Pure White', hex: '#ffffff' }
+    ],
+    features: ['Flexible Fit', 'Real-touch Silk Orchids'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 18,
+    title: 'Luxury Wedding Flower Halo',
+    category: 'silk',
+    color: 'pink',
+    type: 'head-dress',
+    subcategory: 'wedding',
+    subtitle: 'Bridal Romance Series',
+    price: 'Rs 5900.00',
+    numericPrice: 5900,
+    rating: 4.9,
+    reviewCount: 27,
+    image: luxuryWeddingFlowerHalo,
+    thumbnails: [luxuryWeddingFlowerHalo],
+    description: 'A romantic floral halo crown in soft pink and cream tones, evoking an ethereal garden vibe for brides and bridesmaids.',
+    colors: [
+      { name: 'Dusty Pink', hex: '#e8b4b8' },
+      { name: 'Pale Yellow', hex: '#fbfbe3' }
+    ],
+    features: ['Natural Preserved Look', 'Global Shipping'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 19,
+    title: 'Pink Celebration Floral Crown',
+    category: 'silk',
+    color: 'pink',
+    type: 'head-dress',
+    subcategory: 'birthday',
+    subtitle: 'Cheerful Birthday Series',
+    price: 'Rs 3500.00',
+    numericPrice: 3500,
+    rating: 4.8,
+    reviewCount: 54,
+    image: pinkCelebrationFloralCrown,
+    thumbnails: [pinkCelebrationFloralCrown],
+    description: 'A vibrant celebration floral crown featuring bright pink silk roses and pastel ranunculus, perfect for birthday parties and celebrations.',
+    colors: [
+      { name: 'Vibrant Pink', hex: '#ff6b8b' },
+      { name: 'Soft Cream', hex: '#ffffff' }
+    ],
+    features: ['Vibrant Color Pop', 'Soft-Lined Headband'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 20,
+    title: 'Rainbow Blossom Head Dress',
+    category: 'silk',
+    color: 'pink',
+    type: 'head-dress',
+    subcategory: 'birthday',
+    subtitle: 'Festival Birthday Series',
+    price: 'Rs 3800.00',
+    numericPrice: 3800,
+    rating: 4.7,
+    reviewCount: 22,
+    image: rainbowBlossomHeadDress,
+    thumbnails: [rainbowBlossomHeadDress],
+    description: 'A playful festival-style head dress with colorful pastel blossoms and cascading ribbons, perfect for a cheerful birthday celebration.',
+    colors: [
+      { name: 'Rainbow Pastel', hex: '#fad0c4' }
+    ],
+    features: ['Ribbon Streamers', 'Lightweight Construction'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 21,
+    title: 'Birthday Princess Flower Crown',
+    category: 'silk',
+    color: 'purple',
+    type: 'head-dress',
+    subcategory: 'birthday',
+    subtitle: 'Royal Birthday Series',
+    price: 'Rs 4200.00',
+    numericPrice: 4200,
+    rating: 4.9,
+    reviewCount: 39,
+    image: birthdayPrincessCrown,
+    thumbnails: [birthdayPrincessCrown],
+    description: 'An elegant princess tiara crown made of lavender and cream roses, adorned with subtle golden stars to celebrate your special birthday.',
+    colors: [
+      { name: 'Lavender Star', hex: '#c5b4e3' },
+      { name: 'Pastel Pink', hex: '#e8b4b8' }
+    ],
+    features: ['Metallic Star Details', 'Satin-wrapped Band'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 22,
+    title: 'Pastel Garden Floral Headband',
+    category: 'silk',
+    color: 'yellow',
+    type: 'head-dress',
+    subcategory: 'birthday',
+    subtitle: 'Garden Birthday Series',
+    price: 'Rs 3200.00',
+    numericPrice: 3200,
+    rating: 4.6,
+    reviewCount: 19,
+    image: pastelGardenFloralHeadband,
+    thumbnails: [pastelGardenFloralHeadband],
+    description: 'A delicate floral headband featuring pastel green, yellow and pink flowers, ideal for comfortable wear during outdoor birthday garden parties.',
+    colors: [
+      { name: 'Lemon Yellow', hex: '#fff9ae' },
+      { name: 'Mint Green', hex: '#cbf1f5' }
+    ],
+    features: ['Comfort-Flex Headband', 'Soft Felt Backing'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 23,
+    title: 'Floral Party Head Dress',
+    category: 'silk',
+    color: 'purple',
+    type: 'head-dress',
+    subcategory: 'birthday',
+    subtitle: 'Party Celebration Series',
+    price: 'Rs 3900.00',
+    numericPrice: 3900,
+    rating: 4.7,
+    reviewCount: 28,
+    image: floralPartyHeadDress,
+    thumbnails: [floralPartyHeadDress],
+    description: 'A beautiful head dress boasting vibrant lilac, soft cream, and rose gold blossoms, adding a glamorous floral finish to any party outfit.',
+    colors: [
+      { name: 'Lilac Rose Gold', hex: '#d2b4de' }
+    ],
+    features: ['Secure Fit Combs', 'Glitter Accent Petals'],
     has360: false,
     reviews: []
   }
