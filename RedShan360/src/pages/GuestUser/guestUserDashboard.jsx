@@ -35,10 +35,10 @@ const GuestUserDashboard = () => {
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
 
   const categories = [
-    { name: 'Bouquets', tag: 'THE ETERNAL MUSE', image: '/images/cat_roses.png', slug: 'bouquets' },
-    { name: 'Head Dresses', tag: 'MAJESTIC GRACE', image: '/images/cat_lilies.png', slug: 'head-dresses' },
-    { name: 'Wedding Collections', tag: 'OPULENT BLOOMS', image: '/images/cat_peonies.png', slug: 'wedding-collections' },
-    { name: 'Individual Flowers', tag: 'EXOTIC ALLURE', image: '/images/cat_orchids.png', slug: 'individual-flowers' },
+    { name: 'Bouquets', tag: 'THE ETERNAL MUSE', image: '/images/bouquets.png', slug: 'bouquets' },
+    { name: 'Head Dresses', tag: 'MAJESTIC GRACE', image: '/images/cat_headdress_birthday.png', slug: 'head-dresses' },
+    /*{ name: 'Wedding Collections', tag: 'OPULENT BLOOMS', image: '/images/cat_peonies.png', slug: 'wedding-collections' },*/
+    { name: 'Individual Flowers', tag: 'EXOTIC ALLURE', image: '/images/individual.png', slug: 'individual-flowers' },
   ];
 
   return (

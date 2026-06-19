@@ -1,9 +1,9 @@
 // Local Image Imports
 import crimsonSilkPeony from '../assets/crimson_silk_peony.jpg';
 import redChrysanthemums from '../assets/red_chrysanthemum.png';
-import sakuraSpringBloom from '../assets/sakura_spring_bloom.jpg';
-import mauveRadianceDahlia from '../assets/mauve_radiance_dahlia.jpg';
-import serenityWhite from '../assets/serenity_white.jpg';
+import sakuraSpringBloom from '../assets/con2.png';
+import mauveRadianceDahlia from '../assets/mauve_radiance_dahlia.png';
+import serenityWhite from '../assets/con2.png';
 import wildHearth from '../assets/wild_hearth.jpg';
 import redRose from '../assets/red_rose.png';
 import purplecarnation
@@ -24,6 +24,23 @@ import rainbowBlossomHeadDress from '../assets/images/head-dresses/rainbow-bloss
 import birthdayPrincessCrown from '../assets/images/head-dresses/birthday-princess-crown.png';
 import pastelGardenFloralHeadband from '../assets/images/head-dresses/pastel-garden-floral-headband.png';
 import floralPartyHeadDress from '../assets/images/head-dresses/floral-party-head-dress.png';
+
+// Individual Flowers Image Imports
+import graduationRose from '../assets/images/individual-flowers/graduation-rose.png';
+import achievementRedRose from '../assets/images/individual-flowers/achievement-red-rose.png';
+import successGoldRose from '../assets/images/individual-flowers/success-gold-rose.png';
+import graduationBlueRose from '../assets/images/individual-flowers/graduation-blue-rose.png';
+import convocationCelebrationRose from '../assets/images/individual-flowers/convocation-celebration-rose.png';
+import eternalLoveRedRose from '../assets/images/individual-flowers/eternal-love-red-rose.png';
+import romanticSilkRose from '../assets/images/individual-flowers/romantic-silk-rose.png';
+import goldenAnniversaryRose from '../assets/images/individual-flowers/golden-anniversary-rose.png';
+import luxuryWhiteRose from '../assets/images/individual-flowers/luxury-white-rose.png';
+import foreverBloomArtificialRose from '../assets/images/individual-flowers/forever-bloom-artificial-rose.png';
+import birthdayCelebrationRose from '../assets/images/individual-flowers/birthday-celebration-rose.png';
+import pinkBlossomRose from '../assets/images/individual-flowers/pink-blossom-rose.png';
+import rainbowSilkRose from '../assets/images/individual-flowers/rainbow-silk-rose.png';
+import cheerfulYellowRose from '../assets/images/individual-flowers/cheerful-yellow-rose.png';
+import birthdayFloralGiftRose from '../assets/images/individual-flowers/birthday-floral-gift-rose.png';
 
 export const products = [
   {
@@ -663,6 +680,337 @@ export const products = [
       { name: 'Lilac Rose Gold', hex: '#d2b4de' }
     ],
     features: ['Secure Fit Combs', 'Glitter Accent Petals'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 24,
+    title: 'Graduation Rose',
+    category: 'silk',
+    color: 'pink',
+    type: 'single-stem',
+    subcategory: 'convocation',
+    subtitle: 'Achievement Series',
+    price: 'Rs 1200.00',
+    numericPrice: 1200,
+    rating: 4.9,
+    reviewCount: 42,
+    image: graduationRose,
+    thumbnails: [graduationRose],
+    description: 'A beautiful handmade artificial graduation rose crafted from premium silk. The perfect symbolic single-stem gift to celebrate high achievements.',
+    colors: [
+      { name: 'Pink Blush', hex: '#f5ccd4' },
+      { name: 'Cream White', hex: '#ffffff' }
+    ],
+    features: ['Premium Silk Petals', 'Adjustable Wired Stem'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 25,
+    title: 'Achievement Red Rose',
+    category: 'silk',
+    color: 'red',
+    type: 'single-stem',
+    subcategory: 'convocation',
+    subtitle: 'Honors Series',
+    price: 'Rs 1250.00',
+    numericPrice: 1250,
+    rating: 4.8,
+    reviewCount: 31,
+    image: achievementRedRose,
+    thumbnails: [achievementRedRose],
+    description: 'A rich red silk rose symbolizing success, dedication, and honor. An excellent convocation gift for graduates.',
+    colors: [
+      { name: 'Crimson Red', hex: '#d32f2f' }
+    ],
+    features: ['Vibrant Success Red', 'Velvet Felt Leaves'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 26,
+    title: 'Success Gold Rose',
+    category: 'silk',
+    color: 'yellow',
+    type: 'single-stem',
+    subcategory: 'convocation',
+    subtitle: 'Golden Honors Series',
+    price: 'Rs 1400.00',
+    numericPrice: 1400,
+    rating: 5.0,
+    reviewCount: 24,
+    image: successGoldRose,
+    thumbnails: [successGoldRose],
+    description: 'An opulent hand-painted golden rose representing brilliant success and achievement. Perfect for graduation celebrations.',
+    colors: [
+      { name: 'Metallic Gold', hex: '#ffd700' }
+    ],
+    features: ['Hand-painted Gold', 'Special Presentation Wrap'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 27,
+    title: 'Graduation Blue Rose',
+    category: 'silk',
+    color: 'blue',
+    type: 'single-stem',
+    subcategory: 'convocation',
+    subtitle: 'Royal Honors Series',
+    price: 'Rs 1300.00',
+    numericPrice: 1300,
+    rating: 4.7,
+    reviewCount: 19,
+    image: graduationBlueRose,
+    thumbnails: [graduationBlueRose],
+    description: 'A unique royal blue artificial rose representing distinction and wisdom, styled with elegant ribbons.',
+    colors: [
+      { name: 'Royal Blue', hex: '#1a73e8' }
+    ],
+    features: ['Distinguished Blue Hue', 'Satin Leaf Accents'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 28,
+    title: 'Convocation Celebration Rose',
+    category: 'silk',
+    color: 'red',
+    type: 'single-stem',
+    subcategory: 'convocation',
+    subtitle: 'Academic Pride Series',
+    price: 'Rs 1500.00',
+    numericPrice: 1500,
+    rating: 4.8,
+    reviewCount: 29,
+    image: convocationCelebrationRose,
+    thumbnails: [convocationCelebrationRose],
+    description: 'A stately celebration single-stem flower arrangement presented with a miniature graduation ribbon loop.',
+    colors: [
+      { name: 'Red Rose Gold', hex: '#b71c1c' }
+    ],
+    features: ['Academic Ribbon Ribbon', 'Gift-Ready Box'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 29,
+    title: 'Eternal Love Red Rose',
+    category: 'silk',
+    color: 'red',
+    type: 'single-stem',
+    subcategory: 'anniversary',
+    subtitle: 'Luxe Romance Series',
+    price: 'Rs 1350.00',
+    numericPrice: 1350,
+    rating: 5.0,
+    reviewCount: 74,
+    image: eternalLoveRedRose,
+    thumbnails: [eternalLoveRedRose],
+    description: 'An elegant long-stemmed crimson red silk rose representing undying romance. A timeless choice for anniversaries.',
+    colors: [
+      { name: 'Crimson Red', hex: '#b71c1c' }
+    ],
+    features: ['Real-touch Petals', 'Long Flexible Stem'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 30,
+    title: 'Romantic Silk Rose',
+    category: 'silk',
+    color: 'pink',
+    type: 'single-stem',
+    subcategory: 'anniversary',
+    subtitle: 'Classic Romance Series',
+    price: 'Rs 1100.00',
+    numericPrice: 1100,
+    rating: 4.8,
+    reviewCount: 45,
+    image: romanticSilkRose,
+    thumbnails: [romanticSilkRose],
+    description: 'A soft blush pink silk rose capturing the delicate beauty of fresh blossoms. Perfect for romantic expressions.',
+    colors: [
+      { name: 'Blush Pink', hex: '#f8c291' }
+    ],
+    features: ['Delicate Petal Veining', 'Natural Foliage details'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 31,
+    title: 'Golden Anniversary Rose',
+    category: 'silk',
+    color: 'yellow',
+    type: 'single-stem',
+    subcategory: 'anniversary',
+    subtitle: 'Golden Milestone Series',
+    price: 'Rs 1600.00',
+    numericPrice: 1600,
+    rating: 4.9,
+    reviewCount: 38,
+    image: goldenAnniversaryRose,
+    thumbnails: [goldenAnniversaryRose],
+    description: 'A majestic dahlia-shaped golden rose celebrating precious milestones and years of shared love.',
+    colors: [
+      { name: 'Dusty Gold', hex: '#d4af37' }
+    ],
+    features: ['Luxurious Golden Luster', 'Handcrafted Petals'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 32,
+    title: 'Luxury White Rose',
+    category: 'silk',
+    color: 'white',
+    type: 'single-stem',
+    subcategory: 'anniversary',
+    subtitle: 'Pure Devotion Series',
+    price: 'Rs 1250.00',
+    numericPrice: 1250,
+    rating: 4.9,
+    reviewCount: 52,
+    image: luxuryWhiteRose,
+    thumbnails: [luxuryWhiteRose],
+    description: 'A pure white silk rose symbolizing devotion, loyalty, and pure everlasting love.',
+    colors: [
+      { name: 'Ivory White', hex: '#ffffff' }
+    ],
+    features: ['Pure Ivory Tone', 'Realistic Dewy Petals'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 33,
+    title: 'Forever Bloom Rose',
+    category: 'silk',
+    color: 'pink',
+    type: 'single-stem',
+    subcategory: 'anniversary',
+    subtitle: 'Everlasting Series',
+    price: 'Rs 1300.00',
+    numericPrice: 1300,
+    rating: 4.8,
+    reviewCount: 41,
+    image: foreverBloomArtificialRose,
+    thumbnails: [foreverBloomArtificialRose],
+    description: 'A hyper-realistic pink lily-rose stem designed to retain its elegant beauty forever.',
+    colors: [
+      { name: 'Soft Rose', hex: '#e8b4b8' }
+    ],
+    features: ['UV Resistant coating', 'Waterproof Stems'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 34,
+    title: 'Birthday Celebration Rose',
+    category: 'silk',
+    color: 'pink',
+    type: 'single-stem',
+    subcategory: 'birthday',
+    subtitle: 'Joyful Series',
+    price: 'Rs 950.00',
+    numericPrice: 950,
+    rating: 4.7,
+    reviewCount: 68,
+    image: birthdayCelebrationRose,
+    thumbnails: [birthdayCelebrationRose],
+    description: 'A bright pink celebration rose, perfect for adding joyful color and cheer to birthday gifts.',
+    colors: [
+      { name: 'Vibrant Pink', hex: '#e84393' }
+    ],
+    features: ['Vibrant Magenta Hue', 'Lightweight Design'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 35,
+    title: 'Pink Blossom Rose',
+    category: 'silk',
+    color: 'pink',
+    type: 'single-stem',
+    subcategory: 'birthday',
+    subtitle: 'Cheerful Petals Series',
+    price: 'Rs 1000.00',
+    numericPrice: 1000,
+    rating: 4.8,
+    reviewCount: 37,
+    image: pinkBlossomRose,
+    thumbnails: [pinkBlossomRose],
+    description: 'A charming pink blossom stem that brings a fresh garden feel to birthday arrangements.',
+    colors: [
+      { name: 'Light Pink', hex: '#fd79a8' }
+    ],
+    features: ['Multi-petal Volume', 'Realistic Bud Accent'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 36,
+    title: 'Rainbow Silk Rose',
+    category: 'silk',
+    color: 'pink',
+    type: 'single-stem',
+    subcategory: 'birthday',
+    subtitle: 'Festival Series',
+    price: 'Rs 1150.00',
+    numericPrice: 1150,
+    rating: 4.6,
+    reviewCount: 22,
+    image: rainbowSilkRose,
+    thumbnails: [rainbowSilkRose],
+    description: 'A multicolored single-stem flower designed to bring whimsical fun and color to birthdays.',
+    colors: [
+      { name: 'Rainbow Blend', hex: '#ffeaa7' }
+    ],
+    features: ['Whimsical Color Blend', 'Playful Wrapping Options'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 37,
+    title: 'Cheerful Yellow Rose',
+    category: 'silk',
+    color: 'yellow',
+    type: 'single-stem',
+    subcategory: 'birthday',
+    subtitle: 'Sunshine Series',
+    price: 'Rs 980.00',
+    numericPrice: 980,
+    rating: 4.8,
+    reviewCount: 51,
+    image: cheerfulYellowRose,
+    thumbnails: [cheerfulYellowRose],
+    description: 'A bright yellow silk rose that captures the essence of sunshine, symbolizing friendship and birthday joy.',
+    colors: [
+      { name: 'Sunshine Yellow', hex: '#fdcb6e' }
+    ],
+    features: ['Vibrant Golden Glow', 'Durable Flexible Stem'],
+    has360: false,
+    reviews: []
+  },
+  {
+    id: 38,
+    title: 'Birthday Floral Gift Rose',
+    category: 'silk',
+    color: 'purple',
+    type: 'single-stem',
+    subcategory: 'birthday',
+    subtitle: 'Festive Series',
+    price: 'Rs 1050.00',
+    numericPrice: 1050,
+    rating: 4.7,
+    reviewCount: 29,
+    image: birthdayFloralGiftRose,
+    thumbnails: [birthdayFloralGiftRose],
+    description: 'A charming single-stem purple blossom featuring a matching card holder, designed as a ready-to-give birthday gift.',
+    colors: [
+      { name: 'Festive Purple', hex: '#6c5ce7' }
+    ],
+    features: ['Special Card Holder Clip', 'Aromatic Infused Silk'],
     has360: false,
     reviews: []
   }

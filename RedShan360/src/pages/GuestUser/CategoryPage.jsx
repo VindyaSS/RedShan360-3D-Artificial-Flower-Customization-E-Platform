@@ -65,9 +65,9 @@ const CategoryPage = () => {
         };
       case 'individual-flowers':
         return {
-          title: 'Individual Flowers',
+          title: 'Individual Flowers Collection',
           tagline: 'EXOTIC ALLURE',
-          description: 'Premium single-stem floral masterpieces tailored for bespoke vases and minimalist spaces.'
+          description: 'Explore our collection of handcrafted artificial flowers designed for birthdays, anniversaries, graduations, and special occasions.'
         };
       default:
         return {
@@ -98,7 +98,11 @@ const CategoryPage = () => {
       case 'wedding-collections':
         return (product.category === 'velvet' || product.type === 'centerpiece') && product.type !== 'single-stem';
       case 'individual-flowers':
-        return product.type === 'single-stem';
+        if (product.type !== 'single-stem') return false;
+        if (activeSubcategory) {
+          return product.subcategory === activeSubcategory;
+        }
+        return true;
       default:
         return false;
     }
@@ -140,12 +144,18 @@ const CategoryPage = () => {
       return [
         { name: 'Anniversary', value: 'anniversary', image: '/images/cat_roses.png', tag: 'CELEBRATE LOVE' },
         { name: 'Birthday', value: 'birthday', image: '/images/cat_peonies.png', tag: 'CHEERFUL BLOOMS' },
-        { name: 'Convocation', value: 'convocation', image: '/images/about_hero.png', tag: 'SUCCESS & HONOR' }
+        { name: 'Convocation', value: 'convocation', image: '/images/con3.png', tag: 'SUCCESS & HONOR' }
       ];
     } else if (categorySlug === 'head-dresses') {
       return [
         { name: 'Weddings', value: 'wedding', image: '/images/cat_headdress_wedding.png', tag: 'BRIDAL MAJESTY' },
         { name: 'Birthday', value: 'birthday', image: '/images/cat_headdress_birthday.png', tag: 'CELEBRATE GRACE' }
+      ];
+    } else if (categorySlug === 'individual-flowers') {
+      return [
+        { name: 'Convocation', value: 'convocation', image: '/images/cat_individual_convocation.png', tag: 'ACADEMIC PRIDE' },
+        { name: 'Anniversary', value: 'anniversary', image: '/images/cat_individual_anniversary.png', tag: 'ETERNAL DEVOTION' },
+        { name: 'Birthday', value: 'birthday', image: '/images/cat_individual_birthday.png', tag: 'CELEBRATE LIFE' }
       ];
     }
     return [];
@@ -179,6 +189,12 @@ const CategoryPage = () => {
             <span className="text-[#1a1a1a]/30">&gt;</span>
             <span className="text-[#8c5e5e]">Head Dresses</span>
           </nav>
+        ) : slug === 'individual-flowers' ? (
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+            <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
+            <span className="text-[#1a1a1a]/30">&gt;</span>
+            <span className="text-[#8c5e5e]">Individual Flowers</span>
+          </nav>
         ) : (
           <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
             <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
@@ -188,8 +204,8 @@ const CategoryPage = () => {
         )}
 
         {/* Category Banner */}
-        {(slug === 'bouquets' || slug === 'head-dresses') ? (
-          <div className="relative rounded-sm overflow-hidden mb-12 min-h-[480px] flex items-center shadow-sm border border-[#d9d2d0]/20 bg-[#170e0d] bg-cover bg-center md:bg-contain md:bg-right md:bg-no-repeat text-left" style={{ backgroundImage: slug === 'bouquets' ? "url('/images/luxury_bouquets_banner.png')" : "url('/images/luxury_headdress_banner.png')" }}>
+        {(slug === 'bouquets' || slug === 'head-dresses' || slug === 'individual-flowers') ? (
+          <div className="relative rounded-sm overflow-hidden mb-12 min-h-[480px] flex items-center shadow-sm border border-[#d9d2d0]/20 bg-[#170e0d] bg-cover bg-center md:bg-contain md:bg-right md:bg-no-repeat text-left" style={{ backgroundImage: slug === 'bouquets' ? "url('/images/luxury_bouquets_banner.png')" : slug === 'head-dresses' ? "url('/images/luxury_headdress_banner.png')" : "url('/images/3flowers.png')" }}>
             {/* Overlay */}
             <div className="absolute inset-0 bg-[#170e0d]/60 md:bg-transparent md:bg-gradient-to-r md:from-[#170e0d] md:via-[#170e0d]/90 md:to-transparent backdrop-blur-[0.5px]" />
             {/* Banner Content */}
@@ -225,11 +241,11 @@ const CategoryPage = () => {
           </div>
         )}
 
-        {/* Bouquet & Head Dress Subcategories Section */}
-        {(slug === 'bouquets' || slug === 'head-dresses') && (
+        {/* Subcategories Section */}
+        {(slug === 'bouquets' || slug === 'head-dresses' || slug === 'individual-flowers') && (
           <div className="mb-12">
             <h2 className="text-xs uppercase tracking-[0.15em] font-bold text-[#1a1a1a]/55 mb-6 text-left">
-              Shop {slug === 'bouquets' ? 'Bouquet' : 'Head Dress'} Subcategory
+              Shop {slug === 'bouquets' ? 'Bouquet' : slug === 'head-dresses' ? 'Head Dress' : 'Individual Flower'} Subcategory
             </h2>
 
             {/* Desktop and Tablet grid, Mobile scrollable flex row */}
