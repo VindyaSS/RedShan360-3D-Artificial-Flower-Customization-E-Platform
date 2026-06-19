@@ -53,9 +53,9 @@ const CategoryPage = () => {
         };
       case 'head-dresses':
         return {
-          title: 'Head Dresses',
+          title: 'Head Dresse Collection',
           tagline: 'MAJESTIC GRACE',
-          description: 'Delicate floral accessories, headpieces, and crowns for weddings and special collections.'
+          description: 'Discover handcrafted artificial flower head dresses designed for weddings, birthdays, and special occasions.'
         };
       case 'wedding-collections':
         return {
@@ -90,7 +90,11 @@ const CategoryPage = () => {
         }
         return true;
       case 'head-dresses':
-        return (product.category === 'dried' || product.type === 'arrangement') && product.type !== 'single-stem';
+        if (product.type !== 'head-dress') return false;
+        if (activeSubcategory) {
+          return product.subcategory === activeSubcategory;
+        }
+        return true;
       case 'wedding-collections':
         return (product.category === 'velvet' || product.type === 'centerpiece') && product.type !== 'single-stem';
       case 'individual-flowers':
@@ -106,7 +110,7 @@ const CategoryPage = () => {
 
     // Use default color of product if available
     const defaultColor = product.colors?.[0]?.name || 'Default';
-    
+
     // Check if item already exists with the same color
     const existingItemIndex = cartList.findIndex(
       (item) => item.id === product.id && item.selectedColor === defaultColor
@@ -131,11 +135,23 @@ const CategoryPage = () => {
     window.dispatchEvent(new Event('open-cart'));
   };
 
-  const subcategories = [
-    { name: 'Anniversary', value: 'anniversary', image: '/images/cat_roses.png', tag: 'CELEBRATE LOVE' },
-    { name: 'Birthday', value: 'birthday', image: '/images/cat_peonies.png', tag: 'CHEERFUL BLOOMS' },
-    { name: 'Convocation', value: 'convocation', image: '/images/about_hero.png', tag: 'SUCCESS & HONOR' }
-  ];
+  const getSubcategories = (categorySlug) => {
+    if (categorySlug === 'bouquets') {
+      return [
+        { name: 'Anniversary', value: 'anniversary', image: '/images/cat_roses.png', tag: 'CELEBRATE LOVE' },
+        { name: 'Birthday', value: 'birthday', image: '/images/cat_peonies.png', tag: 'CHEERFUL BLOOMS' },
+        { name: 'Convocation', value: 'convocation', image: '/images/about_hero.png', tag: 'SUCCESS & HONOR' }
+      ];
+    } else if (categorySlug === 'head-dresses') {
+      return [
+        { name: 'Weddings', value: 'wedding', image: '/images/cat_headdress_wedding.png', tag: 'BRIDAL MAJESTY' },
+        { name: 'Birthday', value: 'birthday', image: '/images/cat_headdress_birthday.png', tag: 'CELEBRATE GRACE' }
+      ];
+    }
+    return [];
+  };
+
+  const subcategories = getSubcategories(slug);
 
   return (
     <div className="min-h-screen bg-[#fcf9f8] text-[#1a1a1a]" style={{ fontFamily: 'Inter, Montserrat, sans-serif' }}>
@@ -157,6 +173,12 @@ const CategoryPage = () => {
             <span className="text-[#1a1a1a]/30">&gt;</span>
             <span className="text-[#8c5e5e]">Bouquets</span>
           </nav>
+        ) : slug === 'head-dresses' ? (
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+            <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
+            <span className="text-[#1a1a1a]/30">&gt;</span>
+            <span className="text-[#8c5e5e]">Head Dresses</span>
+          </nav>
         ) : (
           <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
             <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
@@ -166,16 +188,16 @@ const CategoryPage = () => {
         )}
 
         {/* Category Banner */}
-        {slug === 'bouquets' ? (
-          <div className="relative rounded-sm overflow-hidden mb-12 min-h-[320px] flex items-center shadow-sm border border-[#d9d2d0]/20 bg-cover bg-center text-left" style={{ backgroundImage: "url('/images/hero_bouquet.png')" }}>
+        {(slug === 'bouquets' || slug === 'head-dresses') ? (
+          <div className="relative rounded-sm overflow-hidden mb-12 min-h-[480px] flex items-center shadow-sm border border-[#d9d2d0]/20 bg-[#170e0d] bg-cover bg-center md:bg-contain md:bg-right md:bg-no-repeat text-left" style={{ backgroundImage: slug === 'bouquets' ? "url('/images/luxury_bouquets_banner.png')" : "url('/images/luxury_headdress_banner.png')" }}>
             {/* Overlay */}
-            <div className="absolute inset-0 bg-[#1a1a1a]/55 backdrop-blur-[1px]" />
+            <div className="absolute inset-0 bg-[#170e0d]/60 md:bg-transparent md:bg-gradient-to-r md:from-[#170e0d] md:via-[#170e0d]/90 md:to-transparent backdrop-blur-[0.5px]" />
             {/* Banner Content */}
-            <div className="relative z-10 p-8 md:p-12 lg:p-16 max-w-2xl text-white">
+            <div className="relative z-10 p-8 md:p-12 lg:p-16 max-w-3xl text-white">
               <p className="text-xs uppercase tracking-[0.2em] text-[#f5e6e8] font-bold mb-3">
                 {categoryDetails.tagline}
               </p>
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
                 {categoryDetails.title}
               </h1>
               <p className="text-sm text-white/95 leading-relaxed font-light mb-6">
@@ -203,13 +225,13 @@ const CategoryPage = () => {
           </div>
         )}
 
-        {/* Bouquet Subcategories Section */}
-        {slug === 'bouquets' && (
+        {/* Bouquet & Head Dress Subcategories Section */}
+        {(slug === 'bouquets' || slug === 'head-dresses') && (
           <div className="mb-12">
             <h2 className="text-xs uppercase tracking-[0.15em] font-bold text-[#1a1a1a]/55 mb-6 text-left">
-              Shop Bouquet Subcategory
+              Shop {slug === 'bouquets' ? 'Bouquet' : 'Head Dress'} Subcategory
             </h2>
-            
+
             {/* Desktop and Tablet grid, Mobile scrollable flex row */}
             <div className="flex overflow-x-auto pb-4 gap-4 no-scrollbar sm:grid sm:grid-cols-2 md:grid-cols-3 sm:gap-6 sm:overflow-visible sm:pb-0">
               {subcategories.map((sub, idx) => {
@@ -218,17 +240,16 @@ const CategoryPage = () => {
                   <button
                     key={idx}
                     onClick={() => setActiveSubcategory(isActive ? null : sub.value)}
-                    className={`group relative flex-shrink-0 w-[240px] sm:w-auto aspect-[16/10] rounded-sm overflow-hidden shadow-sm cursor-pointer transition-all duration-300 border-2 ${
-                      isActive ? 'border-[#8c5e5e] ring-2 ring-[#8c5e5e]/20' : 'border-transparent hover:border-[#8c5e5e]/40'
-                    }`}
+                    className={`group relative flex-shrink-0 w-[240px] sm:w-auto aspect-[16/10] rounded-sm overflow-hidden shadow-sm cursor-pointer transition-all duration-300 border-2 ${isActive ? 'border-[#8c5e5e] ring-2 ring-[#8c5e5e]/20' : 'border-transparent hover:border-[#8c5e5e]/40'
+                      }`}
                   >
-                    <img 
-                      src={sub.image} 
-                      alt={sub.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                    <img
+                      src={sub.image}
+                      alt={sub.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent transition-colors duration-300" />
-                    
+
                     {/* Active State Overlay Indicator */}
                     {isActive && (
                       <div className="absolute inset-0 bg-[#8c5e5e]/20 backdrop-blur-[0.5px] transition-colors" />
@@ -253,12 +274,12 @@ const CategoryPage = () => {
                 );
               })}
             </div>
-            
+
             {/* Mobile Helper/Indicator for scrollability */}
             <div className="flex sm:hidden justify-between items-center text-[10px] text-[#1a1a1a]/40 mt-2">
               <span>← Swipe to view categories →</span>
               {activeSubcategory && (
-                <button 
+                <button
                   onClick={() => setActiveSubcategory(null)}
                   className="text-[#8c5e5e] font-semibold hover:underline"
                 >
@@ -342,7 +363,7 @@ const CategoryPage = () => {
                   <p className="text-sm font-bold text-[#8c5e5e]">
                     {product.price}
                   </p>
-                  
+
                   {/* Add to Cart Button */}
                   <button
                     onClick={() => handleAddToCart(product)}
