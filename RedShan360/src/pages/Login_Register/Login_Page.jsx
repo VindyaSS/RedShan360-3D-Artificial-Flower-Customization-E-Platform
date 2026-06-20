@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import './Login_Page.css';
+import api from '../../services/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [apiSuccess, setApiSuccess] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -29,8 +33,34 @@ export default function LoginPage() {
     }
 
     setErrors({});
-    console.log('Logging in with:', { email, password, rememberMe });
-    alert(`Successfully simulated login for: ${email}`);
+    setApiError('');
+    setApiSuccess('');
+    setLoading(true);
+
+    try {
+      const response = await api.post('/api/auth/login', {
+        email,
+        password
+      });
+
+      setApiSuccess('Successfully logged in!');
+      console.log('Login successful:', response.data);
+
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    } catch (error) {
+      console.error('Login error:', error);
+      const msg = error.response?.data?.message || 'Invalid email or password';
+      setApiError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -108,6 +138,17 @@ export default function LoginPage() {
               Please enter your credentials to access your curated collection.
             </p>
 
+            {apiError && (
+              <div style={{ color: '#d32f2f', backgroundColor: '#ffebee', padding: '10px 14px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', borderLeft: '4px solid #d32f2f', textAlign: 'left' }}>
+                {apiError}
+              </div>
+            )}
+            {apiSuccess && (
+              <div style={{ color: '#2e7d32', backgroundColor: '#e8f5e9', padding: '10px 14px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', borderLeft: '4px solid #2e7d32', textAlign: 'left' }}>
+                {apiSuccess}
+              </div>
+            )}
+
             <form onSubmit={handleLogin} noValidate>
               {/* Email Address */}
               <div className="form-group">
@@ -171,14 +212,16 @@ export default function LoginPage() {
               </div>
 
               {/* Login Button */}
-              <button type="submit" className="login-btn" id="btn-login-submit">
-                Login to Account
-                <span className="login-btn-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </span>
+              <button type="submit" className="login-btn" id="btn-login-submit" disabled={loading} style={loading ? { opacity: 0.7, cursor: 'not-allowed' } : {}}>
+                {loading ? 'Logging in...' : 'Login to Account'}
+                {!loading && (
+                  <span className="login-btn-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </span>
+                )}
               </button>
             </form>
 
