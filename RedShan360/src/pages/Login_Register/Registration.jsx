@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Registration.css';
+import api from '../../services/api';
 
 export default function RegistrationPage() {
   const [firstName, setFirstName] = useState('');
@@ -9,8 +10,11 @@ export default function RegistrationPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [apiSuccess, setApiSuccess] = useState('');
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -50,8 +54,32 @@ export default function RegistrationPage() {
     }
 
     setErrors({});
-    console.log('Registering user with:', { firstName, lastName, email, address, password });
-    alert(`Successfully registered account for: ${firstName} ${lastName}`);
+    setApiError('');
+    setApiSuccess('');
+    setLoading(true);
+
+    try {
+      const response = await api.post('/api/auth/register', {
+        firstName,
+        lastName,
+        email,
+        address,
+        password
+      });
+
+      setApiSuccess('Registration successful! Redirecting to login...');
+      console.log('Registration success:', response.data);
+
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } catch (error) {
+      console.error('Registration error:', error);
+      const msg = error.response?.data?.message || 'Registration failed. Please try again.';
+      setApiError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -126,6 +154,17 @@ export default function RegistrationPage() {
             <p className="form-subtitle">
               Create your account to experience a world of botanical beauty and bespoke curation.
             </p>
+
+            {apiError && (
+              <div style={{ color: '#d32f2f', backgroundColor: '#ffebee', padding: '10px 14px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', borderLeft: '4px solid #d32f2f', textAlign: 'left' }}>
+                {apiError}
+              </div>
+            )}
+            {apiSuccess && (
+              <div style={{ color: '#2e7d32', backgroundColor: '#e8f5e9', padding: '10px 14px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', borderLeft: '4px solid #2e7d32', textAlign: 'left' }}>
+                {apiSuccess}
+              </div>
+            )}
 
             <form onSubmit={handleRegister} noValidate>
               {/* First Name & Last Name (Side by Side) */}
@@ -257,14 +296,16 @@ export default function RegistrationPage() {
               </div>
 
               {/* Register Button */}
-              <button type="submit" className="registration-btn" id="btn-register-submit">
-                Register
-                <span className="registration-btn-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </span>
+              <button type="submit" className="registration-btn" id="btn-register-submit" disabled={loading} style={loading ? { opacity: 0.7, cursor: 'not-allowed' } : {}}>
+                {loading ? 'Registering...' : 'Register'}
+                {!loading && (
+                  <span className="registration-btn-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </span>
+                )}
               </button>
             </form>
 
