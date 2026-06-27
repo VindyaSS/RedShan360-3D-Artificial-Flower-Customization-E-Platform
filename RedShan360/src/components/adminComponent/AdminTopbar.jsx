@@ -1,9 +1,50 @@
 import "./AdminTopbar.css";
-import { useState } from "react";
-import claireValmontAvatar from "../../assets/claire_valmont.png";
+import { useState, useEffect } from "react";
+import defaultProfileAvatar from "../../assets/default-profile.png";
 
 function AdminTopbar() {
   const [showProfile, setShowProfile] = useState(false);
+  const [profile, setProfile] = useState({
+    fullName: "Eleanor Thorne",
+    role: "Super Admin",
+    profilePicture: null,
+  });
+
+  useEffect(() => {
+    // Initial fetch from localStorage
+    const loadProfile = () => {
+      const stored = localStorage.getItem("redshan360_admin_profile");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setProfile({
+            fullName: parsed.fullName || "Eleanor Thorne",
+            role: parsed.role || "Super Admin",
+            profilePicture: parsed.profilePicture || null,
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    loadProfile();
+
+    // Listen for setting changes
+    const handleProfileUpdate = (e) => {
+      const updated = e.detail;
+      setProfile({
+        fullName: updated.fullName,
+        role: updated.role,
+        profilePicture: updated.profilePicture,
+      });
+    };
+
+    window.addEventListener("adminProfileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("adminProfileUpdated", handleProfileUpdate);
+    };
+  }, []);
 
   return (
     <div className="admin-topbar">
@@ -16,7 +57,7 @@ function AdminTopbar() {
         </svg>
         <input
           type="text"
-          placeholder="Search analytics or orders..."
+          placeholder="Search settings..."
         />
       </div>
 
@@ -42,10 +83,14 @@ function AdminTopbar() {
         {/* Admin Profile */}
         <div className="admin-card" onClick={() => setShowProfile(true)}>
           <div className="profile-info">
-            <h4>Claire Valmont</h4>
-            <p>SUPER ADMIN</p>
+            <h4>{profile.fullName}</h4>
+            <p>{profile.role.toUpperCase()}</p>
           </div>
-          <img src={claireValmontAvatar} alt="Claire Valmont" className="profile-avatar" />
+          <img
+            src={profile.profilePicture || defaultProfileAvatar}
+            alt={profile.fullName}
+            className="profile-avatar"
+          />
         </div>
       </div>
 
@@ -56,29 +101,26 @@ function AdminTopbar() {
             <h2>Admin Profile</h2>
             <div className="profile-details">
               <div className="profile-pic-edit">
-                <img src={claireValmontAvatar} alt="Profile" />
-                <button className="edit-btn">Change Image</button>
+                <img
+                  src={profile.profilePicture || defaultProfileAvatar}
+                  alt={profile.fullName}
+                />
               </div>
               <label>
                 Name:
-                <input type="text" defaultValue="Claire Valmont" />
+                <input type="text" readOnly value={profile.fullName} />
               </label>
               <label>
                 Email:
-                <input type="email" defaultValue="claire@redshan360.com" />
-              </label>
-              <label>
-                Phone:
-                <input type="text" defaultValue="0771234567" />
+                <input type="email" readOnly value="eleanor.thorne@redshan360.com" />
               </label>
               <label>
                 Role:
-                <input type="text" defaultValue="Super Admin" />
+                <input type="text" readOnly value={profile.role} />
               </label>
             </div>
             <div className="modal-actions">
-              <button className="save-btn">Save Changes</button>
-              <button className="close-btn" onClick={() => setShowProfile(false)}>Close</button>
+              <button className="close-btn" style={{ flex: 1 }} onClick={() => setShowProfile(false)}>Close</button>
             </div>
           </div>
         </div>
