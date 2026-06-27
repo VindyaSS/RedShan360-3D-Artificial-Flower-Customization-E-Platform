@@ -1,0 +1,73 @@
+.category-performance-card {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  height: 440px;
+  box-sizing: border-box;
+}
+
+.category-card-header {
+  margin-bottom: 30px;
+}
+
+.category-card-header h3 {
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  flex: 1;
+  justify-content: center;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.category-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-name {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #555555;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.category-percentage {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2d2d2d;
+}
+
+.category-progress-track {
+  height: 8px;
+  background-color: #f1edea;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.category-progress-bar {
+  height: 100%;
+  background-color: #8a6365;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}

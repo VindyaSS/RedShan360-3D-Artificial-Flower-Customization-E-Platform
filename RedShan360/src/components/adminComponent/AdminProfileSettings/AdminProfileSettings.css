@@ -1,0 +1,125 @@
+.profile-settings-form-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.profile-inputs-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 24px;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #555555;
+  letter-spacing: 1px;
+}
+
+.form-group input {
+  font-family: "Inter", sans-serif;
+  background-color: #f4f1f0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 14px;
+  color: #2d2d2d;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  background-color: #ece8e6;
+  border-color: #e2dcd9;
+}
+
+.form-group input.readonly-field {
+  background-color: #ece8e6;
+  color: #888888;
+  cursor: not-allowed;
+  border-color: transparent;
+}
+
+.form-submit-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-changes-btn {
+  background-color: #8a6365;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(138, 99, 101, 0.25);
+}
+
+.save-changes-btn:hover {
+  background-color: #735153;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(138, 99, 101, 0.35);
+}
+
+.save-changes-btn:active {
+  transform: translateY(0);
+}
+
+.save-changes-btn:disabled {
+  background-color: #a98f91;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.profile-settings-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 12px;
+  color: #8a6365;
+}
+
+.profile-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(138, 99, 101, 0.15);
+  border-top-color: #8a6365;
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+@media (max-width: 680px) {
+  .form-fields-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .form-submit-row {
+    justify-content: stretch;
+  }
+  .save-changes-btn {
+    width: 100%;
+  }
+}
