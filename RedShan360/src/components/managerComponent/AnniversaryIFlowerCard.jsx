@@ -1,7 +1,7 @@
 import React from 'react';
 import { Edit3, Trash2, Box } from 'lucide-react';
 
-export default function AniversaryBFlowerCard({
+export default function AniversaryIFlowerCard({
     image,
     quantity,
     BoquetName,
@@ -35,7 +35,7 @@ export default function AniversaryBFlowerCard({
             <div className="p-4 flex flex-col flex-1 gap-3 justify-between">
                 <div>
                     <span className="text-[11px] font-semibold text-[#744F51]/75 uppercase tracking-widest font-sans">
-                        Anniversary Bouquet
+                        Anniversary Individual Flowers
                     </span>
                     <h3 className="text-base font-bold text-[#1a1a1a] mt-1 line-clamp-2 font-sans">
                         {BoquetName}
