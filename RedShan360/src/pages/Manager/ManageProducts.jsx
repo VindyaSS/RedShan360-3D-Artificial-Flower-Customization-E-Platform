@@ -212,7 +212,149 @@ export default function MmanageProducts() {
 
                     {/* Dashboard Content area */}
                     <div className="flex-1">
-                        {activeSector === 'All - Boquets' ? (
+                        {activeSector === 'All' ? (
+                            <div className="flex flex-col gap-12">
+                                {/* All - Boquets */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
+                                            All - Boquets
+                                        </h2>
+                                        <span className="text-xs font-semibold text-[#666] bg-[#744F51]/5 border border-[#744F51]/10 px-3 py-1.5 rounded-lg">
+                                            Showing {filteredBouquets.length + filteredBirthdayBouquets.length + filteredConvocationBouquets.length} of {anniversaryBouquets.length + birthdayBoquetFlowers.length + convocationBouquets.length} bouquets
+                                        </span>
+                                    </div>
+
+                                    {filteredBouquets.length + filteredBirthdayBouquets.length + filteredConvocationBouquets.length > 0 ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                            {filteredBouquets.map((bouquet) => (
+                                                <AniversaryBFlowerCard
+                                                    key={`all-anniversary-${bouquet.id}`}
+                                                    image={bouquet.image}
+                                                    quantity={bouquet.quantity}
+                                                    BoquetName={bouquet.BoquetName}
+                                                    Price={bouquet.Price}
+                                                    onEdit={() => handleEdit(bouquet.id, 'Bouquet')}
+                                                    onDelete={() => handleDelete(bouquet.id, 'Bouquet')}
+                                                />
+                                            ))}
+                                            {filteredBirthdayBouquets.map((bouquet) => (
+                                                <BirthdayBFlowerCard
+                                                    key={`all-birthday-${bouquet.id}`}
+                                                    image={bouquet.image}
+                                                    quantity={bouquet.quantity}
+                                                    BoquetName={bouquet.FlowerName || bouquet.BoquetName}
+                                                    Price={bouquet.Price}
+                                                    onEdit={() => handleEdit(bouquet.id, 'Birthday Bouquet')}
+                                                    onDelete={() => handleDelete(bouquet.id, 'Birthday Bouquet')}
+                                                />
+                                            ))}
+                                            {filteredConvocationBouquets.map((bouquet) => (
+                                                <ConvocationBFlowerCard
+                                                    key={`all-convocation-${bouquet.id}`}
+                                                    image={bouquet.image}
+                                                    quantity={bouquet.quantity}
+                                                    BoquetName={bouquet.BoquetName}
+                                                    Price={bouquet.Price}
+                                                    onEdit={() => handleEdit(bouquet.id, 'Convocation Bouquet')}
+                                                    onDelete={() => handleDelete(bouquet.id, 'Convocation Bouquet')}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-white border border-[#e5e4e7] rounded-2xl shadow-sm text-[#666] font-medium">
+                                            No bouquets found matching "{searchQuery}"
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* All - Individual Flowers */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
+                                            All - Individual Flowers
+                                        </h2>
+                                        <span className="text-xs font-semibold text-[#666] bg-[#744F51]/5 border border-[#744F51]/10 px-3 py-1.5 rounded-lg">
+                                            Showing {filteredIndividualFlowers.length + filteredBirthdayIndividualFlowers.length + filteredConvocationIndividualFlowers.length} of {anniversaryIndividualFlowers.length + birthdayIndividualFlowers.length + convocationIndividualFlowers.length} flowers
+                                        </span>
+                                    </div>
+
+                                    {filteredIndividualFlowers.length + filteredBirthdayIndividualFlowers.length + filteredConvocationIndividualFlowers.length > 0 ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                            {filteredIndividualFlowers.map((flower) => (
+                                                <AnniversaryIFlowerCard
+                                                    key={`all-anniversary-flower-${flower.id}`}
+                                                    image={flower.image}
+                                                    quantity={flower.quantity}
+                                                    FlowerName={flower.FlowerName}
+                                                    Price={flower.Price}
+                                                    onEdit={() => handleEdit(flower.id, 'Individual Flower')}
+                                                    onDelete={() => handleDelete(flower.id, 'Individual Flower')}
+                                                />
+                                            ))}
+                                            {filteredBirthdayIndividualFlowers.map((flower) => (
+                                                <BirthdayIFlowerCard
+                                                    key={`all-birthday-flower-${flower.id}`}
+                                                    image={flower.image}
+                                                    quantity={flower.quantity}
+                                                    FlowerName={flower.FlowerName}
+                                                    Price={flower.Price}
+                                                    onEdit={() => handleEdit(flower.id, 'Birthday Individual Flower')}
+                                                    onDelete={() => handleDelete(flower.id, 'Birthday Individual Flower')}
+                                                />
+                                            ))}
+                                            {filteredConvocationIndividualFlowers.map((flower) => (
+                                                <ConvocationIFlowerCard
+                                                    key={`all-convocation-flower-${flower.id}`}
+                                                    image={flower.image}
+                                                    quantity={flower.quantity}
+                                                    BoquetName={flower.FlowerName}
+                                                    Price={flower.Price}
+                                                    onEdit={() => handleEdit(flower.id, 'Convocation Individual Flower')}
+                                                    onDelete={() => handleDelete(flower.id, 'Convocation Individual Flower')}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-white border border-[#e5e4e7] rounded-2xl shadow-sm text-[#666] font-medium">
+                                            No individual flowers found matching "{searchQuery}"
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* All - Head Dresses */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
+                                            All - Head Dresses
+                                        </h2>
+                                        <span className="text-xs font-semibold text-[#666] bg-[#744F51]/5 border border-[#744F51]/10 px-3 py-1.5 rounded-lg">
+                                            Showing {filteredBirthdayHeaddresses.length} of {birthdayHeaddresses.length} headdresses
+                                        </span>
+                                    </div>
+
+                                    {filteredBirthdayHeaddresses.length > 0 ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                            {filteredBirthdayHeaddresses.map((headdress) => (
+                                                <BirthdayHeaddressCard
+                                                    key={`all-birthday-headdress-${headdress.id}`}
+                                                    image={headdress.image}
+                                                    quantity={headdress.quantity}
+                                                    HeaddressName={headdress.HeaddressName}
+                                                    Price={headdress.Price}
+                                                    onEdit={() => handleEdit(headdress.id, 'Birthday Headdress')}
+                                                    onDelete={() => handleDelete(headdress.id, 'Birthday Headdress')}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-white border border-[#e5e4e7] rounded-2xl shadow-sm text-[#666] font-medium">
+                                            No headdresses found matching "{searchQuery}"
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : activeSector === 'All - Boquets' ? (
                             <div>
                                 <div className="flex items-center justify-between mb-6">
                                     <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
