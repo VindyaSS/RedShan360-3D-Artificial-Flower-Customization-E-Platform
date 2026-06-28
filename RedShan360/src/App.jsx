@@ -16,6 +16,8 @@ import ContactPage from './pages/GuestUser/ContactPage';
 import AdminUserManagement from "./pages/Admin/AdminUserManagement";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminOrderManagement from "./pages/admin/AdminOrderManagement";
+import AdminReportsAnalytics from "./pages/Admin/AdminReportsAnalytics/AdminReportsAnalytics";
+import AdminSettings from "./pages/Admin/AdminSettings/AdminSettings";
 
 
 
@@ -74,6 +76,8 @@ function App() {
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/adminUserManagement" element={<AdminUserManagement />} />
           <Route path="/adminOrderManagement" element={<AdminOrderManagement />} />
+          <Route path="/adminReports" element={<AdminReportsAnalytics />} />
+          <Route path="/adminSettings" element={<AdminSettings />} />
 
 
 

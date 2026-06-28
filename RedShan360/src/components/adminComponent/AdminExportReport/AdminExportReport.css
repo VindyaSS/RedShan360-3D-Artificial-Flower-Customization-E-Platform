@@ -1,0 +1,55 @@
+.export-report-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #8a6365;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(138, 99, 101, 0.2);
+}
+
+.export-report-btn:hover {
+  background: #735153;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(138, 99, 101, 0.3);
+}
+
+.export-report-btn:active {
+  transform: translateY(0);
+}
+
+.export-report-btn:disabled {
+  background: #a98f91;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.export-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.export-report-btn:hover .export-icon {
+  transform: translateY(1px);
+}
+
+.export-report-btn.loading .export-icon {
+  animation: bounce 0.6s infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(-2px);
+  }
+  to {
+    transform: translateY(2px);
+  }
+}

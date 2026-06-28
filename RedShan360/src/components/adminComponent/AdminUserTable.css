@@ -1,8 +1,8 @@
 .admin-user-table-container {
-  background: white;
+  background: #ffffff;
   border-radius: 0 0 15px 15px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .admin-user-table {
@@ -11,62 +11,196 @@
 }
 
 .admin-user-table th {
-  background: #f8f6f5;
-  color: #555;
+  background: #faf8f7;
+  color: #888888;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
   text-align: left;
-  padding: 16px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1edea;
 }
 
 .admin-user-table td {
-  padding: 16px;
-  border-top: 1px solid #eeeeee;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1edea;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
+  color: #4f4f4f;
+  vertical-align: middle;
 }
 
-.admin-user-table tr:hover {
-  background: #fafafa;
+.admin-user-table tr:last-child td {
+  border-bottom: none;
 }
 
-.status-dropdown {
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: white;
+.admin-user-table tr:hover td {
+  background-color: #faf8f7;
+}
+
+/* User Details Cell with Initials Bubble */
+.user-details-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-initials-bubble {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Dynamic colors for initials bubble matching mockup theme */
+.initials-rose {
+  background-color: #f2e8e8;
+  color: #8a6365;
+}
+
+.initials-grey {
+  background-color: #eceff1;
+  color: #546e7a;
+}
+
+.initials-coral {
+  background-color: #fdf2f2;
+  color: #ba68c8;
+}
+
+.initials-brown {
+  background-color: #ebd4d4;
+  color: #5c3d3f;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d2d2d;
+}
+
+.user-type {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  color: #888888;
+}
+
+/* Contact Info Cell */
+.contact-info-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-email {
+  font-family: "Inter", sans-serif;
   font-size: 13px;
-  cursor: pointer;
-}
-.status-dropdown:focus {
-  border-color: #7a5255;
+  font-weight: 500;
+  color: #2d2d2d;
 }
 
-.action-buttons {
+.contact-phone {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  color: #888888;
+}
+
+/* Status pills */
+.status-pill {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.status-pill.active {
+  background-color: #e8f9f0;
+  color: #27ae60;
+}
+
+.status-pill.inactive {
+  background-color: #f0f0f0;
+  color: #777777;
+}
+
+.status-pill.suspended {
+  background-color: #fcebeb;
+  color: #c0392b;
+}
+
+/* Action buttons */
+.row-action-buttons {
   display: flex;
   gap: 8px;
+  justify-content: flex-end;
 }
 
-.view-btn {
-  background: #e8f1ff;
-  color: #0057d8;
+.action-icon-btn {
+  background: none;
   border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
   cursor: pointer;
-  font-size: 13px;
+  padding: 6px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #555555;
+  transition: all 0.2s ease;
 }
 
-.edit-btn {
-  background: #fff3dc;
-  color: #c58a00;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
+.action-icon-btn:hover {
+  background-color: #f1edea;
 }
 
-.view-btn:hover,
-.edit-btn:hover {
-  opacity: 0.85;
+.action-icon-btn.view:hover {
+  color: #8a6365;
+}
+
+.action-icon-btn.edit:hover {
+  color: #e67e22;
+}
+
+.action-icon-btn.delete:hover {
+  color: #c0392b;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.table-placeholder {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.table-placeholder h3 {
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0 0 8px 0;
+}
+
+.table-placeholder p {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
 }

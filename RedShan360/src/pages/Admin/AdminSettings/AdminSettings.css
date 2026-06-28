@@ -1,0 +1,123 @@
+/* ===== ADMIN SETTINGS PAGE BASE ===== */
+.admin-settings-page {
+  display: flex;
+  min-height: 100vh;
+  background: #faf8f7;
+  width: 100%;
+}
+
+.settings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 120px);
+}
+
+/* ===== HEADER BLOCK ===== */
+.settings-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+.settings-title-block h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 38px;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.settings-title-block p {
+  margin: 0;
+  font-size: 14px;
+  color: #666666;
+  font-weight: 500;
+}
+
+/* ===== WORKSPACE SPLIT LAYOUT ===== */
+.settings-workspace-split {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 30px;
+  flex: 1;
+  align-items: start;
+  margin-bottom: 40px;
+}
+
+.settings-split-left {
+  width: 100%;
+}
+
+.settings-split-right {
+  width: 100%;
+  min-width: 0; /* prevents overflow */
+}
+
+.settings-content-panel {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 35px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+/* ===== FOOTER BLOCK ===== */
+.settings-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+  border-top: 1px solid #e2dcd9;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #888888;
+  margin-top: auto;
+}
+
+.footer-right {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-link {
+  text-decoration: none;
+  color: #888888;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #8a6365;
+}
+
+/* ===== RESPONSIVENESS AND COLLAPSIBILITY ===== */
+@media (max-width: 900px) {
+  .settings-workspace-split {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .settings-content-panel {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-header-row {
+    margin-bottom: 20px;
+  }
+  .settings-title-block h1 {
+    font-size: 30px;
+  }
+  .settings-footer {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
