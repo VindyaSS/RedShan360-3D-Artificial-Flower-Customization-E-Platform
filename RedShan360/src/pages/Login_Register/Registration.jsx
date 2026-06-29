@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Registration.css';
 import api from '../../services/api';
+import PasswordInput from '../../components/PasswordInput';
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../../components/TermsOfServiceModal';
 
 export default function RegistrationPage() {
   const navigate = useNavigate();
@@ -14,6 +17,8 @@ export default function RegistrationPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   const [apiSuccess, setApiSuccess] = useState('');
@@ -263,8 +268,7 @@ export default function RegistrationPage() {
                     <label className="form-label" htmlFor="password-input">Password</label>
                   </div>
                   <div className="input-wrapper">
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="password-input"
                       className="form-input"
                       placeholder="••••••••"
@@ -283,8 +287,7 @@ export default function RegistrationPage() {
                     <label className="form-label" htmlFor="confirmPassword-input">Confirm Password</label>
                   </div>
                   <div className="input-wrapper">
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="confirmPassword-input"
                       className="form-input"
                       placeholder="••••••••"
@@ -344,9 +347,23 @@ export default function RegistrationPage() {
 
         <div className="footer-right">
           <div className="footer-links-row">
-            <a href="/privacy" className="footer-link">Privacy Policy</a>
+            <button
+              type="button"
+              onClick={() => setIsPrivacyOpen(true)}
+              className="footer-link"
+              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+            >
+              Privacy Policy
+            </button>
             <span style={{ color: '#555' }}>|</span>
-            <a href="/terms" className="footer-link">Terms of Service</a>
+            <button
+              type="button"
+              onClick={() => setIsTermsOpen(true)}
+              className="footer-link"
+              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+            >
+              Terms of Service
+            </button>
           </div>
           <div className="secure-checkout-badge">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
@@ -357,6 +374,9 @@ export default function RegistrationPage() {
           </div>
         </div>
       </footer>
+
+      <PrivacyPolicyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
     </div>
   );
 }

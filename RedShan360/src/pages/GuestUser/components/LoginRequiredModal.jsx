@@ -16,7 +16,7 @@ const LoginRequiredModal = ({ isOpen, onClose }) => {
     if (isOpen) {
       setShouldRender(true);
       setIsClosing(false);
-      
+
       // Lock page body scrolling
       document.body.style.overflow = 'hidden';
 
@@ -108,16 +108,14 @@ const LoginRequiredModal = ({ isOpen, onClose }) => {
   return createPortal(
     <div
       onClick={handleOverlayClick}
-      className={`fixed inset-0 z-[9999] bg-[#000000]/45 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity duration-200 ease-in-out ${
-        isClosing ? 'opacity-0 pointer-events-none' : 'opacity-100'
-      }`}
+      className={`fixed inset-0 z-[9999] bg-[#000000]/45 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity duration-200 ease-in-out ${isClosing ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
     >
       {/* Centered Modal Container */}
       <div
         ref={modalRef}
-        className={`bg-white w-full max-w-[95%] sm:max-w-[90%] md:max-w-[420px] rounded-[12px] p-6 md:p-8 flex flex-col justify-start relative text-center transition-all duration-200 ease-in-out ${
-          isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
-        }`}
+        className={`bg-white w-full max-w-[95%] sm:max-w-[90%] md:max-w-[420px] rounded-[12px] p-6 md:p-8 flex flex-col justify-start relative text-center transition-all duration-200 ease-in-out ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+          }`}
         style={{
           boxShadow: '0 20px 60px rgba(0,0,0,.18)',
           boxSizing: 'border-box',
@@ -172,12 +170,12 @@ const LoginRequiredModal = ({ isOpen, onClose }) => {
           </button>
 
           {/* Text Link: Continue Browsing */}
-          <button
+          {/*<button
             onClick={onClose}
             className="mt-3 text-xs text-[#1a1a1a]/55 hover:text-[#8c5e5e] hover:underline font-bold transition-all uppercase tracking-wider"
           >
             Continue Browsing
-          </button>
+          </button>*/}
         </div>
       </div>
     </div>,
