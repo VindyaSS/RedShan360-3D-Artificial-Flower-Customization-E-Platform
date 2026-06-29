@@ -98,8 +98,9 @@ const LoginRequiredModal = ({ isOpen, onClose }) => {
 
   const handleAction = (route) => {
     onClose();
-    document.body.style.overflow = '';
-    navigate(route);
+    setTimeout(() => {
+      navigate(route, { state: { from: window.location.pathname } });
+    }, 200);
   };
 
   if (!shouldRender) return null;
@@ -154,7 +155,7 @@ const LoginRequiredModal = ({ isOpen, onClose }) => {
           {/* Primary: Sign In */}
           <button
             ref={signInBtnRef}
-            onClick={() => handleAction('/signin')}
+            onClick={() => handleAction('/login')}
             className="w-full py-3 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-xs font-bold uppercase tracking-wider rounded-sm shadow-md hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 transition-all duration-300"
             style={{ height: '44px' }}
           >
@@ -163,7 +164,7 @@ const LoginRequiredModal = ({ isOpen, onClose }) => {
 
           {/* Secondary: Create Account */}
           <button
-            onClick={() => handleAction('/signup')}
+            onClick={() => handleAction('/register')}
             className="w-full py-3 border border-[#d9d2d0] hover:border-[#8c5e5e] bg-white hover:bg-[#8c5e5e]/5 text-[#1a1a1a]/85 hover:text-[#8c5e5e] text-xs font-bold uppercase tracking-wider rounded-sm hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
             style={{ height: '44px' }}
           >
