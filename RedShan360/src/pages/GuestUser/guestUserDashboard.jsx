@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import CategoryGrid from './components/CategoryGrid';
@@ -6,16 +7,47 @@ import ExperienceBanner from './components/ExperienceBanner';
 import FeaturedProducts from './components/FeaturedProducts';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
+import api from '../../services/api';
 
 import { products } from '../../data/products';
 
 const GuestUserDashboard = () => {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem('redshan360_wishlist');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [wishlist, setWishlist] = useState({});
+
+  const savedUser = localStorage.getItem('user');
+  const user = savedUser ? JSON.parse(savedUser) : null;
+  const userId = user ? user.id : null;
+
+  const fetchWishlist = async () => {
+    if (userId) {
+      try {
+        const response = await api.get(`/api/wishlist/user/${userId}`);
+        const wishlistMap = {};
+        response.data.forEach((item) => {
+          wishlistMap[item.productId] = item.wishlistId;
+        });
+        setWishlist(wishlistMap);
+      } catch (error) {
+        console.error('Error fetching wishlist:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [userId]);
+
+  // Sync wishlist from other pages
+  useEffect(() => {
+    const handleWishlistUpdated = () => {
+      fetchWishlist();
+    };
+    window.addEventListener('wishlist-updated', handleWishlistUpdated);
+    return () => window.removeEventListener('wishlist-updated', handleWishlistUpdated);
+  }, [userId]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -23,13 +55,44 @@ const GuestUserDashboard = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleWishlist = (id) => {
-    setWishlist((prev) => {
-      const updated = { ...prev, [id]: !prev[id] };
-      localStorage.setItem('redshan360_wishlist', JSON.stringify(updated));
-      window.dispatchEvent(new Event('wishlist-updated'));
-      return updated;
-    });
+  const toggleWishlist = async (id) => {
+    if (!userId) {
+      window.dispatchEvent(new Event('show-login-required'));
+      return;
+    }
+
+    const wishlistId = wishlist[id];
+
+    if (wishlistId) {
+      // Remove from database
+      try {
+        await api.delete(`/api/wishlist/${wishlistId}`);
+        setWishlist((prev) => {
+          const updated = { ...prev };
+          delete updated[id];
+          window.dispatchEvent(new Event('wishlist-updated'));
+          return updated;
+        });
+      } catch (error) {
+        console.error('Error removing from wishlist:', error);
+      }
+    } else {
+      // Add to database
+      try {
+        const response = await api.post('/api/wishlist', {
+          userId,
+          productId: id
+        });
+        const newWishlistId = response.data.data.wishlistId;
+        setWishlist((prev) => {
+          const updated = { ...prev, [id]: newWishlistId };
+          window.dispatchEvent(new Event('wishlist-updated'));
+          return updated;
+        });
+      } catch (error) {
+        console.error('Error adding to wishlist:', error);
+      }
+    }
   };
 
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
