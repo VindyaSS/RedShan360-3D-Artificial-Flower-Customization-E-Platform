@@ -32,7 +32,7 @@ const STEMS_DATABASE = [
     id: p.id.toString(),
     name: p.title,
     category: 'premium-blooms',
-    price: p.numericPrice ? p.numericPrice / 100 : 20.00,
+    price: p.numericPrice ? p.numericPrice : 1500.00,
     image: p.image,
     color: p.colors[0]?.hex || '#a82c2c',
     description: p.description
@@ -41,7 +41,7 @@ const STEMS_DATABASE = [
     id: 'spiral-handtied',
     name: 'Hand-tied Spiral Style',
     category: 'bouquet-styles',
-    price: 15.00,
+    price: 4500.00,
     image: 'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#bfa38a',
     description: 'European spiral binding styling structure'
@@ -50,7 +50,7 @@ const STEMS_DATABASE = [
     id: 'classic-dome',
     name: 'Classic Dome Style',
     category: 'bouquet-styles',
-    price: 10.00,
+    price: 3000.00,
     image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#dfcfbe',
     description: 'Traditional symmetric rounded arrangement structure'
@@ -59,7 +59,7 @@ const STEMS_DATABASE = [
     id: 'silver-eucalyptus',
     name: 'Silver Dollar Eucalyptus',
     category: 'decorative-foliage',
-    price: 8.00,
+    price: 2400.00,
     image: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#8da89d',
     description: 'Sage green rounded coin leaves'
@@ -68,7 +68,7 @@ const STEMS_DATABASE = [
     id: 'emerald-fern',
     name: 'Emerald Fern Leaf',
     category: 'decorative-foliage',
-    price: 6.00,
+    price: 1800.00,
     image: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#5c8774',
     description: 'Delicate branching feathery deep green fern'
@@ -77,7 +77,7 @@ const STEMS_DATABASE = [
     id: 'velvet-ribbon',
     name: 'Velvet Burgundy Ribbon',
     category: 'wrapping-accents',
-    price: 7.00,
+    price: 2100.00,
     image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#5c2c2c',
     description: 'Plush velvet ribbon around the vase neck'
@@ -86,7 +86,7 @@ const STEMS_DATABASE = [
     id: 'kraft-paper',
     name: 'Kraft Paper Wrapping',
     category: 'wrapping-accents',
-    price: 4.00,
+    price: 1200.00,
     image: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#d2b48c',
     description: 'Minimalist rustic brown paper wraps'
@@ -477,7 +477,7 @@ export default function BoquetCustomization() {
       id: customBouquetId,
       isCustom: true,
       title: 'Custom Bouquet Arrangement',
-      price: '$' + estimatedTotal.toFixed(2),
+      price: 'Rs ' + estimatedTotal.toFixed(2),
       numericPrice: estimatedTotal,
       image: '/images/peonies_vase.png',
       selectedColor: selectedStemsDetails || 'Custom Curation',
@@ -510,7 +510,7 @@ export default function BoquetCustomization() {
   };
 
   // Price calculations
-  const basePrice = 45.00; // Crystal Vase (Base)
+  const basePrice = 13500.00; // Crystal Vase (Base)
   const botanicalSelectionPrice = useMemo(() => {
     return selectedStems.reduce((sum, item) => {
       const dbItem = STEMS_DATABASE.find(s => s.id === item.stemId);
@@ -759,7 +759,7 @@ export default function BoquetCustomization() {
                                 <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
                                 <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
                                 <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
-                                  +${stem.price.toFixed(2)}
+                                  +Rs {stem.price.toFixed(2)}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -935,12 +935,12 @@ export default function BoquetCustomization() {
                         <div className="min-w-0">
                           <h4 className="text-xs font-bold text-[#563c37] truncate">{dbItem.name}</h4>
                           <span className="text-[10px] text-[#563c37]/55 uppercase tracking-wide">
-                            {item.quantity} × ${dbItem.price.toFixed(2)}
+                            {item.quantity} × Rs {dbItem.price.toFixed(2)}
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-xs font-bold text-[#563c37]">
-                            ${(dbItem.price * item.quantity).toFixed(2)}
+                            Rs {(dbItem.price * item.quantity).toFixed(2)}
                           </span>
                           <button 
                             onClick={() => handleClearStem(item.stemId)}
@@ -961,11 +961,11 @@ export default function BoquetCustomization() {
               {/* Pricing list */}
               <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
                 <span>CRYSTAL VASE (BASE)</span>
-                <span className="text-[#563c37]">${basePrice.toFixed(2)}</span>
+                <span className="text-[#563c37]">Rs {basePrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
                 <span>BOTANICAL SELECTION</span>
-                <span className="text-[#563c37]">${botanicalSelectionPrice.toFixed(2)}</span>
+                <span className="text-[#563c37]">Rs {botanicalSelectionPrice.toFixed(2)}</span>
               </div>
 
               <div className="border-t border-[#fdfbf9] my-1" />
@@ -977,7 +977,7 @@ export default function BoquetCustomization() {
                     Estimated Total
                   </span>
                   <span className="text-3xl font-extrabold text-[#563c37] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    ${estimatedTotal.toFixed(2)}
+                    Rs {estimatedTotal.toFixed(2)}
                   </span>
                 </div>
                 
