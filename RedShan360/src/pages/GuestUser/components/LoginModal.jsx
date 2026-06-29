@@ -166,7 +166,7 @@ const LoginModal = ({ isOpen, onClose }) => {
   const handleCreateAccountClick = () => {
     onClose();
     document.body.style.overflow = '';
-    navigate('/signup');
+    navigate('/register');
   };
 
   const handleForgotPasswordClick = () => {

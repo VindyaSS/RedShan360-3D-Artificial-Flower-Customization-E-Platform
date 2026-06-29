@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Login_Page.css';
 import api from '../../services/api';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -52,7 +56,8 @@ export default function LoginPage() {
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
       setTimeout(() => {
-        window.location.href = '/';
+        window.dispatchEvent(new Event('auth-updated'));
+        navigate(from, { replace: true });
       }, 1500);
     } catch (error) {
       console.error('Login error:', error);

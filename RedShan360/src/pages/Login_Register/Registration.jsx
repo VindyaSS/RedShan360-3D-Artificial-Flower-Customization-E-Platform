@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Registration.css';
 import api from '../../services/api';
 
 export default function RegistrationPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -71,7 +75,7 @@ export default function RegistrationPage() {
       console.log('Registration success:', response.data);
 
       setTimeout(() => {
-        window.location.href = '/login';
+        navigate('/login', { state: { from } });
       }, 2000);
     } catch (error) {
       console.error('Registration error:', error);
