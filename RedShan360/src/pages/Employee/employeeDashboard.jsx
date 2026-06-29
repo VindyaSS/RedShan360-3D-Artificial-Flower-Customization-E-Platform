@@ -116,8 +116,17 @@ export default function EmployeeDashboard() {
     }));
   };
 
-  const assignedTasks = tasks.filter(t => t.status !== 'Completed');
-  const completedTasks = tasks.filter(t => t.status === 'Completed');
+  const handleReadyToPacking = (orderId, itemId) => {
+    setTasks(prev => prev.map(t => {
+      if (t.OrderID === orderId && t.ItemID === itemId) {
+        return { ...t, status: 'Ready to Packing' };
+      }
+      return t;
+    }));
+  };
+
+  const assignedTasks = tasks.filter(t => t.status !== 'Completed' && t.status !== 'Ready to Packing');
+  const completedTasks = tasks.filter(t => t.status === 'Completed' || t.status === 'Ready to Packing');
 
   return (
     <div className="EPage">
@@ -141,6 +150,7 @@ export default function EmployeeDashboard() {
               onStart={handleStart}
               onStop={handleStop}
               onComplete={handleComplete}
+              onReadyToPacking={handleReadyToPacking}
               onItemClick={setSelectedItem}
             />
           </div>

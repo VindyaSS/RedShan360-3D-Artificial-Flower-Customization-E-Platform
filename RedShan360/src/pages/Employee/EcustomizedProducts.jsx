@@ -116,6 +116,23 @@ export default function EcustomizedProducts() {
             }}>
               Assigned Tasks (Customized Items)
             </h3>
+            <p style={{
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontSize: "13.5px",
+              color: "#b25e00",
+              backgroundColor: "#fcf6e8",
+              border: "1px solid #faecc8",
+              padding: "8px 12px",
+              borderRadius: "8px",
+              marginTop: "-8px",
+              marginBottom: "16px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              fontWeight: "500"
+            }}>
+              💡 Customized items do not have pre-made flower bouquets. They must be made on-demand (make on time).
+            </p>
             <ECustomizedOrderTable
               orders={assignedTasks}
               onStart={handleStart}
