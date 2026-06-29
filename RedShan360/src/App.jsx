@@ -18,6 +18,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminOrderManagement from "./pages/admin/AdminOrderManagement";
 import AdminReportsAnalytics from "./pages/Admin/AdminReportsAnalytics/AdminReportsAnalytics";
 import AdminSettings from "./pages/Admin/AdminSettings/AdminSettings";
+import AdminProductManagement from "./pages/Admin/AdminProductManagement";
 
 
 
@@ -77,6 +78,7 @@ function App() {
           <Route path="/adminOrderManagement" element={<AdminOrderManagement />} />
           <Route path="/adminReports" element={<AdminReportsAnalytics />} />
           <Route path="/adminSettings" element={<AdminSettings />} />
+          <Route path="/adminProductManagement" element={<AdminProductManagement />} />
 
 
 
