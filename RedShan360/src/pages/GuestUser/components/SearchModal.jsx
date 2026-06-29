@@ -187,6 +187,13 @@ const SearchModal = ({ isOpen, onClose }) => {
               placeholder="Search bouquets, flowers, head dresses..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && inputValue.trim()) {
+                  onClose();
+                  document.body.style.overflow = '';
+                  navigate(`/shop?search=${encodeURIComponent(inputValue.trim())}`);
+                }
+              }}
               className="w-full bg-transparent outline-none text-base md:text-lg font-playfair text-[#1a1a1a] placeholder:text-[#1a1a1a]/40 tracking-wide"
             />
             {inputValue && (
