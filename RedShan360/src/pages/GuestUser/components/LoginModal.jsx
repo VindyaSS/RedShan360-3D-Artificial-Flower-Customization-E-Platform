@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { X, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import api from '../../../services/api';
+import PasswordInput from '../../../components/PasswordInput';
 
 const LoginModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -248,9 +249,8 @@ const LoginModal = ({ isOpen, onClose }) => {
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <input
+                <PasswordInput
                   id="modal-password"
-                  type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -259,14 +259,6 @@ const LoginModal = ({ isOpen, onClose }) => {
                   }`}
                   style={{ height: '48px' }}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1a1a1a] transition-colors"
-                  tabIndex="-1"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
               </div>
               {errors.password && (
                 <span className="text-[11px] text-red-500 mt-1 block font-semibold">{errors.password}</span>
