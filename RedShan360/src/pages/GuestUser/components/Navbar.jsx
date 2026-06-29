@@ -3,6 +3,10 @@ import { Search, Heart, ShoppingCart, User, Menu, X } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { products } from '../../../data/products';
 import CartDrawer from './CartDrawer';
+import SearchModal from './SearchModal';
+import LoginModal from './LoginModal';
+import LoginRequiredModal from './LoginRequiredModal';
+import api from '../../../services/api';
 
 const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWishlistClick }) => {
   const navigate = useNavigate();
@@ -16,13 +20,16 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLoginRequiredOpen, setIsLoginRequiredOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
   const profileDropdownRef = useRef(null);
   const mobileProfileDropdownRef = useRef(null);
 
   // Synchronize cart and wishlist counts
-  const updateCounts = () => {
+  const updateCounts = async () => {
     // Cart Count
     const savedCart = localStorage.getItem('redshan360_cart');
     if (savedCart) {
@@ -35,15 +42,19 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
       setCartCount(0);
     }
 
-    // Wishlist Count
-    const savedWishlist = localStorage.getItem('redshan360_wishlist');
-    if (savedWishlist) {
-      const wishlistObj = JSON.parse(savedWishlist);
-      // Only count wishlisted items that correspond to valid active product IDs
-      const count = Object.keys(wishlistObj).filter(
-        (key) => wishlistObj[key] === true && products.some((p) => p.id === Number(key))
-      ).length;
-      setWishlistCount(count);
+    // Wishlist Count from database if logged in
+    const savedUser = localStorage.getItem('user');
+    const user = savedUser ? JSON.parse(savedUser) : null;
+    const userId = user ? user.id : null;
+
+    if (userId) {
+      try {
+        const response = await api.get(`/api/wishlist/count/${userId}`);
+        setWishlistCount(response.data.count);
+      } catch (error) {
+        console.error('Error fetching wishlist count:', error);
+        setWishlistCount(0);
+      }
     } else {
       setWishlistCount(0);
     }
@@ -52,17 +63,32 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   useEffect(() => {
     updateCounts();
 
-    const handleOpenCart = () => setIsCartOpen(true);
+    const handleOpenCart = () => {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        setIsCartOpen(true);
+      } else {
+        setIsLoginRequiredOpen(true);
+      }
+    };
+
+    const handleShowLoginRequired = () => {
+      setIsLoginRequiredOpen(true);
+    };
 
     // Listen to custom events from details/shop pages
     window.addEventListener('cart-updated', updateCounts);
     window.addEventListener('wishlist-updated', updateCounts);
+    window.addEventListener('auth-updated', updateCounts);
     window.addEventListener('open-cart', handleOpenCart);
+    window.addEventListener('show-login-required', handleShowLoginRequired);
 
     return () => {
       window.removeEventListener('cart-updated', updateCounts);
       window.removeEventListener('wishlist-updated', updateCounts);
+      window.removeEventListener('auth-updated', updateCounts);
       window.removeEventListener('open-cart', handleOpenCart);
+      window.removeEventListener('show-login-required', handleShowLoginRequired);
     };
   }, []);
 
@@ -110,9 +136,11 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setIsProfileOpen(false);
     setIsMobileProfileOpen(false);
     setMobileMenuOpen(false);
+    window.dispatchEvent(new Event('auth-updated'));
     navigate('/login');
   };
 
@@ -134,6 +162,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   };
 
   const handleNavClick = (item, e) => {
+    if (item.toLowerCase() === 'customization') {
+      const savedUser = localStorage.getItem('user');
+      if (!savedUser) {
+        e.preventDefault();
+        setIsLoginRequiredOpen(true);
+        setMobileMenuOpen(false);
+        return;
+      }
+    }
     const route = getRoute(item);
     if (route.startsWith('/guestUserDashboard#')) {
       // If we are already on home page, scroll to element
@@ -191,63 +228,23 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
           {/* Desktop Search & Icons */}
           <div className="hidden lg:flex items-center gap-3">
 
-            {/* Search Input Container */}
-            <div ref={searchContainerRef} className="relative">
-              <div className="flex items-center gap-2 bg-[#f4f0ed] rounded-sm px-4 py-2 w-60 border border-[#1a1a1a]/5 focus-within:border-[#8c5e5e]/30 transition-all duration-300">
-                <Search size={14} className="text-[#1a1a1a]/60" />
-                <input
-                  type="text"
-                  placeholder="Search arrangements..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowSearchResults(true);
-                  }}
-                  onFocus={() => setShowSearchResults(true)}
-                  className="w-full bg-transparent outline-none text-xs text-[#1a1a1a] placeholder:text-[#1a1a1a]/45 font-medium"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="text-[#1a1a1a]/40 hover:text-[#8c5e5e] transition-colors">
-                    <X size={12} />
-                  </button>
-                )}
-              </div>
-
-              {/* Autocomplete Search Dropdown */}
-              {showSearchResults && searchResults.length > 0 && (
-                <div className="absolute right-0 mt-2 w-72 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-2 max-h-96 overflow-y-auto animate-fade-in text-left">
-                  <p className="text-[10px] uppercase font-bold tracking-widest text-[#1a1a1a]/40 px-4 py-1.5 border-b border-[#d9d2d0]/20 mb-1">
-                    Search Results
-                  </p>
-                  {searchResults.map((product) => (
-                    <button
-                      key={product.id}
-                      onClick={() => handleSearchResultClick(product.id)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#f4f0ed] transition-colors duration-200 text-left"
-                    >
-                      <img
-                        src={product.image}
-                        alt=""
-                        className="w-10 h-12 object-cover rounded-sm bg-luxury-beige flex-shrink-0"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-[#1a1a1a] truncate">{product.title}</p>
-                        <p className="text-[10px] text-[#1a1a1a]/50 truncate">{product.subtitle}</p>
-                        <p className="text-xs font-bold text-[#8c5e5e] mt-0.5">{product.price}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Desktop Search Icon Button */}
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="p-2 rounded-full hover:bg-[#f4f0ed] text-[#1a1a1a] hover:text-[#8c5e5e] hover:scale-110 transition-all duration-300 relative group"
+              aria-label="Search"
+            >
+              <Search size={18} />
+            </button>
 
             {/* Favorite / Wishlist Badge Button */}
             <button
               onClick={() => {
-                if (onWishlistClick) {
-                  onWishlistClick();
+                const savedUser = localStorage.getItem('user');
+                if (savedUser) {
+                  navigate('/wishlist');
                 } else {
-                  navigate('/shop?wishlist=true');
+                  setIsLoginRequiredOpen(true);
                 }
               }}
               className="p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300 relative"
@@ -263,7 +260,14 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
             {/* Shopping Cart Badge Button */}
             <button
-              onClick={() => setIsCartOpen(true)}
+              onClick={() => {
+                const savedUser = localStorage.getItem('user');
+                if (savedUser) {
+                  setIsCartOpen(true);
+                } else {
+                  setIsLoginRequiredOpen(true);
+                }
+              }}
               className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300"
               aria-label="shopping_cart"
             >
@@ -278,20 +282,63 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             {/* Profile Button */}
             <div ref={profileDropdownRef} className="relative">
               <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className={`p-2 rounded-full transition-colors duration-300 ${
-                  isProfileOpen ? 'bg-[#f4f0ed]' : 'hover:bg-[#f4f0ed]'
-                }`}
+                onClick={() => {
+                  const savedUser = localStorage.getItem('user');
+                  if (savedUser) {
+                    setIsProfileOpen(!isProfileOpen);
+                  } else {
+                    setIsLoginOpen(true);
+                  }
+                }}
+                className={`p-2 rounded-full transition-colors duration-300 ${isProfileOpen ? 'bg-[#f4f0ed]' : 'hover:bg-[#f4f0ed]'
+                  }`}
                 aria-label="person"
               >
-                <User size={18} className="text-[#1a1a1a]" />
+                <User size={18} className="text-[#1a1a1a] hover:scale-110 transition-transform duration-200" />
               </button>
 
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-1 text-left animate-fade-in">
+                <div className="absolute right-0 mt-2 w-48 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-xs font-semibold uppercase tracking-wider text-[#1a1a1a]/85 font-sans">
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      alert('My Profile feature is coming soon!');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                  >
+                    My Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      alert('My Orders feature is coming soon!');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                  >
+                    My Orders
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      navigate('/wishlist');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                  >
+                    Wishlist
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      alert('Loyalty Points: You have 150 points!');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                  >
+                    Loyalty Points
+                  </button>
+                  <div className="border-t border-[#d9d2d0]/30 my-1"></div>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-[#1a1a1a] hover:bg-[#f4f0ed] transition-colors duration-200 font-medium"
+                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] text-red-500 hover:text-red-600 transition-colors duration-200"
                   >
                     Logout
                   </button>
@@ -300,10 +347,38 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             </div>
           </div>
 
-          {/* Hamburger Menu Trigger */}
-          <div className="md:hidden">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="transition-colors duration-300 text-[#1a1a1a]" aria-label="Toggle menu">
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {/* Mobile Search, Cart and Menu Triggers */}
+          <div className="md:hidden flex items-center gap-1.5">
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300"
+              aria-label="Search"
+            >
+              <Search size={20} className="text-[#1a1a1a] hover:scale-110 transition-transform duration-200" />
+            </button>
+
+            <button
+              onClick={() => {
+                const savedUser = localStorage.getItem('user');
+                if (savedUser) {
+                  setIsCartOpen(true);
+                } else {
+                  setIsLoginRequiredOpen(true);
+                }
+              }}
+              className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300"
+              aria-label="Cart"
+            >
+              <ShoppingCart size={20} className="text-[#1a1a1a]" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#8c5e5e] text-[9px] text-white font-semibold flex items-center justify-center px-1">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-full transition-colors duration-300 text-[#1a1a1a]" aria-label="Toggle menu">
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -326,7 +401,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  navigate('/shop');
+                  setIsSearchOpen(true);
                 }}
                 className="p-2 rounded-full bg-[#f4f0ed]"
                 aria-label="Search"
@@ -337,7 +412,12 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  navigate('/shop?wishlist=true');
+                  const savedUser = localStorage.getItem('user');
+                  if (savedUser) {
+                    navigate('/wishlist');
+                  } else {
+                    setIsLoginRequiredOpen(true);
+                  }
                 }}
                 className="p-2 rounded-full bg-[#f4f0ed] relative"
                 aria-label="Wishlist"
@@ -353,7 +433,12 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  setIsCartOpen(true);
+                  const savedUser = localStorage.getItem('user');
+                  if (savedUser) {
+                    setIsCartOpen(true);
+                  } else {
+                    setIsLoginRequiredOpen(true);
+                  }
                 }}
                 className="relative p-2 rounded-full bg-[#f4f0ed]"
                 aria-label="Cart"
@@ -368,20 +453,68 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
               <div ref={mobileProfileDropdownRef} className="relative">
                 <button
-                  onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
-                  className={`p-2 rounded-full bg-[#f4f0ed] transition-colors duration-300 ${
-                    isMobileProfileOpen ? 'bg-[#eadeda]' : ''
-                  }`}
+                  onClick={() => {
+                    const savedUser = localStorage.getItem('user');
+                    if (savedUser) {
+                      setIsMobileProfileOpen(!isMobileProfileOpen);
+                    } else {
+                      setMobileMenuOpen(false);
+                      setIsLoginOpen(true);
+                    }
+                  }}
+                  className={`p-2 rounded-full bg-[#f4f0ed] transition-colors duration-300 ${isMobileProfileOpen ? 'bg-[#eadeda]' : ''
+                    }`}
                   aria-label="Profile"
                 >
-                  <User size={18} />
+                  <User size={18} className="hover:scale-110 transition-transform duration-200" />
                 </button>
 
                 {isMobileProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-1 text-left animate-fade-in">
+                  <div className="absolute right-0 mt-2 w-44 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-[10px] font-bold uppercase tracking-wider text-[#1a1a1a]/80">
+                    <button
+                      onClick={() => {
+                        setIsMobileProfileOpen(false);
+                        setMobileMenuOpen(false);
+                        alert('My Profile feature is coming soon!');
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                    >
+                      My Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsMobileProfileOpen(false);
+                        setMobileMenuOpen(false);
+                        alert('My Orders feature is coming soon!');
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                    >
+                      My Orders
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsMobileProfileOpen(false);
+                        setMobileMenuOpen(false);
+                        navigate('/wishlist');
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                    >
+                      Wishlist
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsMobileProfileOpen(false);
+                        setMobileMenuOpen(false);
+                        alert('Loyalty Points: You have 150 points!');
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                    >
+                      Loyalty Points
+                    </button>
+                    <div className="border-t border-[#d9d2d0]/30 my-1"></div>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-[#1a1a1a] hover:bg-[#f4f0ed] transition-colors duration-200 font-medium"
+                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] text-red-500 hover:text-red-600 transition-colors duration-200"
                     >
                       Logout
                     </button>
@@ -395,6 +528,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
       {/* Cart side drawer overlay */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* Search Modal Overlay */}
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+      {/* Login Modal Overlay */}
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+
+      {/* Login Required Modal Overlay */}
+      <LoginRequiredModal isOpen={isLoginRequiredOpen} onClose={() => setIsLoginRequiredOpen(false)} />
     </nav>
   );
 };

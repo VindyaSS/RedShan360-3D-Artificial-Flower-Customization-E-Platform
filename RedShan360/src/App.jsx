@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import EmployeeDashboard from "./pages/Employee/employeeDashboard";
 import LoginPage from "./pages/Login_Register/Login_Page";
 import RegistrationPage from "./pages/Login_Register/Registration";
@@ -8,6 +9,7 @@ import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
 
 import BoquetCustomization from './pages/Customization/Boquet_Customization';
 import Shop from './pages/GuestUser/Shop';
+import Wishlist from './pages/GuestUser/Wishlist';
 import ProductDetails from './pages/GuestUser/ProductDetails';
 import ScrollToTop from './components/ScrollToTop';
 import CategoryPage from './pages/GuestUser/CategoryPage';
@@ -53,6 +55,24 @@ import EcustomizedProducts from './pages/Employee/EcustomizedProducts';
 
 
 
+const ProtectedRoute = ({ children }) => {
+  const user = localStorage.getItem('user');
+  
+  useEffect(() => {
+    if (!user) {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('show-login-required'));
+      }, 150);
+    }
+  }, [user]);
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   return (
     <Router>
@@ -65,8 +85,15 @@ function App() {
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
 
           <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
-          <Route path="/customization" element={<BoquetCustomization />} />
+          <Route path="/customization" element={<ProtectedRoute><BoquetCustomization /></ProtectedRoute>} />
+          <Route path="/customize" element={<ProtectedRoute><GuestUserDashboard /></ProtectedRoute>} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/cart" element={<ProtectedRoute><GuestUserDashboard /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute><GuestUserDashboard /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><GuestUserDashboard /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><GuestUserDashboard /></ProtectedRoute>} />
+          <Route path="/loyalty" element={<ProtectedRoute><GuestUserDashboard /></ProtectedRoute>} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/about" element={<AboutPage />} />

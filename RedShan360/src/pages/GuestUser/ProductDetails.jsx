@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Star, Heart, ShoppingBag, ArrowLeft, ArrowRight, RotateCw, Check, ShieldCheck, HelpCircle, Truck, Leaf, X } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import { products } from '../../data/products';
 import Product3DViewer from '../../components/Product3DViewer';
+import api from '../../services/api';
 
 const ProductDetails = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
 
@@ -16,6 +18,7 @@ const ProductDetails = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [wishlistId, setWishlistId] = useState(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
 
@@ -69,10 +72,32 @@ const ProductDetails = () => {
         setReviewsList(currentProduct.reviews || []);
       }
 
-      // Wishlist
-      const savedWishlist = localStorage.getItem('redshan360_wishlist');
-      const wishlistObj = savedWishlist ? JSON.parse(savedWishlist) : {};
-      setIsWishlisted(!!wishlistObj[currentProduct.id]);
+      // Wishlist from database
+      const checkWishlistStatus = async () => {
+        const savedUser = localStorage.getItem('user');
+        const user = savedUser ? JSON.parse(savedUser) : null;
+        const userId = user ? user.id : null;
+
+        if (userId) {
+          try {
+            const response = await api.get(`/api/wishlist/user/${userId}`);
+            const item = response.data.find((w) => w.productId === currentProduct.id);
+            if (item) {
+              setIsWishlisted(true);
+              setWishlistId(item.wishlistId);
+            } else {
+              setIsWishlisted(false);
+              setWishlistId(null);
+            }
+          } catch (error) {
+            console.error('Error checking wishlist status:', error);
+          }
+        } else {
+          setIsWishlisted(false);
+          setWishlistId(null);
+        }
+      };
+      checkWishlistStatus();
 
     } else {
       setProduct(null);
@@ -80,22 +105,52 @@ const ProductDetails = () => {
   }, [id]);
 
   // Wishlist Toggle
-  const toggleWishlist = () => {
+  const toggleWishlist = async () => {
     if (!product) return;
-    const savedWishlist = localStorage.getItem('redshan360_wishlist');
-    const wishlistObj = savedWishlist ? JSON.parse(savedWishlist) : {};
 
-    const updatedStatus = !isWishlisted;
-    setIsWishlisted(updatedStatus);
+    const savedUser = localStorage.getItem('user');
+    const user = savedUser ? JSON.parse(savedUser) : null;
+    const userId = user ? user.id : null;
 
-    wishlistObj[product.id] = updatedStatus;
-    localStorage.setItem('redshan360_wishlist', JSON.stringify(wishlistObj));
-    window.dispatchEvent(new Event('wishlist-updated'));
+    if (!userId) {
+      window.dispatchEvent(new Event('show-login-required'));
+      return;
+    }
+
+    if (isWishlisted && wishlistId) {
+      // Remove from database
+      try {
+        await api.delete(`/api/wishlist/${wishlistId}`);
+        setIsWishlisted(false);
+        setWishlistId(null);
+        window.dispatchEvent(new Event('wishlist-updated'));
+      } catch (error) {
+        console.error('Error removing from wishlist:', error);
+      }
+    } else {
+      // Add to database
+      try {
+        const response = await api.post('/api/wishlist', {
+          userId,
+          productId: product.id
+        });
+        setIsWishlisted(true);
+        setWishlistId(response.data.data.wishlistId);
+        window.dispatchEvent(new Event('wishlist-updated'));
+      } catch (error) {
+        console.error('Error adding to wishlist:', error);
+      }
+    }
   };
 
   // Add to Cart
   const handleAddToCart = () => {
     if (!product) return;
+    const savedUser = localStorage.getItem('user');
+    if (!savedUser) {
+      window.dispatchEvent(new Event('show-login-required'));
+      return;
+    }
     setIsAddingToCart(true);
 
     setTimeout(() => {
@@ -456,7 +511,14 @@ const ProductDetails = () => {
             </div>
 
             <button
-              onClick={() => setShowReviewModal(true)}
+              onClick={() => {
+                const savedUser = localStorage.getItem('user');
+                if (savedUser) {
+                  setShowReviewModal(true);
+                } else {
+                  window.dispatchEvent(new Event('show-login-required'));
+                }
+              }}
               className="px-6 py-3 border border-[#8c5e5e] text-[#8c5e5e] hover:bg-[#8c5e5e] hover:text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-sm shrink-0"
             >
               Write a Review
