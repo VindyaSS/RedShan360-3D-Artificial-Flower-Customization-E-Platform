@@ -1,24 +1,45 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Star, Heart } from 'lucide-react';
 import { products as initialProducts } from '../../data/products';
+import api from '../../services/api';
 
 
 const Shop = () => {
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Wishlist state loaded from localStorage
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem('redshan360_wishlist');
-    return saved ? JSON.parse(saved) : {};
-  });
+  // Wishlist state loaded from database
+  const [wishlist, setWishlist] = useState({});
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [showWishlistOnly, setShowWishlistOnly] = useState(() => {
     return searchParams.get('wishlist') === 'true';
   });
+
+  const savedUser = localStorage.getItem('user');
+  const user = savedUser ? JSON.parse(savedUser) : null;
+  const userId = user ? user.id : null;
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (userId) {
+        try {
+          const response = await api.get(`/api/wishlist/user/${userId}`);
+          const wishlistMap = {};
+          response.data.forEach((item) => {
+            wishlistMap[item.productId] = item.wishlistId;
+          });
+          setWishlist(wishlistMap);
+        } catch (error) {
+          console.error('Error fetching wishlist:', error);
+        }
+      }
+    };
+    fetchWishlist();
+  }, [userId]);
 
   // Listen to url param ?wishlist=true and clean up
   useEffect(() => {
@@ -59,13 +80,44 @@ const Shop = () => {
 
   const [productsState, setProductsState] = useState(initialProducts);
 
-  const toggleWishlist = (id) => {
-    setWishlist((prev) => {
-      const updated = { ...prev, [id]: !prev[id] };
-      localStorage.setItem('redshan360_wishlist', JSON.stringify(updated));
-      window.dispatchEvent(new Event('wishlist-updated'));
-      return updated;
-    });
+  const toggleWishlist = async (id) => {
+    if (!userId) {
+      window.dispatchEvent(new Event('show-login-required'));
+      return;
+    }
+
+    const wishlistId = wishlist[id];
+
+    if (wishlistId) {
+      // Remove from database
+      try {
+        await api.delete(`/api/wishlist/${wishlistId}`);
+        setWishlist((prev) => {
+          const updated = { ...prev };
+          delete updated[id];
+          window.dispatchEvent(new Event('wishlist-updated'));
+          return updated;
+        });
+      } catch (error) {
+        console.error('Error removing from wishlist:', error);
+      }
+    } else {
+      // Add to database
+      try {
+        const response = await api.post('/api/wishlist', {
+          userId,
+          productId: id
+        });
+        const newWishlistId = response.data.data.wishlistId;
+        setWishlist((prev) => {
+          const updated = { ...prev, [id]: newWishlistId };
+          window.dispatchEvent(new Event('wishlist-updated'));
+          return updated;
+        });
+      } catch (error) {
+        console.error('Error adding to wishlist:', error);
+      }
+    }
   };
 
   const handleCategoryChange = (key) => {
