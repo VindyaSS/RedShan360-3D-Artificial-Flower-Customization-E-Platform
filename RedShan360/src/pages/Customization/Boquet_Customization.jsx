@@ -22,7 +22,8 @@ import {
   Calendar, 
   Truck,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Shuffle
 } from 'lucide-react';
 
 // Predefined stems database with rich details and local/system images
@@ -31,7 +32,7 @@ const STEMS_DATABASE = [
     id: p.id.toString(),
     name: p.title,
     category: 'premium-blooms',
-    price: p.numericPrice ? p.numericPrice / 100 : 20.00,
+    price: p.numericPrice ? p.numericPrice : 1500.00,
     image: p.image,
     color: p.colors[0]?.hex || '#a82c2c',
     description: p.description
@@ -40,7 +41,7 @@ const STEMS_DATABASE = [
     id: 'spiral-handtied',
     name: 'Hand-tied Spiral Style',
     category: 'bouquet-styles',
-    price: 15.00,
+    price: 4500.00,
     image: 'https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#bfa38a',
     description: 'European spiral binding styling structure'
@@ -49,7 +50,7 @@ const STEMS_DATABASE = [
     id: 'classic-dome',
     name: 'Classic Dome Style',
     category: 'bouquet-styles',
-    price: 10.00,
+    price: 3000.00,
     image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#dfcfbe',
     description: 'Traditional symmetric rounded arrangement structure'
@@ -58,7 +59,7 @@ const STEMS_DATABASE = [
     id: 'silver-eucalyptus',
     name: 'Silver Dollar Eucalyptus',
     category: 'decorative-foliage',
-    price: 8.00,
+    price: 2400.00,
     image: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#8da89d',
     description: 'Sage green rounded coin leaves'
@@ -67,7 +68,7 @@ const STEMS_DATABASE = [
     id: 'emerald-fern',
     name: 'Emerald Fern Leaf',
     category: 'decorative-foliage',
-    price: 6.00,
+    price: 1800.00,
     image: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#5c8774',
     description: 'Delicate branching feathery deep green fern'
@@ -76,7 +77,7 @@ const STEMS_DATABASE = [
     id: 'velvet-ribbon',
     name: 'Velvet Burgundy Ribbon',
     category: 'wrapping-accents',
-    price: 7.00,
+    price: 2100.00,
     image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#5c2c2c',
     description: 'Plush velvet ribbon around the vase neck'
@@ -85,7 +86,7 @@ const STEMS_DATABASE = [
     id: 'kraft-paper',
     name: 'Kraft Paper Wrapping',
     category: 'wrapping-accents',
-    price: 4.00,
+    price: 1200.00,
     image: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=150&h=150&q=80',
     color: '#d2b48c',
     description: 'Minimalist rustic brown paper wraps'
@@ -191,6 +192,67 @@ export default function BoquetCustomization() {
   const [toastMessage, setToastMessage] = useState('');
   const [flowers, setFlowers] = useState([]);
   const [selectedFlowerId, setSelectedFlowerId] = useState(null);
+  const [isSwapMode, setIsSwapMode] = useState(false);
+  const [selectedSwapFlowerId, setSelectedSwapFlowerId] = useState(null);
+
+  // Swap locations of two flowers
+  const swapFlowers = (id1, id2) => {
+    setFlowers(prevFlowers => {
+      const f1 = prevFlowers.find(f => f.id === id1);
+      const f2 = prevFlowers.find(f => f.id === id2);
+
+      if (!f1 || !f2) return prevFlowers;
+
+      const updated = prevFlowers.map(f => {
+        if (f.id === id1) {
+          return {
+            ...f,
+            position: [...f2.position],
+            rotation: [...f2.rotation],
+            scale: [...f2.scale],
+            isManuallyEdited: true // Lock positions post-swap
+          };
+        }
+        if (f.id === id2) {
+          return {
+            ...f,
+            position: [...f1.position],
+            rotation: [...f1.rotation],
+            scale: [...f1.scale],
+            isManuallyEdited: true // Lock positions post-swap
+          };
+        }
+        return f;
+      });
+
+      triggerToast('Flowers swapped successfully!');
+      setSelectedSwapFlowerId(null);
+      return updated;
+    });
+  };
+
+  // Selection coordination handler for standard and swap modes
+  const handleSelectFlower = (flowerId) => {
+    if (!flowerId) {
+      if (!isSwapMode) setSelectedFlowerId(null);
+      return;
+    }
+
+    if (isSwapMode) {
+      if (!selectedSwapFlowerId) {
+        setSelectedSwapFlowerId(flowerId);
+        triggerToast('Select second flower to swap');
+      } else {
+        if (selectedSwapFlowerId === flowerId) {
+          setSelectedSwapFlowerId(null);
+        } else {
+          swapFlowers(selectedSwapFlowerId, flowerId);
+        }
+      }
+    } else {
+      setSelectedFlowerId(flowerId);
+    }
+  };
 
   // Update position and rotation for manually edited flowers
   const handleUpdateFlowerTransform = (flowerId, position, rotation) => {
@@ -364,6 +426,8 @@ export default function BoquetCustomization() {
     setSelectedStems([]);
     setFlowers([]);
     setSelectedFlowerId(null);
+    setIsSwapMode(false);
+    setSelectedSwapFlowerId(null);
     setRotationDegree(0);
     setZoomLevel('normal');
     triggerToast('Interactive canvas has been reset');
@@ -413,11 +477,25 @@ export default function BoquetCustomization() {
       id: customBouquetId,
       isCustom: true,
       title: 'Custom Bouquet Arrangement',
-      price: '$' + estimatedTotal.toFixed(2),
+      price: 'Rs ' + estimatedTotal.toFixed(2),
       numericPrice: estimatedTotal,
       image: '/images/peonies_vase.png',
       selectedColor: selectedStemsDetails || 'Custom Curation',
       quantity: 1,
+      // Save full custom 3D bouquet configuration!
+      bouquetDesign: {
+        flowers: flowers.map(f => ({
+          flowerId: f.id,
+          stemId: f.stemId,
+          position: f.position,
+          rotation: f.rotation,
+          scale: f.scale,
+          isManuallyEdited: f.isManuallyEdited
+        })),
+        style: selectedStyle,
+        wrappingId,
+        ribbonId
+      }
     };
 
     cartList.push(customBouquetItem);
@@ -432,7 +510,7 @@ export default function BoquetCustomization() {
   };
 
   // Price calculations
-  const basePrice = 45.00; // Crystal Vase (Base)
+  const basePrice = 13500.00; // Crystal Vase (Base)
   const botanicalSelectionPrice = useMemo(() => {
     return selectedStems.reduce((sum, item) => {
       const dbItem = STEMS_DATABASE.find(s => s.id === item.stemId);
@@ -681,7 +759,7 @@ export default function BoquetCustomization() {
                                 <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
                                 <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
                                 <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
-                                  +${stem.price.toFixed(2)}
+                                  +Rs {stem.price.toFixed(2)}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -739,7 +817,9 @@ export default function BoquetCustomization() {
                 ribbonId={ribbonId}
                 stemsDatabase={STEMS_DATABASE}
                 selectedFlowerId={selectedFlowerId}
-                onSelectFlower={setSelectedFlowerId}
+                selectedSwapFlowerId={selectedSwapFlowerId}
+                isSwapMode={isSwapMode}
+                onSelectFlower={handleSelectFlower}
                 onUpdateFlowerTransform={handleUpdateFlowerTransform}
               />
             </div>
@@ -762,6 +842,32 @@ export default function BoquetCustomization() {
                 aria-label="Toggle zoom"
               >
                 {zoomLevel === 'zoomed' ? <ZoomOut size={16} /> : <ZoomIn size={16} />}
+              </button>
+
+              <button 
+                onClick={() => {
+                  setIsSwapMode(prev => {
+                    const next = !prev;
+                    if (next) {
+                      setSelectedFlowerId(null); // Clear normal selection
+                      setSelectedSwapFlowerId(null);
+                      triggerToast('Swap Mode Enabled: Click two flowers to swap');
+                    } else {
+                      setSelectedSwapFlowerId(null);
+                      triggerToast('Swap Mode Disabled');
+                    }
+                    return next;
+                  });
+                }}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                  isSwapMode 
+                    ? 'bg-[#563c37] text-white shadow-md' 
+                    : 'bg-transparent text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9]'
+                }`}
+                title="Swap flower positions"
+                aria-label="Swap flower positions"
+              >
+                <Shuffle size={16} />
               </button>
 
               <button 
@@ -829,12 +935,12 @@ export default function BoquetCustomization() {
                         <div className="min-w-0">
                           <h4 className="text-xs font-bold text-[#563c37] truncate">{dbItem.name}</h4>
                           <span className="text-[10px] text-[#563c37]/55 uppercase tracking-wide">
-                            {item.quantity} × ${dbItem.price.toFixed(2)}
+                            {item.quantity} × Rs {dbItem.price.toFixed(2)}
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-xs font-bold text-[#563c37]">
-                            ${(dbItem.price * item.quantity).toFixed(2)}
+                            Rs {(dbItem.price * item.quantity).toFixed(2)}
                           </span>
                           <button 
                             onClick={() => handleClearStem(item.stemId)}
@@ -855,11 +961,11 @@ export default function BoquetCustomization() {
               {/* Pricing list */}
               <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
                 <span>CRYSTAL VASE (BASE)</span>
-                <span className="text-[#563c37]">${basePrice.toFixed(2)}</span>
+                <span className="text-[#563c37]">Rs {basePrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
                 <span>BOTANICAL SELECTION</span>
-                <span className="text-[#563c37]">${botanicalSelectionPrice.toFixed(2)}</span>
+                <span className="text-[#563c37]">Rs {botanicalSelectionPrice.toFixed(2)}</span>
               </div>
 
               <div className="border-t border-[#fdfbf9] my-1" />
@@ -871,7 +977,7 @@ export default function BoquetCustomization() {
                     Estimated Total
                   </span>
                   <span className="text-3xl font-extrabold text-[#563c37] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    ${estimatedTotal.toFixed(2)}
+                    Rs {estimatedTotal.toFixed(2)}
                   </span>
                 </div>
                 

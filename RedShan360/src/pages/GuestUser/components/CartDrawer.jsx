@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { products } from '../../../data/products';
+import { triggerPayHereCheckout } from '../../../utils/payhere';
+import api from '../../../services/api';
 
 const CartDrawer = ({ isOpen, onClose }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
   const drawerRef = useRef(null);
 
   // Load cart items from local storage and filter out invalid/stale products
@@ -82,6 +85,70 @@ const CartDrawer = ({ isOpen, onClose }) => {
     const priceNum = item.numericPrice || parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
     return acc + priceNum * item.quantity;
   }, 0);
+
+  // Trigger PayHere Payment Gateway Checkout Flow
+  const handleCheckout = async () => {
+    if (cartItems.length === 0 || isProcessing) return;
+
+    setIsProcessing(true);
+    try {
+      // Initialize payment session on the backend
+      const response = await api.post('/api/checkout', {
+        items: cartItems.map((item) => ({
+          id: typeof item.id === 'string' && item.id.startsWith('custom') ? null : Number(item.id),
+          title: item.title,
+          quantity: item.quantity,
+          isCustom: item.isCustom || false,
+          numericPrice: item.numericPrice || 0,
+          bouquetDesign: item.bouquetDesign || null
+        })),
+        currency: "LKR"
+      });
+
+      const checkoutData = response.data;
+
+      triggerPayHereCheckout({
+        merchantId: checkoutData.merchantId,
+        orderId: checkoutData.orderId,
+        amount: checkoutData.amount,
+        currency: checkoutData.currency,
+        hash: checkoutData.hash,
+        itemsName: checkoutData.itemsName,
+        callbacks: {
+          onCompleted: async (completedOrderId) => {
+            try {
+              // Verify the payment status securely on the backend
+              const statusResponse = await api.get(`/api/checkout/status/${completedOrderId}`);
+              if (statusResponse.data.status === "SUCCESS") {
+                alert(`Payment successful! Order ID: ${completedOrderId}`);
+                localStorage.removeItem('redshan360_cart');
+                setCartItems([]);
+                window.dispatchEvent(new Event('cart-updated'));
+                onClose();
+              } else {
+                alert("Payment failed or was declined. Please try again.");
+              }
+            } catch (error) {
+              console.error("Failed to verify payment status:", error);
+              alert("Payment verification failed. Please check your payment status.");
+            }
+          },
+          onDismissed: () => {
+            console.log("Payment cancelled (modal closed).");
+          },
+          onError: (error) => {
+            console.error("PayHere error:", error);
+            alert("Payment failed. Please try again.");
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Failed to initialize checkout session:", error);
+      alert(error.response?.data?.message || "An error occurred while initializing checkout. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -184,7 +251,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     {/* Right: Clear Price Display at top, and Trash/Delete at bottom */}
                     <div className="flex flex-col justify-between items-end text-right pl-1 flex-shrink-0">
                       <p className="text-xs font-bold text-[#8c5e5e] font-mono">
-                        ${(itemPrice * item.quantity).toFixed(2)}
+                        Rs ${(itemPrice * item.quantity).toFixed(2)}
                       </p>
                       
                       <button 
@@ -216,7 +283,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
               <div className="flex justify-between items-center">
                 <span className="text-sm font-bold text-[#1a1a1a]">Subtotal</span>
                 <span className="text-lg font-bold text-[#8c5e5e] font-mono" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  ${subtotal.toFixed(2)}
+                  Rs {subtotal.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -224,16 +291,22 @@ const CartDrawer = ({ isOpen, onClose }) => {
             {/* Action buttons */}
             <div className="pt-2 space-y-2">
               <button 
-                onClick={() => {
-                  alert(`Thank you for checking out! Total order: $${subtotal.toFixed(2)}`);
-                  localStorage.removeItem('redshan360_cart');
-                  setCartItems([]);
-                  window.dispatchEvent(new Event('cart-updated'));
-                  onClose();
-                }}
-                className="w-full py-3.5 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-xs font-bold uppercase tracking-wider rounded-sm shadow-md transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.99]"
+                onClick={handleCheckout}
+                disabled={isProcessing}
+                className={`w-full py-3.5 text-white text-xs font-bold uppercase tracking-wider rounded-sm shadow-md transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.99] ${
+                  isProcessing 
+                    ? 'bg-[#8c5e5e]/75 cursor-not-allowed' 
+                    : 'bg-[#8c5e5e] hover:bg-[#7d4d50]'
+                }`}
               >
-                Proceed to Checkout
+                {isProcessing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Initializing Checkout...</span>
+                  </>
+                ) : (
+                  <span>Proceed to Checkout</span>
+                )}
               </button>
               
               <button 

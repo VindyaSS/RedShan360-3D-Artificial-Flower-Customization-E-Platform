@@ -14,6 +14,8 @@ export default function BouquetCanvas({
   ribbonId = null,
   stemsDatabase = [],
   selectedFlowerId = null,
+  selectedSwapFlowerId = null,
+  isSwapMode = false,
   onSelectFlower = null,
   onUpdateFlowerTransform = null
 }) {
@@ -59,6 +61,8 @@ export default function BouquetCanvas({
             ribbonId={ribbonId}
             stemsDatabase={stemsDatabase}
             selectedFlowerId={selectedFlowerId}
+            selectedSwapFlowerId={selectedSwapFlowerId}
+            isSwapMode={isSwapMode}
             onSelectFlower={onSelectFlower}
             onUpdateFlowerTransform={onUpdateFlowerTransform}
           />
