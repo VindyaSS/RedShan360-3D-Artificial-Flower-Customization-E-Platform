@@ -67,7 +67,7 @@ function AdminUserManagement() {
   const openAddModal = () => {
     const role = activeTab === "managers" ? "Manager" : "Employee";
     const dateToday = new Date().toISOString().split("T")[0];
-    
+
     setFormData({
       ...defaultFormState,
       role: role,
@@ -155,11 +155,6 @@ function AdminUserManagement() {
       return;
     }
 
-    if (!formData.department) {
-      alert("Department must be selected.");
-      return;
-    }
-
     // Create user object
     const contactString = `${formData.email} | ${formData.phone}`;
     const jobTitleLabel = formData.jobTitle || (formData.role === "Manager" ? "Manager" : "Executive");
@@ -217,7 +212,7 @@ function AdminUserManagement() {
     // Populate form data
     const email = user.contact.split(" | ")[0];
     const phone = user.contact.split(" | ")[1] || "";
-    
+
     setFormData({
       fullName: user.name,
       employeeId: user.employeeId || "",
@@ -238,7 +233,7 @@ function AdminUserManagement() {
       province: user.province || "",
       permissions: user.permissions || [],
     });
-    
+
     setModalMode("view");
     setIsModalOpen(true);
   };
@@ -251,7 +246,7 @@ function AdminUserManagement() {
 
     const email = user.contact.split(" | ")[0];
     const phone = user.contact.split(" | ")[1] || "";
-    
+
     setFormData({
       fullName: user.name,
       employeeId: user.employeeId || "",
@@ -272,7 +267,7 @@ function AdminUserManagement() {
       province: user.province || "",
       permissions: user.permissions || [],
     });
-    
+
     setEditingUserId(user.id);
     setModalMode("edit");
     setIsModalOpen(true);
@@ -455,8 +450,8 @@ function AdminUserManagement() {
                 {modalMode === "view"
                   ? "View Details"
                   : modalMode === "edit"
-                  ? `Edit ${formData.role}`
-                  : `Add New ${formData.role}`}
+                    ? `Edit ${formData.role}`
+                    : `Add New ${formData.role}`}
               </h2>
               <button className="close-x-btn" onClick={() => setIsModalOpen(false)}>
                 &times;
@@ -481,18 +476,7 @@ function AdminUserManagement() {
                     />
                   </div>
 
-                  <div className="form-group-item">
-                    <label>Employee ID <span className="req">*</span></label>
-                    <input
-                      type="text"
-                      name="employeeId"
-                      value={formData.employeeId}
-                      onChange={handleInputChange}
-                      placeholder="EMP001"
-                      required
-                      disabled
-                    />
-                  </div>
+
 
                   <div className="form-group-item">
                     <label>Email Address <span className="req">*</span></label>
@@ -566,35 +550,7 @@ function AdminUserManagement() {
                     </select>
                   </div>
 
-                  <div className="form-group-item">
-                    <label>Department <span className="req">*</span></label>
-                    <select
-                      name="department"
-                      value={formData.department}
-                      onChange={handleInputChange}
-                      required
-                      disabled={modalMode === "view"}
-                    >
-                      <option value="">Select Department</option>
-                      <option value="Sales">Sales</option>
-                      <option value="Inventory">Inventory</option>
-                      <option value="Customer Support">Customer Support</option>
-                      <option value="Production">Production</option>
-                      <option value="Finance">Finance</option>
-                    </select>
-                  </div>
 
-                  <div className="form-group-item">
-                    <label>Job Title</label>
-                    <input
-                      type="text"
-                      name="jobTitle"
-                      value={formData.jobTitle}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Sales Consultant"
-                      disabled={modalMode === "view"}
-                    />
-                  </div>
 
                   <div className="form-group-item">
                     <label>Joining Date <span className="req">*</span></label>
@@ -724,33 +680,7 @@ function AdminUserManagement() {
                 </div>
               </div>
 
-              {/* SECTION 5: Permissions (Manager Only) */}
-              {formData.role === "Manager" && (
-                <div className="form-section">
-                  <h4 className="section-title">5. Permissions (Manager Only)</h4>
-                  <div className="permissions-checkbox-row">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={formData.permissions.includes("Product Management")}
-                        onChange={() => handlePermissionChange("Product Management")}
-                        disabled={modalMode === "view"}
-                      />
-                      <span>Product Management</span>
-                    </label>
 
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={formData.permissions.includes("Order Management")}
-                        onChange={() => handlePermissionChange("Order Management")}
-                        disabled={modalMode === "view"}
-                      />
-                      <span>Order Management</span>
-                    </label>
-                  </div>
-                </div>
-              )}
 
               {/* Actions Footer row */}
               <div className="modal-actions-footer">

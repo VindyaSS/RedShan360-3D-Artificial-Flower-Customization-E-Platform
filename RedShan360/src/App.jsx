@@ -15,7 +15,7 @@ import AboutPage from './pages/GuestUser/AboutPage';
 import ContactPage from './pages/GuestUser/ContactPage';
 import AdminUserManagement from "./pages/Admin/AdminUserManagement";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
-import AdminOrderManagement from "./pages/admin/AdminOrderManagement";
+import AdminOrderManagement from "./pages/Admin/AdminOrderManagement";
 import AdminReportsAnalytics from "./pages/Admin/AdminReportsAnalytics/AdminReportsAnalytics";
 import AdminSettings from "./pages/Admin/AdminSettings/AdminSettings";
 import AdminProductManagement from "./pages/Admin/AdminProductManagement";
