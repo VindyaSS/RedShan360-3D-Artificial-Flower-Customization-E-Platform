@@ -1,17 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { MapPin, Phone, Mail, Clock, HelpCircle, ChevronDown, MessageSquare, Compass, Send, CheckCircle, Globe } from 'lucide-react';
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Send,
+  CheckCircle,
+  AlertCircle,
+  Facebook,
+  Instagram,
+  MessageCircle,
+  Loader2
+} from 'lucide-react';
+
+// EmailJS Constants
+const SERVICE_ID = "service_47etspc";
+const TEMPLATE_ID = "template_44dzenn";
+const PUBLIC_KEY = "gz6MEcZFQaUA0ZVN8";
 
 const ContactPage = () => {
+  const formRef = useRef();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  // Accordion state for FAQs
-  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   // Form states
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -20,7 +35,20 @@ const ContactPage = () => {
     message: ''
   });
 
+  // Validation errors
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+
+  // Sending status
+  const [isSending, setIsSending] = useState(false);
+  const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: '' }
+
   useEffect(() => {
+    // Initialize EmailJS v4 globally
+    emailjs.init({
+      publicKey: PUBLIC_KEY,
+    });
+
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -28,371 +56,467 @@ const ContactPage = () => {
 
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
 
-  const toggleFaq = (index) => {
-    setOpenFaqIndex(openFaqIndex === index ? null : index);
+  // Email format regex
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  // Real-time validator
+  const validateField = (name, value) => {
+    let errorMsg = '';
+    switch (name) {
+      case 'fullName':
+        if (!value.trim()) {
+          errorMsg = 'Full Name is required.';
+        }
+        break;
+      case 'email':
+        if (!value.trim()) {
+          errorMsg = 'Email Address is required.';
+        } else if (!validateEmail(value)) {
+          errorMsg = 'Please enter a valid email address.';
+        }
+        break;
+      case 'subject':
+        if (!value.trim()) {
+          errorMsg = 'Subject is required.';
+        }
+        break;
+      case 'message':
+        if (!value.trim()) {
+          errorMsg = 'Message is required.';
+        } else if (value.trim().length < 10) {
+          errorMsg = 'Message must be at least 10 characters long.';
+        }
+        break;
+      default:
+        break;
+    }
+    return errorMsg;
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    // Simulate API request submission
-    setFormSubmitted(true);
-    setFormData({
-      fullName: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    });
-    setTimeout(() => {
-      setFormSubmitted(false);
-    }, 5000);
-  };
-
-  const faqData = [
-    {
-      question: "How can I place an order?",
-      answer: "You can place an order directly through our online Shop by selecting your desired artificial arrangements and adding them to the cart. For bespoke custom orders, you can utilize our 3D Bouquet Customizer tool or consult with one of our designers."
-    },
-    {
-      question: "Can I customize flower arrangements?",
-      answer: "Absolutely! RedShan360 specializes in custom designs. You can select specific flowers, colors, fillers, and vases inside our custom 3D studio, or submit an inquiry on this page for special large-scale event requests."
-    },
-    {
-      question: "What payment methods do you accept?",
-      answer: "We accept all major credit/debit cards (Visa, MasterCard, American Express), digital wallets (Apple Pay, Google Pay), and bank transfers for large commercial orders."
-    },
-    {
-      question: "How long does delivery take?",
-      answer: "Standard orders are processed and shipped within 3-5 business days. Custom orders and bespoke design consultations require an additional 5-7 business days for handcrafting. International shipping rates and times vary depending on the destination."
-    },
-    {
-      question: "Do you offer wholesale orders?",
-      answer: "Yes, we partner with corporate spaces, hotels, retail outlets, and wedding venues globally. Please select 'Wholesale Inquiry' as the subject in the contact form or contact us directly at info@redshan360.com to discuss options."
+    // Run validation on change if touched
+    if (touched[name]) {
+      const errorMsg = validateField(name, value);
+      setErrors((prev) => ({ ...prev, name: errorMsg }));
     }
-  ];
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const errorMsg = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: errorMsg }));
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+
+    // Mark all fields as touched
+    const allTouched = {};
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      allTouched[key] = true;
+      const errorMsg = validateField(key, formData[key]);
+      if (errorMsg) {
+        newErrors[key] = errorMsg;
+      }
+    });
+
+    setTouched(allTouched);
+    setErrors(newErrors);
+
+    // If there are errors, stop
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
+    setIsSending(true);
+    setNotification(null);
+
+    try {
+      await emailjs.sendForm(
+        SERVICE_ID,
+        TEMPLATE_ID,
+        formRef.current,
+        PUBLIC_KEY
+      );
+
+      // Success
+      setNotification({
+        type: 'success',
+        message: 'Thank you! Your message has been sent successfully. We will get back to you as soon as possible.'
+      });
+
+      // Clear fields
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+      setTouched({});
+      setErrors({});
+    } catch (error) {
+      console.error('EmailJS error details:', error.text || error.message || error);
+      // Failed
+      setNotification({
+        type: 'error',
+        message: `Sorry! Something went wrong. ${error.text || 'Please try again later.'}`
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#fcf9f8] text-[#1a1a1a] flex flex-col font-sans selection:bg-[#e8b4b8]/30 selection:text-[#8c5e5e]">
+    <div className="min-h-screen bg-[#fcf9f8] text-[#1a1a1a] flex flex-col font-sans selection:bg-[#e8b4b8]/30 selection:text-[#8c5e5e] animate-fade-in-page">
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-page {
+          animation: fadeIn 0.8s ease-out forwards;
+        }
+        .animate-slide-up-card {
+          animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+
       {/* Navbar */}
-      <Navbar 
-        isScrolled={isScrolled} 
-        mobileMenuOpen={mobileMenuOpen} 
-        setMobileMenuOpen={setMobileMenuOpen} 
-        navItems={navItems} 
+      <Navbar
+        isScrolled={isScrolled}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        navItems={navItems}
       />
 
-      {/* SECTION 1 - HERO BANNER */}
-      <section className="relative h-[65vh] flex items-center justify-center overflow-hidden bg-[#f4f0ed]">
-        {/* Hero Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/images/contact_hero.png" 
-            alt="Luxurious artificial flower banner" 
-            className="w-full h-full object-cover object-center animate-fade-in"
-          />
-          {/* Soft dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black/40" />
+      {/* Page Header */}
+      <div className="pt-32 pb-12 text-center bg-[#f4f0ed]/40 border-b border-[#d9d2d0]/20">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#C2185B] font-bold mb-3">Get in touch</p>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Contact Us
+          </h1>
+          <p className="text-sm md:text-base text-[#1a1a1a]/70 max-w-2xl mx-auto leading-relaxed">
+            Have questions about our hyper-realistic floral designs or need support? Reach out to our design consultants.
+          </p>
         </div>
+      </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center text-white">
-          <div className="animate-slide-up">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-playfair mb-4 text-white">
-              Contact Us
-            </h1>
-            <p className="text-sm md:text-lg text-white/95 max-w-2xl mx-auto leading-relaxed font-light">
-              We would love to hear from you. Contact our team for inquiries, support, and custom flower arrangements.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 2 - CONTACT INFORMATION */}
-      <section className="py-20 max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-16 -mt-16 relative z-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1: Address */}
-          <div className="bg-white p-8 rounded-sm shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-[#d9d2d0]/20 flex flex-col text-left group">
-            <div className="w-10 h-10 rounded-full bg-[#e8b4b8]/15 text-[#8c5e5e] flex items-center justify-center mb-6 group-hover:bg-[#e8b4b8] group-hover:text-white transition-colors duration-300">
-              <MapPin size={18} />
+      {/* Toast Notification Popups */}
+      {notification && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 animate-slide-up-card">
+          <div className={`p-4 rounded-md shadow-lg flex items-start gap-3 border ${notification.type === 'success'
+            ? 'bg-[#E8F5E9] text-[#2E7D32] border-[#A5D6A7]'
+            : 'bg-[#FFEBEE] text-[#C62828] border-[#FFCDD2]'
+            }`}>
+            {notification.type === 'success' ? (
+              <CheckCircle className="shrink-0 mt-0.5" size={18} />
+            ) : (
+              <AlertCircle className="shrink-0 mt-0.5" size={18} />
+            )}
+            <div className="flex-1">
+              <p className="text-xs font-semibold leading-normal">
+                {notification.message}
+              </p>
             </div>
-            <h3 className="font-bold text-sm tracking-wider uppercase text-[#1a1a1a] mb-2">
-              Address
-            </h3>
-            <p className="text-xs md:text-sm text-[#1a1a1a]/70 leading-relaxed font-medium mt-auto">
-              Huejay International Multi Flora LTD<br />Sri Lanka
-            </p>
-          </div>
-
-          {/* Card 2: Phone */}
-          <div className="bg-white p-8 rounded-sm shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-[#d9d2d0]/20 flex flex-col text-left group">
-            <div className="w-10 h-10 rounded-full bg-[#e8b4b8]/15 text-[#8c5e5e] flex items-center justify-center mb-6 group-hover:bg-[#e8b4b8] group-hover:text-white transition-colors duration-300">
-              <Phone size={18} />
-            </div>
-            <h3 className="font-bold text-sm tracking-wider uppercase text-[#1a1a1a] mb-2">
-              Phone
-            </h3>
-            <p className="text-xs md:text-sm text-[#1a1a1a]/70 leading-relaxed font-medium mt-auto">
-              +94 XX XXX XXXX
-            </p>
-          </div>
-
-          {/* Card 3: Email */}
-          <div className="bg-white p-8 rounded-sm shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-[#d9d2d0]/20 flex flex-col text-left group">
-            <div className="w-10 h-10 rounded-full bg-[#e8b4b8]/15 text-[#8c5e5e] flex items-center justify-center mb-6 group-hover:bg-[#e8b4b8] group-hover:text-white transition-colors duration-300">
-              <Mail size={18} />
-            </div>
-            <h3 className="font-bold text-sm tracking-wider uppercase text-[#1a1a1a] mb-2">
-              Email
-            </h3>
-            <a 
-              href="mailto:info@redshan360.com" 
-              className="text-xs md:text-sm text-[#8c5e5e] font-semibold hover:text-[#7d4d50] transition-colors leading-relaxed mt-auto"
+            <button
+              onClick={() => setNotification(null)}
+              className="text-xs font-bold uppercase tracking-wider hover:opacity-75 transition-opacity"
             >
-              info@redshan360.com
-            </a>
-          </div>
-
-          {/* Card 4: Business Hours */}
-          <div className="bg-white p-8 rounded-sm shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-[#d9d2d0]/20 flex flex-col text-left group">
-            <div className="w-10 h-10 rounded-full bg-[#e8b4b8]/15 text-[#8c5e5e] flex items-center justify-center mb-6 group-hover:bg-[#e8b4b8] group-hover:text-white transition-colors duration-300">
-              <Clock size={18} />
-            </div>
-            <h3 className="font-bold text-sm tracking-wider uppercase text-[#1a1a1a] mb-2">
-              Business Hours
-            </h3>
-            <p className="text-xs md:text-sm text-[#1a1a1a]/70 leading-relaxed font-medium mt-auto">
-              Monday – Saturday<br />8:00 AM – 6:00 PM
-            </p>
+              Dismiss
+            </button>
           </div>
         </div>
-      </section>
+      )}
 
-      {/* SECTION 3 - GET IN TOUCH */}
-      <section className="py-12 max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-16">
+      {/* Main Content Form & Info split */}
+      <main className="flex-1 py-16 max-w-7xl w-full mx-auto px-6 md:px-12 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          
-          {/* Left Column */}
-          <div className="lg:col-span-5 text-left">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] tracking-tight font-playfair mb-4">
-              Get In Touch!
-            </h2>
-            <p className="text-sm md:text-base leading-relaxed text-[#1a1a1a]/75 mb-10">
-              Have questions about our hyper-realistic floral designs or need support with your 3D customization process? Reach out to our design consultants. We are happy to guide you in finding or creating the perfect centerpiece.
-            </p>
 
-            <div className="space-y-8">
-              {/* Feature 1 */}
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-sm bg-[#e8b4b8]/10 flex items-center justify-center text-[#8c5e5e] shrink-0">
-                  <MessageSquare size={18} />
-                </div>
+          {/* LEFT SIDE: Send Message Form */}
+          <div className="lg:col-span-7 bg-white p-8 md:p-10 rounded-xl shadow-sm border border-[#d9d2d0]/20 text-left transition-all duration-300">
+            <h3 className="font-bold text-xl text-[#1a1a1a] tracking-tight uppercase mb-6 font-playfair border-b border-[#d9d2d0]/20 pb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Send a Message
+            </h3>
+
+            <form ref={formRef} onSubmit={handleFormSubmit} className="space-y-6">
+
+              {/* Row 1: Name and Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-bold text-sm text-[#1a1a1a] uppercase tracking-wider">
-                    Premium Support
-                  </h4>
-                  <p className="text-xs md:text-sm text-[#1a1a1a]/75 mt-1 leading-relaxed">
-                    Our dedicated care team is available to assist you with order tracking, design edits, and inquiries.
-                  </p>
+                  <label htmlFor="fullName" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
+                    Full Name <span className="text-[#C2185B]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    className={`w-full bg-[#fcf9f8] border rounded-md px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none transition-all ${errors.fullName && touched.fullName
+                      ? 'border-[#C62828] focus:border-[#C62828] focus:ring-1 focus:ring-[#C62828]'
+                      : 'border-[#d9d2d0] focus:border-[#C2185B] focus:ring-1 focus:ring-[#C2185B] focus:bg-white'
+                      }`}
+                    placeholder="John Doe"
+                  />
+                  {errors.fullName && touched.fullName && (
+                    <p className="text-[10px] text-[#C62828] mt-1.5 font-medium flex items-center gap-1">
+                      <AlertCircle size={10} /> {errors.fullName}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
+                    Email Address <span className="text-[#C2185B]">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    className={`w-full bg-[#fcf9f8] border rounded-md px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none transition-all ${errors.email && touched.email
+                      ? 'border-[#C62828] focus:border-[#C62828] focus:ring-1 focus:ring-[#C62828]'
+                      : 'border-[#d9d2d0] focus:border-[#C2185B] focus:ring-1 focus:ring-[#C2185B] focus:bg-white'
+                      }`}
+                    placeholder="john@example.com"
+                  />
+                  {errors.email && touched.email && (
+                    <p className="text-[10px] text-[#C62828] mt-1.5 font-medium flex items-center gap-1">
+                      <AlertCircle size={10} /> {errors.email}
+                    </p>
+                  )}
                 </div>
               </div>
 
-              {/* Feature 2 */}
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-sm bg-[#e8b4b8]/10 flex items-center justify-center text-[#8c5e5e] shrink-0">
-                  <Compass size={18} />
-                </div>
+              {/* Row 2: Phone and Subject */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-bold text-sm text-[#1a1a1a] uppercase tracking-wider">
-                    Bespoke Design Consultation
-                  </h4>
-                  <p className="text-xs md:text-sm text-[#1a1a1a]/75 mt-1 leading-relaxed">
-                    Work directly with our floral designers to craft custom silk arrangements matching your space's exact palette.
-                  </p>
+                  <label htmlFor="phone" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full bg-[#fcf9f8] border border-[#d9d2d0] rounded-md px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none focus:border-[#C2185B] focus:ring-1 focus:ring-[#C2185B] focus:bg-white transition-all"
+                    placeholder="+94 XX XXX XXXX"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="subject" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
+                    Subject <span className="text-[#C2185B]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    className={`w-full bg-[#fcf9f8] border rounded-md px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none transition-all ${errors.subject && touched.subject
+                      ? 'border-[#C62828] focus:border-[#C62828] focus:ring-1 focus:ring-[#C62828]'
+                      : 'border-[#d9d2d0] focus:border-[#C2185B] focus:ring-1 focus:ring-[#C2185B] focus:bg-white'
+                      }`}
+                    placeholder="e.g. Custom Bouquet Design"
+                  />
+                  {errors.subject && touched.subject && (
+                    <p className="text-[10px] text-[#C62828] mt-1.5 font-medium flex items-center gap-1">
+                      <AlertCircle size={10} /> {errors.subject}
+                    </p>
+                  )}
                 </div>
               </div>
 
-              {/* Feature 3 */}
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-sm bg-[#e8b4b8]/10 flex items-center justify-center text-[#8c5e5e] shrink-0">
-                  <Globe size={18} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-[#1a1a1a] uppercase tracking-wider">
-                    Global Shipping Logistics
-                  </h4>
-                  <p className="text-xs md:text-sm text-[#1a1a1a]/75 mt-1 leading-relaxed">
-                    We coordinate secure, shockproof packaging and tracked global delivery for all premium bouquets.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Form */}
-          <div className="lg:col-span-7 w-full">
-            <div className="bg-white p-8 md:p-10 rounded-sm shadow-soft border border-[#d9d2d0]/20 text-left relative overflow-hidden">
-              <h3 className="font-bold text-lg text-[#1a1a1a] tracking-tight uppercase mb-6 font-playfair border-b border-[#d9d2d0]/20 pb-3">
-                Send a Message
-              </h3>
-
-              {formSubmitted ? (
-                <div className="py-10 text-center animate-fade-in">
-                  <CheckCircle size={48} className="mx-auto text-[#8c5e5e] mb-4" />
-                  <h4 className="font-bold text-lg text-[#1a1a1a] mb-2">Thank you!</h4>
-                  <p className="text-sm text-[#1a1a1a]/70">Your message has been successfully sent. We will get back to you shortly.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleFormSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="fullName" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
-                        Full Name
-                      </label>
-                      <input 
-                        type="text" 
-                        id="fullName"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        className="w-full bg-[#fcf9f8] border border-[#d9d2d0] rounded-sm px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none focus:border-[#8c5e5e] focus:bg-white transition-all"
-                        placeholder="John Doe"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
-                        Email Address
-                      </label>
-                      <input 
-                        type="email" 
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full bg-[#fcf9f8] border border-[#d9d2d0] rounded-sm px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none focus:border-[#8c5e5e] focus:bg-white transition-all"
-                        placeholder="john@example.com"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="phone" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
-                        Phone Number
-                      </label>
-                      <input 
-                        type="tel" 
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full bg-[#fcf9f8] border border-[#d9d2d0] rounded-sm px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none focus:border-[#8c5e5e] focus:bg-white transition-all"
-                        placeholder="+94 XX XXX XXXX"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="subject" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
-                        Subject
-                      </label>
-                      <input 
-                        type="text" 
-                        id="subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        className="w-full bg-[#fcf9f8] border border-[#d9d2d0] rounded-sm px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none focus:border-[#8c5e5e] focus:bg-white transition-all"
-                        placeholder="e.g. Custom Bouquet Design"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="message" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
-                      Message
-                    </label>
-                    <textarea 
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      rows="5"
-                      className="w-full bg-[#fcf9f8] border border-[#d9d2d0] rounded-sm px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none focus:border-[#8c5e5e] focus:bg-white transition-all resize-none"
-                      placeholder="Write your message here..."
-                      required
-                    ></textarea>
-                  </div>
-
-                  <button 
-                    type="submit"
-                    className="w-full bg-[#e8b4b8] hover:bg-[#8c5e5e] text-white text-xs font-semibold tracking-widest uppercase py-4 px-6 rounded-sm shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2"
-                  >
-                    Send Message
-                    <Send size={12} />
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 4 - FREQUENTLY ASKED QUESTIONS */}
-      <section className="py-24 bg-white border-t border-b border-[#d9d2d0]/20">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <span className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-2 block">
-            Common Questions
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] tracking-tight font-playfair mb-12">
-            Frequently Asked Questions
-          </h2>
-
-          <div className="space-y-4 text-left">
-            {faqData.map((faq, index) => {
-              const isOpen = openFaqIndex === index;
-              return (
-                <div 
-                  key={index}
-                  className="border border-[#d9d2d0]/30 rounded-sm overflow-hidden bg-[#fcf9f8]/40 hover:bg-[#fcf9f8] transition-colors duration-200"
-                >
-                  <button
-                    onClick={() => toggleFaq(index)}
-                    className="w-full flex items-center justify-between p-5 md:p-6 text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors focus:outline-none"
-                  >
-                    <span className="text-xs md:text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-                      <HelpCircle size={14} className="text-[#8c5e5e]/80" />
-                      {faq.question}
-                    </span>
-                    <ChevronDown 
-                      size={16} 
-                      className={`text-[#1a1a1a]/40 hover:text-[#8c5e5e] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-                  
-                  {/* Collapsible Answer */}
-                  <div 
-                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                      isOpen ? 'max-h-40 border-t border-[#d9d2d0]/20' : 'max-h-0'
+              {/* Message */}
+              <div>
+                <label htmlFor="message" className="block text-[11px] uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-2">
+                  Message <span className="text-[#C2185B]">*</span>
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  rows="6"
+                  className={`w-full bg-[#fcf9f8] border rounded-md px-4 py-3 text-xs text-[#1a1a1a] focus:outline-none transition-all resize-none ${errors.message && touched.message
+                    ? 'border-[#C62828] focus:border-[#C62828] focus:ring-1 focus:ring-[#C62828]'
+                    : 'border-[#d9d2d0] focus:border-[#C2185B] focus:ring-1 focus:ring-[#C2185B] focus:bg-white'
                     }`}
-                  >
-                    <p className="p-5 md:p-6 text-xs md:text-sm text-[#1a1a1a]/70 leading-relaxed font-medium">
-                      {faq.answer}
+                  placeholder="Write your message here..."
+                ></textarea>
+                {errors.message && touched.message && (
+                  <p className="text-[10px] text-[#C62828] mt-1.5 font-medium flex items-center gap-1">
+                    <AlertCircle size={10} /> {errors.message}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSending}
+                className="w-full bg-[#C2185B] hover:bg-[#a0134a] disabled:bg-[#C2185B]/60 text-white text-xs font-semibold tracking-widest uppercase py-4 px-6 rounded-md shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer"
+              >
+                {isSending ? (
+                  <>
+                    <Loader2 className="animate-spin" size={14} />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Send Message</span>
+                    <Send size={12} />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* RIGHT SIDE: Contact Information */}
+          <div className="lg:col-span-5 space-y-6 w-full text-left">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-[#d9d2d0]/20 space-y-6">
+
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Redshan Flora
+                </h2>
+                <p className="text-xs uppercase tracking-[0.15em] text-[#C2185B] font-semibold mt-1">Premium Botanical Artistry</p>
+              </div>
+
+              <div className="border-t border-[#d9d2d0]/30 pt-6 space-y-5">
+
+                {/* Address */}
+                <div className="flex gap-4 items-start">
+                  <div className="w-10 h-10 rounded-full bg-[#C2185B]/10 text-[#C2185B] flex items-center justify-center shrink-0">
+                    <MapPin size={18} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-[#1a1a1a]/60 uppercase tracking-wider">Address</h4>
+                    <p className="text-xs md:text-sm text-[#1a1a1a]/85 leading-relaxed font-semibold mt-1">
+                      Huejay International Multi Flora LTD<br />Sri Lanka
                     </p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
-      {/* SECTION 5 - FOOTER */}
+                {/* Phone */}
+                <div className="flex gap-4 items-start">
+                  <div className="w-10 h-10 rounded-full bg-[#C2185B]/10 text-[#C2185B] flex items-center justify-center shrink-0">
+                    <Phone size={18} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-[#1a1a1a]/60 uppercase tracking-wider">Phone Number</h4>
+                    <p className="text-xs md:text-sm text-[#1a1a1a]/85 leading-relaxed font-semibold mt-1">
+                      +94 11 234 5678
+                    </p>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="flex gap-4 items-start">
+                  <div className="w-10 h-10 rounded-full bg-[#C2185B]/10 text-[#C2185B] flex items-center justify-center shrink-0">
+                    <Mail size={18} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-[#1a1a1a]/60 uppercase tracking-wider">Email Address</h4>
+                    <a
+                      href="mailto:info@redshan360.com"
+                      className="text-xs md:text-sm text-[#C2185B] font-bold hover:underline leading-relaxed mt-1 block"
+                    >
+                      info@redshan360.com
+                    </a>
+                  </div>
+                </div>
+
+                {/* Working Hours */}
+                <div className="flex gap-4 items-start">
+                  <div className="w-10 h-10 rounded-full bg-[#C2185B]/10 text-[#C2185B] flex items-center justify-center shrink-0">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-[#1a1a1a]/60 uppercase tracking-wider">Working Hours</h4>
+                    <p className="text-xs md:text-sm text-[#1a1a1a]/85 leading-relaxed font-semibold mt-1">
+                      Monday – Saturday: 8:00 AM – 6:00 PM<br />
+                      Sunday: Closed
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Social Media Icons */}
+              <div className="border-t border-[#d9d2d0]/30 pt-6">
+                <h4 className="font-bold text-xs text-[#1a1a1a]/60 uppercase tracking-wider mb-4">Follow Us</h4>
+                <div className="flex items-center gap-4">
+                  <a
+                    href="https://facebook.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-10 h-10 rounded-full bg-[#f4f0ed] hover:bg-[#C2185B] text-[#1a1a1a]/70 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+                    aria-label="Facebook"
+                  >
+                    <Facebook size={18} />
+                  </a>
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-10 h-10 rounded-full bg-[#f4f0ed] hover:bg-[#C2185B] text-[#1a1a1a]/70 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+                    aria-label="Instagram"
+                  >
+                    <Instagram size={18} />
+                  </a>
+                  <a
+                    href="https://wa.me/94112345678"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-10 h-10 rounded-full bg-[#f4f0ed] hover:bg-[#C2185B] text-[#1a1a1a]/70 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+                    aria-label="WhatsApp"
+                  >
+                    <MessageCircle size={18} />
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Google Maps Embed Card */}
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-[#d9d2d0]/20 overflow-hidden h-72">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.9757659424754!2d79.8488!3d6.9271!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2593f4e24eb2d%3A0xe21287c71e2efd22!2sHuejay%20International%20Multi%20Flora%20LTD!5e0!3m2!1sen!2slk!4v1719700000000!5m2!1sen!2slk"
+                className="w-full h-full border-0 rounded-md"
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Huejay International Location Map"
+              ></iframe>
+            </div>
+
+          </div>
+
+        </div>
+      </main>
+
+      {/* Footer */}
       <Footer />
     </div>
   );
