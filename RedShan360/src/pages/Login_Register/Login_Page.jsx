@@ -55,14 +55,35 @@ export default function LoginPage() {
       setApiSuccess('Successfully logged in!');
       console.log('Login successful:', response.data);
 
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      if (response.data) {
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
+        
+        // Ensure id compatibility mapping alongside other fields
+        const userData = {
+          ...response.data,
+          id: response.data.userId
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
       }
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      // Redirect based on user role
+      let redirectPath = from;
+      const role = response.data?.role;
+      if (role === 'CUSTOMER') {
+        redirectPath = (from && from !== '/' && from !== '/login') ? from : '/guestUserDashboard';
+      } else if (role === 'EMPLOYEE') {
+        redirectPath = '/employeeDashboard';
+      } else if (role === 'MANAGER') {
+        redirectPath = '/managerOverview';
+      } else if (role === 'ADMIN') {
+        redirectPath = '/adminDashboard';
+      }
 
       setTimeout(() => {
         window.dispatchEvent(new Event('auth-updated'));
-        navigate(from, { replace: true });
+        navigate(redirectPath, { replace: true });
       }, 1500);
     } catch (error) {
       console.error('Login error:', error);
