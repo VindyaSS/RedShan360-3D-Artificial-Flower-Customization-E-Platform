@@ -135,20 +135,37 @@ export default function ENormalCompletedTable({ orders, onItemClick }) {
                                     {item.Quantity || 1}
                                   </td>
                                   <td>
-                                    <span style={{ 
-                                      color: '#0f766e', 
-                                      fontWeight: '700', 
-                                      fontSize: '12.5px',
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      gap: '4px',
-                                      backgroundColor: '#f0fdfa',
-                                      padding: '4px 10px',
-                                      borderRadius: '20px',
-                                      border: '1px solid #ccfbf1'
-                                    }}>
-                                      <Check size={12} /> Completed
-                                    </span>
+                                    {(item.status || item.Status) === 'Ready to Packing' ? (
+                                      <span style={{ 
+                                        color: '#3730a3', 
+                                        fontWeight: '700', 
+                                        fontSize: '12.5px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        backgroundColor: '#e0e7ff',
+                                        padding: '4px 10px',
+                                        borderRadius: '20px',
+                                        border: '1px solid #c7d2fe'
+                                      }}>
+                                        <Inbox size={12} /> Ready to Packing
+                                      </span>
+                                    ) : (
+                                      <span style={{ 
+                                        color: '#0f766e', 
+                                        fontWeight: '700', 
+                                        fontSize: '12.5px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        backgroundColor: '#f0fdfa',
+                                        padding: '4px 10px',
+                                        borderRadius: '20px',
+                                        border: '1px solid #ccfbf1'
+                                      }}>
+                                        <Check size={12} /> Completed
+                                      </span>
+                                    )}
                                   </td>
                                 </tr>
                               );

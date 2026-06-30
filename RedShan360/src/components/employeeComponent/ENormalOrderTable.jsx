@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Check, Play, Pause, AlertCircle, Inbox, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, Play, Pause, AlertCircle, Inbox, ChevronDown, ChevronUp, Database } from 'lucide-react';
 import EStartButton from './EStartButton';
 import EStopButton from './EStopButton';
 import ECompletedButton from './ECompletedButton';
@@ -18,11 +18,18 @@ const DEFAULT_ORDERS = [
   { OrderID: 'ORD-1004', ItemID: 'ITM-5002', OrderName: 'Romantic Red Rose Bouquet', image: redRoseBunch, Quantity: 1, initialStatus: 'Completed' }
 ];
 
+const MOCK_STOCK = {
+  'ITM-5001': 0, // Daisy Bunch: 0 in stock (not enough!)
+  'ITM-5002': 0, // Red Rose Bouquet: 0 in stock (Quantity 1 is not enough)
+  'ITM-5003': 3, // Elegant Lily Arrangement: 3 in stock (Quantity 1 is enough)
+};
+
 export default function ENormalOrderTable({
   orders,
   onStart,
   onStop,
   onComplete,
+  onReadyToPacking,
   onItemClick
 }) {
   const displayOrders = orders || DEFAULT_ORDERS;
@@ -31,6 +38,10 @@ export default function ENormalOrderTable({
   const [rowStatuses, setRowStatuses] = useState({});
   // Track which orders are expanded
   const [expandedOrders, setExpandedOrders] = useState({});
+
+  // Stock check states
+  const [checkingStock, setCheckingStock] = useState({});
+  const [stockChecked, setStockChecked] = useState({});
 
   useEffect(() => {
     const newStatuses = {};
@@ -63,6 +74,30 @@ export default function ENormalOrderTable({
       ...prev,
       [orderId]: !prev[orderId]
     }));
+  };
+
+  const handleCheckStock = (rowKey, itemId, quantity) => {
+    setCheckingStock(prev => ({ ...prev, [rowKey]: true }));
+    setTimeout(() => {
+      const stock = MOCK_STOCK[itemId] !== undefined ? MOCK_STOCK[itemId] : 3;
+      const isSufficient = stock >= quantity;
+      setStockChecked(prev => ({
+        ...prev,
+        [rowKey]: {
+          available: stock,
+          isSufficient
+        }
+      }));
+      setCheckingStock(prev => ({ ...prev, [rowKey]: false }));
+    }, 1000);
+  };
+
+  const handleReadyToPackingClick = (rowKey, orderId, itemId) => {
+    setRowStatuses(prev => ({
+      ...prev,
+      [rowKey]: 'Ready to Packing'
+    }));
+    if (onReadyToPacking) onReadyToPacking(orderId, itemId);
   };
 
   const handleStart = (rowKey, orderId, itemId) => {
@@ -107,6 +142,12 @@ export default function ENormalOrderTable({
         return (
           <span className="status-badge status-badge-completed">
             <Check size={10} /> Completed
+          </span>
+        );
+      case 'Ready to Packing':
+        return (
+          <span className="status-badge status-badge-ready-packing">
+            <Inbox size={10} /> Ready to Packing
           </span>
         );
       case 'Pending':
@@ -228,7 +269,50 @@ export default function ENormalOrderTable({
                                   <td>
                                     <div className="employee-table-actions-cell">
                                       {status === 'Pending' && (
-                                        <EStartButton onClick={() => handleStart(rowKey, item.OrderID, item.ItemID)} label="Start" />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                          {!stockChecked[rowKey] && !checkingStock[rowKey] && (
+                                            <button
+                                              className="btn-employee btn-employee-check-stock"
+                                              onClick={() => handleCheckStock(rowKey, item.ItemID, item.Quantity || 1)}
+                                            >
+                                              <Database size={14} /> Check Stock
+                                            </button>
+                                          )}
+
+                                          {checkingStock[rowKey] && (
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#b25e00' }}>
+                                              <span className="stock-check-loader"></span> Checking...
+                                            </span>
+                                          )}
+
+                                          {stockChecked[rowKey] && (
+                                            <>
+                                              {stockChecked[rowKey].isSufficient ? (
+                                                <>
+                                                  <span className="stock-badge-info stock-badge-sufficient">
+                                                    <Check size={10} /> Stock: {stockChecked[rowKey].available} available
+                                                  </span>
+                                                  <button
+                                                    className="btn-employee btn-employee-ready-packing"
+                                                    onClick={() => handleReadyToPackingClick(rowKey, item.OrderID, item.ItemID)}
+                                                  >
+                                                    <Inbox size={14} /> Ready to Packing
+                                                  </button>
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <span className="stock-badge-info stock-badge-insufficient">
+                                                    <AlertCircle size={10} /> Stock: {stockChecked[rowKey].available} available
+                                                  </span>
+                                                  <EStartButton
+                                                    onClick={() => handleStart(rowKey, item.OrderID, item.ItemID)}
+                                                    label="Start Order"
+                                                  />
+                                                </>
+                                              )}
+                                            </>
+                                          )}
+                                        </div>
                                       )}
 
                                       {status === 'In Progress' && (
@@ -255,6 +339,19 @@ export default function ENormalOrderTable({
                                           gap: '4px'
                                         }}>
                                           <Check size={14} /> Completed
+                                        </span>
+                                      )}
+
+                                      {status === 'Ready to Packing' && (
+                                        <span style={{
+                                          color: '#3730a3',
+                                          fontWeight: '700',
+                                          fontSize: '12.5px',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '4px'
+                                        }}>
+                                          <Inbox size={14} /> Ready to Packing
                                         </span>
                                       )}
                                     </div>
