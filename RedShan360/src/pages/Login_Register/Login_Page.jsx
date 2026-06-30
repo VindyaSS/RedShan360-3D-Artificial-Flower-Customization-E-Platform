@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Login_Page.css';
+import api from '../../services/api';
+import PasswordInput from '../../components/PasswordInput';
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../../components/TermsOfServiceModal';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [apiSuccess, setApiSuccess] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -29,8 +42,35 @@ export default function LoginPage() {
     }
 
     setErrors({});
-    console.log('Logging in with:', { email, password, rememberMe });
-    alert(`Successfully simulated login for: ${email}`);
+    setApiError('');
+    setApiSuccess('');
+    setLoading(true);
+
+    try {
+      const response = await api.post('/api/auth/login', {
+        email,
+        password
+      });
+
+      setApiSuccess('Successfully logged in!');
+      console.log('Login successful:', response.data);
+
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      setTimeout(() => {
+        window.dispatchEvent(new Event('auth-updated'));
+        navigate(from, { replace: true });
+      }, 1500);
+    } catch (error) {
+      console.error('Login error:', error);
+      const msg = error.response?.data?.message || 'Invalid email or password';
+      setApiError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -108,6 +148,17 @@ export default function LoginPage() {
               Please enter your credentials to access your curated collection.
             </p>
 
+            {apiError && (
+              <div style={{ color: '#d32f2f', backgroundColor: '#ffebee', padding: '10px 14px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', borderLeft: '4px solid #d32f2f', textAlign: 'left' }}>
+                {apiError}
+              </div>
+            )}
+            {apiSuccess && (
+              <div style={{ color: '#2e7d32', backgroundColor: '#e8f5e9', padding: '10px 14px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', borderLeft: '4px solid #2e7d32', textAlign: 'left' }}>
+                {apiSuccess}
+              </div>
+            )}
+
             <form onSubmit={handleLogin} noValidate>
               {/* Email Address */}
               <div className="form-group">
@@ -139,15 +190,14 @@ export default function LoginPage() {
                   <a href="/forgot-password" className="forgot-password-link">Forgot Password?</a>
                 </div>
                 <div className="input-wrapper">
-                  <input
-                    type="password"
-                    id="password-input"
-                    className="form-input"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={errors.password ? { borderColor: '#d32f2f' } : {}}
-                  />
+                <PasswordInput
+                  id="password-input"
+                  className="form-input"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={errors.password ? { borderColor: '#d32f2f' } : {}}
+                />
                 </div>
                 {errors.password && (
                   <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '6px' }}>
@@ -166,19 +216,21 @@ export default function LoginPage() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <label htmlFor="remember-me-checkbox" className="remember-me-label">
-                  Remember me for 30 days
+                  Remember me
                 </label>
               </div>
 
               {/* Login Button */}
-              <button type="submit" className="login-btn" id="btn-login-submit">
-                Login to Account
-                <span className="login-btn-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </span>
+              <button type="submit" className="login-btn" id="btn-login-submit" disabled={loading} style={loading ? { opacity: 0.7, cursor: 'not-allowed' } : {}}>
+                {loading ? 'Logging in...' : 'Login to Account'}
+                {!loading && (
+                  <span className="login-btn-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </span>
+                )}
               </button>
             </form>
 
@@ -190,7 +242,7 @@ export default function LoginPage() {
             </div>
 
             {/* Social Logins */}
-            <div className="social-buttons-container">
+            {/*<div className="social-buttons-container">
               <button className="social-btn" id="btn-google-login">
                 <span className="social-btn-logo">
                   <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
@@ -210,7 +262,7 @@ export default function LoginPage() {
                 </span>
                 Apple
               </button>
-            </div>
+            </div>*/}
 
             {/* Create Account Link */}
             <div className="register-container">
@@ -236,9 +288,23 @@ export default function LoginPage() {
 
         <div className="footer-right">
           <div className="footer-links-row">
-            <a href="/privacy" className="footer-link">Privacy Policy</a>
+            <button
+              type="button"
+              onClick={() => setIsPrivacyOpen(true)}
+              className="footer-link"
+              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+            >
+              Privacy Policy
+            </button>
             <span style={{ color: '#555' }}>|</span>
-            <a href="/terms" className="footer-link">Terms of Service</a>
+            <button
+              type="button"
+              onClick={() => setIsTermsOpen(true)}
+              className="footer-link"
+              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+            >
+              Terms of Service
+            </button>
           </div>
           <div className="secure-checkout-badge">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
@@ -249,6 +315,9 @@ export default function LoginPage() {
           </div>
         </div>
       </footer>
+
+      <PrivacyPolicyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
     </div>
   );
 }

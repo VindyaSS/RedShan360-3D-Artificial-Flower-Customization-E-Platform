@@ -158,7 +158,7 @@
   font-family: 'Playfair Display', serif;
   font-size: 38px;
   font-weight: 600;
-  color: #ffffff;
+  color: #000000;
   margin: 0 0 12px 0;
   line-height: 1.2;
 }
@@ -167,7 +167,7 @@
   font-size: 15px;
   font-style: italic;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.9);
+  color: #000000;
   line-height: 1.5;
   margin: 0;
 }
@@ -508,21 +508,22 @@
   .login-main {
     flex-direction: column;
   }
-  
+
   .login-visual-panel {
     min-height: 400px;
   }
-  
+
   .login-form-panel {
     padding: 48px 24px;
   }
-  
+
   .login-header {
     padding: 16px 24px;
   }
-  
+
   .header-nav {
-    display: none; /* Hide main nav links on tablet/mobile */
+    display: none;
+    /* Hide main nav links on tablet/mobile */
   }
 }
 
@@ -533,15 +534,15 @@
     text-align: center;
     padding: 32px 24px;
   }
-  
+
   .footer-right {
     align-items: center;
   }
-  
+
   .footer-left {
     align-items: center;
   }
-  
+
   .footer-center {
     justify-content: center;
     flex-wrap: wrap;

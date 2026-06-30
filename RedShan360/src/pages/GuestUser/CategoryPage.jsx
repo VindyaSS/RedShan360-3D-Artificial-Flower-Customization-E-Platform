@@ -1,38 +1,96 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Star, Heart } from 'lucide-react';
 import { products } from '../../data/products';
+import api from '../../services/api';
 
 const CategoryPage = () => {
+  const navigate = useNavigate();
   const { slug } = useParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSubcategory, setActiveSubcategory] = useState(null);
 
-  // Load wishlist from localStorage
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem('redshan360_wishlist');
-    return saved ? JSON.parse(saved) : {};
-  });
+  // Wishlist state loaded from database
+  const [wishlist, setWishlist] = useState({});
 
-  const toggleWishlist = (id) => {
-    setWishlist((prev) => {
-      const updated = { ...prev, [id]: !prev[id] };
-      localStorage.setItem('redshan360_wishlist', JSON.stringify(updated));
-      window.dispatchEvent(new Event('wishlist-updated'));
-      return updated;
-    });
+  const savedUser = localStorage.getItem('user');
+  const user = savedUser ? JSON.parse(savedUser) : null;
+  const userId = user ? user.id : null;
+
+  const fetchWishlist = async () => {
+    if (userId) {
+      try {
+        const response = await api.get(`/api/wishlist/user/${userId}`);
+        const wishlistMap = {};
+        response.data.forEach((item) => {
+          wishlistMap[item.productId] = item.wishlistId;
+        });
+        setWishlist(wishlistMap);
+      } catch (error) {
+        console.error('Error fetching wishlist:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [userId]);
+
+  const toggleWishlist = async (id) => {
+    if (!userId) {
+      window.dispatchEvent(new Event('show-login-required'));
+      return;
+    }
+
+    const wishlistId = wishlist[id];
+
+    if (wishlistId) {
+      // Remove from database
+      try {
+        await api.delete(`/api/wishlist/${wishlistId}`);
+        setWishlist((prev) => {
+          const updated = { ...prev };
+          delete updated[id];
+          window.dispatchEvent(new Event('wishlist-updated'));
+          return updated;
+        });
+      } catch (error) {
+        console.error('Error removing from wishlist:', error);
+      }
+    } else {
+      // Add to database
+      try {
+        const response = await api.post('/api/wishlist', {
+          userId,
+          productId: id
+        });
+        const newWishlistId = response.data.data.wishlistId;
+        setWishlist((prev) => {
+          const updated = { ...prev, [id]: newWishlistId };
+          window.dispatchEvent(new Event('wishlist-updated'));
+          return updated;
+        });
+      } catch (error) {
+        console.error('Error adding to wishlist:', error);
+      }
+    }
   };
 
   // Sync wishlist from other pages
   useEffect(() => {
     const handleWishlistUpdated = () => {
-      const saved = localStorage.getItem('redshan360_wishlist');
-      setWishlist(saved ? JSON.parse(saved) : {});
+      fetchWishlist();
     };
     window.addEventListener('wishlist-updated', handleWishlistUpdated);
     return () => window.removeEventListener('wishlist-updated', handleWishlistUpdated);
-  }, []);
+  }, [userId]);
+
+  // Reset subcategory when page category slug changes
+  useEffect(() => {
+    setActiveSubcategory(null);
+  }, [slug]);
 
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
 
@@ -41,15 +99,15 @@ const CategoryPage = () => {
     switch (categorySlug) {
       case 'bouquets':
         return {
-          title: 'Bouquets',
+          title: 'Bouquets Collection',
           tagline: 'THE ETERNAL MUSE',
           description: 'Meticulously crafted silk & velvet arrangements designed to stand the test of time.'
         };
       case 'head-dresses':
         return {
-          title: 'Head Dresses',
+          title: 'Head Dresse Collection',
           tagline: 'MAJESTIC GRACE',
-          description: 'Delicate floral accessories, headpieces, and crowns for weddings and special collections.'
+          description: 'Discover handcrafted artificial flower head dresses designed for weddings, birthdays, and special occasions.'
         };
       case 'wedding-collections':
         return {
@@ -59,9 +117,9 @@ const CategoryPage = () => {
         };
       case 'individual-flowers':
         return {
-          title: 'Individual Flowers',
+          title: 'Individual Flowers Collection',
           tagline: 'EXOTIC ALLURE',
-          description: 'Premium single-stem floral masterpieces tailored for bespoke vases and minimalist spaces.'
+          description: 'Explore our collection of handcrafted artificial flowers designed for birthdays, anniversaries, graduations, and special occasions.'
         };
       default:
         return {
@@ -74,21 +132,93 @@ const CategoryPage = () => {
 
   const categoryDetails = getCategoryDetails(slug);
 
-  // Filter products belonging to selected category
+  // Filter products belonging to selected category and subcategory
   const filteredProducts = products.filter((product) => {
     switch (slug) {
       case 'bouquets':
-        return product.type === 'bouquet';
+        if (product.type !== 'bouquet') return false;
+        if (activeSubcategory) {
+          return product.subcategory === activeSubcategory;
+        }
+        return true;
       case 'head-dresses':
-        return product.category === 'dried' || product.type === 'arrangement';
+        if (product.type !== 'head-dress') return false;
+        if (activeSubcategory) {
+          return product.subcategory === activeSubcategory;
+        }
+        return true;
       case 'wedding-collections':
-        return product.category === 'velvet' || product.type === 'centerpiece';
+        return (product.category === 'velvet' || product.type === 'centerpiece') && product.type !== 'single-stem';
       case 'individual-flowers':
-        return product.type === 'single-stem';
+        if (product.type !== 'single-stem') return false;
+        if (activeSubcategory) {
+          return product.subcategory === activeSubcategory;
+        }
+        return true;
       default:
         return false;
     }
   });
+
+  const handleAddToCart = (product) => {
+    const savedUser = localStorage.getItem('user');
+    if (!savedUser) {
+      window.dispatchEvent(new Event('show-login-required'));
+      return;
+    }
+    const savedCart = localStorage.getItem('redshan360_cart');
+    const cartList = savedCart ? JSON.parse(savedCart) : [];
+
+    // Use default color of product if available
+    const defaultColor = product.colors?.[0]?.name || 'Default';
+
+    // Check if item already exists with the same color
+    const existingItemIndex = cartList.findIndex(
+      (item) => item.id === product.id && item.selectedColor === defaultColor
+    );
+
+    if (existingItemIndex > -1) {
+      cartList[existingItemIndex].quantity += 1;
+    } else {
+      cartList.push({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        numericPrice: product.numericPrice,
+        image: product.image,
+        selectedColor: defaultColor,
+        quantity: 1,
+      });
+    }
+
+    localStorage.setItem('redshan360_cart', JSON.stringify(cartList));
+    window.dispatchEvent(new Event('cart-updated'));
+    window.dispatchEvent(new Event('open-cart'));
+  };
+
+  const getSubcategories = (categorySlug) => {
+    if (categorySlug === 'bouquets') {
+      return [
+        { name: 'Anniversary', value: 'anniversary', image: '/images/cat_roses.png', tag: 'CELEBRATE LOVE' },
+        { name: 'Birthday', value: 'birthday', image: '/images/cat_peonies.png', tag: 'CHEERFUL BLOOMS' },
+        { name: 'Convocation', value: 'convocation', image: '/images/con3.png', tag: 'SUCCESS & HONOR' }
+      ];
+    } else if (categorySlug === 'head-dresses') {
+      return [
+        { name: 'Weddings', value: 'wedding', image: '/images/cat_headdress_wedding.png', tag: 'BRIDAL MAJESTY' },
+        { name: 'Birthday', value: 'birthday', image: '/images/cat_headdress_birthday.png', tag: 'CELEBRATE GRACE' }
+      ];
+    } else if (categorySlug === 'individual-flowers') {
+      return [
+        { name: 'Convocation', value: 'convocation', image: '/images/cat_individual_convocation.png', tag: 'ACADEMIC PRIDE' },
+        { name: 'Anniversary', value: 'anniversary', image: '/images/cat_individual_anniversary.png', tag: 'ETERNAL DEVOTION' },
+        { name: 'Birthday', value: 'birthday', image: '/images/cat_individual_birthday.png', tag: 'CELEBRATE LIFE' }
+      ];
+    }
+    return [];
+  };
+
+  const subcategories = getSubcategories(slug);
 
   return (
     <div className="min-h-screen bg-[#fcf9f8] text-[#1a1a1a]" style={{ fontFamily: 'Inter, Montserrat, sans-serif' }}>
@@ -102,29 +232,136 @@ const CategoryPage = () => {
 
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-[120px] pb-20">
-        
+
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
-          <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
-          <span>/</span>
-          <span className="text-[#8c5e5e]">{categoryDetails.title}</span>
-        </nav>
+        {slug === 'bouquets' ? (
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+            <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
+            <span className="text-[#1a1a1a]/30">&gt;</span>
+            <span className="text-[#8c5e5e]">Bouquets</span>
+          </nav>
+        ) : slug === 'head-dresses' ? (
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+            <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
+            <span className="text-[#1a1a1a]/30">&gt;</span>
+            <span className="text-[#8c5e5e]">Head Dresses</span>
+          </nav>
+        ) : slug === 'individual-flowers' ? (
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+            <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
+            <span className="text-[#1a1a1a]/30">&gt;</span>
+            <span className="text-[#8c5e5e]">Individual Flowers</span>
+          </nav>
+        ) : (
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+            <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
+            <span>/</span>
+            <span className="text-[#8c5e5e]">{categoryDetails.title}</span>
+          </nav>
+        )}
 
         {/* Category Banner */}
-        <div className="pb-8 border-b border-[#d9d2d0]/30 text-left mb-12">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-2">
-            {categoryDetails.tagline}
-          </p>
-          <h1 className="text-3xl md:text-5xl font-bold text-[#1a1a1a] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-            {categoryDetails.title}
-          </h1>
-          <p className="text-sm text-[#1a1a1a]/70 mt-3 max-w-2xl leading-relaxed">
-            {categoryDetails.description}
-          </p>
-          <p className="text-xs font-semibold text-[#1a1a1a]/55 mt-4">
-            Showing {filteredProducts.length} premium arrangements
-          </p>
-        </div>
+        {(slug === 'bouquets' || slug === 'head-dresses' || slug === 'individual-flowers') ? (
+          <div className="relative rounded-sm overflow-hidden mb-12 min-h-[480px] flex items-center shadow-sm border border-[#d9d2d0]/20 bg-[#170e0d] bg-cover bg-center md:bg-contain md:bg-right md:bg-no-repeat text-left" style={{ backgroundImage: slug === 'bouquets' ? "url('/images/luxury_bouquets_banner.png')" : slug === 'head-dresses' ? "url('/images/luxury_headdress_banner.png')" : "url('/images/3flowers.png')" }}>
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-[#170e0d]/60 md:bg-transparent md:bg-gradient-to-r md:from-[#170e0d] md:via-[#170e0d]/90 md:to-transparent backdrop-blur-[0.5px]" />
+            {/* Banner Content */}
+            <div className="relative z-10 p-8 md:p-12 lg:p-16 max-w-3xl text-white">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#f5e6e8] font-bold mb-3">
+                {categoryDetails.tagline}
+              </p>
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                {categoryDetails.title}
+              </h1>
+              <p className="text-sm text-white/95 leading-relaxed font-light mb-6">
+                {categoryDetails.description}
+              </p>
+              <p className="text-[11px] uppercase tracking-wider font-semibold text-white/85 bg-white/10 backdrop-blur-sm rounded-full py-1 px-4 inline-block">
+                Showing {filteredProducts.length} premium arrangements
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="pb-8 border-b border-[#d9d2d0]/30 text-left mb-12">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-2">
+              {categoryDetails.tagline}
+            </p>
+            <h1 className="text-3xl md:text-5xl font-bold text-[#1a1a1a] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+              {categoryDetails.title}
+            </h1>
+            <p className="text-sm text-[#1a1a1a]/70 mt-3 max-w-2xl leading-relaxed">
+              {categoryDetails.description}
+            </p>
+            <p className="text-xs font-semibold text-[#1a1a1a]/55 mt-4">
+              Showing {filteredProducts.length} premium arrangements
+            </p>
+          </div>
+        )}
+
+        {/* Subcategories Section */}
+        {(slug === 'bouquets' || slug === 'head-dresses' || slug === 'individual-flowers') && (
+          <div className="mb-12">
+            <h2 className="text-xs uppercase tracking-[0.15em] font-bold text-[#1a1a1a]/55 mb-6 text-left">
+              Shop {slug === 'bouquets' ? 'Bouquet' : slug === 'head-dresses' ? 'Head Dress' : 'Individual Flower'} Subcategory
+            </h2>
+
+            {/* Desktop and Tablet grid, Mobile scrollable flex row */}
+            <div className="flex overflow-x-auto pb-4 gap-4 no-scrollbar sm:grid sm:grid-cols-2 md:grid-cols-3 sm:gap-6 sm:overflow-visible sm:pb-0">
+              {subcategories.map((sub, idx) => {
+                const isActive = activeSubcategory === sub.value;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveSubcategory(isActive ? null : sub.value)}
+                    className={`group relative flex-shrink-0 w-[240px] sm:w-auto aspect-[16/10] rounded-sm overflow-hidden shadow-sm cursor-pointer transition-all duration-300 border-2 ${isActive ? 'border-[#8c5e5e] ring-2 ring-[#8c5e5e]/20' : 'border-transparent hover:border-[#8c5e5e]/40'
+                      }`}
+                  >
+                    <img
+                      src={sub.image}
+                      alt={sub.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent transition-colors duration-300" />
+
+                    {/* Active State Overlay Indicator */}
+                    {isActive && (
+                      <div className="absolute inset-0 bg-[#8c5e5e]/20 backdrop-blur-[0.5px] transition-colors" />
+                    )}
+
+                    <div className="absolute inset-x-0 bottom-0 p-4 text-left">
+                      <h4 className="text-lg md:text-xl text-white font-semibold" style={{ fontFamily: 'Playfair Display, serif' }}>
+                        {sub.name}
+                      </h4>
+                      <p className="text-[8px] md:text-[9px] uppercase tracking-[0.15em] text-white/90 font-medium mt-0.5">
+                        {sub.tag}
+                      </p>
+                    </div>
+
+                    {/* Tiny badge indicating selection */}
+                    {isActive && (
+                      <div className="absolute top-3 right-3 bg-[#8c5e5e] text-white text-[8px] font-bold tracking-widest px-2 py-0.5 rounded-sm">
+                        SELECTED
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Mobile Helper/Indicator for scrollability */}
+            <div className="flex sm:hidden justify-between items-center text-[10px] text-[#1a1a1a]/40 mt-2">
+              <span>← Swipe to view categories →</span>
+              {activeSubcategory && (
+                <button
+                  onClick={() => setActiveSubcategory(null)}
+                  className="text-[#8c5e5e] font-semibold hover:underline"
+                >
+                  Clear filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Filtered Product Grid */}
         {filteredProducts.length === 0 ? (
@@ -194,9 +431,20 @@ const CategoryPage = () => {
                   {product.subtitle}
                 </p>
 
-                <p className="text-sm font-bold text-[#8c5e5e] mt-auto">
-                  {product.price}
-                </p>
+                {/* Price & Add to Cart Button Container */}
+                <div className="flex justify-between items-center mt-auto pt-3 border-t border-[#d9d2d0]/20">
+                  <p className="text-sm font-bold text-[#8c5e5e]">
+                    {product.price}
+                  </p>
+
+                  {/* Add to Cart Button */}
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="px-3 py-1.5 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 active:scale-95"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
               </div>
             ))}
           </div>

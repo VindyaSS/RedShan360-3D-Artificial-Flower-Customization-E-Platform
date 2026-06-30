@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AdminSettingsService } from "../../../services/AdminSettingsService";
+import PasswordInput from "../../PasswordInput";
 import "./AdminPasswordSettings.css";
 
 function AdminPasswordSettings() {
@@ -55,8 +56,7 @@ function AdminPasswordSettings() {
         <div className="form-fields-grid-single">
           <div className="form-group">
             <label htmlFor="currentPassword">CURRENT PASSWORD</label>
-            <input
-              type="password"
+            <PasswordInput
               id="currentPassword"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -67,8 +67,7 @@ function AdminPasswordSettings() {
 
           <div className="form-group">
             <label htmlFor="newPassword">NEW PASSWORD</label>
-            <input
-              type="password"
+            <PasswordInput
               id="newPassword"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -79,8 +78,7 @@ function AdminPasswordSettings() {
 
           <div className="form-group">
             <label htmlFor="confirmPassword">CONFIRM NEW PASSWORD</label>
-            <input
-              type="password"
+            <PasswordInput
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Registration.css';
+import api from '../../services/api';
+import PasswordInput from '../../components/PasswordInput';
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../../components/TermsOfServiceModal';
 
 export default function RegistrationPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -9,8 +17,13 @@ export default function RegistrationPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [apiSuccess, setApiSuccess] = useState('');
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -50,8 +63,32 @@ export default function RegistrationPage() {
     }
 
     setErrors({});
-    console.log('Registering user with:', { firstName, lastName, email, address, password });
-    alert(`Successfully registered account for: ${firstName} ${lastName}`);
+    setApiError('');
+    setApiSuccess('');
+    setLoading(true);
+
+    try {
+      const response = await api.post('/api/auth/register', {
+        firstName,
+        lastName,
+        email,
+        address,
+        password
+      });
+
+      setApiSuccess('Registration successful! Redirecting to login...');
+      console.log('Registration success:', response.data);
+
+      setTimeout(() => {
+        navigate('/login', { state: { from } });
+      }, 2000);
+    } catch (error) {
+      console.error('Registration error:', error);
+      const msg = error.response?.data?.message || 'Registration failed. Please try again.';
+      setApiError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -126,6 +163,17 @@ export default function RegistrationPage() {
             <p className="form-subtitle">
               Create your account to experience a world of botanical beauty and bespoke curation.
             </p>
+
+            {apiError && (
+              <div style={{ color: '#d32f2f', backgroundColor: '#ffebee', padding: '10px 14px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', borderLeft: '4px solid #d32f2f', textAlign: 'left' }}>
+                {apiError}
+              </div>
+            )}
+            {apiSuccess && (
+              <div style={{ color: '#2e7d32', backgroundColor: '#e8f5e9', padding: '10px 14px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', borderLeft: '4px solid #2e7d32', textAlign: 'left' }}>
+                {apiSuccess}
+              </div>
+            )}
 
             <form onSubmit={handleRegister} noValidate>
               {/* First Name & Last Name (Side by Side) */}
@@ -220,8 +268,7 @@ export default function RegistrationPage() {
                     <label className="form-label" htmlFor="password-input">Password</label>
                   </div>
                   <div className="input-wrapper">
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="password-input"
                       className="form-input"
                       placeholder="••••••••"
@@ -240,8 +287,7 @@ export default function RegistrationPage() {
                     <label className="form-label" htmlFor="confirmPassword-input">Confirm Password</label>
                   </div>
                   <div className="input-wrapper">
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="confirmPassword-input"
                       className="form-input"
                       placeholder="••••••••"
@@ -257,14 +303,16 @@ export default function RegistrationPage() {
               </div>
 
               {/* Register Button */}
-              <button type="submit" className="registration-btn" id="btn-register-submit">
-                Register
-                <span className="registration-btn-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </span>
+              <button type="submit" className="registration-btn" id="btn-register-submit" disabled={loading} style={loading ? { opacity: 0.7, cursor: 'not-allowed' } : {}}>
+                {loading ? 'Registering...' : 'Register'}
+                {!loading && (
+                  <span className="registration-btn-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </span>
+                )}
               </button>
             </form>
 
@@ -299,9 +347,23 @@ export default function RegistrationPage() {
 
         <div className="footer-right">
           <div className="footer-links-row">
-            <a href="/privacy" className="footer-link">Privacy Policy</a>
+            <button
+              type="button"
+              onClick={() => setIsPrivacyOpen(true)}
+              className="footer-link"
+              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+            >
+              Privacy Policy
+            </button>
             <span style={{ color: '#555' }}>|</span>
-            <a href="/terms" className="footer-link">Terms of Service</a>
+            <button
+              type="button"
+              onClick={() => setIsTermsOpen(true)}
+              className="footer-link"
+              style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+            >
+              Terms of Service
+            </button>
           </div>
           <div className="secure-checkout-badge">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
@@ -312,6 +374,9 @@ export default function RegistrationPage() {
           </div>
         </div>
       </footer>
+
+      <PrivacyPolicyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
     </div>
   );
 }

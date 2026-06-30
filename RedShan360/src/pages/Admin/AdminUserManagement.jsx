@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AdminSidebar from "../../components/adminComponent/AdminSidebar";
 import AdminTopbar from "../../components/adminComponent/AdminTopbar";
 import AdminUserTable from "../../components/adminComponent/AdminUserTable";
+import PasswordInput from "../../components/PasswordInput";
 import "./AdminUserManagement.css";
 
 const initialCustomers = [
@@ -602,8 +603,7 @@ function AdminUserManagement() {
                       <>
                         <div className="form-group-item">
                           <label>Password <span className="req">*</span></label>
-                          <input
-                            type="password"
+                          <PasswordInput
                             name="password"
                             value={formData.password}
                             onChange={handleInputChange}
@@ -614,8 +614,7 @@ function AdminUserManagement() {
 
                         <div className="form-group-item">
                           <label>Confirm Password <span className="req">*</span></label>
-                          <input
-                            type="password"
+                          <PasswordInput
                             name="confirmPassword"
                             value={formData.confirmPassword}
                             onChange={handleInputChange}
