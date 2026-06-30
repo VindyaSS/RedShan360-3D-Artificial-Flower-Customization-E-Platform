@@ -16,6 +16,7 @@ export default function RegistrationPage() {
   const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState({});
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function RegistrationPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (loading) return;
     const newErrors = {};
 
     if (!firstName.trim()) {
@@ -35,14 +37,21 @@ export default function RegistrationPage() {
       newErrors.lastName = 'Last name is required';
     }
 
-    if (!email) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
       newErrors.email = 'Email address is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/\S+@\S+\.\S+/.test(normalizedEmail)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
     if (!address.trim()) {
       newErrors.address = 'Address is required';
+    }
+
+    if (!phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\+?[0-9\s-]{9,15}$/.test(phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
     }
 
     if (!password) {
@@ -69,10 +78,9 @@ export default function RegistrationPage() {
 
     try {
       const response = await api.post('/api/auth/register', {
-        firstName,
-        lastName,
-        email,
-        address,
+        name: `${firstName} ${lastName}`.trim(),
+        email: normalizedEmail,
+        phone,
         password
       });
 
@@ -96,7 +104,7 @@ export default function RegistrationPage() {
       {/* HEADER */}
       <header className="registration-header">
         <div className="header-left">
-          <a href="/" className="logo-text">RedShan360</a>
+          <a href="/" className="logo-text">Redshan Flora</a>
         </div>
 
         {/*<nav className="header-nav">
@@ -240,6 +248,27 @@ export default function RegistrationPage() {
                 )}
               </div>
 
+              {/* Phone Number */}
+              <div className="form-group">
+                <div className="label-row">
+                  <label className="form-label" htmlFor="phone-input">Phone Number</label>
+                </div>
+                <div className="input-wrapper">
+                  <input
+                    type="tel"
+                    id="phone-input"
+                    className="form-input"
+                    placeholder="0771234567"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    style={errors.phone ? { borderColor: '#d32f2f' } : {}}
+                  />
+                </div>
+                {errors.phone && (
+                  <span className="validation-error">{errors.phone}</span>
+                )}
+              </div>
+
               {/* Address */}
               <div className="form-group">
                 <div className="label-row">
@@ -334,8 +363,8 @@ export default function RegistrationPage() {
       {/* FOOTER */}
       <footer className="registration-footer">
         <div className="footer-left">
-          <a href="/" className="logo-text">RedShan360</a>
-          <span className="copyright-text">© 2024 RedShan360. Everlasting Elegance. Crafting botanical wonders for the modern sanctuary.</span>
+          <a href="/" className="logo-text">Redshan Flora</a>
+          <span className="copyright-text">© 2024 Redshan Flora. Everlasting Elegance. Crafting botanical wonders for the modern sanctuary.</span>
         </div>
 
         <div className="footer-center">

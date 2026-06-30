@@ -78,7 +78,7 @@ export default function LoginPage() {
       {/* HEADER */}
       <header className="login-header">
         <div className="header-left">
-          <a href="/" className="logo-text">RedShan360</a>
+          <a href="/" className="logo-text">Redshan Flora</a>
         </div>
 
         {/*<nav className="header-nav">
@@ -266,7 +266,7 @@ export default function LoginPage() {
 
             {/* Create Account Link */}
             <div className="register-container">
-              New to RedShan360? <a href="/register" className="register-link">Create Account</a>
+              New to Redshan Flora? <a href="/register" className="register-link">Create Account</a>
             </div>
           </div>
         </div>
@@ -275,8 +275,8 @@ export default function LoginPage() {
       {/* FOOTER */}
       <footer className="login-footer">
         <div className="footer-left">
-          <a href="/" className="logo-text">RedShan360</a>
-          <span className="copyright-text">© 2024 RedShan360. Everlasting Elegance.</span>
+          <a href="/" className="logo-text">Redshan Flora</a>
+          <span className="copyright-text">© 2024 Redshan Flora. Everlasting Elegance.</span>
         </div>
 
         <div className="footer-center">

@@ -204,7 +204,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
         <div className="flex justify-between items-center h-[80px] gap-4">
           <Link to="/guestUserDashboard" className="flex-shrink-0">
             <h1 className="text-[26px] md:text-[28px] font-bold tracking-tight text-[#1a1a1a] font-playfair">
-              RedShan<span className="text-[#8c5e5e] italic font-normal">360</span>
+              Redshan Flora
             </h1>
           </Link>
 
