@@ -26,6 +26,7 @@ export default function RegistrationPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (loading) return;
     const newErrors = {};
 
     if (!firstName.trim()) {
@@ -36,9 +37,10 @@ export default function RegistrationPage() {
       newErrors.lastName = 'Last name is required';
     }
 
-    if (!email) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
       newErrors.email = 'Email address is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/\S+@\S+\.\S+/.test(normalizedEmail)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
@@ -76,12 +78,9 @@ export default function RegistrationPage() {
 
     try {
       const response = await api.post('/api/auth/register', {
-        firstName,
-        lastName,
-        email,
-        address,
+        name: `${firstName} ${lastName}`.trim(),
+        email: normalizedEmail,
         phone,
-        phoneNumber: phone,
         password
       });
 
