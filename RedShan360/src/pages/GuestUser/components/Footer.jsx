@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-14">
           <div>
-            <h4 className="text-2xl font-medium mb-5" style={{ fontFamily: 'Playfair Display, serif' }}>RedShan360</h4>
+            <h4 className="text-2xl font-medium mb-5" style={{ fontFamily: 'Playfair Display, serif' }}>Redshan Flora</h4>
             <p className="text-[#1a1a1a]/70 font-medium leading-relaxed">Pioneering the future of botanical décor with hyper-realistic art and immersive digital visualization.</p>
             <div className="flex items-center gap-3 mt-6">
               <a href="#" className="w-9 h-9 rounded-full bg-white shadow-sm inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"><Trophy size={16} /></a>
@@ -39,7 +39,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-[#d9d2d0]/30 pt-7 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-          <p className="text-sm text-[#1a1a1a]/60 font-medium">© 2024 RedShan360. Everlasting Elegance.</p>
+          <p className="text-sm text-[#1a1a1a]/60 font-medium">© 2024 Redshan Flora. Everlasting Elegance.</p>
           <div className="flex items-center gap-5">
             <a href="#" className="text-sm text-[#1a1a1a]/60 font-medium hover:text-[#8c5e5e] transition-colors duration-300">Terms of Service</a>
             <a href="#" className="text-sm text-[#1a1a1a]/60 font-medium hover:text-[#8c5e5e] transition-colors duration-300">Privacy Policy</a>

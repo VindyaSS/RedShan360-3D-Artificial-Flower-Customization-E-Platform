@@ -6,8 +6,7 @@ import mauveRadianceDahlia from '../assets/mauve_radiance_dahlia.png';
 import serenityWhite from '../assets/con2.png';
 import wildHearth from '../assets/wild_hearth.jpg';
 import redRose from '../assets/red_rose.png';
-import purplecarnation
-  from '../assets/purple_carnation.png';
+import purplecarnation from '../assets/purple_carnation.png';
 import pinkChrysanthemums from '../assets/pink_chrysanthemum.png';
 import lilyHeaddress from '../assets/lily_headdress.jpg';
 import pinkLilyStem from '../assets/pink_lily.jpg';
@@ -24,6 +23,8 @@ import rainbowBlossomHeadDress from '../assets/images/head-dresses/rainbow-bloss
 import birthdayPrincessCrown from '../assets/images/head-dresses/birthday-princess-crown.png';
 import pastelGardenFloralHeadband from '../assets/images/head-dresses/pastel-garden-floral-headband.png';
 import floralPartyHeadDress from '../assets/images/head-dresses/floral-party-head-dress.png';
+
+
 
 // Individual Flowers Image Imports
 import graduationRose from '../assets/images/individual-flowers/graduation-rose.png';

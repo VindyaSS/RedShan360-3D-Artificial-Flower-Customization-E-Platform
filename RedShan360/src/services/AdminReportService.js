@@ -244,6 +244,8 @@ export const AdminReportService = {
    * and initiates browser file download.
    */
   exportPDFReport: async (period) => {
+
+   
     const normPeriod = normalizePeriod(period);
     try {
       console.log(`Attempting to export PDF report from Spring Boot backend for period: ${period}`);
@@ -277,6 +279,7 @@ export const AdminReportService = {
         downloadUrl: "#"
       };
     }
+
   }
 };
 
