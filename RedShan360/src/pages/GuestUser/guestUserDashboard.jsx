@@ -18,8 +18,15 @@ const GuestUserDashboard = () => {
   const [wishlist, setWishlist] = useState({});
 
   const savedUser = localStorage.getItem('user');
-  const user = savedUser ? JSON.parse(savedUser) : null;
-  const userId = user ? user.id : null;
+  let user = null;
+  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+    try {
+      user = JSON.parse(savedUser);
+    } catch (e) {
+      console.error('Failed to parse user from localStorage in GuestUserDashboard:', e);
+    }
+  }
+  const userId = user ? (user.id || user.userId) : null;
 
   const fetchWishlist = async () => {
     if (userId) {

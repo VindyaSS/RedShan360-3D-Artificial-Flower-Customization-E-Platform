@@ -75,8 +75,15 @@ const ProductDetails = () => {
       // Wishlist from database
       const checkWishlistStatus = async () => {
         const savedUser = localStorage.getItem('user');
-        const user = savedUser ? JSON.parse(savedUser) : null;
-        const userId = user ? user.id : null;
+        let user = null;
+        if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+          try {
+            user = JSON.parse(savedUser);
+          } catch (e) {
+            console.error('Failed to parse user from localStorage in ProductDetails checkWishlistStatus:', e);
+          }
+        }
+        const userId = user ? (user.id || user.userId) : null;
 
         if (userId) {
           try {
@@ -109,8 +116,15 @@ const ProductDetails = () => {
     if (!product) return;
 
     const savedUser = localStorage.getItem('user');
-    const user = savedUser ? JSON.parse(savedUser) : null;
-    const userId = user ? user.id : null;
+    let user = null;
+    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+      try {
+        user = JSON.parse(savedUser);
+      } catch (e) {
+        console.error('Failed to parse user from localStorage in ProductDetails toggleWishlist:', e);
+      }
+    }
+    const userId = user ? (user.id || user.userId) : null;
 
     if (!userId) {
       window.dispatchEvent(new Event('show-login-required'));
@@ -147,7 +161,15 @@ const ProductDetails = () => {
   const handleAddToCart = () => {
     if (!product) return;
     const savedUser = localStorage.getItem('user');
-    if (!savedUser) {
+    let currentUser = null;
+    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+      try {
+        currentUser = JSON.parse(savedUser);
+      } catch (e) {
+        console.error('Failed to parse user from localStorage in ProductDetails handleAddToCart:', e);
+      }
+    }
+    if (!currentUser) {
       window.dispatchEvent(new Event('show-login-required'));
       return;
     }
@@ -513,7 +535,15 @@ const ProductDetails = () => {
             <button
               onClick={() => {
                 const savedUser = localStorage.getItem('user');
-                if (savedUser) {
+                let currentUser = null;
+                if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                  try {
+                    currentUser = JSON.parse(savedUser);
+                  } catch (e) {
+                    console.error('Failed to parse user from localStorage in ProductDetails review click:', e);
+                  }
+                }
+                if (currentUser) {
                   setShowReviewModal(true);
                 } else {
                   window.dispatchEvent(new Event('show-login-required'));
