@@ -77,36 +77,37 @@ const Shop = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get('/api/products');
-        const merged = response.data.map((dbProd) => {
-          const localProd = initialProducts.find((p) => p.id === dbProd.id) || {};
-          const numPrice = Number(dbProd.price) || 0;
-          const discountPct = Number(dbProd.discountPercentage) || 0;
+        const dbProducts = response.data;
+        const merged = initialProducts.map((localProd) => {
+          const dbProd = dbProducts.find((p) => p.id === localProd.id);
+          const numPrice = dbProd ? (Number(dbProd.price) || 0) : (localProd.numericPrice || 15000);
+          const discountPct = dbProd ? (Number(dbProd.discountPercentage) || 0) : (localProd.discountPercent || 0);
           let discPriceVal = null;
           if (discountPct > 0) {
             discPriceVal = numPrice * (1 - discountPct / 100);
           }
 
           // Resolve image
-          const finalImg = localProd.image || (dbProd.imageUrl ? `http://localhost:8080/images/${dbProd.imageUrl}` : '/images/placeholder.png');
+          const finalImg = localProd.image || (dbProd && dbProd.imageUrl ? `http://localhost:8080/images/${dbProd.imageUrl}` : '/images/placeholder.png');
 
           return {
             ...localProd,
-            id: dbProd.id,
-            title: dbProd.productName || localProd.title,
-            description: dbProd.description || localProd.description,
+            id: localProd.id,
+            title: dbProd && dbProd.productName ? dbProd.productName : localProd.title,
+            description: dbProd && dbProd.description ? dbProd.description : localProd.description,
             price: `Rs ${numPrice.toFixed(2)}`,
             numericPrice: numPrice,
             discountPercentage: discountPct,
             discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
             discountNumericPrice: discPriceVal,
-            stockQuantity: dbProd.stockQuantity,
-            imageUrl: dbProd.imageUrl,
+            stockQuantity: dbProd ? dbProd.stockQuantity : 50,
+            imageUrl: dbProd ? dbProd.imageUrl : null,
             image: finalImg,
-            featured: dbProd.featured,
-            status: dbProd.status,
-            createdAt: dbProd.createdAt || localProd.createdAt || new Date().toISOString(),
-            categoryName: dbProd.categoryName || localProd.category || 'silk',
-            subCategoryName: dbProd.subCategoryName || localProd.subcategory || '',
+            featured: dbProd ? dbProd.featured : false,
+            status: dbProd ? dbProd.status : 'ACTIVE',
+            createdAt: dbProd && dbProd.createdAt ? dbProd.createdAt : (localProd.createdAt || new Date().toISOString()),
+            categoryName: dbProd && dbProd.categoryName ? dbProd.categoryName : (localProd.category || 'silk'),
+            subCategoryName: dbProd && dbProd.subCategoryName ? dbProd.subCategoryName : (localProd.subcategory || ''),
             rating: localProd.rating || 4.5,
             reviewCount: localProd.reviewCount || 10,
             colors: localProd.colors || [],
