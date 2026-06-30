@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../css/manager.css';
 import SideNavigation from '../../components/managerComponent/sideNavigation';
 import SearchBarM from '../../components/managerComponent/searchBarM';
 import SubNavbarM from '../../components/managerComponent/subNavbarM';
+import MAddNewProductForm from '../../components/managerComponent/MAddNewProductForm';
+import MAddProductButton from '../../components/managerComponent/MAddProductButton';
+import { Plus, X } from 'lucide-react';
 import AniversaryBFlowerCard from '../../components/managerComponent/AniversaryBFlowerCard';
 import AnniversaryIFlowerCard from '../../components/managerComponent/AnniversaryIFlowerCard';
 import BirthdayBFlowerCard from '../../components/managerComponent/BirthdayBFlowerCard';
@@ -73,57 +76,63 @@ export default function MmanageProducts() {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeSector, setActiveSector] = useState('All');
 
-    // Anniversary Bouquets Mock Data
-    const anniversaryBouquets = [
+    // Toggle state for Add Product Form
+    const [isAddingProduct, setIsAddingProduct] = useState(false);
+
+    // Success toast notification
+    const [successNotification, setSuccessNotification] = useState(null);
+
+    // Anniversary Bouquets State
+    const [anniversaryBouquets, setAnniversaryBouquets] = useState([
         { id: 1, BoquetName: "Luxury Crimson Romance", Price: "Rs 5,500.00", quantity: 12, image: A1 },
         { id: 2, BoquetName: "Ethereal Pastel Dream", Price: "Rs 6,200.00", quantity: 8, image: A2 },
         { id: 3, BoquetName: "Royal Velvet Blush", Price: "Rs 7,000.00", quantity: 3, image: A3 },
         { id: 4, BoquetName: "Classic Golden Grace", Price: "Rs 6,500.00", quantity: 15, image: A4 },
         { id: 5, BoquetName: "Whispering Lily White", Price: "Rs 4,800.00", quantity: 0, image: A5 },
         { id: 6, BoquetName: "Enchanted Garden Bloom", Price: "Rs 8,500.00", quantity: 6, image: A6 }
-    ];
+    ]);
 
-    // Anniversary Individual Flowers Mock Data
-    const anniversaryIndividualFlowers = [
+    // Anniversary Individual Flowers State
+    const [anniversaryIndividualFlowers, setAnniversaryIndividualFlowers] = useState([
         { id: 1, FlowerName: "Crimson Silk Rose Stem", Price: "Rs 1,200.00", quantity: 24, image: AI1 },
         { id: 2, FlowerName: "Ethereal White Lily Stem", Price: "Rs 1,500.00", quantity: 18, image: AI2 },
         { id: 3, FlowerName: "Velvet Blush Peony Stem", Price: "Rs 1,800.00", quantity: 9, image: AI3 },
         { id: 4, FlowerName: "Golden Grace Tulip Stem", Price: "Rs 1,350.00", quantity: 30, image: AI4 },
         { id: 5, FlowerName: "Serene Hydrangea Stem", Price: "Rs 2,100.00", quantity: 4, image: AI5 },
-        { id: 6, FlowerName: "Orchid Splendor Stem", Price: "Rs 2,400.00", quantity: 15, image: AI6 },
-        { id: 7, FlowerName: "Mystique Iris Stem", Price: "Rs 1,650.00", quantity: 0, image: AI7 }
-    ];
-    // Birthday FlowerBoquets Mock Data
-    const birthdayBoquetFlowers = [
+        { id: 7, FlowerName: "Orchid Splendor Stem", Price: "Rs 2,400.00", quantity: 15, image: AI6 },
+        { id: 8, FlowerName: "Mystique Iris Stem", Price: "Rs 1,650.00", quantity: 0, image: AI7 }
+    ]);
+
+    // Birthday FlowerBoquets State
+    const [birthdayBoquetFlowers, setBirthdayBoquetFlowers] = useState([
         { id: 1, FlowerName: "Crimson Silk Rose Stem", Price: "Rs 1,200.00", quantity: 24, image: ABB1 },
         { id: 2, FlowerName: "Ethereal White Lily Stem", Price: "Rs 1,500.00", quantity: 18, image: ABB2 },
         { id: 3, FlowerName: "Velvet Blush Peony Stem", Price: "Rs 1,800.00", quantity: 9, image: ABB3 },
         { id: 4, FlowerName: "Golden Grace Tulip Stem", Price: "Rs 1,350.00", quantity: 30, image: ABB4 },
         { id: 5, FlowerName: "Serene Hydrangea Stem", Price: "Rs 2,100.00", quantity: 4, image: ABB5 },
         { id: 6, FlowerName: "Orchid Splendor Stem", Price: "Rs 2,400.00", quantity: 15, image: ABB6 }
-    ];
+    ]);
 
-    // Birthday Individual Flowers Mock Data
-    const birthdayIndividualFlowers = [
+    // Birthday Individual Flowers State
+    const [birthdayIndividualFlowers, setBirthdayIndividualFlowers] = useState([
         { id: 1, FlowerName: "Sun-Kissed Yellow Daisy Stem", Price: "Rs 950.00", quantity: 20, image: BI1 },
         { id: 2, FlowerName: "Pink Grace Rose Stem", Price: "Rs 1,100.00", quantity: 15, image: BI2 },
         { id: 3, FlowerName: "Purple Magic Orchid Stem", Price: "Rs 850.00", quantity: 35, image: BI3 },
         { id: 4, FlowerName: "Blushing Tulip Stem", Price: "Rs 1,200.00", quantity: 0, image: BI4 },
         { id: 5, FlowerName: "White Celebration Lily Stem", Price: "Rs 1,500.00", quantity: 5, image: BI5 }
-    ];
+    ]);
 
-    // Birthday Headdresses Mock Data
-    const birthdayHeaddresses = [
+    // Birthday Headdresses State
+    const [birthdayHeaddresses, setBirthdayHeaddresses] = useState([
         { id: 1, HeaddressName: "Floral Queen Crown", Price: "Rs 2,500.00", quantity: 8, image: BH1 },
         { id: 2, HeaddressName: "Rose Petal Tiara", Price: "Rs 1,800.00", quantity: 12, image: BH2 },
         { id: 3, HeaddressName: "Blossom Headband Elegance", Price: "Rs 1,500.00", quantity: 0, image: BH3 },
         { id: 4, HeaddressName: "Jasmine Dream Wreath", Price: "Rs 2,200.00", quantity: 4, image: BH4 },
-        { id: 5, HeaddressName: "Golden Lily Halo", Price: "Rs 3,000.00", quantity: 15, image: BH5 },
+        { id: 5, HeaddressName: "Golden Lily Halo", Price: "Rs 3,000.00", quantity: 15, image: BH5 }
+    ]);
 
-    ];
-
-    // Convocation Bouquets Mock Data
-    const convocationBouquets = [
+    // Convocation Bouquets State
+    const [convocationBouquets, setConvocationBouquets] = useState([
         { id: 1, BoquetName: "Academic Achievement Bloom", Price: "Rs 4,500.00", quantity: 10, image: C1 },
         { id: 2, BoquetName: "Graduation Golden Glory", Price: "Rs 5,200.00", quantity: 7, image: C2 },
         { id: 3, BoquetName: "Success Sapphire Sparkle", Price: "Rs 6,000.00", quantity: 0, image: C3 },
@@ -132,10 +141,10 @@ export default function MmanageProducts() {
         { id: 6, BoquetName: "Triumphant Sunflower Burst", Price: "Rs 7,500.00", quantity: 8, image: C6 },
         { id: 7, BoquetName: "Honors Lavender Elegance", Price: "Rs 5,000.00", quantity: 12, image: C7 },
         { id: 8, BoquetName: "Commencement Pastel Harmony", Price: "Rs 6,800.00", quantity: 5, image: C8 }
-    ];
+    ]);
 
-    // Convocation Individual Flowers Mock Data
-    const convocationIndividualFlowers = [
+    // Convocation Individual Flowers State
+    const [convocationIndividualFlowers, setConvocationIndividualFlowers] = useState([
         { id: 1, FlowerName: "Scholar's Crimson Rose Stem", Price: "Rs 1,300.00", quantity: 15, image: CI1 },
         { id: 2, FlowerName: "Success Golden Lily Stem", Price: "Rs 1,600.00", quantity: 20, image: CI2 },
         { id: 3, FlowerName: "Academic Orchid Stem", Price: "Rs 1,900.00", quantity: 6, image: CI3 },
@@ -143,16 +152,26 @@ export default function MmanageProducts() {
         { id: 5, FlowerName: "Graduation Hydrangea Stem", Price: "Rs 2,200.00", quantity: 8, image: CI5 },
         { id: 6, FlowerName: "Honors Lavender Stem", Price: "Rs 1,750.00", quantity: 0, image: CI6 },
         { id: 7, FlowerName: "Valedictorian Iris Stem", Price: "Rs 1,800.00", quantity: 11, image: CI7 }
-    ];
+    ]);
+
+    // Auto-clear notification after 4 seconds
+    useEffect(() => {
+        if (successNotification) {
+            const timer = setTimeout(() => {
+                setSuccessNotification(null);
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [successNotification]);
 
     // Filter bouquets based on search query
     const filteredBouquets = anniversaryBouquets.filter(bouquet =>
-        bouquet.BoquetName.toLowerCase().includes(searchQuery.toLowerCase())
+        (bouquet.BoquetName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     // Filter individual flowers based on search query
     const filteredIndividualFlowers = anniversaryIndividualFlowers.filter(flower =>
-        flower.FlowerName.toLowerCase().includes(searchQuery.toLowerCase())
+        (flower.FlowerName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     // Filter birthday bouquets based on search query
@@ -180,39 +199,171 @@ export default function MmanageProducts() {
         (flower.FlowerName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleEdit = (id, type) => {
-        alert(`Edit ${type} with ID: ${id}`);
+    const handleEdit = (id, type, newPrice) => {
+        if (type === 'Bouquet') {
+            setAnniversaryBouquets(prev => prev.map(b => b.id === id ? { ...b, Price: newPrice } : b));
+        } else if (type === 'Individual Flower') {
+            setAnniversaryIndividualFlowers(prev => prev.map(f => f.id === id ? { ...f, Price: newPrice } : f));
+        } else if (type === 'Birthday Bouquet') {
+            setBirthdayBoquetFlowers(prev => prev.map(b => b.id === id ? { ...b, Price: newPrice } : b));
+        } else if (type === 'Birthday Individual Flower') {
+            setBirthdayIndividualFlowers(prev => prev.map(f => f.id === id ? { ...f, Price: newPrice } : f));
+        } else if (type === 'Birthday Headdress') {
+            setBirthdayHeaddresses(prev => prev.map(h => h.id === id ? { ...h, Price: newPrice } : h));
+        } else if (type === 'Convocation Bouquet') {
+            setConvocationBouquets(prev => prev.map(b => b.id === id ? { ...b, Price: newPrice } : b));
+        } else if (type === 'Convocation Individual Flower') {
+            setConvocationIndividualFlowers(prev => prev.map(f => f.id === id ? { ...f, Price: newPrice } : f));
+        }
+        setSuccessNotification(`Price updated to ${newPrice} successfully.`);
     };
 
     const handleDelete = (id, type) => {
-        alert(`Delete ${type} with ID: ${id}`);
+        if (window.confirm("Are you sure delete product?")) {
+            if (type === 'Bouquet') {
+                setAnniversaryBouquets(prev => prev.filter(b => b.id !== id));
+            } else if (type === 'Individual Flower') {
+                setAnniversaryIndividualFlowers(prev => prev.filter(f => f.id !== id));
+            } else if (type === 'Birthday Bouquet') {
+                setBirthdayBoquetFlowers(prev => prev.filter(b => b.id !== id));
+            } else if (type === 'Birthday Individual Flower') {
+                setBirthdayIndividualFlowers(prev => prev.filter(f => f.id !== id));
+            } else if (type === 'Birthday Headdress') {
+                setBirthdayHeaddresses(prev => prev.filter(h => h.id !== id));
+            } else if (type === 'Convocation Bouquet') {
+                setConvocationBouquets(prev => prev.filter(b => b.id !== id));
+            } else if (type === 'Convocation Individual Flower') {
+                setConvocationIndividualFlowers(prev => prev.filter(f => f.id !== id));
+            }
+            setSuccessNotification(`${type} deleted successfully.`);
+        }
+    };
+
+    const handleAddNewProduct = (newProduct) => {
+        const { productName, category, subcategory, price, stockQuantity, description, image } = newProduct;
+
+        // Formatted price string for mock data standard
+        const formattedPrice = `Rs ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        const getNextId = (list) => {
+            return list.length > 0 ? Math.max(...list.map(item => item.id)) + 1 : 1;
+        };
+
+        if (category === 'Birthday') {
+            if (subcategory === 'Boquet') {
+                const id = getNextId(birthdayBoquetFlowers);
+                setBirthdayBoquetFlowers([
+                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
+                    ...birthdayBoquetFlowers
+                ]);
+            } else if (subcategory === 'Individual Flowers') {
+                const id = getNextId(birthdayIndividualFlowers);
+                setBirthdayIndividualFlowers([
+                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
+                    ...birthdayIndividualFlowers
+                ]);
+            } else if (subcategory === 'Headdress') {
+                const id = getNextId(birthdayHeaddresses);
+                setBirthdayHeaddresses([
+                    { id, HeaddressName: productName, Price: formattedPrice, quantity: stockQuantity, image },
+                    ...birthdayHeaddresses
+                ]);
+            }
+        } else if (category === 'Anniversary') {
+            if (subcategory === 'Boquet') {
+                const id = getNextId(anniversaryBouquets);
+                setAnniversaryBouquets([
+                    { id, BoquetName: productName, Price: formattedPrice, quantity: stockQuantity, image },
+                    ...anniversaryBouquets
+                ]);
+            } else if (subcategory === 'Individual Flowers') {
+                const id = getNextId(anniversaryIndividualFlowers);
+                setAnniversaryIndividualFlowers([
+                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
+                    ...anniversaryIndividualFlowers
+                ]);
+            }
+        } else if (category === 'Convocation') {
+            if (subcategory === 'Boquet') {
+                const id = getNextId(convocationBouquets);
+                setConvocationBouquets([
+                    { id, BoquetName: productName, Price: formattedPrice, quantity: stockQuantity, image },
+                    ...convocationBouquets
+                ]);
+            } else if (subcategory === 'Individual Flowers') {
+                const id = getNextId(convocationIndividualFlowers);
+                setConvocationIndividualFlowers([
+                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
+                    ...convocationIndividualFlowers
+                ]);
+            }
+        }
+
+        // Set active sector to the newly added product's category & subcategory so it's shown immediately
+        setActiveSector(`${category} - ${subcategory === 'Boquet' ? 'Boquets' : subcategory === 'Headdress' ? 'Head Dresses' : subcategory}`);
+
+        // Set success notification
+        setSuccessNotification(`Product "${productName}" successfully added to ${category} - ${subcategory === 'Boquet' ? 'Bouquet' : subcategory}!`);
+        setIsAddingProduct(false);
     };
 
     return (
         <>
+            {successNotification && (
+                <div className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-[#eefaf4] border border-emerald-100 text-green-800 rounded-2xl shadow-xl animate-slideIn">
+                    <span className="p-1.5 bg-emerald-500 text-white rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    </span>
+                    <div className="flex flex-col gap-0.5">
+                        <span className="font-bold text-sm text-emerald-950">Success!</span>
+                        <span className="text-xs text-emerald-700 font-medium">{successNotification}</span>
+                    </div>
+                    <button
+                        onClick={() => setSuccessNotification(null)}
+                        className="ml-4 p-1 text-emerald-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
+                    >
+                        <X size={14} />
+                    </button>
+                </div>
+            )}
+
             <div className="MPage">
                 <div className="Mpart1">
                     <SideNavigation />
                 </div>
                 <div className="Mpart2" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-                    {/* Top Bar with Search and SubNavbar */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#e5e4e7] pb-6">
-                        <SearchBarM
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onClear={() => setSearchQuery('')}
-                            placeholder="search product"
-                        />
-                        <SubNavbarM
-                            activeSector={activeSector}
-                            onSectorChange={setActiveSector}
-                        />
+                    {/* Top Bar with Search, SubNavbar and Add Product Button */}
+                    <div className="flex flex-col gap-4 border-b border-[#e5e4e7] pb-6">
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                            <SearchBarM
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onClear={() => setSearchQuery('')}
+                                placeholder="search product"
+                            />
+                            <SubNavbarM
+                                activeSector={activeSector}
+                                onSectorChange={setActiveSector}
+                            />
+                        </div>
+                        {!isAddingProduct && (
+                            <div className="flex items-start">
+                                <MAddProductButton onClick={() => setIsAddingProduct(true)} />
+                            </div>
+                        )}
                     </div>
 
                     {/* Dashboard Content area */}
                     <div className="flex-1">
-                        {activeSector === 'All' ? (
+                        {isAddingProduct ? (
+                            <MAddNewProductForm
+                                onClose={() => setIsAddingProduct(false)}
+                                onSubmit={handleAddNewProduct}
+                            />
+                        ) : activeSector === 'All' ? (
                             <div className="flex flex-col gap-12">
                                 {/* All - Boquets */}
                                 <div>
@@ -234,7 +385,7 @@ export default function MmanageProducts() {
                                                     quantity={bouquet.quantity}
                                                     BoquetName={bouquet.BoquetName}
                                                     Price={bouquet.Price}
-                                                    onEdit={() => handleEdit(bouquet.id, 'Bouquet')}
+                                                    onEdit={(newPrice) => handleEdit(bouquet.id, 'Bouquet', newPrice)}
                                                     onDelete={() => handleDelete(bouquet.id, 'Bouquet')}
                                                 />
                                             ))}
@@ -245,7 +396,7 @@ export default function MmanageProducts() {
                                                     quantity={bouquet.quantity}
                                                     BoquetName={bouquet.FlowerName || bouquet.BoquetName}
                                                     Price={bouquet.Price}
-                                                    onEdit={() => handleEdit(bouquet.id, 'Birthday Bouquet')}
+                                                    onEdit={(newPrice) => handleEdit(bouquet.id, 'Birthday Bouquet', newPrice)}
                                                     onDelete={() => handleDelete(bouquet.id, 'Birthday Bouquet')}
                                                 />
                                             ))}
@@ -256,7 +407,7 @@ export default function MmanageProducts() {
                                                     quantity={bouquet.quantity}
                                                     BoquetName={bouquet.BoquetName}
                                                     Price={bouquet.Price}
-                                                    onEdit={() => handleEdit(bouquet.id, 'Convocation Bouquet')}
+                                                    onEdit={(newPrice) => handleEdit(bouquet.id, 'Convocation Bouquet', newPrice)}
                                                     onDelete={() => handleDelete(bouquet.id, 'Convocation Bouquet')}
                                                 />
                                             ))}
@@ -288,7 +439,7 @@ export default function MmanageProducts() {
                                                     quantity={flower.quantity}
                                                     FlowerName={flower.FlowerName}
                                                     Price={flower.Price}
-                                                    onEdit={() => handleEdit(flower.id, 'Individual Flower')}
+                                                    onEdit={(newPrice) => handleEdit(flower.id, 'Individual Flower', newPrice)}
                                                     onDelete={() => handleDelete(flower.id, 'Individual Flower')}
                                                 />
                                             ))}
@@ -299,7 +450,7 @@ export default function MmanageProducts() {
                                                     quantity={flower.quantity}
                                                     FlowerName={flower.FlowerName}
                                                     Price={flower.Price}
-                                                    onEdit={() => handleEdit(flower.id, 'Birthday Individual Flower')}
+                                                    onEdit={(newPrice) => handleEdit(flower.id, 'Birthday Individual Flower', newPrice)}
                                                     onDelete={() => handleDelete(flower.id, 'Birthday Individual Flower')}
                                                 />
                                             ))}
@@ -310,7 +461,7 @@ export default function MmanageProducts() {
                                                     quantity={flower.quantity}
                                                     BoquetName={flower.FlowerName}
                                                     Price={flower.Price}
-                                                    onEdit={() => handleEdit(flower.id, 'Convocation Individual Flower')}
+                                                    onEdit={(newPrice) => handleEdit(flower.id, 'Convocation Individual Flower', newPrice)}
                                                     onDelete={() => handleDelete(flower.id, 'Convocation Individual Flower')}
                                                 />
                                             ))}
@@ -342,7 +493,7 @@ export default function MmanageProducts() {
                                                     quantity={headdress.quantity}
                                                     HeaddressName={headdress.HeaddressName}
                                                     Price={headdress.Price}
-                                                    onEdit={() => handleEdit(headdress.id, 'Birthday Headdress')}
+                                                    onEdit={(newPrice) => handleEdit(headdress.id, 'Birthday Headdress', newPrice)}
                                                     onDelete={() => handleDelete(headdress.id, 'Birthday Headdress')}
                                                 />
                                             ))}
@@ -374,7 +525,7 @@ export default function MmanageProducts() {
                                                 quantity={bouquet.quantity}
                                                 BoquetName={bouquet.BoquetName}
                                                 Price={bouquet.Price}
-                                                onEdit={() => handleEdit(bouquet.id, 'Bouquet')}
+                                                onEdit={(newPrice) => handleEdit(bouquet.id, 'Bouquet', newPrice)}
                                                 onDelete={() => handleDelete(bouquet.id, 'Bouquet')}
                                             />
                                         ))}
@@ -385,7 +536,7 @@ export default function MmanageProducts() {
                                                 quantity={bouquet.quantity}
                                                 BoquetName={bouquet.FlowerName || bouquet.BoquetName}
                                                 Price={bouquet.Price}
-                                                onEdit={() => handleEdit(bouquet.id, 'Birthday Bouquet')}
+                                                onEdit={(newPrice) => handleEdit(bouquet.id, 'Birthday Bouquet', newPrice)}
                                                 onDelete={() => handleDelete(bouquet.id, 'Birthday Bouquet')}
                                             />
                                         ))}
@@ -396,7 +547,7 @@ export default function MmanageProducts() {
                                                 quantity={bouquet.quantity}
                                                 BoquetName={bouquet.BoquetName}
                                                 Price={bouquet.Price}
-                                                onEdit={() => handleEdit(bouquet.id, 'Convocation Bouquet')}
+                                                onEdit={(newPrice) => handleEdit(bouquet.id, 'Convocation Bouquet', newPrice)}
                                                 onDelete={() => handleDelete(bouquet.id, 'Convocation Bouquet')}
                                             />
                                         ))}
@@ -427,7 +578,7 @@ export default function MmanageProducts() {
                                                 quantity={flower.quantity}
                                                 FlowerName={flower.FlowerName}
                                                 Price={flower.Price}
-                                                onEdit={() => handleEdit(flower.id, 'Individual Flower')}
+                                                onEdit={(newPrice) => handleEdit(flower.id, 'Individual Flower', newPrice)}
                                                 onDelete={() => handleDelete(flower.id, 'Individual Flower')}
                                             />
                                         ))}
@@ -438,7 +589,7 @@ export default function MmanageProducts() {
                                                 quantity={flower.quantity}
                                                 FlowerName={flower.FlowerName}
                                                 Price={flower.Price}
-                                                onEdit={() => handleEdit(flower.id, 'Birthday Individual Flower')}
+                                                onEdit={(newPrice) => handleEdit(flower.id, 'Birthday Individual Flower', newPrice)}
                                                 onDelete={() => handleDelete(flower.id, 'Birthday Individual Flower')}
                                             />
                                         ))}
@@ -449,7 +600,7 @@ export default function MmanageProducts() {
                                                 quantity={flower.quantity}
                                                 BoquetName={flower.FlowerName}
                                                 Price={flower.Price}
-                                                onEdit={() => handleEdit(flower.id, 'Convocation Individual Flower')}
+                                                onEdit={(newPrice) => handleEdit(flower.id, 'Convocation Individual Flower', newPrice)}
                                                 onDelete={() => handleDelete(flower.id, 'Convocation Individual Flower')}
                                             />
                                         ))}
@@ -480,7 +631,7 @@ export default function MmanageProducts() {
                                                 quantity={headdress.quantity}
                                                 HeaddressName={headdress.HeaddressName}
                                                 Price={headdress.Price}
-                                                onEdit={() => handleEdit(headdress.id, 'Birthday Headdress')}
+                                                onEdit={(newPrice) => handleEdit(headdress.id, 'Birthday Headdress', newPrice)}
                                                 onDelete={() => handleDelete(headdress.id, 'Birthday Headdress')}
                                             />
                                         ))}
@@ -511,7 +662,7 @@ export default function MmanageProducts() {
                                                 quantity={bouquet.quantity}
                                                 BoquetName={bouquet.BoquetName}
                                                 Price={bouquet.Price}
-                                                onEdit={() => handleEdit(bouquet.id, 'Bouquet')}
+                                                onEdit={(newPrice) => handleEdit(bouquet.id, 'Bouquet', newPrice)}
                                                 onDelete={() => handleDelete(bouquet.id, 'Bouquet')}
                                             />
                                         ))}
@@ -542,7 +693,7 @@ export default function MmanageProducts() {
                                                 quantity={flower.quantity}
                                                 FlowerName={flower.FlowerName}
                                                 Price={flower.Price}
-                                                onEdit={() => handleEdit(flower.id, 'Individual Flower')}
+                                                onEdit={(newPrice) => handleEdit(flower.id, 'Individual Flower', newPrice)}
                                                 onDelete={() => handleDelete(flower.id, 'Individual Flower')}
                                             />
                                         ))}
@@ -573,7 +724,7 @@ export default function MmanageProducts() {
                                                 quantity={bouquet.quantity}
                                                 BoquetName={bouquet.FlowerName || bouquet.BoquetName}
                                                 Price={bouquet.Price}
-                                                onEdit={() => handleEdit(bouquet.id, 'Birthday Bouquet')}
+                                                onEdit={(newPrice) => handleEdit(bouquet.id, 'Birthday Bouquet', newPrice)}
                                                 onDelete={() => handleDelete(bouquet.id, 'Birthday Bouquet')}
                                             />
                                         ))}
@@ -604,7 +755,7 @@ export default function MmanageProducts() {
                                                 quantity={flower.quantity}
                                                 FlowerName={flower.FlowerName}
                                                 Price={flower.Price}
-                                                onEdit={() => handleEdit(flower.id, 'Birthday Individual Flower')}
+                                                onEdit={(newPrice) => handleEdit(flower.id, 'Birthday Individual Flower', newPrice)}
                                                 onDelete={() => handleDelete(flower.id, 'Birthday Individual Flower')}
                                             />
                                         ))}
@@ -635,7 +786,7 @@ export default function MmanageProducts() {
                                                 quantity={headdress.quantity}
                                                 HeaddressName={headdress.HeaddressName}
                                                 Price={headdress.Price}
-                                                onEdit={() => handleEdit(headdress.id, 'Birthday Headdress')}
+                                                onEdit={(newPrice) => handleEdit(headdress.id, 'Birthday Headdress', newPrice)}
                                                 onDelete={() => handleDelete(headdress.id, 'Birthday Headdress')}
                                             />
                                         ))}
@@ -666,7 +817,7 @@ export default function MmanageProducts() {
                                                 quantity={bouquet.quantity}
                                                 BoquetName={bouquet.BoquetName}
                                                 Price={bouquet.Price}
-                                                onEdit={() => handleEdit(bouquet.id, 'Convocation Bouquet')}
+                                                onEdit={(newPrice) => handleEdit(bouquet.id, 'Convocation Bouquet', newPrice)}
                                                 onDelete={() => handleDelete(bouquet.id, 'Convocation Bouquet')}
                                             />
                                         ))}
@@ -697,7 +848,7 @@ export default function MmanageProducts() {
                                                 quantity={flower.quantity}
                                                 BoquetName={flower.FlowerName}
                                                 Price={flower.Price}
-                                                onEdit={() => handleEdit(flower.id, 'Convocation Individual Flower')}
+                                                onEdit={(newPrice) => handleEdit(flower.id, 'Convocation Individual Flower', newPrice)}
                                                 onDelete={() => handleDelete(flower.id, 'Convocation Individual Flower')}
                                             />
                                         ))}
