@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit3, Trash2, Box } from 'lucide-react';
 
 export default function ConvocationIFlowerCard({
@@ -9,6 +9,31 @@ export default function ConvocationIFlowerCard({
     onEdit,
     onDelete
 }) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [newPrice, setNewPrice] = useState(Price);
+
+    useEffect(() => {
+        setNewPrice(Price);
+    }, [Price]);
+
+    const handleChangePrice = () => {
+        if (!newPrice.trim()) return;
+
+        let formatted = newPrice.trim();
+        const numericString = formatted.replace(/Rs\s*/gi, '').replace(/,/g, '').trim();
+        if (!isNaN(numericString) && numericString !== '') {
+            const num = parseFloat(numericString);
+            formatted = `Rs ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        if (window.confirm("Are you sure you want to change the price?")) {
+            if (onEdit) {
+                onEdit(formatted);
+            }
+            setIsEditing(false);
+        }
+    };
+
     // Check if item is low in stock (< 10) for custom badge colors
     const isLowStock = quantity <= 5;
     const isOutOfStock = quantity === 0;
@@ -44,43 +69,82 @@ export default function ConvocationIFlowerCard({
 
                 {/* Price, Quantity and Actions Row */}
                 <div className="pt-3 border-t border-[#e5e4e7]/60 flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">Price</span>
-                            <span className="text-base font-bold text-[#744F51] font-sans">
-                                {Price}
-                            </span>
+                    {isEditing ? (
+                        <div className="flex flex-col gap-2">
+                            <div>
+                                <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">Current Price</span>
+                                <span className="text-sm font-bold text-gray-500 line-through font-sans">
+                                    {Price}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">New Price</span>
+                                <input
+                                    type="text"
+                                    value={newPrice}
+                                    onChange={(e) => setNewPrice(e.target.value)}
+                                    className="w-full px-2.5 py-1.5 text-sm bg-white border border-[#e5e4e7] rounded-lg focus:outline-none focus:border-[#744F51] font-sans font-bold text-[#744F51]"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                                <button
+                                    onClick={handleChangePrice}
+                                    className="flex-1 py-2 px-3 bg-[#744F51] hover:bg-[#5c3e40] text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                                >
+                                    Change
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                        setNewPrice(Price);
+                                    }}
+                                    className="py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-lg transition-all"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">Quantity</span>
-                            <span className={`text-sm font-bold font-sans ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-amber-600' : 'text-[#1a1a1a]'}`}>
-                                {quantity}
-                            </span>
-                        </div>
-                    </div>
+                    ) : (
+                        <>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">Price</span>
+                                    <span className="text-base font-bold text-[#744F51] font-sans">
+                                        {Price}
+                                    </span>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">Quantity</span>
+                                    <span className={`text-sm font-bold font-sans ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-amber-600' : 'text-[#1a1a1a]'}`}>
+                                        {quantity}
+                                    </span>
+                                </div>
+                            </div>
 
-                    {/* Actions under the Price */}
-                    <div className="flex items-center gap-2">
-                        {onEdit && (
-                            <button
-                                onClick={onEdit}
-                                className="flex-1 py-2 px-3 bg-[#744F51]/5 hover:bg-[#744F51] text-[#744F51] hover:text-white text-xs font-bold rounded-lg border border-[#744F51]/10 transition-all flex items-center justify-center gap-1.5 shadow-sm"
-                                title="Edit Bouquet"
-                            >
-                                <Edit3 size={14} />
-                                <span>Edit</span>
-                            </button>
-                        )}
-                        {onDelete && (
-                            <button
-                                onClick={onDelete}
-                                className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg border border-[#e5e4e7] transition-all"
-                                title="Delete Bouquet"
-                            >
-                                <Trash2 size={14} />
-                            </button>
-                        )}
-                    </div>
+                            {/* Actions under the Price */}
+                            <div className="flex items-center gap-2">
+                                {onEdit && (
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="flex-1 py-2 px-3 bg-[#744F51]/5 hover:bg-[#744F51] text-[#744F51] hover:text-white text-xs font-bold rounded-lg border border-[#744F51]/10 transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                                        title="Edit Bouquet"
+                                    >
+                                        <Edit3 size={14} />
+                                        <span>Edit</span>
+                                    </button>
+                                )}
+                                {onDelete && (
+                                    <button
+                                        onClick={onDelete}
+                                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg border border-[#e5e4e7] transition-all"
+                                        title="Delete Bouquet"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
