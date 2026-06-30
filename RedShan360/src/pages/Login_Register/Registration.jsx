@@ -16,6 +16,7 @@ export default function RegistrationPage() {
   const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState({});
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -43,6 +44,12 @@ export default function RegistrationPage() {
 
     if (!address.trim()) {
       newErrors.address = 'Address is required';
+    }
+
+    if (!phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\+?[0-9\s-]{9,15}$/.test(phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
     }
 
     if (!password) {
@@ -73,6 +80,8 @@ export default function RegistrationPage() {
         lastName,
         email,
         address,
+        phone,
+        phoneNumber: phone,
         password
       });
 
@@ -237,6 +246,27 @@ export default function RegistrationPage() {
                 </div>
                 {errors.email && (
                   <span className="validation-error">{errors.email}</span>
+                )}
+              </div>
+
+              {/* Phone Number */}
+              <div className="form-group">
+                <div className="label-row">
+                  <label className="form-label" htmlFor="phone-input">Phone Number</label>
+                </div>
+                <div className="input-wrapper">
+                  <input
+                    type="tel"
+                    id="phone-input"
+                    className="form-input"
+                    placeholder="0771234567"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    style={errors.phone ? { borderColor: '#d32f2f' } : {}}
+                  />
+                </div>
+                {errors.phone && (
+                  <span className="validation-error">{errors.phone}</span>
                 )}
               </div>
 
