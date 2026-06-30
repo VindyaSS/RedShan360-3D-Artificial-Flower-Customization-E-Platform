@@ -44,8 +44,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
     // Wishlist Count from database if logged in
     const savedUser = localStorage.getItem('user');
-    const user = savedUser ? JSON.parse(savedUser) : null;
-    const userId = user ? user.id : null;
+    let user = null;
+    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+      try {
+        user = JSON.parse(savedUser);
+      } catch (e) {
+        console.error('Failed to parse user in Navbar:', e);
+      }
+    }
+    const userId = user ? (user.id || user.userId) : null;
 
     if (userId) {
       try {
@@ -65,7 +72,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
     const handleOpenCart = () => {
       const savedUser = localStorage.getItem('user');
-      if (savedUser) {
+      let currentUser = null;
+      if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+        try {
+          currentUser = JSON.parse(savedUser);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (currentUser) {
         setIsCartOpen(true);
       } else {
         setIsLoginRequiredOpen(true);
@@ -164,7 +179,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   const handleNavClick = (item, e) => {
     if (item.toLowerCase() === 'customization') {
       const savedUser = localStorage.getItem('user');
-      if (!savedUser) {
+      let currentUser = null;
+      if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+        try {
+          currentUser = JSON.parse(savedUser);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (!currentUser) {
         e.preventDefault();
         setIsLoginRequiredOpen(true);
         setMobileMenuOpen(false);
@@ -241,7 +264,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             <button
               onClick={() => {
                 const savedUser = localStorage.getItem('user');
-                if (savedUser) {
+                let currentUser = null;
+                if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                  try {
+                    currentUser = JSON.parse(savedUser);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }
+                if (currentUser) {
                   navigate('/wishlist');
                 } else {
                   setIsLoginRequiredOpen(true);
@@ -262,7 +293,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             <button
               onClick={() => {
                 const savedUser = localStorage.getItem('user');
-                if (savedUser) {
+                let currentUser = null;
+                if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                  try {
+                    currentUser = JSON.parse(savedUser);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }
+                if (currentUser) {
                   setIsCartOpen(true);
                 } else {
                   setIsLoginRequiredOpen(true);
@@ -284,7 +323,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
               <button
                 onClick={() => {
                   const savedUser = localStorage.getItem('user');
-                  if (savedUser) {
+                  let currentUser = null;
+                  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                    try {
+                      currentUser = JSON.parse(savedUser);
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }
+                  if (currentUser) {
                     setIsProfileOpen(!isProfileOpen);
                   } else {
                     setIsLoginOpen(true);
@@ -360,7 +407,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             <button
               onClick={() => {
                 const savedUser = localStorage.getItem('user');
-                if (savedUser) {
+                let currentUser = null;
+                if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                  try {
+                    currentUser = JSON.parse(savedUser);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }
+                if (currentUser) {
                   setIsCartOpen(true);
                 } else {
                   setIsLoginRequiredOpen(true);
@@ -413,7 +468,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 onClick={() => {
                   setMobileMenuOpen(false);
                   const savedUser = localStorage.getItem('user');
-                  if (savedUser) {
+                  let currentUser = null;
+                  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                    try {
+                      currentUser = JSON.parse(savedUser);
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }
+                  if (currentUser) {
                     navigate('/wishlist');
                   } else {
                     setIsLoginRequiredOpen(true);
@@ -434,7 +497,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 onClick={() => {
                   setMobileMenuOpen(false);
                   const savedUser = localStorage.getItem('user');
-                  if (savedUser) {
+                  let currentUser = null;
+                  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                    try {
+                      currentUser = JSON.parse(savedUser);
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }
+                  if (currentUser) {
                     setIsCartOpen(true);
                   } else {
                     setIsLoginRequiredOpen(true);
@@ -455,7 +526,15 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 <button
                   onClick={() => {
                     const savedUser = localStorage.getItem('user');
-                    if (savedUser) {
+                    let currentUser = null;
+                    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                      try {
+                        currentUser = JSON.parse(savedUser);
+                      } catch (e) {
+                        console.error(e);
+                      }
+                    }
+                    if (currentUser) {
                       setIsMobileProfileOpen(!isMobileProfileOpen);
                     } else {
                       setMobileMenuOpen(false);

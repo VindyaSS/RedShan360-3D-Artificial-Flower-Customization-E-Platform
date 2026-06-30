@@ -33,8 +33,15 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState('popularity');
 
   const savedUser = localStorage.getItem('user');
-  const user = savedUser ? JSON.parse(savedUser) : null;
-  const userId = user ? user.id : null;
+  let user = null;
+  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+    try {
+      user = JSON.parse(savedUser);
+    } catch (e) {
+      console.error('Failed to parse user from localStorage in Shop:', e);
+    }
+  }
+  const userId = user ? (user.id || user.userId) : null;
 
   // Fetch Wishlist
   const fetchWishlist = async () => {
@@ -180,7 +187,15 @@ const Shop = () => {
 
   const handleAddToCart = (product) => {
     const savedUser = localStorage.getItem('user');
-    if (!savedUser) {
+    let currentUser = null;
+    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+      try {
+        currentUser = JSON.parse(savedUser);
+      } catch (e) {
+        console.error('Failed to parse user from localStorage in handleAddToCart:', e);
+      }
+    }
+    if (!currentUser) {
       window.dispatchEvent(new Event('show-login-required'));
       return;
     }

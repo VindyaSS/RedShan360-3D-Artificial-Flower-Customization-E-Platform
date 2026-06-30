@@ -143,10 +143,18 @@ const LoginModal = ({ isOpen, onClose }) => {
       });
 
       // Save token and user info
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      if (response.data) {
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
+        
+        // Ensure id compatibility mapping alongside other fields
+        const userData = {
+          ...response.data,
+          id: response.data.userId
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
       }
-      localStorage.setItem('user', JSON.stringify(response.data.user));
 
       // Close modal and unlock body scrolling
       onClose();
@@ -154,6 +162,18 @@ const LoginModal = ({ isOpen, onClose }) => {
 
       // Dispatch event to update navbar instantly
       window.dispatchEvent(new Event('auth-updated'));
+
+      // Redirect based on user role
+      const role = response.data?.role;
+      if (role === 'CUSTOMER') {
+        navigate('/guestUserDashboard', { replace: true });
+      } else if (role === 'EMPLOYEE') {
+        navigate('/employeeDashboard', { replace: true });
+      } else if (role === 'MANAGER') {
+        navigate('/managerOverview', { replace: true });
+      } else if (role === 'ADMIN') {
+        navigate('/adminDashboard', { replace: true });
+      }
 
     } catch (error) {
       console.error('Modal login error:', error);

@@ -57,7 +57,15 @@ import EcustomizedProducts from './pages/Employee/EcustomizedProducts';
 
 
 const ProtectedRoute = ({ children }) => {
-  const user = localStorage.getItem('user');
+  const savedUser = localStorage.getItem('user');
+  let user = null;
+  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+    try {
+      user = JSON.parse(savedUser);
+    } catch (e) {
+      console.error('Failed to parse user from localStorage in ProtectedRoute:', e);
+    }
+  }
   
   useEffect(() => {
     if (!user) {
@@ -131,6 +139,7 @@ function App() {
           <Route path="/mOCards" element={<MOCards />} />
           <Route path="/mOCards" element={<MOCards />} />
           <Route path="/managerOverview" element={<ManagerOverview />} />
+          <Route path="/managerDashboard" element={<ManagerOverview />} />
           <Route path="/mOrderGraph" element={<MOrderGraph />} />
           <Route path="/mManageEmployees" element={<MmanageEmployees />} />
           <Route path="/mManageProducts" element={<MmanageProducts />} />
