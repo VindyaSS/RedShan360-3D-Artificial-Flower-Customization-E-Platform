@@ -1,4 +1,4 @@
-# ✅ RedShan360 Guest User Dashboard - Complete Checklist
+# ✅ Redshan Flora Guest User Dashboard - Complete Checklist
 
 ## 🎯 Project Completion Status
 
@@ -42,7 +42,7 @@
 ### 1. Navigation Bar ✅
 - [x] Sticky positioning
 - [x] Transparent to solid on scroll
-- [x] Brand title "RedShan360"
+- [x] Brand title "Redshan Flora"
 - [x] Navigation links (Home, Shop, Customization, About, Contact)
 - [x] Search icon (lucide)
 - [x] Heart/Wishlist icon (lucide)

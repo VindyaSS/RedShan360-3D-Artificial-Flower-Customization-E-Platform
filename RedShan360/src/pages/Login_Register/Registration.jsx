@@ -96,7 +96,7 @@ export default function RegistrationPage() {
       {/* HEADER */}
       <header className="registration-header">
         <div className="header-left">
-          <a href="/" className="logo-text">RedShan360</a>
+          <a href="/" className="logo-text">Redshan Flora</a>
         </div>
 
         {/*<nav className="header-nav">
@@ -334,8 +334,8 @@ export default function RegistrationPage() {
       {/* FOOTER */}
       <footer className="registration-footer">
         <div className="footer-left">
-          <a href="/" className="logo-text">RedShan360</a>
-          <span className="copyright-text">© 2024 RedShan360. Everlasting Elegance. Crafting botanical wonders for the modern sanctuary.</span>
+          <a href="/" className="logo-text">Redshan Flora</a>
+          <span className="copyright-text">© 2024 Redshan Flora. Everlasting Elegance. Crafting botanical wonders for the modern sanctuary.</span>
         </div>
 
         <div className="footer-center">

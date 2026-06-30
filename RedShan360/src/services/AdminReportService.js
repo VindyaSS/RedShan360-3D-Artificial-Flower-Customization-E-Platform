@@ -201,7 +201,7 @@ export const AdminReportService = {
     await delay(1200); // Simulates file processing/generation time
     return {
       success: true,
-      message: `Report exported successfully as RedShan360-Analytics-${period.replace(/\s+/g, "-")}.pdf`,
+      message: `Report exported successfully as Redshan Flora-Analytics-${period.replace(/\s+/g, "-")}.pdf`,
       downloadUrl: "#"
     };
   }
