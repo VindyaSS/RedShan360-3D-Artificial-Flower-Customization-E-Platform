@@ -139,6 +139,61 @@ const CategoryPage = () => {
 
   const categoryDetails = getCategoryDetails(slug);
 
+  // Reusable function to load images dynamically using import.meta.glob
+  const loadImages = (folderPath) => {
+    // Eager load all images in the bouquets subdirectories
+    const globPattern = import.meta.glob('/src/assets/images/bouquets/**/*.{png,jpg,jpeg,PNG,JPG,JPEG}', { eager: true });
+    const matchingImages = [];
+    const normalizedFolder = folderPath.toLowerCase().replace(/\\/g, '/');
+
+    let idx = 1000;
+    for (const path in globPattern) {
+      const normalizedPath = path.toLowerCase();
+      if (normalizedPath.includes(normalizedFolder)) {
+        const url = globPattern[path].default || globPattern[path];
+        const filename = path.split('/').pop();
+        const nameWithoutExt = filename.replace(/\.[^/.]+$/, "");
+
+        // Clean name (e.g. lilyBoquet.jpg -> Lily Boquet)
+        const cleanName = nameWithoutExt
+          .replace(/[-_]/g, " ")
+          .replace(/([A-Z])/g, " $1")
+          .trim();
+        const displayName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+        // Try to find a matching product in static products to retain description/pricing
+        const staticMatch = products.find(p => {
+          const pTitle = p.title.toLowerCase().replace(/[-_]/g, " ");
+          const pNameLower = displayName.toLowerCase();
+          return pTitle.includes(pNameLower) || pNameLower.includes(pTitle);
+        });
+
+        if (staticMatch) {
+          matchingImages.push({
+            ...staticMatch,
+            id: staticMatch.id,
+            image: url,
+            title: displayName,
+          });
+        } else {
+          matchingImages.push({
+            id: idx++,
+            title: displayName,
+            subtitle: 'Premium Bouquet Collection',
+            price: 'Rs 12000.00',
+            numericPrice: 12000,
+            rating: 4.8,
+            reviewCount: 15,
+            image: url,
+            colors: [{ name: 'Pastel Pink', hex: '#f5ccd4' }],
+            isDynamic: true
+          });
+        }
+      }
+    }
+    return matchingImages;
+  };
+
   // Filter products belonging to selected category and subcategory
   const filteredProducts = products.filter((product) => {
     switch (slug) {
@@ -166,6 +221,19 @@ const CategoryPage = () => {
         return false;
     }
   });
+
+  const getDisplayProducts = () => {
+    if (slug === 'bouquets') {
+      if (activeSubcategory) {
+        return loadImages(`bouquets/${activeSubcategory}`);
+      } else {
+        return loadImages('bouquets');
+      }
+    }
+    return filteredProducts;
+  };
+
+  const displayProducts = getDisplayProducts();
 
   const handleAddToCart = (product) => {
     const savedUser = localStorage.getItem('user');
@@ -292,7 +360,7 @@ const CategoryPage = () => {
                 {categoryDetails.description}
               </p>
               <p className="text-[11px] uppercase tracking-wider font-semibold text-white/85 bg-white/10 backdrop-blur-sm rounded-full py-1 px-4 inline-block">
-                Showing {filteredProducts.length} premium arrangements
+                Showing {displayProducts.length} premium arrangements
               </p>
             </div>
           </div>
@@ -308,7 +376,7 @@ const CategoryPage = () => {
               {categoryDetails.description}
             </p>
             <p className="text-xs font-semibold text-[#1a1a1a]/55 mt-4">
-              Showing {filteredProducts.length} premium arrangements
+              Showing {displayProducts.length} premium arrangements
             </p>
           </div>
         )}
@@ -379,7 +447,7 @@ const CategoryPage = () => {
         )}
 
         {/* Filtered Product Grid */}
-        {filteredProducts.length === 0 ? (
+        {displayProducts.length === 0 ? (
           <div className="text-center py-20 bg-[#faf8f6] rounded-sm border border-[#d9d2d0]/10 mt-8">
             <Heart size={40} className="mx-auto text-[#1a1a1a]/20 mb-3" />
             <p className="text-sm font-medium text-[#1a1a1a]/55">
@@ -394,7 +462,7 @@ const CategoryPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {filteredProducts.map((product) => (
+            {displayProducts.map((product) => (
               <div key={product.id} className="group flex flex-col font-sans relative">
                 {/* Product Image Container */}
                 <div className="relative overflow-hidden bg-[#f4f0ed] rounded-sm aspect-[3/4] mb-4 border border-[#d9d2d0]/15 shadow-sm">

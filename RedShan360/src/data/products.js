@@ -5,7 +5,9 @@ import sakuraSpringBloom from '../assets/con2.png';
 import mauveRadianceDahlia from '../assets/mauve_radiance_dahlia.png';
 import serenityWhite from '../assets/con2.png';
 import wildHearth from '../assets/wild_hearth.jpg';
+import B_AI3 from '../assets/images/bouquets/anniversary/B_AI3.jpg';
 import redRose from '../assets/red_rose.png';
+
 import purplecarnation from '../assets/purple_carnation.png';
 import pinkChrysanthemums from '../assets/pink_chrysanthemum.png';
 import lilyHeaddress from '../assets/lily_headdress.jpg';
@@ -31,17 +33,17 @@ import graduationRose from '../assets/images/individual-flowers/graduation-rose.
 import achievementRedRose from '../assets/images/individual-flowers/achievement-red-rose.png';
 import successGoldRose from '../assets/images/individual-flowers/success-gold-rose.png';
 import graduationBlueRose from '../assets/images/individual-flowers/graduation-blue-rose.png';
-import convocationCelebrationRose from '../assets/images/individual-flowers/convocation-celebration-rose.png';
+import convocationCelebrationRose from '../assets/images/individual-flowers/IBI1.jpg';
 import eternalLoveRedRose from '../assets/images/individual-flowers/eternal-love-red-rose.png';
-import romanticSilkRose from '../assets/images/individual-flowers/romantic-silk-rose.png';
+import romanticSilkRose from '../assets/images/individual-flowers/IAI5.jpg';
 import goldenAnniversaryRose from '../assets/images/individual-flowers/golden-anniversary-rose.png';
-import luxuryWhiteRose from '../assets/images/individual-flowers/luxury-white-rose.png';
+import luxuryWhiteRose from '../assets/images/individual-flowers/IAI6.jpg';
 import foreverBloomArtificialRose from '../assets/images/individual-flowers/forever-bloom-artificial-rose.png';
 import birthdayCelebrationRose from '../assets/images/individual-flowers/birthday-celebration-rose.png';
-import pinkBlossomRose from '../assets/images/individual-flowers/pink-blossom-rose.png';
+import pinkBlossomRose from '../assets/images/individual-flowers/IBI4.jpg';
 import rainbowSilkRose from '../assets/images/individual-flowers/rainbow-silk-rose.png';
-import cheerfulYellowRose from '../assets/images/individual-flowers/cheerful-yellow-rose.png';
-import birthdayFloralGiftRose from '../assets/images/individual-flowers/birthday-floral-gift-rose.png';
+import cheerfulYellowRose from '../assets/images/individual-flowers/IBI2.jpg';
+import birthdayFloralGiftRose from '../assets/images/individual-flowers/IBI3.jpg';
 
 export const products = [
   {
