@@ -27,12 +27,16 @@ const FeaturedProducts = ({ products, wishlist, toggleWishlist }) => {
                     />
                   </Link>
                   
-                  {/* Bestseller Badge */}
-                  {product.id === 2 && (
+                  {/* Bestseller/Discount Badge */}
+                  {product.discountPercentage > 0 ? (
+                    <div className="absolute top-3 left-3 bg-[#e88d9d] text-white px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase">
+                      {product.discountPercentage}% OFF
+                    </div>
+                  ) : product.id === 2 ? (
                     <div className="absolute top-3 left-3 bg-[#f5e6e8] text-[#8c5e5e] px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest">
                       BESTSELLER
                     </div>
-                  )}
+                  ) : null}
                   
                   {/* Wishlist Heart Icon */}
                   <button
@@ -63,6 +67,9 @@ const FeaturedProducts = ({ products, wishlist, toggleWishlist }) => {
 
                 {/* Product Info */}
                 <div className="pt-1 px-1">
+                  <span className="text-[10px] font-bold text-[#8c5e5e]/85 uppercase tracking-wider block mb-1">
+                    {product.categoryName || product.category}
+                  </span>
                   <Link to={`/product/${product.id}`} className="hover:text-[#8c5e5e] transition-colors">
                     <h4 className="text-lg text-[#1a1a1a] font-bold group-hover:text-[#8c5e5e] transition-colors" style={{ fontFamily: 'Playfair Display, serif' }}>
                       {product.title}
@@ -74,10 +81,13 @@ const FeaturedProducts = ({ products, wishlist, toggleWishlist }) => {
                 </div>
               </div>
               
-              <div className="px-1 pt-2">
+              <div className="px-1 pt-2 flex justify-between items-center border-t border-[#d9d2d0]/15 mt-3">
                 <p className="text-sm text-[#1a1a1a] font-bold font-sans">
                   {product.price}
                 </p>
+                <span className="text-[10px] font-bold text-[#1a1a1a]/55 tracking-wide">
+                  {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Out of stock'}
+                </span>
               </div>
             </article>
           ))}
