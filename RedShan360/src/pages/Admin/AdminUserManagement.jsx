@@ -505,31 +505,7 @@ function AdminUserManagement() {
                     />
                   </div>
 
-                  <div className="form-group-item">
-                    <label>Gender</label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                      disabled={modalMode === "view"}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
 
-                  <div className="form-group-item">
-                    <label>Date of Birth</label>
-                    <input
-                      type="date"
-                      name="dob"
-                      value={formData.dob}
-                      onChange={handleInputChange}
-                      disabled={modalMode === "view"}
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -583,101 +559,36 @@ function AdminUserManagement() {
               </div>
 
               {/* SECTION 3: Login Information */}
-              {modalMode !== "view" && (
+              {modalMode === "add" && (
                 <div className="form-section">
                   <h4 className="section-title">3. Login Information</h4>
                   <div className="form-row-grid">
                     <div className="form-group-item">
-                      <label>Username</label>
-                      <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
+                      <label>Password <span className="req">*</span></label>
+                      <PasswordInput
+                        name="password"
+                        value={formData.password}
                         onChange={handleInputChange}
-                        placeholder="Recommends Email"
-                        disabled={modalMode === "view"}
+                        placeholder="Initial Password"
+                        required
                       />
                     </div>
 
-                    {modalMode === "add" && (
-                      <>
-                        <div className="form-group-item">
-                          <label>Password <span className="req">*</span></label>
-                          <PasswordInput
-                            name="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            placeholder="Initial Password"
-                            required
-                          />
-                        </div>
-
-                        <div className="form-group-item">
-                          <label>Confirm Password <span className="req">*</span></label>
-                          <PasswordInput
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleInputChange}
-                            placeholder="Confirm Password"
-                            required
-                          />
-                        </div>
-                      </>
-                    )}
+                    <div className="form-group-item">
+                      <label>Confirm Password <span className="req">*</span></label>
+                      <PasswordInput
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        placeholder="Confirm Password"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* SECTION 4: Address Information (Optional) */}
-              <div className="form-section">
-                <h4 className="section-title">4. Address Information (Optional)</h4>
-                <div className="form-row-grid">
-                  <div className="form-group-item full-width">
-                    <label>Address Line</label>
-                    <textarea
-                      name="addressLine"
-                      value={formData.addressLine}
-                      onChange={handleInputChange}
-                      placeholder="House No, Road, Suite..."
-                      rows="2"
-                      disabled={modalMode === "view"}
-                    ></textarea>
-                  </div>
 
-                  <div className="form-group-item">
-                    <label>City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      placeholder="Colombo"
-                      disabled={modalMode === "view"}
-                    />
-                  </div>
-
-                  <div className="form-group-item">
-                    <label>Province</label>
-                    <select
-                      name="province"
-                      value={formData.province}
-                      onChange={handleInputChange}
-                      disabled={modalMode === "view"}
-                    >
-                      <option value="">Select Province</option>
-                      <option value="Western">Western</option>
-                      <option value="Central">Central</option>
-                      <option value="Southern">Southern</option>
-                      <option value="Northern">Northern</option>
-                      <option value="Eastern">Eastern</option>
-                      <option value="North Western">North Western</option>
-                      <option value="North Central">North Central</option>
-                      <option value="Uva">Uva</option>
-                      <option value="Sabaragamuwa">Sabaragamuwa</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
 
 
 
