@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Loader2
 } from 'lucide-react';
+import { SiGooglemaps } from 'react-icons/si';
 
 // EmailJS Constants
 const SERVICE_ID = "service_47etspc";
@@ -415,6 +416,14 @@ const ContactPage = () => {
                     <p className="text-xs md:text-sm text-[#1a1a1a]/85 leading-relaxed font-semibold mt-1">
                       Huejay International Multi Flora LTD<br />Sri Lanka
                     </p>
+                    <button
+                      onClick={() => window.open("https://maps.app.goo.gl/422Yf2rPWjKNsLtr7", "_blank", "noopener,noreferrer")}
+                      className="mt-3 inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-semibold text-xs md:text-sm px-4 py-2.5 rounded-[10px] shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+                      title="Click to navigate using Google Maps"
+                    >
+                      <SiGooglemaps size={16} />
+                      <span>Open in Google Maps</span>
+                    </button>
                   </div>
                 </div>
 
