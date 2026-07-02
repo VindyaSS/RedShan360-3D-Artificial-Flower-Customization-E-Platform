@@ -36,24 +36,24 @@ export default function MAddNewProductForm({ onClose, onSubmit }) {
 
   // Update available subcategories when category changes
   useEffect(() => {
-  if (formData.categoryId === 2 || formData.categoryId === 3) {
-    setAvailableSubcategories([
-      { id: 1, name: "Bouquet" },
-      { id: 2, name: "Individual Flowers" }
-    ]);
+    if (formData.categoryId === 2 || formData.categoryId === 3) {
+      setAvailableSubcategories([
+        { id: 1, name: "Bouquet" },
+        { id: 2, name: "Individual Flowers" }
+      ]);
 
-    if (![1, 2].includes(formData.subCategoryId)) {
-      setFormData(prev => ({ ...prev, subCategoryId: '' }));
+      if (![1, 2].includes(formData.subCategoryId)) {
+        setFormData(prev => ({ ...prev, subCategoryId: '' }));
+      }
+
+    } else {
+      setAvailableSubcategories([
+        { id: 1, name: "Bouquet" },
+        { id: 2, name: "Individual Flowers" },
+        { id: 3, name: "Headdress" }
+      ]);
     }
-
-  } else {
-    setAvailableSubcategories([
-      { id: 1, name: "Bouquet" },
-      { id: 2, name: "Individual Flowers" },
-      { id: 3, name: "Headdress" }
-    ]);
-  }
-}, [formData.categoryId, formData.subCategoryId]);
+  }, [formData.categoryId, formData.subCategoryId]);
 
   // Validation logic for a single field
   const validateField = (name, value) => {
@@ -111,20 +111,20 @@ export default function MAddNewProductForm({ onClose, onSubmit }) {
 
   // Run validation whenever inputs change if they have been touched
   const handleInputChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  setFormData(prev => ({
-    ...prev,
-    [name]: name === "categoryId" || name === "subCategoryId"
-      ? Number(value)
-      : value
-  }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === "categoryId" || name === "subCategoryId"
+        ? Number(value)
+        : value
+    }));
 
-  if (touched[name]) {
-    const fieldError = validateField(name, value);
-    setErrors(prev => ({ ...prev, [name]: fieldError }));
-  }
-};
+    if (touched[name]) {
+      const fieldError = validateField(name, value);
+      setErrors(prev => ({ ...prev, [name]: fieldError }));
+    }
+  };
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
@@ -181,6 +181,27 @@ export default function MAddNewProductForm({ onClose, onSubmit }) {
     };
   }, [imagePreview]);
 
+  const resetForm = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    setFormData({
+      productName: "",
+      categoryId: "",
+      subCategoryId: "",
+      price: "",
+      stockQuantity: "",
+      description: "",
+      imageUrl: ""
+    });
+
+    setImageFile(null);
+    setImagePreview(null);
+    setErrors({});
+    setTouched({});
+  };
+
   // Handle Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -221,7 +242,7 @@ export default function MAddNewProductForm({ onClose, onSubmit }) {
         "https://example.com/rose.jpg"
     };
 
-    console.log(product);
+    console.log("Adding new product:", product);
 
     try {
       const response = await axios.post(
@@ -233,20 +254,17 @@ export default function MAddNewProductForm({ onClose, onSubmit }) {
           }
         }
       );
-
-      console.log(response.data);
+      
+      console.log("Product added successfully:", response.data);
       alert("Product Added Successfully!");
-
+      resetForm();
       if (onSubmit) {
         onSubmit(response.data);
       }
 
     } catch (err) {
-
-      console.error(err);
-
+     console.error("Failed to add product:", err);
       alert("Failed to add product.");
-
     }
   };
 
