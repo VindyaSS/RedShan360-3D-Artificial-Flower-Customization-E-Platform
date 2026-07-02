@@ -348,12 +348,12 @@ export default function MmanageProducts() {
                                 activeSector={activeSector}
                                 onSectorChange={setActiveSector}
                             />
+                            {!isAddingProduct && (
+                                <div className="flex items-start">
+                                    <MAddProductButton onClick={() => setIsAddingProduct(true)} />
+                                </div>
+                            )}
                         </div>
-                        {!isAddingProduct && (
-                            <div className="flex items-start">
-                                <MAddProductButton onClick={() => setIsAddingProduct(true)} />
-                            </div>
-                        )}
                     </div>
 
                     {/* Dashboard Content area */}
