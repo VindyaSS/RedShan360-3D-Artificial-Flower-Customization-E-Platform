@@ -239,74 +239,6 @@ export default function MmanageProducts() {
         }
     };
 
-    const handleAddNewProduct = (newProduct) => {
-        const { productName, category, subcategory, price, stockQuantity, description, image } = newProduct;
-
-        // Formatted price string for mock data standard
-        const formattedPrice = `Rs ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-        const getNextId = (list) => {
-            return list.length > 0 ? Math.max(...list.map(item => item.id)) + 1 : 1;
-        };
-
-        if (category === 'Birthday') {
-            if (subcategory === 'Boquet') {
-                const id = getNextId(birthdayBoquetFlowers);
-                setBirthdayBoquetFlowers([
-                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...birthdayBoquetFlowers
-                ]);
-            } else if (subcategory === 'Individual Flowers') {
-                const id = getNextId(birthdayIndividualFlowers);
-                setBirthdayIndividualFlowers([
-                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...birthdayIndividualFlowers
-                ]);
-            } else if (subcategory === 'Headdress') {
-                const id = getNextId(birthdayHeaddresses);
-                setBirthdayHeaddresses([
-                    { id, HeaddressName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...birthdayHeaddresses
-                ]);
-            }
-        } else if (category === 'Anniversary') {
-            if (subcategory === 'Boquet') {
-                const id = getNextId(anniversaryBouquets);
-                setAnniversaryBouquets([
-                    { id, BoquetName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...anniversaryBouquets
-                ]);
-            } else if (subcategory === 'Individual Flowers') {
-                const id = getNextId(anniversaryIndividualFlowers);
-                setAnniversaryIndividualFlowers([
-                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...anniversaryIndividualFlowers
-                ]);
-            }
-        } else if (category === 'Convocation') {
-            if (subcategory === 'Boquet') {
-                const id = getNextId(convocationBouquets);
-                setConvocationBouquets([
-                    { id, BoquetName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...convocationBouquets
-                ]);
-            } else if (subcategory === 'Individual Flowers') {
-                const id = getNextId(convocationIndividualFlowers);
-                setConvocationIndividualFlowers([
-                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...convocationIndividualFlowers
-                ]);
-            }
-        }
-
-        // Set active sector to the newly added product's category & subcategory so it's shown immediately
-        setActiveSector(`${category} - ${subcategory === 'Boquet' ? 'Boquets' : subcategory === 'Headdress' ? 'Head Dresses' : subcategory}`);
-
-        // Set success notification
-        setSuccessNotification(`Product "${productName}" successfully added to ${category} - ${subcategory === 'Boquet' ? 'Bouquet' : subcategory}!`);
-        setIsAddingProduct(false);
-    };
-
     return (
         <>
             {successNotification && (
@@ -361,7 +293,6 @@ export default function MmanageProducts() {
                         {isAddingProduct ? (
                             <MAddNewProductForm
                                 onClose={() => setIsAddingProduct(false)}
-                                onSubmit={handleAddNewProduct}
                             />
                         ) : activeSector === 'All' ? (
                             <div className="flex flex-col gap-12">
