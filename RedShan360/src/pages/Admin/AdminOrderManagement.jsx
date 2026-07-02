@@ -48,7 +48,6 @@ function AdminOrderManagement() {
           <div className="order-kpi-card pending"><h4>Pending Review</h4><h2>24</h2></div>
           <div className="order-kpi-card processing"><h4>Processing</h4><h2>142</h2></div>
           <div className="order-kpi-card completed"><h4>Completed</h4><h2>1,284</h2></div>
-          <div className="order-kpi-card cancelled"><h4>Cancelled</h4><h2>12</h2></div>
         </div>
 
         {/* Filters + Actions */}

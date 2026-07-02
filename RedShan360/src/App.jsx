@@ -66,7 +66,7 @@ const ProtectedRoute = ({ children }) => {
       console.error('Failed to parse user from localStorage in ProtectedRoute:', e);
     }
   }
-  
+
   useEffect(() => {
     if (!user) {
       setTimeout(() => {

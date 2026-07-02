@@ -4,22 +4,22 @@ import { products } from '../../data/products';
 import { arrangeBouquet, relaxOverlaps } from '../../components/bouquet/LayoutEngine';
 import BouquetCanvas from '../../components/bouquet/BouquetCanvas';
 import CartDrawer from '../GuestUser/components/CartDrawer';
-import { 
-  Search, 
-  Heart, 
-  ShoppingCart, 
-  User, 
-  ChevronDown, 
-  ChevronUp, 
-  Plus, 
-  Minus, 
-  Trash2, 
-  RotateCcw, 
-  ZoomIn, 
-  ZoomOut, 
-  RefreshCw, 
-  Camera, 
-  Calendar, 
+import {
+  Search,
+  Heart,
+  ShoppingCart,
+  User,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Minus,
+  Trash2,
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
+  RefreshCw,
+  Camera,
+  Calendar,
   Truck,
   ArrowRight,
   Sparkles,
@@ -84,12 +84,21 @@ const STEMS_DATABASE = [
   },
   {
     id: 'kraft-paper',
-    name: 'Kraft Paper Wrapping',
+    name: 'Light Red Wrapping Paper',
     category: 'wrapping-accents',
     price: 1200.00,
-    image: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=150&h=150&q=80',
-    color: '#d2b48c',
-    description: 'Minimalist rustic brown paper wraps'
+    image: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=150&h=150&q=80',
+    color: '#e27b7b',
+    description: 'Soft romantic light red tissue wrap'
+  },
+  {
+    id: 'luxury-mesh',
+    name: 'White Wrapping Paper',
+    category: 'wrapping-accents',
+    price: 1800.00,
+    image: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=150&h=150&q=80',
+    color: '#ffffff',
+    description: 'Elegant minimalist matte white wrap'
   }
 ];
 
@@ -307,7 +316,7 @@ export default function BoquetCustomization() {
       validStems.forEach((item) => {
         const currentCount = updatedFlowers.filter(f => f.stemId === item.stemId).length;
         const diff = item.quantity - currentCount;
-        
+
         if (diff > 0) {
           for (let i = 0; i < diff; i++) {
             updatedFlowers.push({
@@ -373,7 +382,7 @@ export default function BoquetCustomization() {
 
   // Search and filter stems
   const filteredStems = useMemo(() => {
-    return STEMS_DATABASE.filter(stem => 
+    return STEMS_DATABASE.filter(stem =>
       stem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       stem.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -392,7 +401,7 @@ export default function BoquetCustomization() {
     setSelectedStems(prev => {
       const existing = prev.find(item => item.stemId === stemId);
       if (existing) {
-        return prev.map(item => 
+        return prev.map(item =>
           item.stemId === stemId ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
@@ -407,7 +416,7 @@ export default function BoquetCustomization() {
       const existing = prev.find(item => item.stemId === stemId);
       if (!existing) return prev;
       if (existing.quantity > 1) {
-        return prev.map(item => 
+        return prev.map(item =>
           item.stemId === stemId ? { ...item, quantity: item.quantity - 1 } : item
         );
       } else {
@@ -419,6 +428,19 @@ export default function BoquetCustomization() {
   // Complete removal of a stem category
   const handleClearStem = (stemId) => {
     setSelectedStems(prev => prev.filter(item => item.stemId !== stemId));
+  };
+
+  const handleSelectWrapping = (id) => {
+    setSelectedStems(prev => {
+      const wrappingIds = ['kraft-paper', 'luxury-mesh'];
+      const filtered = prev.filter(item => !wrappingIds.includes(item.stemId));
+      
+      const isAlreadySelected = prev.some(item => item.stemId === id);
+      if (isAlreadySelected) {
+        return filtered;
+      }
+      return [...filtered, { stemId: id, quantity: 1 }];
+    });
   };
 
   // Canvas Toolbar operations
@@ -523,14 +545,12 @@ export default function BoquetCustomization() {
   // Map category tags for rendering
   const categoriesList = [
     { key: 'premium-blooms', label: 'PREMIUM BLOOMS' },
-    { key: 'bouquet-styles', label: 'BOUQUET STYLES' },
-    { key: 'decorative-foliage', label: 'DECORATIVE FOLIAGE' },
-    { key: 'wrapping-accents', label: 'WRAPPING & ACCENTS' }
+    { key: 'wrapping-accents', label: 'WRAPPING' }
   ];
 
   return (
     <div className="min-h-screen bg-[#fdfbf9] text-[#563c37] flex flex-col relative" style={{ fontFamily: 'Plus Jakarta Sans, Inter, sans-serif' }}>
-      
+
       {/* SHUTTER FLASH OVERLAY */}
       {showFlash && (
         <div className="fixed inset-0 bg-white z-[9999] opacity-90 transition-opacity duration-300 animate-pulse pointer-events-none" />
@@ -552,7 +572,7 @@ export default function BoquetCustomization() {
               RedShan<span className="text-[#8c5e5e] italic font-normal">360</span>
             </a>
           </div>
-          
+
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8">
             <a href="/guestUserDashboard" className="text-xs uppercase tracking-widest font-semibold text-[#563c37]/75 hover:text-[#563c37] transition-colors duration-300">Home</a>
@@ -569,7 +589,7 @@ export default function BoquetCustomization() {
             </button>
 
             {/* Wishlist Button */}
-            <a 
+            <a
               href="/shop?wishlist=true"
               className="relative p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300"
               aria-label="Wishlist"
@@ -581,11 +601,11 @@ export default function BoquetCustomization() {
                 </span>
               )}
             </a>
-            
+
             {/* Cart Button */}
-            <button 
+            <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300" 
+              className="relative p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300"
               aria-label="Cart"
             >
               <ShoppingCart size={20} />
@@ -598,7 +618,7 @@ export default function BoquetCustomization() {
 
             {/* Profile Button with Dropdown */}
             <div ref={profileDropdownRef} className="relative">
-              <button 
+              <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300"
                 aria-label="Profile"
@@ -642,7 +662,7 @@ export default function BoquetCustomization() {
             <a href="/customization" onClick={() => setMobileMenuOpen(false)} className="block text-xs uppercase tracking-widest font-bold text-[#8c5e5e] py-1">Customization</a>
             <a href="/about" onClick={() => setMobileMenuOpen(false)} className="block text-xs uppercase tracking-widest font-semibold text-[#563c37] hover:text-[#8c5e5e] py-1">About</a>
             <a href="/contact" onClick={() => setMobileMenuOpen(false)} className="block text-xs uppercase tracking-widest font-semibold text-[#563c37] hover:text-[#8c5e5e] py-1">Contact</a>
-            
+
             <div className="flex items-center gap-4 pt-4 border-t border-[#f0ebe4]">
               <button
                 onClick={() => {
@@ -655,7 +675,7 @@ export default function BoquetCustomization() {
                 <Search size={18} />
               </button>
 
-              <a 
+              <a
                 href="/shop?wishlist=true"
                 onClick={() => setMobileMenuOpen(false)}
                 className="relative p-2 rounded-full bg-[#f5efeb] text-[#563c37]"
@@ -700,7 +720,7 @@ export default function BoquetCustomization() {
 
       {/* MAIN CONTAINER */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 md:px-12 lg:px-16 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
         {/* LEFT PANEL: BOTANICALS SELECTOR */}
         <section className="lg:col-span-3 order-2 lg:order-1 bg-white rounded-[24px] border border-[#f0ebe4] p-4 sm:p-6 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-6 self-stretch">
           <div>
@@ -715,8 +735,8 @@ export default function BoquetCustomization() {
           {/* Search bar */}
           <div className="relative flex items-center bg-[#fdfbf9] border border-[#ece7e2] rounded-lg px-3 py-2.5">
             <Search size={14} className="text-[#563c37]/40 mr-2" />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search stems"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -732,7 +752,7 @@ export default function BoquetCustomization() {
 
               return (
                 <div key={category.key} className="border-b border-[#fdfbf9] pb-3 last:border-0 last:pb-0">
-                  <button 
+                  <button
                     onClick={() => toggleCategory(category.key)}
                     className="flex justify-between items-center w-full text-left font-bold text-xs tracking-wider uppercase text-[#563c37] py-3 hover:text-[#8c5e5e] transition-colors duration-300"
                   >
@@ -745,47 +765,87 @@ export default function BoquetCustomization() {
                       {categoryStems.length === 0 ? (
                         <p className="text-[11px] text-[#563c37]/40 italic py-1">No stems match your search.</p>
                       ) : (
-                        categoryStems.map((stem) => {
-                          const quantitySelected = selectedStems.find(s => s.stemId === stem.id)?.quantity || 0;
-
-                          return (
-                            <div key={stem.id} className="flex items-center gap-3 bg-[#fdfbf9]/70 p-2 rounded-xl border border-[#f5efeb] hover:border-[#8c5e5e]/25 transition-all">
-                              <img 
-                                src={stem.image} 
-                                alt={stem.name} 
-                                className="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm border border-[#ece7e2]"
-                              />
-                              <div className="flex-grow min-w-0">
-                                <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
-                                <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
-                                <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
-                                  +Rs {stem.price.toFixed(2)}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {quantitySelected > 0 && (
-                                  <>
-                                    <button 
-                                      onClick={() => handleRemoveStem(stem.id)}
-                                      className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
-                                      aria-label="Decrease quantity"
-                                    >
-                                      <Minus size={12} />
-                                    </button>
-                                    <span className="text-xs font-bold text-[#563c37] w-4 text-center">{quantitySelected}</span>
-                                  </>
-                                )}
-                                <button 
-                                  onClick={() => handleAddStem(stem.id)}
-                                  className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
-                                  aria-label="Add stem"
-                                >
-                                  <Plus size={12} />
-                                </button>
+                        <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1.5 scroll-smooth custom-scrollbar">
+                          {/* Special check for wrapping-accents category */}
+                          {category.key === 'wrapping-accents' && (
+                            <div className="mb-2">
+                              <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-[#563c37]/60 block mb-2">
+                                Select Wrapping Paper
+                              </span>
+                              <div className="grid grid-cols-2 gap-3">
+                                {categoryStems
+                                  .filter(s => s.id === 'luxury-mesh')
+                                  .map((stem) => {
+                                    const isSelected = selectedStems.some(s => s.stemId === stem.id);
+                                    return (
+                                      <button
+                                        key={stem.id}
+                                        onClick={() => handleSelectWrapping(stem.id)}
+                                        className={`flex flex-col text-left p-2 rounded-xl transition-all duration-300 ${
+                                          isSelected 
+                                            ? 'bg-[#fdfbf9]/90 border-2 border-[#8c5e5e] shadow-sm font-semibold' 
+                                            : 'bg-[#fdfbf9]/40 border border-[#f5efeb] hover:border-[#8c5e5e]/20'
+                                        }`}
+                                      >
+                                        <img 
+                                          src={stem.image} 
+                                          alt={stem.name} 
+                                          className="w-full h-16 rounded-lg object-cover bg-gray-100 mb-1.5 border border-[#ece7e2]"
+                                        />
+                                        <span className="text-[10px] font-bold text-[#563c37] truncate w-full">{stem.name}</span>
+                                        <span className="text-[9px] font-semibold text-[#8c5e5e] mt-0.5">+Rs {stem.price.toFixed(2)}</span>
+                                      </button>
+                                    );
+                                  })}
                               </div>
                             </div>
-                          );
-                        })
+                          )}
+
+                          {/* Normal List Rendering (accents/ribbons or standard categories) */}
+                          {categoryStems
+                            .filter(stem => category.key !== 'wrapping-accents')
+                            .map((stem) => {
+                              const quantitySelected = selectedStems.find(s => s.stemId === stem.id)?.quantity || 0;
+
+                              return (
+                                <div key={stem.id} className="flex items-center gap-3 bg-[#fdfbf9]/70 p-2 rounded-xl border border-[#f5efeb] hover:border-[#8c5e5e]/25 transition-all">
+                                  <img 
+                                    src={stem.image} 
+                                    alt={stem.name} 
+                                    className="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm border border-[#ece7e2]"
+                                  />
+                                  <div className="flex-grow min-w-0">
+                                    <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
+                                    <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
+                                    <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
+                                      +Rs {stem.price.toFixed(2)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {quantitySelected > 0 && (
+                                      <>
+                                        <button 
+                                          onClick={() => handleRemoveStem(stem.id)}
+                                          className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
+                                          aria-label="Decrease quantity"
+                                        >
+                                          <Minus size={12} />
+                                        </button>
+                                        <span className="text-xs font-bold text-[#563c37] w-4 text-center">{quantitySelected}</span>
+                                      </>
+                                    )}
+                                    <button 
+                                      onClick={() => handleAddStem(stem.id)}
+                                      className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
+                                      aria-label="Add stem"
+                                    >
+                                      <Plus size={12} />
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
                       )}
                     </div>
                   )}
@@ -798,7 +858,7 @@ export default function BoquetCustomization() {
         {/* MIDDLE PANEL: 3D INTERACTIVE CANVAS */}
         <section className="lg:col-span-6 order-1 lg:order-2 flex flex-col gap-6 items-center w-full">
           <div className="w-full bg-[#fcf9f6] rounded-[24px] border border-[#f0ebe4] p-4 sm:p-6 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col relative h-[400px] sm:h-[500px] lg:h-[600px] overflow-hidden">
-            
+
             {/* Header info inside canvas */}
             <div className="flex justify-between items-center z-10">
               <div className="flex items-center gap-2">
@@ -826,7 +886,7 @@ export default function BoquetCustomization() {
 
             {/* FLOATING CONTROLS TOOLBAR */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md border border-[#ece7e2] rounded-full p-2.5 shadow-lg flex items-center gap-4 z-20">
-              <button 
+              <button
                 onClick={handleReset}
                 className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9] transition-all"
                 title="Reset arrangement"
@@ -835,7 +895,7 @@ export default function BoquetCustomization() {
                 <RotateCcw size={16} />
               </button>
 
-              <button 
+              <button
                 onClick={handleZoom}
                 className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9] transition-all"
                 title="Toggle zoom"
@@ -844,7 +904,7 @@ export default function BoquetCustomization() {
                 {zoomLevel === 'zoomed' ? <ZoomOut size={16} /> : <ZoomIn size={16} />}
               </button>
 
-              <button 
+              <button
                 onClick={() => {
                   setIsSwapMode(prev => {
                     const next = !prev;
@@ -859,18 +919,17 @@ export default function BoquetCustomization() {
                     return next;
                   });
                 }}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                  isSwapMode 
-                    ? 'bg-[#563c37] text-white shadow-md' 
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isSwapMode
+                    ? 'bg-[#563c37] text-white shadow-md'
                     : 'bg-transparent text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9]'
-                }`}
+                  }`}
                 title="Swap flower positions"
                 aria-label="Swap flower positions"
               >
                 <Shuffle size={16} />
               </button>
 
-              <button 
+              <button
                 onClick={handleRotate}
                 className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9] transition-all"
                 title="Rotate bouquet"
@@ -881,7 +940,7 @@ export default function BoquetCustomization() {
 
               <div className="h-6 w-[1px] bg-[#ece7e2]" />
 
-              <button 
+              <button
                 onClick={handleCameraSnapshot}
                 className="w-10 h-10 rounded-full bg-[#563c37] hover:bg-[#8c5e5e] text-white flex items-center justify-center transition-all shadow-md active:scale-95"
                 title="Take snapshot"
@@ -896,7 +955,7 @@ export default function BoquetCustomization() {
 
         {/* RIGHT PANEL: ARRANGEMENT SUMMARY */}
         <section className="lg:col-span-3 order-3 lg:order-3 flex flex-col gap-6 self-stretch">
-          
+
           {/* Main summary card */}
           <div className="bg-white rounded-[24px] border border-[#f0ebe4] p-4 sm:p-6 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-6 flex-grow">
             <div>
@@ -942,7 +1001,7 @@ export default function BoquetCustomization() {
                           <span className="text-xs font-bold text-[#563c37]">
                             Rs {(dbItem.price * item.quantity).toFixed(2)}
                           </span>
-                          <button 
+                          <button
                             onClick={() => handleClearStem(item.stemId)}
                             className="text-[#563c37]/40 hover:text-[#8c5e5e] transition-colors"
                             aria-label={`Remove all ${dbItem.name}`}
@@ -980,7 +1039,7 @@ export default function BoquetCustomization() {
                     Rs {estimatedTotal.toFixed(2)}
                   </span>
                 </div>
-                
+
                 {/* Free shipping badge */}
                 <div className="bg-[#f5efeb] text-[#563c37] text-[8px] font-extrabold tracking-widest uppercase rounded-full px-3 py-1.5 flex items-center gap-1.5 border border-[#ece3dc]">
                   <Truck size={10} className="text-[#8c5e5e]" />
@@ -991,14 +1050,14 @@ export default function BoquetCustomization() {
 
             {/* Action button */}
             <div className="flex flex-col gap-2.5">
-              <button 
+              <button
                 onClick={handleAddToCart}
                 className="w-full bg-[#563c37] hover:bg-[#4a322e] text-white text-xs uppercase tracking-[0.2em] font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-[#563c37]/5"
               >
                 <span>Add to Cart</span>
                 <ArrowRight size={14} />
               </button>
-              
+
               <span className="text-[9px] font-extrabold tracking-[0.18em] text-[#563c37]/45 text-center uppercase block mt-1">
                 Secure Artisanal Delivery Guaranteed
               </span>
@@ -1028,10 +1087,10 @@ export default function BoquetCustomization() {
       {/* FOOTER */}
       <footer className="bg-[#fcf9f6] text-[#563c37] border-t border-[#f0ebe4] pt-16 pb-10 px-6 md:px-12 lg:px-16 mt-16">
         <div className="max-w-7xl mx-auto">
-          
+
           {/* Main Footer Links */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
-            
+
             {/* Column 1: Brand details */}
             <div className="md:col-span-5 flex flex-col gap-4">
               <h3 className="text-2xl font-bold tracking-tight text-[#563c37]" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -1074,12 +1133,12 @@ export default function BoquetCustomization() {
                 Stay Inspired
               </h4>
               <div className="relative flex items-center border-b border-[#563c37]/20 pb-1.5 focus-within:border-[#563c37] transition-colors">
-                <input 
-                  type="email" 
-                  placeholder="your@email.com" 
+                <input
+                  type="email"
+                  placeholder="your@email.com"
                   className="bg-transparent border-none outline-none text-xs text-[#563c37] placeholder:text-[#563c37]/30 w-full pr-6"
                 />
-                <button 
+                <button
                   onClick={() => triggerToast('Subscribed to newsletter!')}
                   className="absolute right-0 hover:text-[#8c5e5e] transition-colors text-[#563c37]/80"
                   aria-label="Subscribe to newsletter"

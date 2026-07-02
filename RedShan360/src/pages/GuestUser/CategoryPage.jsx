@@ -139,6 +139,61 @@ const CategoryPage = () => {
 
   const categoryDetails = getCategoryDetails(slug);
 
+  // Reusable function to load images dynamically using import.meta.glob
+  const loadImages = (folderPath) => {
+    // Eager load all images in the bouquets subdirectories
+    const globPattern = import.meta.glob('../../assets/images/bouquets/**/*.{png,jpg,jpeg,PNG,JPG,JPEG}', { eager: true });
+    const matchingImages = [];
+    const normalizedFolder = folderPath.toLowerCase().replace(/\\/g, '/');
+
+    let idx = 1000;
+    for (const path in globPattern) {
+      const normalizedPath = path.toLowerCase();
+      if (normalizedPath.includes(normalizedFolder)) {
+        const url = globPattern[path].default || globPattern[path];
+        const filename = path.split('/').pop();
+        const nameWithoutExt = filename.replace(/\.[^/.]+$/, "");
+
+        // Clean name (e.g. lilyBoquet.jpg -> Lily Boquet)
+        const cleanName = nameWithoutExt
+          .replace(/[-_]/g, " ")
+          .replace(/([A-Z])/g, " $1")
+          .trim();
+        const displayName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+        // Try to find a matching product in static products to retain description/pricing
+        const staticMatch = products.find(p => {
+          const pTitle = p.title.toLowerCase().replace(/[-_]/g, " ");
+          const pNameLower = displayName.toLowerCase();
+          return pTitle.includes(pNameLower) || pNameLower.includes(pTitle);
+        });
+
+        if (staticMatch) {
+          matchingImages.push({
+            ...staticMatch,
+            id: staticMatch.id,
+            image: url,
+            title: displayName,
+          });
+        } else {
+          matchingImages.push({
+            id: idx++,
+            title: displayName,
+            subtitle: 'Premium Bouquet Collection',
+            price: 'Rs 12000.00',
+            numericPrice: 12000,
+            rating: 4.8,
+            reviewCount: 15,
+            image: url,
+            colors: [{ name: 'Pastel Pink', hex: '#f5ccd4' }],
+            isDynamic: true
+          });
+        }
+      }
+    }
+    return matchingImages;
+  };
+
   // Filter products belonging to selected category and subcategory
   const filteredProducts = products.filter((product) => {
     switch (slug) {
@@ -166,6 +221,19 @@ const CategoryPage = () => {
         return false;
     }
   });
+
+  const getDisplayProducts = () => {
+    if (slug === 'bouquets') {
+      if (activeSubcategory) {
+        return loadImages(`bouquets/${activeSubcategory}`);
+      } else {
+        return loadImages('bouquets');
+      }
+    }
+    return filteredProducts;
+  };
+
+  const displayProducts = getDisplayProducts();
 
   const handleAddToCart = (product) => {
     const savedUser = localStorage.getItem('user');
@@ -292,7 +360,7 @@ const CategoryPage = () => {
                 {categoryDetails.description}
               </p>
               <p className="text-[11px] uppercase tracking-wider font-semibold text-white/85 bg-white/10 backdrop-blur-sm rounded-full py-1 px-4 inline-block">
-                Showing {filteredProducts.length} premium arrangements
+                Showing {displayProducts.length} premium arrangements
               </p>
             </div>
           </div>
@@ -308,7 +376,7 @@ const CategoryPage = () => {
               {categoryDetails.description}
             </p>
             <p className="text-xs font-semibold text-[#1a1a1a]/55 mt-4">
-              Showing {filteredProducts.length} premium arrangements
+              Showing {displayProducts.length} premium arrangements
             </p>
           </div>
         )}
@@ -321,49 +389,24 @@ const CategoryPage = () => {
             </h2>
 
             {/* Desktop and Tablet grid, Mobile scrollable flex row */}
-            <div className="flex overflow-x-auto pb-4 gap-4 no-scrollbar sm:grid sm:grid-cols-2 md:grid-cols-3 sm:gap-6 sm:overflow-visible sm:pb-0">
+            <div className="flex flex-wrap justify-center gap-6">
               {subcategories.map((sub, idx) => {
                 const isActive = activeSubcategory === sub.value;
                 return (
                   <button
                     key={idx}
                     onClick={() => setActiveSubcategory(isActive ? null : sub.value)}
-                    className={`group relative flex-shrink-0 w-[240px] sm:w-auto aspect-[16/10] rounded-sm overflow-hidden shadow-sm cursor-pointer transition-all duration-300 border-2 ${isActive ? 'border-[#8c5e5e] ring-2 ring-[#8c5e5e]/20' : 'border-transparent hover:border-[#8c5e5e]/40'
-                      }`}
+                    className={`w-[180px] h-[52px] rounded-full border-[1.5px] flex items-center justify-center font-poppins font-semibold text-base transition-all duration-300
+                      ${isActive
+                        ? 'bg-[#6A8F72] text-white font-bold shadow-[0_4px_6px_rgba(0,0,0,0.08)] transform scale-105'
+                        : 'bg-[#EAF4EC] border-[#C7D9CC] text-[#2F3E34] hover:bg-[#D7EBD9] hover:border-[#8FB89A] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] hover:-translate-y-1'}
+                    `}
                   >
-                    <img
-                      src={sub.image}
-                      alt={sub.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent transition-colors duration-300" />
-
-                    {/* Active State Overlay Indicator */}
-                    {isActive && (
-                      <div className="absolute inset-0 bg-[#8c5e5e]/20 backdrop-blur-[0.5px] transition-colors" />
-                    )}
-
-                    <div className="absolute inset-x-0 bottom-0 p-4 text-left">
-                      <h4 className="text-lg md:text-xl text-white font-semibold" style={{ fontFamily: 'Playfair Display, serif' }}>
-                        {sub.name}
-                      </h4>
-                      <p className="text-[8px] md:text-[9px] uppercase tracking-[0.15em] text-white/90 font-medium mt-0.5">
-                        {sub.tag}
-                      </p>
-                    </div>
-
-                    {/* Tiny badge indicating selection */}
-                    {isActive && (
-                      <div className="absolute top-3 right-3 bg-[#8c5e5e] text-white text-[8px] font-bold tracking-widest px-2 py-0.5 rounded-sm">
-                        SELECTED
-                      </div>
-                    )}
+                    {sub.name}
                   </button>
                 );
               })}
             </div>
-
-            {/* Mobile Helper/Indicator for scrollability */}
             <div className="flex sm:hidden justify-between items-center text-[10px] text-[#1a1a1a]/40 mt-2">
               <span>← Swipe to view categories →</span>
               {activeSubcategory && (
@@ -379,7 +422,7 @@ const CategoryPage = () => {
         )}
 
         {/* Filtered Product Grid */}
-        {filteredProducts.length === 0 ? (
+        {displayProducts.length === 0 ? (
           <div className="text-center py-20 bg-[#faf8f6] rounded-sm border border-[#d9d2d0]/10 mt-8">
             <Heart size={40} className="mx-auto text-[#1a1a1a]/20 mb-3" />
             <p className="text-sm font-medium text-[#1a1a1a]/55">
@@ -394,7 +437,7 @@ const CategoryPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {filteredProducts.map((product) => (
+            {displayProducts.map((product) => (
               <div key={product.id} className="group flex flex-col font-sans relative">
                 {/* Product Image Container */}
                 <div className="relative overflow-hidden bg-[#f4f0ed] rounded-sm aspect-[3/4] mb-4 border border-[#d9d2d0]/15 shadow-sm">

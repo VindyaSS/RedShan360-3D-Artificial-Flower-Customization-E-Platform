@@ -77,36 +77,54 @@ const Shop = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get('/api/products');
-        const merged = response.data.map((dbProd) => {
-          const localProd = initialProducts.find((p) => p.id === dbProd.id) || {};
-          const numPrice = Number(dbProd.price) || 0;
-          const discountPct = Number(dbProd.discountPercentage) || 0;
+        const dbProducts = response.data;
+        const merged = initialProducts.map((localProd) => {
+          const dbProd = dbProducts.find((p) => p.id === localProd.id);
+          const numPrice = dbProd ? (Number(dbProd.price) || 0) : (localProd.numericPrice || 15000);
+          const discountPct = dbProd ? (Number(dbProd.discountPercentage) || 0) : (localProd.discountPercent || 0);
           let discPriceVal = null;
           if (discountPct > 0) {
             discPriceVal = numPrice * (1 - discountPct / 100);
           }
 
           // Resolve image
-          const finalImg = localProd.image || (dbProd.imageUrl ? `http://localhost:8080/images/${dbProd.imageUrl}` : '/images/placeholder.png');
+          const finalImg = localProd.image || (dbProd && dbProd.imageUrl ? `http://localhost:8080/images/${dbProd.imageUrl}` : '/images/placeholder.png');
 
           return {
             ...localProd,
-            id: dbProd.id,
-            title: dbProd.productName || localProd.title,
-            description: dbProd.description || localProd.description,
+            id: localProd.id,
+            title: dbProd && dbProd.productName ? dbProd.productName : localProd.title,
+            description: dbProd && dbProd.description ? dbProd.description : localProd.description,
             price: `Rs ${numPrice.toFixed(2)}`,
             numericPrice: numPrice,
             discountPercentage: discountPct,
             discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
             discountNumericPrice: discPriceVal,
-            stockQuantity: dbProd.stockQuantity,
-            imageUrl: dbProd.imageUrl,
+            stockQuantity: dbProd ? dbProd.stockQuantity : 50,
+            imageUrl: dbProd ? dbProd.imageUrl : null,
             image: finalImg,
-            featured: dbProd.featured,
-            status: dbProd.status,
-            createdAt: dbProd.createdAt || localProd.createdAt || new Date().toISOString(),
-            categoryName: dbProd.categoryName || localProd.category || 'silk',
-            subCategoryName: dbProd.subCategoryName || localProd.subcategory || '',
+            featured: dbProd ? dbProd.featured : false,
+            status: dbProd ? dbProd.status : 'ACTIVE',
+            createdAt: dbProd && dbProd.createdAt ? dbProd.createdAt : (localProd.createdAt || new Date().toISOString()),
+            // Derive main category based on product type and backend info
+            categoryName: (() => {
+              const rawCat = dbProd && dbProd.category ? dbProd.category : (localProd.category || '');
+              const lower = rawCat.toString().toLowerCase();
+              if (lower.includes('bouquet')) return 'Bouquets';
+              if (lower.includes('individual')) return 'Individual Flowers';
+              if (lower.includes('head')) return 'Head Dresses';
+              // fallback based on product type
+              const type = (localProd.type || '').toString().toLowerCase();
+              if (type.includes('bouquet')) return 'Bouquets';
+              if (type.includes('head')) return 'Head Dresses';
+              return 'Individual Flowers';
+            })(),
+            // Subcategory (occasion) validation
+            subCategoryName: (() => {
+              const rawSub = dbProd && dbProd.subcategory ? dbProd.subcategory : (localProd.subcategory || '');
+              const sub = rawSub.toString().toLowerCase();
+              return ['anniversary', 'birthday', 'convocation'].includes(sub) ? rawSub : '';
+            })(),
             rating: localProd.rating || 4.5,
             reviewCount: localProd.reviewCount || 10,
             colors: localProd.colors || [],
@@ -240,7 +258,7 @@ const Shop = () => {
 
   const handleSubcategoryToggle = (sub) => {
     setSelectedSubcategories((prev) =>
-      prev.includes(sub) ? prev.filter((s) => s !== sub) : [...prev, sub]
+      prev.includes(sub) ? [] : [sub]
     );
     setCurrentPage(1);
   };
@@ -586,9 +604,8 @@ const Shop = () => {
                 </button>
               </div>
             ) : (
-              <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 transition-opacity duration-300 ${
-                isTransitioning ? 'opacity-40' : 'opacity-100'
-              }`}>
+              <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 transition-opacity duration-300 ${isTransitioning ? 'opacity-40' : 'opacity-100'
+                }`}>
                 {currentItems.map((product) => {
                   const isOutOfStock = product.stockQuantity <= 0 || product.status !== 'ACTIVE';
                   return (
@@ -627,9 +644,8 @@ const Shop = () => {
                           >
                             <Heart
                               size={15}
-                              className={`transition-all duration-300 ${
-                                wishlist[product.id] ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-400'
-                              }`}
+                              className={`transition-all duration-300 ${wishlist[product.id] ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-gray-400'
+                                }`}
                             />
                           </button>
 
@@ -730,11 +746,10 @@ const Shop = () => {
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`w-9 h-9 rounded-sm flex items-center justify-center font-semibold text-sm transition-all ${
-                        currentPage === page
-                          ? 'bg-[#8c5e5e] text-white shadow-sm'
-                          : 'border border-[#d9d2d0]/60 text-[#1a1a1a]/70 hover:bg-[#f4f0ed]'
-                      }`}
+                      className={`w-9 h-9 rounded-sm flex items-center justify-center font-semibold text-sm transition-all ${currentPage === page
+                        ? 'bg-[#8c5e5e] text-white shadow-sm'
+                        : 'border border-[#d9d2d0]/60 text-[#1a1a1a]/70 hover:bg-[#f4f0ed]'
+                        }`}
                     >
                       {page}
                     </button>
@@ -840,16 +855,14 @@ const Shop = () => {
 
                 {/* Stock status */}
                 <div className="mb-6">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                    activeQuickViewProduct.stockQuantity > 0 && activeQuickViewProduct.status === 'ACTIVE'
-                      ? 'bg-green-50 text-green-700'
-                      : 'bg-red-50 text-red-700'
-                  }`}>
-                    <span className={`w-2 h-2 rounded-full ${
-                      activeQuickViewProduct.stockQuantity > 0 && activeQuickViewProduct.status === 'ACTIVE'
-                        ? 'bg-green-600'
-                        : 'bg-red-600'
-                    }`} />
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${activeQuickViewProduct.stockQuantity > 0 && activeQuickViewProduct.status === 'ACTIVE'
+                    ? 'bg-green-50 text-green-700'
+                    : 'bg-red-50 text-red-700'
+                    }`}>
+                    <span className={`w-2 h-2 rounded-full ${activeQuickViewProduct.stockQuantity > 0 && activeQuickViewProduct.status === 'ACTIVE'
+                      ? 'bg-green-600'
+                      : 'bg-red-600'
+                      }`} />
                     {activeQuickViewProduct.stockQuantity > 0 && activeQuickViewProduct.status === 'ACTIVE'
                       ? `In Stock (${activeQuickViewProduct.stockQuantity} available)`
                       : 'Out of Stock'}

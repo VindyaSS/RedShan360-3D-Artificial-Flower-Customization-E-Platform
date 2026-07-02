@@ -5,19 +5,14 @@ const CategoryGrid = ({ categories }) => {
   return (
     <section id="shop" className="py-24 px-6 md:px-12 lg:px-16 bg-[#faf8f6]">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-12 flex flex-row items-end justify-between gap-5">
-          <div className="text-left">
-            <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-3">Collections</p>
-            <h3 className="text-3xl md:text-[40px] text-[#1a1a1a] font-bold leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Shop by Variety
-            </h3>
-          </div>
-          {/*<a href="#" className="text-xs uppercase tracking-wider font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] border-b border-[#1a1a1a] pb-0.5 transition-colors duration-300">
-            View All Categories
-          </a>*/}
+        <div className="mb-12 text-center">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-3">Collections</p>
+          <h3 className="text-3xl md:text-[40px] text-[#1a1a1a] font-bold leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Shop by Variety
+          </h3>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {categories.map((category, idx) => (
             <Link to={`/category/${category.slug}`} key={idx} className="group relative aspect-[3/4] rounded-sm overflow-hidden shadow-sm cursor-pointer block">
               <img src={category.image} alt={category.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
