@@ -17,16 +17,18 @@ export default function AssignedEmployeeTable(props) {
                 </thead>
                 <tbody>
                     {props.assignedEmployees?.map((assignedEmployee) => {
-                        const isActive = assignedEmployee.WorkingStatus?.toLowerCase() === "active";
-                        const isOffline = assignedEmployee.WorkingStatus?.toLowerCase() === "offline";
+                        const status = assignedEmployee.WorkingStatus || "Not yet Start Work";
+                        const isActive = status.toLowerCase() === "active";
+                        const isOffline = status.toLowerCase() === "offline";
+                        const isNotStarted = status.toLowerCase() === "not yet start work";
                         return (
                             <tr key={assignedEmployee.EmployeeName}>
                                 <td>{assignedEmployee.EmployeeName}</td>
                                 <td>{assignedEmployee.OrderID}</td>
                                 <td>{assignedEmployee.OrderName}</td>
                                 <td colSpan="2">
-                                    <button className={`btn-dispatch ${isActive ? "active-status" : ""} ${isOffline ? "offline-status" : ""}`}>
-                                        {assignedEmployee.WorkingStatus}
+                                    <button className={`btn-dispatch ${isActive ? "active-status" : ""} ${isOffline ? "offline-status" : ""} ${isNotStarted ? "not-started-status" : ""}`}>
+                                        {status}
                                     </button>
                                 </td>
                             </tr>

@@ -130,7 +130,7 @@ export default function MmanageEmployees() {
                 EmployeeName: employeeName,
                 OrderID: order.OrderID,
                 OrderName: order.OrderName,
-                WorkingStatus: "Active"
+                WorkingStatus: "Not yet Start Work"
             }
         ]);
         setPreOrders(prev => prev.filter(po => po.OrderID !== order.OrderID));
