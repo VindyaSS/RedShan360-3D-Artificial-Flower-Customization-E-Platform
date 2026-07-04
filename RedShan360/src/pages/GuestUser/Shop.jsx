@@ -3,7 +3,6 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Star, Heart, Eye, ShoppingCart, ChevronLeft, ChevronRight, Filter, SlidersHorizontal, Check, Info, AlertCircle, X } from 'lucide-react';
-import { products as initialProducts } from '../../data/products';
 import api from '../../services/api';
 
 const Shop = () => {
@@ -14,6 +13,9 @@ const Shop = () => {
 
   // Products and states
   const [productsState, setProductsState] = useState([]);
+  const [dbCategories, setDbCategories] = useState([]);
+  const [dbSubCategories, setDbSubCategories] = useState([]);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [wishlist, setWishlist] = useState({});
   const [activeQuickViewProduct, setActiveQuickViewProduct] = useState(null);
@@ -72,98 +74,104 @@ const Shop = () => {
     return () => window.removeEventListener('wishlist-updated', handleWishlistUpdated);
   }, [userId]);
 
-  // Fetch Products from Backend API and merge with mock database details
+  // Fetch master filter categories and subcategories from backend
+  useEffect(() => {
+    const loadFilters = async () => {
+      try {
+        const [categoriesRes, subcategoriesRes] = await Promise.all([
+          api.get('/api/categories'),
+          api.get('/api/subcategories')
+        ]);
+        setDbCategories(categoriesRes.data);
+        setDbSubCategories(subcategoriesRes.data);
+      } catch (error) {
+        console.error('Error loading filter options from backend:', error);
+        setError('Failed to load filter options. Please try again later.');
+      }
+    };
+    loadFilters();
+  }, []);
+
+  // Fetch products according to active filters from backend
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await api.get('/api/products');
+        let endpoint = '/api/products';
+
+        const activeCat = dbCategories.find(c => c.categoryName === selectedCategories[0]);
+        const activeSub = dbSubCategories.find(s => 
+          s.subCategoryName === selectedSubcategories[0] && 
+          (!activeCat || s.categoryId === activeCat.id)
+        );
+
+        if (activeCat && activeSub) {
+          endpoint = `/api/products/category/${activeCat.id}/subcategory/${activeSub.id}`;
+        } else if (activeCat) {
+          endpoint = `/api/products/category/${activeCat.id}`;
+        } else if (activeSub) {
+          endpoint = `/api/products/subcategory/${activeSub.id}`;
+        }
+
+        const response = await api.get(endpoint);
         const dbProducts = response.data;
-        const merged = initialProducts.map((localProd) => {
-          const dbProd = dbProducts.find((p) => p.id === localProd.id);
-          const numPrice = dbProd ? (Number(dbProd.price) || 0) : (localProd.numericPrice || 15000);
-          const discountPct = dbProd ? (Number(dbProd.discountPercentage) || 0) : (localProd.discountPercent || 0);
+
+        const mapped = dbProducts.map((p) => {
+          const numPrice = Number(p.price) || 0;
+          const discountPct = Number(p.discountPercentage) || 0;
           let discPriceVal = null;
           if (discountPct > 0) {
             discPriceVal = numPrice * (1 - discountPct / 100);
           }
 
-          // Resolve image
-          const finalImg = localProd.image || (dbProd && dbProd.imageUrl ? `http://localhost:8080/images/${dbProd.imageUrl}` : '/images/placeholder.png');
+          const productCategory = dbCategories.find(c => c.id === p.categoryId);
+          const productSubCategory = dbSubCategories.find(s => s.id === p.subCategoryId);
 
           return {
-            ...localProd,
-            id: localProd.id,
-            title: dbProd && dbProd.productName ? dbProd.productName : localProd.title,
-            description: dbProd && dbProd.description ? dbProd.description : localProd.description,
+            id: p.productId,
+            productId: p.productId,
+            title: p.productName || 'Unnamed Arrangement',
+            description: p.description || '',
             price: `Rs ${numPrice.toFixed(2)}`,
             numericPrice: numPrice,
             discountPercentage: discountPct,
             discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
             discountNumericPrice: discPriceVal,
-            stockQuantity: dbProd ? dbProd.stockQuantity : 50,
-            imageUrl: dbProd ? dbProd.imageUrl : null,
-            image: finalImg,
-            featured: dbProd ? dbProd.featured : false,
-            status: dbProd ? dbProd.status : 'ACTIVE',
-            createdAt: dbProd && dbProd.createdAt ? dbProd.createdAt : (localProd.createdAt || new Date().toISOString()),
-            // Derive main category based on product type and backend info
-            categoryName: (() => {
-              const rawCat = dbProd && dbProd.category ? dbProd.category : (localProd.category || '');
-              const lower = rawCat.toString().toLowerCase();
-              if (lower.includes('bouquet')) return 'Bouquets';
-              if (lower.includes('individual')) return 'Individual Flowers';
-              if (lower.includes('head')) return 'Head Dresses';
-              // fallback based on product type
-              const type = (localProd.type || '').toString().toLowerCase();
-              if (type.includes('bouquet')) return 'Bouquets';
-              if (type.includes('head')) return 'Head Dresses';
-              return 'Individual Flowers';
-            })(),
-            // Subcategory (occasion) validation
-            subCategoryName: (() => {
-              const rawSub = dbProd && dbProd.subcategory ? dbProd.subcategory : (localProd.subcategory || '');
-              const sub = rawSub.toString().toLowerCase();
-              return ['anniversary', 'birthday', 'convocation'].includes(sub) ? rawSub : '';
-            })(),
-            rating: localProd.rating || 4.5,
-            reviewCount: localProd.reviewCount || 10,
-            colors: localProd.colors || [],
-          };
-        });
-        setProductsState(merged);
-      } catch (error) {
-        console.error('Error fetching products from backend:', error);
-        // Fallback to local products formatted
-        const fallback = initialProducts.map((p) => {
-          const numPrice = p.numericPrice || 15000;
-          const discountPct = p.discountPercent || 0;
-          let discPriceVal = null;
-          if (discountPct > 0) {
-            discPriceVal = numPrice * (1 - discountPct / 100);
-          }
-          return {
-            ...p,
-            numericPrice: numPrice,
-            price: `Rs ${numPrice.toFixed(2)}`,
-            discountPercentage: discountPct,
-            discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
-            discountNumericPrice: discPriceVal,
-            stockQuantity: 50,
+            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 100,
+            imageUrl: p.imageUrl || '/images/placeholder.png',
+            image: p.imageUrl || '/images/placeholder.png',
+            featured: false,
             status: 'ACTIVE',
             createdAt: new Date().toISOString(),
-            categoryName: p.category,
-            subCategoryName: p.subcategory || '',
-            rating: p.rating || 4.5,
-            reviewCount: p.reviewCount || 10,
+            categoryName: productCategory ? productCategory.categoryName : '',
+            subCategoryName: productSubCategory ? productSubCategory.subCategoryName : '',
+            rating: 4.8,
+            reviewCount: 15,
+            colors: [
+              { name: 'Pastel Pink', hex: '#f5ccd4' },
+              { name: 'Pale Yellow', hex: '#fbfbe3' },
+              { name: 'Soft White', hex: '#ffffff' }
+            ],
+            thumbnails: [
+              p.imageUrl || '/images/placeholder.png'
+            ]
           };
         });
-        setProductsState(fallback);
+
+        setProductsState(mapped);
+      } catch (err) {
+        console.error('Error fetching products from backend:', err);
+        setError('Failed to load arrangements. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
-  }, []);
+
+    if (dbCategories.length > 0) {
+      fetchProducts();
+    }
+  }, [selectedCategories, selectedSubcategories, dbCategories, dbSubCategories]);
 
   const toggleWishlist = async (id) => {
     if (!userId) {
@@ -245,14 +253,21 @@ const Shop = () => {
     window.dispatchEvent(new Event('open-cart'));
   };
 
-  // Extract Categories and Subcategories dynamically
-  const categoriesList = [...new Set(productsState.map((p) => p.categoryName).filter(Boolean))];
-  const subcategoriesList = [...new Set(productsState.map((p) => p.subCategoryName).filter(Boolean))];
+  // Extract Categories and Subcategories from master lists
+  const categoriesList = dbCategories.map((c) => c.categoryName);
+  
+  // Show subcategories filtered by active category if selected, otherwise show all unique subcategory names
+  const activeCat = dbCategories.find(c => c.categoryName === selectedCategories[0]);
+  const filteredSubcategories = activeCat 
+    ? dbSubCategories.filter(s => s.categoryId === activeCat.id)
+    : dbSubCategories;
+  const subcategoriesList = [...new Set(filteredSubcategories.map((s) => s.subCategoryName).filter(Boolean))];
 
   const handleCategoryToggle = (cat) => {
     setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+      prev.includes(cat) ? [] : [cat]
     );
+    setSelectedSubcategories([]); // Clear subcategory when category changes
     setCurrentPage(1);
   };
 
@@ -585,7 +600,20 @@ const Shop = () => {
             </div>
 
             {/* Products grid */}
-            {loading ? (
+            {error ? (
+              <div className="text-center py-24 bg-[#faf8f6] rounded-xl border border-red-200 mt-4">
+                <AlertCircle size={40} className="mx-auto text-red-500 mb-3" />
+                <p className="text-sm font-bold text-red-600">
+                  {error}
+                </p>
+                <button
+                  onClick={() => { setError(null); handleClearAll(); }}
+                  className="mt-5 px-6 py-3 rounded-sm bg-[#8c5e5e] hover:bg-[#7d4d50] text-white font-bold text-xs tracking-wider uppercase transition-all duration-300"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : loading ? (
               <div className="text-center py-32 flex flex-col items-center justify-center">
                 <div className="w-8 h-8 border-4 border-[#8c5e5e]/30 border-t-[#8c5e5e] rounded-full animate-spin mb-3"></div>
                 <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Loading Arrangements...</p>
@@ -615,7 +643,7 @@ const Shop = () => {
                         <div className="relative aspect-[3/4] rounded-sm overflow-hidden bg-[#f4f0ed] shadow-sm mb-4 border border-[#d9d2d0]/15">
                           <Link to={`/product/${product.id}`} className="block w-full h-full">
                             <img
-                              src={product.image}
+                              src={product.imageUrl}
                               alt={product.title}
                               className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                             />
@@ -793,7 +821,7 @@ const Shop = () => {
             {/* Image box */}
             <div className="w-full md:w-1/2 aspect-[4/5] bg-[#f4f0ed] rounded-xl overflow-hidden border border-[#d9d2d0]/15 relative">
               <img
-                src={activeQuickViewProduct.image}
+                src={activeQuickViewProduct.imageUrl}
                 alt={activeQuickViewProduct.title}
                 className="w-full h-full object-cover"
               />
