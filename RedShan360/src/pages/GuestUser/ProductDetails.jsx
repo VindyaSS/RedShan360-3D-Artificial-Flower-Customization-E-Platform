@@ -4,7 +4,6 @@ import { Star, Heart, ShoppingBag, ArrowLeft, ArrowRight, RotateCw, Check, Shiel
 import Navbar from './components/Navbar';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
-import { products } from '../../data/products';
 import Product3DViewer from '../../components/Product3DViewer';
 import api from '../../services/api';
 
@@ -12,9 +11,11 @@ const ProductDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
   // Gallery states
-  const [activeImage, setActiveImage] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -40,75 +41,140 @@ const ProductDetails = () => {
   // Carousel slider ref for complementary pieces
   const carouselRef = useRef(null);
 
-  // Load product data based on ID
+  // Load product data from PostgreSQL backend based on ID
   useEffect(() => {
-    const currentProduct = products.find((p) => p.id === Number(id));
+    const fetchProductDetails = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.get(`/api/products/${id}`);
+        const p = response.data;
 
-    if (currentProduct) {
-      setProduct(currentProduct);
-      setActiveImage(currentProduct.image);
-      setSelectedColor(currentProduct.colors[0]?.name || '');
-      setQuantity(1);
-
-      // ✅ SET MODEL PATH HERE
-      const modelMapping = {
-        "Pink Roses Bouquet": "/models/Pinkrosesboquet.glb",
-        "Red Chrysanthemums": "/models/redChrysanthemums.glb",
-        "Purple Carnation": "/models/purplrcarnation.glb",
-        "Pink Chrysanthemums": "/models/pinkChrysanthemums.glb",
-        "Lily Headdress": "/models/LilyHeadDress.glb",
-        "Red Rose": "/models/redrose.glb",
-        "Pink Lily": "/models/Liliflowerpink.glb"
-      };
-      setModelPath(
-        modelMapping[currentProduct?.title] || currentProduct?.model || "/models/redrose.glb"
-      );
-
-      // Load reviews
-      const savedReviews = localStorage.getItem(`redshan360_reviews_${id}`);
-      if (savedReviews) {
-        setReviewsList(JSON.parse(savedReviews));
-      } else {
-        setReviewsList(currentProduct.reviews || []);
-      }
-
-      // Wishlist from database
-      const checkWishlistStatus = async () => {
-        const savedUser = localStorage.getItem('user');
-        let user = null;
-        if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
-          try {
-            user = JSON.parse(savedUser);
-          } catch (e) {
-            console.error('Failed to parse user from localStorage in ProductDetails checkWishlistStatus:', e);
+        if (p) {
+          const numPrice = Number(p.price) || 0;
+          const discountPct = Number(p.discountPercentage) || 0;
+          let discPriceVal = null;
+          if (discountPct > 0) {
+            discPriceVal = numPrice * (1 - discountPct / 100);
           }
-        }
-        const userId = user ? (user.id || user.userId) : null;
 
-        if (userId) {
+          const mappedProduct = {
+            id: p.productId,
+            productId: p.productId,
+            productName: p.productName || 'Unnamed Arrangement',
+            title: p.productName || 'Unnamed Arrangement',
+            subtitle: p.categoryName || '',
+            description: p.description || '',
+            price: `Rs ${numPrice.toFixed(2)}`,
+            numericPrice: numPrice,
+            discountPercentage: discountPct,
+            discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
+            discountNumericPrice: discPriceVal,
+            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 100,
+            imageUrl: p.imageUrl || '/images/placeholder.png',
+            modelUrl: p.modelUrl || '',
+            categoryName: p.categoryName || '',
+            subCategoryName: p.subCategoryName || '',
+            categoryId: p.categoryId,
+            subCategoryId: p.subCategoryId,
+            colors: [
+              { name: 'Pastel Pink', hex: '#f5ccd4' },
+              { name: 'Pale Yellow', hex: '#fbfbe3' },
+              { name: 'Soft White', hex: '#ffffff' }
+            ]
+          };
+
+          setProduct(mappedProduct);
+          setSelectedColor(mappedProduct.colors[0]?.name || '');
+          setQuantity(1);
+
+          // Set 3D model path dynamically from backend modelUrl
+          setModelPath(mappedProduct.modelUrl || "");
+
+          // Load reviews
+          const savedReviews = localStorage.getItem(`redshan360_reviews_${id}`);
+          if (savedReviews) {
+            setReviewsList(JSON.parse(savedReviews));
+          } else {
+            setReviewsList([
+              { id: 1, name: "Vindya S.", verified: true, date: "2 days ago", rating: 5, text: "Absolutely stunning lifelike detail! It coordinates perfectly in my living room." },
+              { id: 2, name: "Harshana K.", verified: true, date: "1 week ago", rating: 4, text: "Excellent craftsmanship. The color options make it very customizable." }
+            ]);
+          }
+
+          // Fetch related products based on same category/subcategory
+          let relatedEndpoint = '/api/products';
+          if (p.categoryId && p.subCategoryId) {
+            relatedEndpoint = `/api/products/category/${p.categoryId}/subcategory/${p.subCategoryId}`;
+          } else if (p.categoryId) {
+            relatedEndpoint = `/api/products/category/${p.categoryId}`;
+          }
+
           try {
-            const response = await api.get(`/api/wishlist/user/${userId}`);
-            const item = response.data.find((w) => w.productId === currentProduct.id);
-            if (item) {
-              setIsWishlisted(true);
-              setWishlistId(item.wishlistId);
+            const relatedRes = await api.get(relatedEndpoint);
+            const filtered = relatedRes.data
+              .filter((item) => item.productId !== p.productId)
+              .map((item) => {
+                const rPrice = Number(item.price) || 0;
+                return {
+                  id: item.productId,
+                  title: item.productName,
+                  price: `Rs ${rPrice.toFixed(2)}`,
+                  imageUrl: item.imageUrl || '/images/placeholder.png',
+                  categoryName: item.categoryName,
+                  subCategoryName: item.subCategoryName
+                };
+              });
+            setRelatedProducts(filtered.slice(0, 8));
+          } catch (relatedErr) {
+            console.error('Error fetching related products:', relatedErr);
+          }
+
+          // Wishlist check status
+          const checkWishlistStatus = async () => {
+            const savedUser = localStorage.getItem('user');
+            let user = null;
+            if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+              try {
+                user = JSON.parse(savedUser);
+              } catch (e) {
+                console.error('Failed to parse user from localStorage in ProductDetails checkWishlistStatus:', e);
+              }
+            }
+            const userId = user ? (user.id || user.userId) : null;
+
+            if (userId) {
+              try {
+                const response = await api.get(`/api/wishlist/user/${userId}`);
+                const item = response.data.find((w) => w.productId === p.productId);
+                if (item) {
+                  setIsWishlisted(true);
+                  setWishlistId(item.wishlistId);
+                } else {
+                  setIsWishlisted(false);
+                  setWishlistId(null);
+                }
+              } catch (error) {
+                console.error('Error checking wishlist status:', error);
+              }
             } else {
               setIsWishlisted(false);
               setWishlistId(null);
             }
-          } catch (error) {
-            console.error('Error checking wishlist status:', error);
-          }
+          };
+          checkWishlistStatus();
         } else {
-          setIsWishlisted(false);
-          setWishlistId(null);
+          setError('Product not found');
         }
-      };
-      checkWishlistStatus();
+      } catch (err) {
+        console.error('Error loading product details from backend:', err);
+        setError('Arrangement not found or server is unreachable.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    } else {
-      setProduct(null);
-    }
+    fetchProductDetails();
   }, [id]);
 
   // Wishlist Toggle
@@ -132,7 +198,6 @@ const ProductDetails = () => {
     }
 
     if (isWishlisted && wishlistId) {
-      // Remove from database
       try {
         await api.delete(`/api/wishlist/${wishlistId}`);
         setIsWishlisted(false);
@@ -142,7 +207,6 @@ const ProductDetails = () => {
         console.error('Error removing from wishlist:', error);
       }
     } else {
-      // Add to database
       try {
         const response = await api.post('/api/wishlist', {
           userId,
@@ -179,11 +243,9 @@ const ProductDetails = () => {
       setIsAddingToCart(false);
       setAddedToCart(true);
 
-      // Save item to cart in localStorage
       const savedCart = localStorage.getItem('redshan360_cart');
       const cartList = savedCart ? JSON.parse(savedCart) : [];
 
-      // Check if item already exists with the same selected color
       const existingItemIndex = cartList.findIndex(
         (item) => item.id === product.id && item.selectedColor === selectedColor
       );
@@ -194,9 +256,9 @@ const ProductDetails = () => {
         cartList.push({
           id: product.id,
           title: product.title,
-          price: product.price,
-          numericPrice: product.numericPrice,
-          image: product.image,
+          price: product.discountPrice || product.price,
+          numericPrice: product.discountNumericPrice || product.numericPrice,
+          image: product.imageUrl,
           selectedColor: selectedColor,
           quantity: quantity,
         });
@@ -205,7 +267,6 @@ const ProductDetails = () => {
       localStorage.setItem('redshan360_cart', JSON.stringify(cartList));
       window.dispatchEvent(new Event('cart-updated'));
 
-      // Reset success state after 2 seconds
       setTimeout(() => {
         setAddedToCart(false);
       }, 2000);
@@ -230,7 +291,6 @@ const ProductDetails = () => {
     setReviewsList(updatedReviews);
     localStorage.setItem(`redshan360_reviews_${id}`, JSON.stringify(updatedReviews));
 
-    // Reset review form
     setNewReviewName('');
     setNewReviewText('');
     setNewReviewRating(5);
@@ -259,14 +319,28 @@ const ProductDetails = () => {
     }
   };
 
-  // If product not found
-  if (!product) {
+  // Loading State View
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#fcf9f8] flex flex-col font-sans">
         <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
         <div className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-6">
+          <div className="w-8 h-8 border-4 border-[#8c5e5e]/30 border-t-[#8c5e5e] rounded-full animate-spin mb-3"></div>
+          <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Loading Arrangement...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Error State View
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-[#fcf9f8] flex flex-col font-sans">
+        <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
+        <div className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-6 text-center">
           <h2 className="text-3xl font-bold font-playfair text-[#1a1a1a] mb-4">Arrangement Not Found</h2>
-          <p className="text-sm text-[#1a1a1a]/60 mb-8">The botanical piece you are looking for does not exist or has been cataloged differently.</p>
+          <p className="text-sm text-[#1a1a1a]/60 mb-8">{error || 'The botanical piece you are looking for does not exist.'}</p>
           <Link to="/shop" className="px-6 py-3 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white rounded-sm text-xs font-semibold uppercase tracking-wider transition-all duration-300">
             Back to Collections
           </Link>
@@ -276,13 +350,10 @@ const ProductDetails = () => {
     );
   }
 
-  // Get complementary pieces (exclude current product)
-  const complementaryPieces = products.filter((p) => p.id !== product.id).slice(0, 5);
-
   // Calculate dynamic average rating and review count
   const averageRating = reviewsList.length > 0
     ? (reviewsList.reduce((acc, r) => acc + r.rating, 0) / reviewsList.length).toFixed(1)
-    : product.rating;
+    : 4.8;
   const totalReviewsCount = reviewsList.length;
 
   return (
@@ -303,65 +374,59 @@ const ProductDetails = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
 
-          {/* Left Column: Image Gallery */}
-          <div className="lg:col-span-7 flex flex-col md:flex-row gap-5">
-
-            {/* Gallery Thumbnails (Desktop side-align, Mobile bottom-align) */}
-            <div className="flex md:flex-col flex-row gap-3 order-2 md:order-1 overflow-x-auto md:overflow-x-visible">
-              {product.thumbnails.map((thumb, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveImage(thumb)}
-                  className={`w-16 h-20 md:w-20 md:h-24 flex-shrink-0 bg-[#f4f0ed] rounded-sm overflow-hidden border transition-all duration-300 ${activeImage === thumb ? 'border-[#8c5e5e] shadow-md scale-[1.02]' : 'border-transparent hover:border-[#8c5e5e]/40'
-                    }`}
-                  aria-label={`View gallery image ${index + 1}`}
-                >
-                  <img src={thumb} alt="" className="w-full h-full object-contain" />
-                </button>
-              ))}
-            </div>
-
+          {/* Left Column: Product Image */}
+          <div className="lg:col-span-7 flex flex-col gap-5">
             {/* Main Interactive Product Image */}
-            <div className="flex-1 order-1 md:order-2 flex flex-col items-center">
-              <div className="w-full aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative group shadow-sm border border-[#d9d2d0]/25">
-                <img
-                  src={activeImage}
-                  alt={product.title}
-                  className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.03] animate-fade-in"
+            <div className="w-full aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative group shadow-sm border border-[#d9d2d0]/25">
+              <img
+                src={product.imageUrl}
+                alt={product.productName}
+                className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.03] animate-fade-in"
+              />
+
+              {/* Favorite toggle overlay */}
+              <button
+                onClick={toggleWishlist}
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm shadow-md hover:bg-white w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105"
+                aria-label="Add to Wishlist"
+              >
+                <Heart
+                  size={16}
+                  className={`transition-colors duration-300 ${isWishlisted ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-[#1a1a1a]/75'
+                    }`}
                 />
-
-                {/* Favorite toggle overlay for mobile */}
-                <button
-                  onClick={toggleWishlist}
-                  className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm shadow-md hover:bg-white w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105"
-                  aria-label="Add to Wishlist"
-                >
-                  <Heart
-                    size={16}
-                    className={`transition-colors duration-300 ${isWishlisted ? 'fill-[#8c5e5e] text-[#8c5e5e]' : 'text-[#1a1a1a]/75'
-                      }`}
-                  />
-                </button>
-              </div>
-
-              {/* 360° View Trigger Button */}
-              {product.has360 && (
-                <button
-                  onClick={() => {
-                    setShow360Modal(true);
-                    setViewMode3D(true);
-                  }}
-                  className="flex items-center gap-2.5 mt-5 px-6 py-2.5 rounded-full border border-[#d9d2d0] hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-xs font-bold tracking-widest text-[#1a1a1a]/70 hover:text-[#8c5e5e] transition-all duration-300 shadow-sm"
-                >
-                  <RotateCw size={14} className="animate-spin-slow" />
-                  <span>360° VIEW</span>
-                </button>
-              )}
+              </button>
             </div>
+
+            {/* 3D Model Option */}
+            {product.modelUrl ? (
+              <button
+                onClick={() => {
+                  setShow360Modal(true);
+                  setViewMode3D(true);
+                }}
+                className="flex items-center justify-center gap-2.5 mx-auto mt-2 px-6 py-2.5 rounded-full border border-[#d9d2d0] hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-xs font-bold tracking-widest text-[#1a1a1a]/70 hover:text-[#8c5e5e] transition-all duration-300 shadow-sm"
+              >
+                <RotateCw size={14} className="animate-spin-slow" />
+                <span>INTERACTIVE 3D VIEW</span>
+              </button>
+            ) : (
+              <p className="text-center text-xs text-[#1a1a1a]/40 font-semibold mt-2">
+                3D model not available.
+              </p>
+            )}
           </div>
 
           {/* Right Column: Product Detail Panel */}
           <div className="lg:col-span-5 flex flex-col justify-start text-left">
+
+            {/* Category / Subcategory tags */}
+            <div className="flex flex-wrap items-center gap-2 mb-4 text-[10px] uppercase tracking-wider font-bold text-[#1a1a1a]/50">
+              <span className="bg-[#f4f0ed] px-2.5 py-1 rounded-sm border border-[#d9d2d0]/20">Category: <span className="text-[#8c5e5e]">{product.categoryName}</span></span>
+              {product.subCategoryName && (
+                <span className="bg-[#f4f0ed] px-2.5 py-1 rounded-sm border border-[#d9d2d0]/20">Subcategory: <span className="text-[#8c5e5e]">{product.subCategoryName}</span></span>
+              )}
+            </div>
 
             {/* Reviews Summary */}
             <div className="flex items-center gap-1.5 mb-3">
@@ -383,19 +448,40 @@ const ProductDetails = () => {
             </div>
 
             {/* Product Title */}
-            <h1 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] tracking-tight leading-tight mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] tracking-tight leading-tight mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
               {product.title}
             </h1>
 
-            {/* Collection tag */}
-            <p className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8c5e5e] mb-6">
-              {product.subtitle}
-            </p>
+            {/* Pricing Info */}
+            <div className="flex items-center gap-4 mb-4">
+              {product.discountPercentage > 0 ? (
+                <>
+                  <span className="text-2xl md:text-3xl font-semibold text-[#8c5e5e]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    {product.discountPrice}
+                  </span>
+                  <span className="text-sm line-through text-[#1a1a1a]/40">
+                    {product.price}
+                  </span>
+                  <span className="bg-red-500 text-white text-[9px] font-bold tracking-widest px-2.5 py-1 rounded-full uppercase shadow-sm">
+                    {product.discountPercentage}% OFF
+                  </span>
+                </>
+              ) : (
+                <span className="text-2xl md:text-3xl font-semibold text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  {product.price}
+                </span>
+              )}
+            </div>
 
-            {/* Price tag */}
-            <p className="text-2xl md:text-3xl font-semibold text-[#1a1a1a] mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
-              {product.price}
-            </p>
+            {/* Stock Quantity */}
+            <div className="mb-4 flex items-center gap-2 text-xs text-[#1a1a1a]/70">
+              <span className="font-bold">Availability:</span>
+              {product.stockQuantity > 0 ? (
+                <span className="text-emerald-600 font-semibold">{product.stockQuantity} in stock</span>
+              ) : (
+                <span className="text-red-500 font-semibold">Out of Stock</span>
+              )}
+            </div>
 
             {/* Divider */}
             <div className="border-t border-[#d9d2d0]/50 my-2"></div>
@@ -561,22 +647,22 @@ const ProductDetails = () => {
               <div key={review.id} className="p-8 rounded-sm bg-[#faf8f6] border border-[#d9d2d0]/20 flex flex-col justify-between shadow-sm relative animate-fade-in hover:shadow-md transition-shadow duration-300">
                 <div>
                   <div className="flex justify-between items-start gap-4 mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#f4f0ed] border border-[#d9d2d0]/30 flex items-center justify-center font-bold text-[#8c5e5e] text-xs">
-                        {review.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="font-semibold text-sm text-[#1a1a1a]">{review.name}</h4>
-                          {review.verified && (
-                            <span className="inline-flex items-center gap-0.5 bg-[#f5e6e8] text-[#8c5e5e] text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-sm">
-                              <ShieldCheck size={8} /> Verified Buyer
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[9px] text-[#1a1a1a]/40 font-semibold uppercase tracking-wider mt-0.5">{review.date}</p>
-                      </div>
-                    </div>
+                     <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 rounded-full bg-[#f4f0ed] border border-[#d9d2d0]/30 flex items-center justify-center font-bold text-[#8c5e5e] text-xs">
+                         {review.name.split(' ').map(n => n[0]).join('')}
+                       </div>
+                       <div>
+                         <div className="flex items-center gap-1.5">
+                           <h4 className="font-semibold text-sm text-[#1a1a1a]">{review.name}</h4>
+                           {review.verified && (
+                             <span className="inline-flex items-center gap-0.5 bg-[#f5e6e8] text-[#8c5e5e] text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-sm">
+                               <ShieldCheck size={8} /> Verified Buyer
+                             </span>
+                           )}
+                         </div>
+                         <p className="text-[9px] text-[#1a1a1a]/40 font-semibold uppercase tracking-wider mt-0.5">{review.date}</p>
+                       </div>
+                     </div>
 
                     <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
                       {[...Array(5)].map((_, i) => (
@@ -611,74 +697,82 @@ const ProductDetails = () => {
           )}
         </section>
 
-        {/* Related / Complementary Pieces Section */}
-        <section className="mt-32 pt-20 border-t border-[#d9d2d0]/50 relative">
-          <div className="flex justify-between items-end gap-6 mb-12">
-            <div className="text-left">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-3">Harmonious Pairings</p>
-              <h2 className="text-3xl font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Complementary Pieces
-              </h2>
+        {/* Related Products Section */}
+        {relatedProducts.length > 0 && (
+          <section className="mt-32 pt-20 border-t border-[#d9d2d0]/50 relative">
+            <div className="flex justify-between items-end gap-6 mb-12">
+              <div className="text-left">
+                <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-3">Harmonious Pairings</p>
+                <h2 className="text-3xl font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Related Products
+                </h2>
+              </div>
+
+              {/* Nav arrows */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => scrollCarousel('left')}
+                  className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
+                  aria-label="Scroll left"
+                >
+                  <ArrowLeft size={14} className="text-[#1a1a1a]/70" />
+                </button>
+                <button
+                  onClick={() => scrollCarousel('right')}
+                  className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
+                  aria-label="Scroll right"
+                >
+                  <ArrowRight size={14} className="text-[#1a1a1a]/70" />
+                </button>
+              </div>
             </div>
 
-            {/* Nav arrows */}
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => scrollCarousel('left')}
-                className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
-                aria-label="Scroll left"
-              >
-                <ArrowLeft size={14} className="text-[#1a1a1a]/70" />
-              </button>
-              <button
-                onClick={() => scrollCarousel('right')}
-                className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
-                aria-label="Scroll right"
-              >
-                <ArrowRight size={14} className="text-[#1a1a1a]/70" />
-              </button>
-            </div>
-          </div>
+            {/* Related Products Slider list */}
+            <div
+              ref={carouselRef}
+              className="flex gap-8 overflow-x-auto scroll-smooth no-scrollbar pb-6 text-left select-none"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {relatedProducts.map((piece) => (
+                <Link
+                  key={piece.id}
+                  to={`/product/${piece.id}`}
+                  className="min-w-[260px] md:min-w-[280px] max-w-[280px] flex-shrink-0 group flex flex-col font-sans hover:-translate-y-1 transition-transform duration-300"
+                >
+                  <div className="relative aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden mb-4 border border-[#d9d2d0]/15">
+                    <img
+                      src={piece.imageUrl}
+                      alt={piece.title}
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
+                  </div>
 
-          {/* Related Products Slider list */}
-          <div
-            ref={carouselRef}
-            className="flex gap-8 overflow-x-auto scroll-smooth no-scrollbar pb-6 text-left select-none"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {complementaryPieces.map((piece) => (
-              <Link
-                key={piece.id}
-                to={`/product/${piece.id}`}
-                className="min-w-[260px] md:min-w-[280px] max-w-[280px] flex-shrink-0 group flex flex-col font-sans hover:-translate-y-1 transition-transform duration-300"
-              >
-                <div className="relative aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden mb-4 border border-[#d9d2d0]/15">
-                  <img
-                    src={piece.image}
-                    alt={piece.title}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
-                </div>
-
-                <div className="px-1 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-bold text-[15px] text-[#1a1a1a] tracking-tight group-hover:text-[#8c5e5e] transition-colors leading-snug mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
-                      {piece.title}
-                    </h3>
-                    <p className="text-[10px] font-semibold tracking-wider text-[#1a1a1a]/45 uppercase mb-2">
-                      {piece.subtitle}
+                  <div className="px-1 flex-1 flex flex-col justify-between text-left">
+                    <div>
+                      <h3 className="font-bold text-[15px] text-[#1a1a1a] tracking-tight group-hover:text-[#8c5e5e] transition-colors leading-snug mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+                        {piece.title}
+                      </h3>
+                      <div className="flex items-center gap-1.5 text-[9px] font-semibold tracking-wider text-[#1a1a1a]/45 uppercase mb-2">
+                        <span>{piece.categoryName}</span>
+                        {piece.subCategoryName && (
+                          <>
+                            <span>&bull;</span>
+                            <span>{piece.subCategoryName}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm font-bold text-[#8c5e5e] mt-auto">
+                      {piece.price}
                     </p>
                   </div>
-                  <p className="text-sm font-bold text-[#8c5e5e] mt-auto">
-                    {piece.price}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
       </div>
 
