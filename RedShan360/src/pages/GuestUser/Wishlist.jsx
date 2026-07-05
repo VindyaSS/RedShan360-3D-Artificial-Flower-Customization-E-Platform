@@ -4,7 +4,7 @@ import { Heart, ShoppingBag, Eye, Trash2, ArrowRight } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { products } from '../../data/products';
-import api from '../../services/api';
+import api, { cartApi } from '../../services/api';
 
 const Wishlist = () => {
   const navigate = useNavigate();
@@ -74,36 +74,19 @@ const Wishlist = () => {
   };
 
   // Handle Add to Cart
-  const handleAddToCart = (product) => {
+  const handleAddToCart = async (product) => {
     // Determine default color (first color in array or Default)
     const defaultColor = product.colors && product.colors.length > 0 ? product.colors[0].name : 'Default';
 
-    // Retrieve active cart items
-    const savedCart = localStorage.getItem('redshan360_cart');
-    const cartList = savedCart ? JSON.parse(savedCart) : [];
-
-    const existingIndex = cartList.findIndex(
-      (item) => item.id === product.id && item.selectedColor === defaultColor
-    );
-
-    if (existingIndex > -1) {
-      cartList[existingIndex].quantity += 1;
-    } else {
-      cartList.push({
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        numericPrice: product.numericPrice,
-        image: product.image,
-        selectedColor: defaultColor,
-        quantity: 1,
-      });
+    try {
+      await cartApi.addToCart(product.id, 1, defaultColor);
+      // Dispatch events to refresh navbar count and open the drawer
+      window.dispatchEvent(new Event('cart-updated'));
+      window.dispatchEvent(new Event('open-cart'));
+    } catch (error) {
+      console.error('Failed to add product to cart:', error);
+      alert('Failed to add product to cart.');
     }
-
-    localStorage.setItem('redshan360_cart', JSON.stringify(cartList));
-    // Dispatch events to refresh navbar count and open the drawer
-    window.dispatchEvent(new Event('cart-updated'));
-    window.dispatchEvent(new Event('open-cart'));
   };
 
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];

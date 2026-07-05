@@ -7,7 +7,7 @@ import SearchModal from './SearchModal';
 import LoginModal from './LoginModal';
 import LoginRequiredModal from './LoginRequiredModal';
 import api from '../../../services/api';
-
+import { cartApi } from '../../../services/api';
 const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWishlistClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,24 +30,50 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
   // Synchronize cart and wishlist counts
   const updateCounts = async () => {
-    // Cart Count
-    const savedCart = localStorage.getItem('redshan360_cart');
-    if (savedCart) {
-      const cartList = JSON.parse(savedCart);
-      // Filter out cart items that do not correspond to active products
-      const validItems = cartList.filter((item) => item.isCustom || products.some((p) => p.id === item.id));
-      const count = validItems.reduce((acc, item) => acc + item.quantity, 0);
-      setCartCount(count);
-    } else {
-      setCartCount(0);
-    }
+    let standardCount = 0;
 
-    // Wishlist Count from database if logged in
+    // Read standard products from backend if user is logged in
     const savedUser = localStorage.getItem('user');
-    let user = null;
+    let currentUser = null;
     if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
       try {
-        user = JSON.parse(savedUser);
+        currentUser = JSON.parse(savedUser);
+      } catch (e) {
+        console.error('Failed to parse user in Navbar:', e);
+      }
+    }
+
+    if (currentUser) {
+      try {
+        const response = await cartApi.getCart();
+        standardCount = response.data.totalItems || 0;
+      } catch (error) {
+        console.error('Error fetching standard cart count:', error);
+      }
+    }
+
+    // Read custom bouquets from localStorage
+    let customCount = 0;
+    const savedCart = localStorage.getItem('redshan360_cart');
+    if (savedCart) {
+      try {
+        const cartList = JSON.parse(savedCart);
+        // Only keep custom bouquet items in local storage
+        const customItems = cartList.filter((item) => item.isCustom);
+        customCount = customItems.reduce((acc, item) => acc + item.quantity, 0);
+      } catch (e) {
+        console.error('Error parsing cart from localStorage:', e);
+      }
+    }
+
+    setCartCount(standardCount + customCount);
+
+    // Wishlist Count from database if logged in
+    const savedUserWL = localStorage.getItem('user');
+    let user = null;
+    if (savedUserWL && savedUserWL !== 'undefined' && savedUserWL !== 'null') {
+      try {
+        user = JSON.parse(savedUserWL);
       } catch (e) {
         console.error('Failed to parse user in Navbar:', e);
       }

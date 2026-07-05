@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Star, Heart } from 'lucide-react';
 import { products } from '../../data/products';
-import api from '../../services/api';
+import api, { cartApi } from '../../services/api';
 
 const CategoryPage = () => {
   const navigate = useNavigate();
@@ -235,7 +235,7 @@ const CategoryPage = () => {
 
   const displayProducts = getDisplayProducts();
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = async (product) => {
     const savedUser = localStorage.getItem('user');
     let currentUser = null;
     if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
@@ -249,34 +249,16 @@ const CategoryPage = () => {
       window.dispatchEvent(new Event('show-login-required'));
       return;
     }
-    const savedCart = localStorage.getItem('redshan360_cart');
-    const cartList = savedCart ? JSON.parse(savedCart) : [];
 
-    // Use default color of product if available
     const defaultColor = product.colors?.[0]?.name || 'Default';
-
-    // Check if item already exists with the same color
-    const existingItemIndex = cartList.findIndex(
-      (item) => item.id === product.id && item.selectedColor === defaultColor
-    );
-
-    if (existingItemIndex > -1) {
-      cartList[existingItemIndex].quantity += 1;
-    } else {
-      cartList.push({
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        numericPrice: product.numericPrice,
-        image: product.image,
-        selectedColor: defaultColor,
-        quantity: 1,
-      });
+    try {
+      await cartApi.addToCart(product.id, 1, defaultColor);
+      window.dispatchEvent(new Event('cart-updated'));
+      window.dispatchEvent(new Event('open-cart'));
+    } catch (error) {
+      console.error('Failed to add product to cart:', error);
+      alert('Failed to add product to cart.');
     }
-
-    localStorage.setItem('redshan360_cart', JSON.stringify(cartList));
-    window.dispatchEvent(new Event('cart-updated'));
-    window.dispatchEvent(new Event('open-cart'));
   };
 
   const getSubcategories = (categorySlug) => {
