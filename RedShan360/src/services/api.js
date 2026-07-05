@@ -40,3 +40,19 @@ api.interceptors.response.use(
 
 export default api;
 
+export const cartApi = {
+  getCart: () => api.get('/api/cart'),
+  addToCart: (productId, quantity, selectedColor) =>
+    api.post('/api/cart', {
+      productId: Number(productId),
+      quantity: Number(quantity),
+      selectedColor: selectedColor || 'Default'
+    }),
+  updateQuantity: (itemId, quantity) =>
+    api.put(`/api/cart/item/${itemId}`, {
+      quantity: Number(quantity)
+    }),
+  removeFromCart: (itemId) =>
+    api.delete(`/api/cart/item/${itemId}`)
+};
+

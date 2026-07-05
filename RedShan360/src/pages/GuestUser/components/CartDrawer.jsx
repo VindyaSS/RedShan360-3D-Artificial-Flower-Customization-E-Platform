@@ -2,23 +2,57 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { products } from '../../../data/products';
 import { triggerPayHereCheckout } from '../../../utils/payhere';
-import api from '../../../services/api';
+import api, { cartApi } from '../../../services/api';
 
 const CartDrawer = ({ isOpen, onClose }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const drawerRef = useRef(null);
 
-  // Load cart items from local storage and filter out invalid/stale products
-  const loadCart = () => {
+  // Load cart items from API + local storage
+  const loadCart = async () => {
+    let standardItems = [];
+    
+    // 1. Fetch standard products if logged in
+    const savedUser = localStorage.getItem('user');
+    let currentUser = null;
+    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+      try {
+        currentUser = JSON.parse(savedUser);
+      } catch (e) {
+        console.error('Failed to parse user in CartDrawer:', e);
+      }
+    }
+    
+    if (currentUser) {
+      try {
+        const response = await cartApi.getCart();
+        const items = response.data.items || [];
+        standardItems = items.map((item) => {
+          const productDetail = products.find((p) => p.id === item.productId);
+          return {
+            ...item,
+            image: productDetail ? productDetail.image : '/images/peonies_vase.png'
+          };
+        });
+      } catch (error) {
+        console.error('Error fetching standard cart items:', error);
+      }
+    }
+
+    // 2. Fetch custom bouquets from local storage
+    let customItems = [];
     const savedCart = localStorage.getItem('redshan360_cart');
     if (savedCart) {
-      const parsedCart = JSON.parse(savedCart);
-      const filteredCart = parsedCart.filter((item) => item.isCustom || products.some((p) => p.id === item.id));
-      setCartItems(filteredCart);
-    } else {
-      setCartItems([]);
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        customItems = parsedCart.filter((item) => item.isCustom);
+      } catch (e) {
+        console.error('Error parsing cart from localStorage:', e);
+      }
     }
+
+    setCartItems([...standardItems, ...customItems]);
   };
 
   useEffect(() => {
@@ -55,29 +89,59 @@ const CartDrawer = ({ isOpen, onClose }) => {
   }, [isOpen, onClose]);
 
   // Handle quantity changes
-  const updateQuantity = (id, selectedColor, delta) => {
-    const updatedCart = cartItems.map((item) => {
-      if (item.id === id && item.selectedColor === selectedColor) {
-        const newQty = item.quantity + delta;
-        return { ...item, quantity: Math.max(1, newQty) };
-      }
-      return item;
-    });
+  const updateQuantity = async (id, selectedColor, delta) => {
+    const item = cartItems.find((i) => i.id === id && i.selectedColor === selectedColor);
+    if (!item) return;
 
-    setCartItems(updatedCart);
-    localStorage.setItem('redshan360_cart', JSON.stringify(updatedCart));
-    window.dispatchEvent(new Event('cart-updated'));
+    const newQty = item.quantity + delta;
+    if (newQty < 1) return;
+
+    if (item.isCustom) {
+      const updatedCart = cartItems.map((i) => {
+        if (i.id === id && i.selectedColor === selectedColor) {
+          return { ...i, quantity: newQty };
+        }
+        return i;
+      });
+      setCartItems(updatedCart);
+      const customOnlyItems = updatedCart.filter((item) => item.isCustom);
+      localStorage.setItem('redshan360_cart', JSON.stringify(customOnlyItems));
+      window.dispatchEvent(new Event('cart-updated'));
+    } else {
+      try {
+        await cartApi.updateQuantity(item.id, newQty);
+        await loadCart();
+        window.dispatchEvent(new Event('cart-updated'));
+      } catch (error) {
+        console.error('Failed to update quantity:', error);
+        alert('Failed to update item quantity.');
+      }
+    }
   };
 
   // Remove item from cart
-  const removeItem = (id, selectedColor) => {
-    const updatedCart = cartItems.filter(
-      (item) => !(item.id === id && item.selectedColor === selectedColor)
-    );
+  const removeItem = async (id, selectedColor) => {
+    const item = cartItems.find((i) => i.id === id && i.selectedColor === selectedColor);
+    if (!item) return;
 
-    setCartItems(updatedCart);
-    localStorage.setItem('redshan360_cart', JSON.stringify(updatedCart));
-    window.dispatchEvent(new Event('cart-updated'));
+    if (item.isCustom) {
+      const updatedCart = cartItems.filter(
+        (i) => !(i.id === id && i.selectedColor === selectedColor)
+      );
+      setCartItems(updatedCart);
+      const customOnlyItems = updatedCart.filter((item) => item.isCustom);
+      localStorage.setItem('redshan360_cart', JSON.stringify(customOnlyItems));
+      window.dispatchEvent(new Event('cart-updated'));
+    } else {
+      try {
+        await cartApi.removeFromCart(item.id);
+        await loadCart();
+        window.dispatchEvent(new Event('cart-updated'));
+      } catch (error) {
+        console.error('Failed to remove item:', error);
+        alert('Failed to remove item from cart.');
+      }
+    }
   };
 
   // Calculate totals
@@ -95,7 +159,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
       // Initialize payment session on the backend
       const response = await api.post('/api/checkout', {
         items: cartItems.map((item) => ({
-          id: typeof item.id === 'string' && item.id.startsWith('custom') ? null : Number(item.id),
+          id: item.isCustom ? null : Number(item.productId),
           title: item.title,
           quantity: item.quantity,
           isCustom: item.isCustom || false,
@@ -121,7 +185,20 @@ const CartDrawer = ({ isOpen, onClose }) => {
               const statusResponse = await api.get(`/api/checkout/status/${completedOrderId}`);
               if (statusResponse.data.status === "SUCCESS") {
                 alert(`Payment successful! Order ID: ${completedOrderId}`);
+                
+                // Clear custom items from local storage
                 localStorage.removeItem('redshan360_cart');
+                
+                // Remove standard items from database in a loop
+                const standardItems = cartItems.filter((i) => !i.isCustom);
+                for (const item of standardItems) {
+                  try {
+                    await cartApi.removeFromCart(item.id);
+                  } catch (e) {
+                    console.error('Failed to clear item from backend cart:', item.id, e);
+                  }
+                }
+
                 setCartItems([]);
                 window.dispatchEvent(new Event('cart-updated'));
                 onClose();

@@ -5,7 +5,7 @@ import Navbar from './components/Navbar';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import Product3DViewer from '../../components/Product3DViewer';
-import api from '../../services/api';
+import api, { cartApi } from '../../services/api';
 
 const ProductDetails = () => {
   const navigate = useNavigate();
@@ -222,7 +222,7 @@ const ProductDetails = () => {
   };
 
   // Add to Cart
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
     const savedUser = localStorage.getItem('user');
     let currentUser = null;
@@ -239,38 +239,20 @@ const ProductDetails = () => {
     }
     setIsAddingToCart(true);
 
-    setTimeout(() => {
+    try {
+      await cartApi.addToCart(product.id, quantity, selectedColor || 'Default');
       setIsAddingToCart(false);
       setAddedToCart(true);
-
-      const savedCart = localStorage.getItem('redshan360_cart');
-      const cartList = savedCart ? JSON.parse(savedCart) : [];
-
-      const existingItemIndex = cartList.findIndex(
-        (item) => item.id === product.id && item.selectedColor === selectedColor
-      );
-
-      if (existingItemIndex > -1) {
-        cartList[existingItemIndex].quantity += quantity;
-      } else {
-        cartList.push({
-          id: product.id,
-          title: product.title,
-          price: product.discountPrice || product.price,
-          numericPrice: product.discountNumericPrice || product.numericPrice,
-          image: product.imageUrl,
-          selectedColor: selectedColor,
-          quantity: quantity,
-        });
-      }
-
-      localStorage.setItem('redshan360_cart', JSON.stringify(cartList));
       window.dispatchEvent(new Event('cart-updated'));
 
       setTimeout(() => {
         setAddedToCart(false);
       }, 2000);
-    }, 800);
+    } catch (error) {
+      setIsAddingToCart(false);
+      console.error('Failed to add product to cart:', error);
+      alert('Failed to add product to cart.');
+    }
   };
 
   // Review submission
