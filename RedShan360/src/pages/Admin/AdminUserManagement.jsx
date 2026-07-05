@@ -179,61 +179,58 @@ function AdminUserManagement() {
     };
 
     if (modalMode === "add") {
-      if (formData.role === "Manager") {
-        // Make the HTTP request to the backend registration API
-        fetch("http://localhost:8080/api/admin/users/register-manager", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: formData.fullName,
-            email: formData.email,
-            password: formData.password,
-            phone: formData.phone
-          })
+      const isManager = formData.role === "Manager";
+      const apiUrl = isManager 
+        ? "http://localhost:8080/api/admin/users/register-manager"
+        : "http://localhost:8080/api/admin/users/register-employee";
+      fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone
         })
-        .then(async (response) => {
-          const data = await response.json();
-          if (!response.ok) {
-            // Throw error with the backend message (e.g. EmailAlreadyExistsException message)
-            throw new Error(data.message || "Failed to register manager");
-          }
-          return data;
-        })
-        .then((data) => {
-          // Construct the local frontend state object using the saved data from backend
-          const savedManagerObj = {
-            id: data.id, // User ID returned from backend
-            name: data.name,
-            type: "Manager",
-            contact: `${data.email} | ${data.phone || ""}`,
-            status: "Active",
-            employeeId: formData.employeeId,
-            department: formData.department,
-            gender: formData.gender,
-            dob: formData.dob,
-            joiningDate: formData.joiningDate,
-            addressLine: formData.addressLine,
-            city: formData.city,
-            province: formData.province,
-            permissions: formData.permissions,
-            username: data.email
-          };
-
-          setManagers((prev) => [...prev, savedManagerObj]);
-          alert("Manager registered successfully on the backend database!");
-          setIsModalOpen(false); // Close the modal
-        })
-        .catch((error) => {
-          alert("Registration Error: " + error.message);
-        });
-      } else {
-        // Employee add logic remains local (or edit similarly if backend is ready for employee)
-        setEmployees((prev) => [...prev, newUserObj]);
-        alert("Employee added successfully!");
+      })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || `Failed to register ${formData.role.toLowerCase()}`);
+        }
+        return data;
+      })
+      .then((data) => {
+        const savedUserObj = {
+          id: data.id,
+          name: data.name,
+          type: isManager ? "Manager" : "Executive",
+          contact: `${data.email} | ${data.phone || ""}`,
+          status: "Active",
+          employeeId: formData.employeeId,
+          department: formData.department,
+          gender: formData.gender,
+          dob: formData.dob,
+          joiningDate: formData.joiningDate,
+          addressLine: formData.addressLine,
+          city: formData.city,
+          province: formData.province,
+          permissions: isManager ? formData.permissions : [],
+          username: data.email
+        };
+        if (isManager) {
+          setManagers((prev) => [...prev, savedUserObj]);
+        } else {
+          setEmployees((prev) => [...prev, savedUserObj]);
+        }
+        alert(`${formData.role} registered successfully on backend!`);
         setIsModalOpen(false);
-      }
+      })
+      .catch((error) => {
+        alert("Registration Error: " + error.message);
+      });
     } else {
       // Edit mode
       if (formData.role === "Manager") {
