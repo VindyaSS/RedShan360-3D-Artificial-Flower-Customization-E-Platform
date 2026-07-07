@@ -179,12 +179,58 @@ function AdminUserManagement() {
     };
 
     if (modalMode === "add") {
-      if (formData.role === "Manager") {
-        setManagers((prev) => [...prev, newUserObj]);
-      } else {
-        setEmployees((prev) => [...prev, newUserObj]);
-      }
-      alert("Manager/Employee added successfully!");
+      const isManager = formData.role === "Manager";
+      const apiUrl = isManager 
+        ? "http://localhost:8080/api/admin/users/register-manager"
+        : "http://localhost:8080/api/admin/users/register-employee";
+      fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone
+        })
+      })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || `Failed to register ${formData.role.toLowerCase()}`);
+        }
+        return data;
+      })
+      .then((data) => {
+        const savedUserObj = {
+          id: data.id,
+          name: data.name,
+          type: isManager ? "Manager" : "Executive",
+          contact: `${data.email} | ${data.phone || ""}`,
+          status: "Active",
+          employeeId: formData.employeeId,
+          department: formData.department,
+          gender: formData.gender,
+          dob: formData.dob,
+          joiningDate: formData.joiningDate,
+          addressLine: formData.addressLine,
+          city: formData.city,
+          province: formData.province,
+          permissions: isManager ? formData.permissions : [],
+          username: data.email
+        };
+        if (isManager) {
+          setManagers((prev) => [...prev, savedUserObj]);
+        } else {
+          setEmployees((prev) => [...prev, savedUserObj]);
+        }
+        alert(`${formData.role} registered successfully on backend!`);
+        setIsModalOpen(false);
+      })
+      .catch((error) => {
+        alert("Registration Error: " + error.message);
+      });
     } else {
       // Edit mode
       if (formData.role === "Manager") {
@@ -203,9 +249,8 @@ function AdminUserManagement() {
         });
       }
       alert("Manager/Employee updated successfully!");
+      setIsModalOpen(false);
     }
-
-    setIsModalOpen(false);
   };
 
   // Row Action Handlers
