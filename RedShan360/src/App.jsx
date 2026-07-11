@@ -15,6 +15,7 @@ import ScrollToTop from './components/ScrollToTop';
 import CategoryPage from './pages/GuestUser/CategoryPage';
 import AboutPage from './pages/GuestUser/AboutPage';
 import ContactPage from './pages/GuestUser/ContactPage';
+import LoyaltyPoints from './pages/GuestUser/LoyaltyPoints';
 import AdminUserManagement from "./pages/Admin/AdminUserManagement";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminOrderManagement from "./pages/Admin/AdminOrderManagement";
@@ -107,6 +108,7 @@ function App() {
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/loyalty-points" element={<ProtectedRoute><LoyaltyPoints /></ProtectedRoute>} />
 
           <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
           <Route path="/adminDashboard" element={<AdminDashboard />} />
