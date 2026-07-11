@@ -245,10 +245,11 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   };
 
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 h-[80px] transition-all duration-300 ${isScrolled ? 'bg-[#faf8f6]/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
-        }`}
-    >
+    <>
+      <nav
+        className={`fixed top-0 w-full z-50 h-[80px] transition-all duration-300 ${isScrolled ? 'bg-[#faf8f6]/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
+          }`}
+      >
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
         <div className="flex justify-between items-center h-[80px] gap-4">
           <Link to="/guestUserDashboard" className="flex-shrink-0">
@@ -371,34 +372,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
               </button>
 
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-xs font-semibold uppercase tracking-wider text-[#1a1a1a]/85 font-sans">
-                  <button
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      alert('My Profile feature is coming soon!');
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
-                  >
-                    My Profile
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      alert('My Orders feature is coming soon!');
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
-                  >
-                    My Orders
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      navigate('/wishlist');
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
-                  >
-                    Wishlist
-                  </button>
+                <div className="absolute right-0 mt-2 w-48 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-xs font-semibold uppercase tracking-wider text-[#1a1a1a]/85 font-sans" style={{background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)'}}>
                   <button
                     onClick={() => {
                       setIsProfileOpen(false);
@@ -575,37 +549,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 </button>
 
                 {isMobileProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-[#fcf9f8] border border-[#d9d2d0]/50 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-[10px] font-bold uppercase tracking-wider text-[#1a1a1a]/80">
-                    <button
-                      onClick={() => {
-                        setIsMobileProfileOpen(false);
-                        setMobileMenuOpen(false);
-                        alert('My Profile feature is coming soon!');
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
-                    >
-                      My Profile
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsMobileProfileOpen(false);
-                        setMobileMenuOpen(false);
-                        alert('My Orders feature is coming soon!');
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
-                    >
-                      My Orders
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsMobileProfileOpen(false);
-                        setMobileMenuOpen(false);
-                        navigate('/wishlist');
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
-                    >
-                      Wishlist
-                    </button>
+                  <div className="absolute right-0 mt-2 w-44 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-[10px] font-bold uppercase tracking-wider text-[#1a1a1a]/80" style={{background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)'}}>
                     <button
                       onClick={() => {
                         setIsMobileProfileOpen(false);
@@ -642,7 +586,10 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
       {/* Login Required Modal Overlay */}
       <LoginRequiredModal isOpen={isLoginRequiredOpen} onClose={() => setIsLoginRequiredOpen(false)} />
-    </nav>
+      </nav>
+      {/* Reusable structural spacer to ensure page content starts below the fixed navbar */}
+      <div className="h-[80px] w-full shrink-0" />
+    </>
   );
 };
 

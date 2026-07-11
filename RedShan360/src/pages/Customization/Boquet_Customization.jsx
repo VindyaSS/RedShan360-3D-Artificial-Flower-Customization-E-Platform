@@ -4,6 +4,8 @@ import { products } from '../../data/products';
 import { arrangeBouquet, relaxOverlaps } from '../../components/bouquet/LayoutEngine';
 import BouquetCanvas from '../../components/bouquet/BouquetCanvas';
 import CartDrawer from '../GuestUser/components/CartDrawer';
+import Navbar from '../GuestUser/components/Navbar';
+
 import {
   Search,
   Heart,
@@ -113,10 +115,15 @@ export default function BoquetCustomization() {
   const [isWishlistActive, setIsWishlistActive] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  const headerRef = useRef(null);
-  const profileDropdownRef = useRef(null);
+  const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Synchronize cart count from localStorage and listen to updates
   useEffect(() => {
@@ -166,27 +173,6 @@ export default function BoquetCustomization() {
       window.removeEventListener('wishlist-updated', updateWishlistCount);
     };
   }, []);
-
-  // Click outside listener for profile and mobile menu
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-        setIsProfileOpen(false);
-      }
-      if (headerRef.current && !headerRef.current.contains(event.target)) {
-        setMobileMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setIsProfileOpen(false);
-    setMobileMenuOpen(false);
-    navigate('/login');
-  };
   const [activeCategory, setActiveCategory] = useState({
     'premium-blooms': true,
     'bouquet-styles': false,
@@ -434,7 +420,7 @@ export default function BoquetCustomization() {
     setSelectedStems(prev => {
       const wrappingIds = ['kraft-paper', 'luxury-mesh'];
       const filtered = prev.filter(item => !wrappingIds.includes(item.stemId));
-      
+
       const isAlreadySelected = prev.some(item => item.stemId === id);
       if (isAlreadySelected) {
         return filtered;
@@ -564,159 +550,12 @@ export default function BoquetCustomization() {
         </div>
       )}
 
-      {/* HEADER */}
-      <header ref={headerRef} className="bg-[#fdfbf9] h-[80px] border-b border-[#f0ebe4] sticky top-0 z-40 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 h-full flex items-center justify-between">
-          <div className="flex-shrink-0">
-            <a href="/guestUserDashboard" className="text-[26px] md:text-[28px] font-bold tracking-tight text-[#563c37]" style={{ fontFamily: 'Playfair Display, serif' }}>
-              RedShan<span className="text-[#8c5e5e] italic font-normal">360</span>
-            </a>
-          </div>
-
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="/guestUserDashboard" className="text-xs uppercase tracking-widest font-semibold text-[#563c37]/75 hover:text-[#563c37] transition-colors duration-300">Home</a>
-            <a href="/shop" className="text-xs uppercase tracking-widest font-semibold text-[#563c37]/75 hover:text-[#563c37] transition-colors duration-300">Shop</a>
-            <a href="/customization" className="text-xs uppercase tracking-widest font-bold text-[#563c37] transition-colors duration-300 relative after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:w-full after:h-[2px] after:bg-[#563c37]">Customization</a>
-            <a href="/about" className="text-xs uppercase tracking-widest font-semibold text-[#563c37]/75 hover:text-[#563c37] transition-colors duration-300">About</a>
-            <a href="/contact" className="text-xs uppercase tracking-widest font-semibold text-[#563c37]/75 hover:text-[#563c37] transition-colors duration-300">Contact</a>
-          </nav>
-
-          {/* Desktop Icons */}
-          <div className="hidden md:flex items-center gap-5">
-            <button className="p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300" aria-label="Search items">
-              <Search size={20} />
-            </button>
-
-            {/* Wishlist Button */}
-            <a
-              href="/shop?wishlist=true"
-              className="relative p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300"
-              aria-label="Wishlist"
-            >
-              <Heart size={20} />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#563c37] text-[9px] text-white font-bold flex items-center justify-center px-1">
-                  {wishlistCount}
-                </span>
-              )}
-            </a>
-
-            {/* Cart Button */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300"
-              aria-label="Cart"
-            >
-              <ShoppingCart size={20} />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#563c37] text-[9px] text-white font-bold flex items-center justify-center px-1">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-
-            {/* Profile Button with Dropdown */}
-            <div ref={profileDropdownRef} className="relative">
-              <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="p-2 text-[#563c37] hover:text-[#8c5e5e] transition-colors duration-300"
-                aria-label="Profile"
-              >
-                <User size={20} />
-              </button>
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#fdfbf9] border border-[#ece7e2] rounded-lg shadow-lg z-50 py-1 text-left animate-fadeIn">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2.5 text-xs text-[#563c37] hover:bg-[#f5efeb] transition-colors duration-200 font-semibold uppercase tracking-wider"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Hamburger Menu Trigger */}
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-[#563c37] transition-colors duration-300" aria-label="Toggle menu">
-              {mobileMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Dropdown */}
-        {mobileMenuOpen && (
-          <div className="md:hidden pb-6 pt-2 space-y-4 bg-[#fdfbf9] border-t border-[#f0ebe4] px-6 text-left absolute top-[80px] left-0 w-full shadow-lg z-50 animate-fadeIn">
-            <a href="/guestUserDashboard" onClick={() => setMobileMenuOpen(false)} className="block text-xs uppercase tracking-widest font-semibold text-[#563c37] hover:text-[#8c5e5e] py-1">Home</a>
-            <a href="/shop" onClick={() => setMobileMenuOpen(false)} className="block text-xs uppercase tracking-widest font-semibold text-[#563c37] hover:text-[#8c5e5e] py-1">Shop</a>
-            <a href="/customization" onClick={() => setMobileMenuOpen(false)} className="block text-xs uppercase tracking-widest font-bold text-[#8c5e5e] py-1">Customization</a>
-            <a href="/about" onClick={() => setMobileMenuOpen(false)} className="block text-xs uppercase tracking-widest font-semibold text-[#563c37] hover:text-[#8c5e5e] py-1">About</a>
-            <a href="/contact" onClick={() => setMobileMenuOpen(false)} className="block text-xs uppercase tracking-widest font-semibold text-[#563c37] hover:text-[#8c5e5e] py-1">Contact</a>
-
-            <div className="flex items-center gap-4 pt-4 border-t border-[#f0ebe4]">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  navigate('/shop');
-                }}
-                className="p-2 rounded-full bg-[#f5efeb] text-[#563c37]"
-                aria-label="Search"
-              >
-                <Search size={18} />
-              </button>
-
-              <a
-                href="/shop?wishlist=true"
-                onClick={() => setMobileMenuOpen(false)}
-                className="relative p-2 rounded-full bg-[#f5efeb] text-[#563c37]"
-                aria-label="Wishlist"
-              >
-                <Heart size={18} />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[#563c37] text-[9px] text-white font-bold flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
-              </a>
-
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setIsCartOpen(true);
-                }}
-                className="relative p-2 rounded-full bg-[#f5efeb] text-[#563c37]"
-                aria-label="Cart"
-              >
-                <ShoppingCart size={18} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[#563c37] text-[9px] text-white font-bold flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="p-2 rounded-full bg-[#f5efeb] text-[#563c37]"
-                aria-label="Logout"
-                title="Logout"
-              >
-                <User size={18} />
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
+      <Navbar 
+        isScrolled={isScrolled} 
+        mobileMenuOpen={mobileMenuOpen} 
+        setMobileMenuOpen={setMobileMenuOpen} 
+        navItems={navItems} 
+      />
 
       {/* MAIN CONTAINER */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 md:px-12 lg:px-16 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -781,15 +620,14 @@ export default function BoquetCustomization() {
                                       <button
                                         key={stem.id}
                                         onClick={() => handleSelectWrapping(stem.id)}
-                                        className={`flex flex-col text-left p-2 rounded-xl transition-all duration-300 ${
-                                          isSelected 
-                                            ? 'bg-[#fdfbf9]/90 border-2 border-[#8c5e5e] shadow-sm font-semibold' 
-                                            : 'bg-[#fdfbf9]/40 border border-[#f5efeb] hover:border-[#8c5e5e]/20'
-                                        }`}
+                                        className={`flex flex-col text-left p-2 rounded-xl transition-all duration-300 ${isSelected
+                                          ? 'bg-[#fdfbf9]/90 border-2 border-[#8c5e5e] shadow-sm font-semibold'
+                                          : 'bg-[#fdfbf9]/40 border border-[#f5efeb] hover:border-[#8c5e5e]/20'
+                                          }`}
                                       >
-                                        <img 
-                                          src={stem.image} 
-                                          alt={stem.name} 
+                                        <img
+                                          src={stem.image}
+                                          alt={stem.name}
                                           className="w-full h-16 rounded-lg object-cover bg-gray-100 mb-1.5 border border-[#ece7e2]"
                                         />
                                         <span className="text-[10px] font-bold text-[#563c37] truncate w-full">{stem.name}</span>
@@ -809,9 +647,9 @@ export default function BoquetCustomization() {
 
                               return (
                                 <div key={stem.id} className="flex items-center gap-3 bg-[#fdfbf9]/70 p-2 rounded-xl border border-[#f5efeb] hover:border-[#8c5e5e]/25 transition-all">
-                                  <img 
-                                    src={stem.image} 
-                                    alt={stem.name} 
+                                  <img
+                                    src={stem.image}
+                                    alt={stem.name}
                                     className="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm border border-[#ece7e2]"
                                   />
                                   <div className="flex-grow min-w-0">
@@ -824,7 +662,7 @@ export default function BoquetCustomization() {
                                   <div className="flex items-center gap-2">
                                     {quantitySelected > 0 && (
                                       <>
-                                        <button 
+                                        <button
                                           onClick={() => handleRemoveStem(stem.id)}
                                           className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
                                           aria-label="Decrease quantity"
@@ -834,7 +672,7 @@ export default function BoquetCustomization() {
                                         <span className="text-xs font-bold text-[#563c37] w-4 text-center">{quantitySelected}</span>
                                       </>
                                     )}
-                                    <button 
+                                    <button
                                       onClick={() => handleAddStem(stem.id)}
                                       className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
                                       aria-label="Add stem"
@@ -920,8 +758,8 @@ export default function BoquetCustomization() {
                   });
                 }}
                 className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isSwapMode
-                    ? 'bg-[#563c37] text-white shadow-md'
-                    : 'bg-transparent text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9]'
+                  ? 'bg-[#563c37] text-white shadow-md'
+                  : 'bg-transparent text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9]'
                   }`}
                 title="Swap flower positions"
                 aria-label="Swap flower positions"
