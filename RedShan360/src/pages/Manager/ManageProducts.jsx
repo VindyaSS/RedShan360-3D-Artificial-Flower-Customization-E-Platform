@@ -13,6 +13,7 @@ import BirthdayIFlowerCard from '../../components/managerComponent/BirthdayIFlow
 import BirthdayHeaddressCard from '../../components/managerComponent/BirthdayHeaddressCard';
 import ConvocationBFlowerCard from '../../components/managerComponent/ConvocationBFlowerCard';
 import ConvocationIFlowerCard from '../../components/managerComponent/ConvocationIFlowerCard';
+import api from '../../services/api';
 
 // Import Images for Anniversary Boquets
 import A1 from '../../assets/A1.jpg';
@@ -82,77 +83,93 @@ export default function MmanageProducts() {
     // Success toast notification
     const [successNotification, setSuccessNotification] = useState(null);
 
-    // Anniversary Bouquets State
-    const [anniversaryBouquets, setAnniversaryBouquets] = useState([
-        { id: 1, BoquetName: "Luxury Crimson Romance", Price: "Rs 5,500.00", quantity: 12, image: A1 },
-        { id: 2, BoquetName: "Ethereal Pastel Dream", Price: "Rs 6,200.00", quantity: 8, image: A2 },
-        { id: 3, BoquetName: "Royal Velvet Blush", Price: "Rs 7,000.00", quantity: 3, image: A3 },
-        { id: 4, BoquetName: "Classic Golden Grace", Price: "Rs 6,500.00", quantity: 15, image: A4 },
-        { id: 5, BoquetName: "Whispering Lily White", Price: "Rs 4,800.00", quantity: 0, image: A5 },
-        { id: 6, BoquetName: "Enchanted Garden Bloom", Price: "Rs 8,500.00", quantity: 6, image: A6 }
-    ]);
+    // Products List state loaded from Backend REST API
+    const [productsList, setProductsList] = useState([]);
 
-    // Anniversary Individual Flowers State
-    const [anniversaryIndividualFlowers, setAnniversaryIndividualFlowers] = useState([
-        { id: 1, FlowerName: "Crimson Silk Rose Stem", Price: "Rs 1,200.00", quantity: 24, image: AI1 },
-        { id: 2, FlowerName: "Ethereal White Lily Stem", Price: "Rs 1,500.00", quantity: 18, image: AI2 },
-        { id: 3, FlowerName: "Velvet Blush Peony Stem", Price: "Rs 1,800.00", quantity: 9, image: AI3 },
-        { id: 4, FlowerName: "Golden Grace Tulip Stem", Price: "Rs 1,350.00", quantity: 30, image: AI4 },
-        { id: 5, FlowerName: "Serene Hydrangea Stem", Price: "Rs 2,100.00", quantity: 4, image: AI5 },
-        { id: 7, FlowerName: "Orchid Splendor Stem", Price: "Rs 2,400.00", quantity: 15, image: AI6 },
-        { id: 8, FlowerName: "Mystique Iris Stem", Price: "Rs 1,650.00", quantity: 0, image: AI7 }
-    ]);
+    const fetchProducts = async () => {
+        try {
+            const response = await api.get('/api/products');
+            setProductsList(response.data);
 
-    // Birthday FlowerBoquets State
-    const [birthdayBoquetFlowers, setBirthdayBoquetFlowers] = useState([
-        { id: 1, FlowerName: "Crimson Silk Rose Stem", Price: "Rs 1,200.00", quantity: 24, image: ABB1 },
-        { id: 2, FlowerName: "Ethereal White Lily Stem", Price: "Rs 1,500.00", quantity: 18, image: ABB2 },
-        { id: 3, FlowerName: "Velvet Blush Peony Stem", Price: "Rs 1,800.00", quantity: 9, image: ABB3 },
-        { id: 4, FlowerName: "Golden Grace Tulip Stem", Price: "Rs 1,350.00", quantity: 30, image: ABB4 },
-        { id: 5, FlowerName: "Serene Hydrangea Stem", Price: "Rs 2,100.00", quantity: 4, image: ABB5 },
-        { id: 6, FlowerName: "Orchid Splendor Stem", Price: "Rs 2,400.00", quantity: 15, image: ABB6 }
-    ]);
+            console.log(response.data);
 
-    // Birthday Individual Flowers State
-    const [birthdayIndividualFlowers, setBirthdayIndividualFlowers] = useState([
-        { id: 1, FlowerName: "Sun-Kissed Yellow Daisy Stem", Price: "Rs 950.00", quantity: 20, image: BI1 },
-        { id: 2, FlowerName: "Pink Grace Rose Stem", Price: "Rs 1,100.00", quantity: 15, image: BI2 },
-        { id: 3, FlowerName: "Purple Magic Orchid Stem", Price: "Rs 850.00", quantity: 35, image: BI3 },
-        { id: 4, FlowerName: "Blushing Tulip Stem", Price: "Rs 1,200.00", quantity: 0, image: BI4 },
-        { id: 5, FlowerName: "White Celebration Lily Stem", Price: "Rs 1,500.00", quantity: 5, image: BI5 }
-    ]);
+        } catch (error) {
+            console.error("Failed to fetch products:", error);
+        }
+    };
 
-    // Birthday Headdresses State
-    const [birthdayHeaddresses, setBirthdayHeaddresses] = useState([
-        { id: 1, HeaddressName: "Floral Queen Crown", Price: "Rs 2,500.00", quantity: 8, image: BH1 },
-        { id: 2, HeaddressName: "Rose Petal Tiara", Price: "Rs 1,800.00", quantity: 12, image: BH2 },
-        { id: 3, HeaddressName: "Blossom Headband Elegance", Price: "Rs 1,500.00", quantity: 0, image: BH3 },
-        { id: 4, HeaddressName: "Jasmine Dream Wreath", Price: "Rs 2,200.00", quantity: 4, image: BH4 },
-        { id: 5, HeaddressName: "Golden Lily Halo", Price: "Rs 3,000.00", quantity: 15, image: BH5 }
-    ]);
+    useEffect(() => {
+        fetchProducts();
+    }, []);
 
-    // Convocation Bouquets State
-    const [convocationBouquets, setConvocationBouquets] = useState([
-        { id: 1, BoquetName: "Academic Achievement Bloom", Price: "Rs 4,500.00", quantity: 10, image: C1 },
-        { id: 2, BoquetName: "Graduation Golden Glory", Price: "Rs 5,200.00", quantity: 7, image: C2 },
-        { id: 3, BoquetName: "Success Sapphire Sparkle", Price: "Rs 6,000.00", quantity: 0, image: C3 },
-        { id: 4, BoquetName: "Scholar's Crimson Pride", Price: "Rs 5,800.00", quantity: 14, image: C4 },
-        { id: 5, BoquetName: "Valedictorian Violet Dream", Price: "Rs 4,200.00", quantity: 3, image: C5 },
-        { id: 6, BoquetName: "Triumphant Sunflower Burst", Price: "Rs 7,500.00", quantity: 8, image: C6 },
-        { id: 7, BoquetName: "Honors Lavender Elegance", Price: "Rs 5,000.00", quantity: 12, image: C7 },
-        { id: 8, BoquetName: "Commencement Pastel Harmony", Price: "Rs 6,800.00", quantity: 5, image: C8 }
-    ]);
+    // Image resolver helper to map products dynamically to either database images or fallback local assets
+    const getProductImage = (product) => {
+        if (product.imageUrl) {
+            return `http://localhost:8080${product.imageUrl}`;
+        }
 
-    // Convocation Individual Flowers State
-    const [convocationIndividualFlowers, setConvocationIndividualFlowers] = useState([
-        { id: 1, FlowerName: "Scholar's Crimson Rose Stem", Price: "Rs 1,300.00", quantity: 15, image: CI1 },
-        { id: 2, FlowerName: "Success Golden Lily Stem", Price: "Rs 1,600.00", quantity: 20, image: CI2 },
-        { id: 3, FlowerName: "Academic Orchid Stem", Price: "Rs 1,900.00", quantity: 6, image: CI3 },
-        { id: 4, FlowerName: "Triumphant Tulip Stem", Price: "Rs 1,450.00", quantity: 25, image: CI4 },
-        { id: 5, FlowerName: "Graduation Hydrangea Stem", Price: "Rs 2,200.00", quantity: 8, image: CI5 },
-        { id: 6, FlowerName: "Honors Lavender Stem", Price: "Rs 1,750.00", quantity: 0, image: CI6 },
-        { id: 7, FlowerName: "Valedictorian Iris Stem", Price: "Rs 1,800.00", quantity: 11, image: CI7 }
-    ]);
+        const name = (product.productName || '').toLowerCase();
+
+        // Anniversary Bouquets
+        if (name.includes("crimson romance")) return A1;
+        if (name.includes("pastel dream")) return A2;
+        if (name.includes("velvet blush")) return A3;
+        if (name.includes("golden grace")) return A4;
+        if (name.includes("lily white")) return A5;
+        if (name.includes("garden bloom")) return A6;
+
+        // Anniversary Individual Flowers
+        if (name.includes("rose stem") && name.includes("crimson")) return AI1;
+        if (name.includes("lily stem") && name.includes("white")) return AI2;
+        if (name.includes("peony stem") && name.includes("blush")) return AI3;
+        if (name.includes("tulip stem") && name.includes("golden")) return AI4;
+        if (name.includes("hydrangea stem") && name.includes("serene")) return AI5;
+        if (name.includes("orchid splendor")) return AI6;
+        if (name.includes("mystique iris")) return AI7;
+
+        // Birthday Bouquets
+        if (name.includes("rose stem") && name.includes("birthday")) return ABB1;
+        if (name.includes("lily stem") && name.includes("birthday")) return ABB2;
+        if (name.includes("peony stem") && name.includes("birthday")) return ABB3;
+        if (name.includes("tulip stem") && name.includes("birthday")) return ABB4;
+        if (name.includes("hydrangea stem") && name.includes("birthday")) return ABB5;
+        if (name.includes("orchid splendor") && name.includes("birthday")) return ABB6;
+
+        // Birthday Individual Flowers
+        if (name.includes("yellow daisy")) return BI1;
+        if (name.includes("pink grace rose")) return BI2;
+        if (name.includes("purple magic")) return BI3;
+        if (name.includes("blushing tulip")) return BI4;
+        if (name.includes("white celebration")) return BI5;
+
+        // Birthday Headdresses
+        if (name.includes("queen crown")) return BH1;
+        if (name.includes("petal tiara")) return BH2;
+        if (name.includes("headband elegance")) return BH3;
+        if (name.includes("dream wreath")) return BH4;
+        if (name.includes("lily halo")) return BH5;
+
+        // Convocation Bouquets
+        if (name.includes("achievement bloom")) return C1;
+        if (name.includes("golden glory")) return C2;
+        if (name.includes("sapphire sparkle")) return C3;
+        if (name.includes("crimson pride")) return C4;
+        if (name.includes("violet dream")) return C5;
+        if (name.includes("sunflower burst")) return C6;
+        if (name.includes("lavender elegance")) return C7;
+        if (name.includes("pastel harmony")) return C8;
+
+        // Convocation Individual Flowers
+        if (name.includes("scholar's crimson rose")) return CI1;
+        if (name.includes("success golden lily")) return CI2;
+        if (name.includes("academic orchid")) return CI3;
+        if (name.includes("triumphant tulip")) return CI4;
+        if (name.includes("graduation hydrangea")) return CI5;
+        if (name.includes("honors lavender")) return CI6;
+        if (name.includes("valedictorian iris")) return CI7;
+
+        return '/images/placeholder.png';
+    };
 
     // Auto-clear notification after 4 seconds
     useEffect(() => {
@@ -163,6 +180,32 @@ export default function MmanageProducts() {
             return () => clearTimeout(timer);
         }
     }, [successNotification]);
+
+    // Map database product fields to the format expected by the card components
+    const mapProduct = (p) => ({
+        id: p.id,
+        BoquetName: p.productName,
+        FlowerName: p.productName,
+        HeaddressName: p.productName,
+        Price: `Rs ${Number(p.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        quantity: p.stockQuantity,
+        image: getProductImage(p),
+        categoryId: p.categoryId,
+        subCategoryId: p.subCategoryId
+    });
+
+    const allMappedProducts = productsList.map(mapProduct);
+
+    // Filter mapped products into separate category/subcategory lists
+    const anniversaryBouquets = allMappedProducts.filter(p => p.categoryId === 1 && p.subCategoryId === 1);
+    const birthdayBoquetFlowers = allMappedProducts.filter(p => p.categoryId === 1 && p.subCategoryId === 2);
+    const convocationBouquets = allMappedProducts.filter(p => p.categoryId === 1 && p.subCategoryId === 3);
+
+    const anniversaryIndividualFlowers = allMappedProducts.filter(p => p.categoryId === 3 && p.subCategoryId === 7);
+    const birthdayIndividualFlowers = allMappedProducts.filter(p => p.categoryId === 3 && p.subCategoryId === 8);
+    const convocationIndividualFlowers = allMappedProducts.filter(p => p.categoryId === 3 && p.subCategoryId === 9);
+
+    const birthdayHeaddresses = allMappedProducts.filter(p => p.categoryId === 2 && p.subCategoryId === 5);
 
     // Filter bouquets based on search query
     const filteredBouquets = anniversaryBouquets.filter(bouquet =>
@@ -199,112 +242,42 @@ export default function MmanageProducts() {
         (flower.FlowerName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleEdit = (id, type, newPrice) => {
-        if (type === 'Bouquet') {
-            setAnniversaryBouquets(prev => prev.map(b => b.id === id ? { ...b, Price: newPrice } : b));
-        } else if (type === 'Individual Flower') {
-            setAnniversaryIndividualFlowers(prev => prev.map(f => f.id === id ? { ...f, Price: newPrice } : f));
-        } else if (type === 'Birthday Bouquet') {
-            setBirthdayBoquetFlowers(prev => prev.map(b => b.id === id ? { ...b, Price: newPrice } : b));
-        } else if (type === 'Birthday Individual Flower') {
-            setBirthdayIndividualFlowers(prev => prev.map(f => f.id === id ? { ...f, Price: newPrice } : f));
-        } else if (type === 'Birthday Headdress') {
-            setBirthdayHeaddresses(prev => prev.map(h => h.id === id ? { ...h, Price: newPrice } : h));
-        } else if (type === 'Convocation Bouquet') {
-            setConvocationBouquets(prev => prev.map(b => b.id === id ? { ...b, Price: newPrice } : b));
-        } else if (type === 'Convocation Individual Flower') {
-            setConvocationIndividualFlowers(prev => prev.map(f => f.id === id ? { ...f, Price: newPrice } : f));
-        }
-        setSuccessNotification(`Price updated to ${newPrice} successfully.`);
-    };
+    const handleEdit = async (id, type, newPrice) => {
+        try {
+            const numericString = newPrice.replace(/Rs\s*/gi, '').replace(/,/g, '').trim();
+            const numericPrice = parseFloat(numericString) || 0;
 
-    const handleDelete = (id, type) => {
-        if (window.confirm("Are you sure delete product?")) {
-            if (type === 'Bouquet') {
-                setAnniversaryBouquets(prev => prev.filter(b => b.id !== id));
-            } else if (type === 'Individual Flower') {
-                setAnniversaryIndividualFlowers(prev => prev.filter(f => f.id !== id));
-            } else if (type === 'Birthday Bouquet') {
-                setBirthdayBoquetFlowers(prev => prev.filter(b => b.id !== id));
-            } else if (type === 'Birthday Individual Flower') {
-                setBirthdayIndividualFlowers(prev => prev.filter(f => f.id !== id));
-            } else if (type === 'Birthday Headdress') {
-                setBirthdayHeaddresses(prev => prev.filter(h => h.id !== id));
-            } else if (type === 'Convocation Bouquet') {
-                setConvocationBouquets(prev => prev.filter(b => b.id !== id));
-            } else if (type === 'Convocation Individual Flower') {
-                setConvocationIndividualFlowers(prev => prev.filter(f => f.id !== id));
-            }
-            setSuccessNotification(`${type} deleted successfully.`);
+            // Fetch the existing product details first
+            const getResponse = await api.get(`/api/products/${id}`);
+            const existingProduct = getResponse.data;
+            console.log(existingProduct);
+            // Send PUT request to update only the price
+            await api.put(`/api/products/${id}`, {
+                ...existingProduct,
+                price: numericPrice
+            });
+
+            // Update state dynamically
+            setProductsList(prev => prev.map(p => p.id === id ? { ...p, price: numericPrice } : p));
+            setSuccessNotification(`Price updated to ${newPrice} successfully.`);
+        } catch (error) {
+            console.error("Failed to update product price:", error);
+            alert("Failed to update product price in backend.");
         }
     };
 
-    const handleAddNewProduct = (newProduct) => {
-        const { productName, category, subcategory, price, stockQuantity, description, image } = newProduct;
-
-        // Formatted price string for mock data standard
-        const formattedPrice = `Rs ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-        const getNextId = (list) => {
-            return list.length > 0 ? Math.max(...list.map(item => item.id)) + 1 : 1;
-        };
-
-        if (category === 'Birthday') {
-            if (subcategory === 'Boquet') {
-                const id = getNextId(birthdayBoquetFlowers);
-                setBirthdayBoquetFlowers([
-                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...birthdayBoquetFlowers
-                ]);
-            } else if (subcategory === 'Individual Flowers') {
-                const id = getNextId(birthdayIndividualFlowers);
-                setBirthdayIndividualFlowers([
-                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...birthdayIndividualFlowers
-                ]);
-            } else if (subcategory === 'Headdress') {
-                const id = getNextId(birthdayHeaddresses);
-                setBirthdayHeaddresses([
-                    { id, HeaddressName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...birthdayHeaddresses
-                ]);
-            }
-        } else if (category === 'Anniversary') {
-            if (subcategory === 'Boquet') {
-                const id = getNextId(anniversaryBouquets);
-                setAnniversaryBouquets([
-                    { id, BoquetName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...anniversaryBouquets
-                ]);
-            } else if (subcategory === 'Individual Flowers') {
-                const id = getNextId(anniversaryIndividualFlowers);
-                setAnniversaryIndividualFlowers([
-                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...anniversaryIndividualFlowers
-                ]);
-            }
-        } else if (category === 'Convocation') {
-            if (subcategory === 'Boquet') {
-                const id = getNextId(convocationBouquets);
-                setConvocationBouquets([
-                    { id, BoquetName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...convocationBouquets
-                ]);
-            } else if (subcategory === 'Individual Flowers') {
-                const id = getNextId(convocationIndividualFlowers);
-                setConvocationIndividualFlowers([
-                    { id, FlowerName: productName, Price: formattedPrice, quantity: stockQuantity, image },
-                    ...convocationIndividualFlowers
-                ]);
+    const handleDelete = async (id, type) => {
+        if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
+            try {
+                await api.delete(`/api/products/${id}`);
+                // Update state dynamically
+                setProductsList(prev => prev.filter(p => p.id !== id));
+                setSuccessNotification(`${type} deleted successfully.`);
+            } catch (error) {
+                console.error("Failed to delete product:", error);
+                alert("Failed to delete product in backend.");
             }
         }
-
-        // Set active sector to the newly added product's category & subcategory so it's shown immediately
-        setActiveSector(`${category} - ${subcategory === 'Boquet' ? 'Boquets' : subcategory === 'Headdress' ? 'Head Dresses' : subcategory}`);
-
-        // Set success notification
-        setSuccessNotification(`Product "${productName}" successfully added to ${category} - ${subcategory === 'Boquet' ? 'Bouquet' : subcategory}!`);
-        setIsAddingProduct(false);
     };
 
     return (
@@ -361,7 +334,10 @@ export default function MmanageProducts() {
                         {isAddingProduct ? (
                             <MAddNewProductForm
                                 onClose={() => setIsAddingProduct(false)}
-                                onSubmit={handleAddNewProduct}
+                                onSubmit={() => {
+                                    setIsAddingProduct(false);
+                                    fetchProducts();
+                                }}
                             />
                         ) : activeSector === 'All' ? (
                             <div className="flex flex-col gap-12">

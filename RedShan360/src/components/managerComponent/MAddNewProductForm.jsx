@@ -1,254 +1,588 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, AlertCircle, CheckCircle2, Box } from 'lucide-react';
+import { X, Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
 import axios from "axios";
 
+
 export default function MAddNewProductForm({ onClose, onSubmit }) {
-  // Form fields state
+
+
   const [formData, setFormData] = useState({
+
     productName: '',
     categoryId: '',
     subCategoryId: '',
     price: '',
     stockQuantity: '',
-    description: '',
-    imageUrl: ''
+    description: ''
+
   });
 
-  // Image upload state
+
   const [imageFile, setImageFile] = useState(null);
+
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Validation & touched states
+
   const [errors, setErrors] = useState({});
+
   const [touched, setTouched] = useState({});
 
-  const [availableCategories, setAvailableCategories] = useState([
-    { id: 1, name: "Birthday" },
-    { id: 2, name: "Convocation" },
-    { id: 3, name: "Anniversary" }
+
+
+  const [availableCategories] = useState([
+    { id: 1, name: "Bouquets" },
+    { id: 2, name: "Head Dresses" },
+    { id: 3, name: "Individual Flowers" }
   ]);
 
-  const [availableSubcategories, setAvailableSubcategories] = useState([
-    { id: 1, name: "Bouquet" },
-    { id: 2, name: "Individual Flowers" },
-    { id: 3, name: "Headdress" }
-  ]);
+  const [availableSubcategories, setAvailableSubcategories] = useState([]);
 
-  // Update available subcategories when category changes
   useEffect(() => {
-  if (formData.categoryId === 2 || formData.categoryId === 3) {
-    setAvailableSubcategories([
-      { id: 1, name: "Bouquet" },
-      { id: 2, name: "Individual Flowers" }
-    ]);
+    const allSubcategories = [
+      { id: 1, categoryId: 1, name: "Anniversary" },
+      { id: 2, categoryId: 1, name: "Birthday" },
+      { id: 3, categoryId: 1, name: "Convocation" },
+      { id: 4, categoryId: 2, name: "Anniversary" },
+      { id: 5, categoryId: 2, name: "Birthday" },
+      { id: 6, categoryId: 2, name: "Convocation" },
+      { id: 7, categoryId: 3, name: "Anniversary" },
+      { id: 8, categoryId: 3, name: "Birthday" },
+      { id: 9, categoryId: 3, name: "Convocation" }
+    ];
 
-    if (![1, 2].includes(formData.subCategoryId)) {
-      setFormData(prev => ({ ...prev, subCategoryId: '' }));
+    if (formData.categoryId) {
+      const filtered = allSubcategories.filter(
+        sub => sub.categoryId === Number(formData.categoryId)
+      );
+      setAvailableSubcategories(filtered);
+    } else {
+      setAvailableSubcategories([]);
     }
+  }, [formData.categoryId]);
 
-  } else {
-    setAvailableSubcategories([
-      { id: 1, name: "Bouquet" },
-      { id: 2, name: "Individual Flowers" },
-      { id: 3, name: "Headdress" }
-    ]);
-  }
-}, [formData.categoryId, formData.subCategoryId]);
-
-  // Validation logic for a single field
   const validateField = (name, value) => {
-    let error = '';
+
+
+    let error = "";
+
+
     switch (name) {
-      case 'productName':
-        if (!value.trim()) {
-          error = 'Product name is required';
-        } else if (value.trim().length < 3) {
-          error = 'Product name must be at least 3 characters';
-        }
+
+
+      case "productName":
+
+        if (!value.trim())
+
+          error = "Product name is required";
+
+        else if (value.length < 3)
+
+          error = "Minimum 3 characters";
+
         break;
-      case 'categoryId':
-        if (!value) {
-          error = "Please select a category";
-        }
+
+
+
+      case "categoryId":
+
+        if (!value)
+
+          error = "Select category";
+
         break;
-      case 'subCategoryId':
-        if (!value) {
-          error = "Please select a subcategory";
-        }
+
+
+
+      case "subCategoryId":
+
+        if (!value)
+
+          error = "Select sub category";
+
         break;
-      case 'price':
-        if (!value) {
-          error = 'Price is required';
-        } else {
-          const priceNum = parseFloat(value);
-          if (isNaN(priceNum) || priceNum <= 0) {
-            error = 'Price must be a valid positive number';
-          }
-        }
+
+
+
+      case "price":
+
+        if (!value || Number(value) <= 0)
+
+          error = "Invalid price";
+
         break;
-      case 'stockQuantity':
-        if (!value && value !== 0) {
-          error = 'Stock quantity is required';
-        } else {
-          const stockNum = Number(value);
-          if (!Number.isInteger(stockNum) || stockNum < 0) {
-            error = 'Stock quantity must be a non-negative integer';
-          }
-        }
+
+
+
+      case "stockQuantity":
+
+        if (value === "" || Number(value) < 0)
+
+          error = "Invalid stock quantity";
+
         break;
-      case 'description':
-        if (!value.trim()) {
-          error = 'Description is required';
-        } else if (value.trim().length < 10) {
-          error = 'Description must be at least 10 characters';
-        }
+
+
+
+      case "description":
+
+        if (!value.trim())
+
+          error = "Description required";
+
+        else if (value.length < 10)
+
+          error = "Minimum 10 characters";
+
         break;
+
+
+
       default:
+
         break;
+
+
     }
+
+
     return error;
+
+
   };
 
-  // Run validation whenever inputs change if they have been touched
+
+
+
+
+
+
   const handleInputChange = (e) => {
-  const { name, value } = e.target;
-
-  setFormData(prev => ({
-    ...prev,
-    [name]: name === "categoryId" || name === "subCategoryId"
-      ? Number(value)
-      : value
-  }));
-
-  if (touched[name]) {
-    const fieldError = validateField(name, value);
-    setErrors(prev => ({ ...prev, [name]: fieldError }));
-  }
-};
-
-  const handleBlur = (e) => {
     const { name, value } = e.target;
-    setTouched(prev => ({ ...prev, [name]: true }));
-    const fieldError = validateField(name, value);
-    setErrors(prev => ({ ...prev, [name]: fieldError }));
-  };
 
-  // Handle Image upload selection
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    // Optional validation
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-    if (!allowedTypes.includes(file.type)) {
-      alert("Please select a JPG or PNG image.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size must be less than 5MB.");
-      return;
-    }
-    // Remove previous preview URL
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview);
-    }
-    const previewUrl = URL.createObjectURL(file);
-    setImageFile(file);
-    setImagePreview(previewUrl);
-    setFormData(prev => ({
-      ...prev,
-      imageUrl: imagePreview
-    }));
-  };
+    setFormData(prev => {
+      const parsedValue = (name === "categoryId" || name === "subCategoryId")
+        ? (value === "" ? "" : Number(value))
+        : value;
 
-  const removeImage = () => {
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview);
-    }
-    setImageFile(null);
-    setImagePreview(null);
-    setFormData(prev => ({
-      ...prev,
-      imageUrl: ""
-    }));
-  };
+      const newFormData = {
+        ...prev,
+        [name]: parsedValue
+      };
 
-  // Cleanup object URL on unmount
-  useEffect(() => {
-    return () => {
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
+      if (name === "categoryId") {
+        newFormData.subCategoryId = "";
       }
-    };
-  }, [imagePreview]);
 
-  // Handle Form Submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const allTouched = {};
-    const validationErrors = {};
-
-    Object.keys(formData).forEach(key => {
-      if (key !== "imageUrl") {
-        allTouched[key] = true;
-
-        const error = validateField(key, formData[key]);
-
-        if (error) {
-          validationErrors[key] = error;
-        }
-      }
+      return newFormData;
     });
 
-    setTouched(allTouched);
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
-
-    const product = {
-      categoryId: Number(formData.categoryId),
-      subCategoryId: Number(formData.subCategoryId),
-      productName: formData.productName,
-      description: formData.description,
-      price: Number(formData.price),
-      stockQuantity: Number(formData.stockQuantity),
-
-      // Replace with uploaded image URL later
-      imageUrl:
-        formData.imageUrl ||
-        "https://example.com/rose.jpg"
-    };
-
-    console.log(product);
-
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/api/products/add",
-        product,
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
+    if (touched[name]) {
+      setErrors(prev => {
+        const newErrors = {
+          ...prev,
+          [name]: validateField(name, value)
+        };
+        if (name === "categoryId") {
+          newErrors.subCategoryId = "";
         }
-      );
-
-      console.log(response.data);
-      alert("Product Added Successfully!");
-
-      if (onSubmit) {
-        onSubmit(response.data);
-      }
-
-    } catch (err) {
-
-      console.error(err);
-
-      alert("Failed to add product.");
-
+        return newErrors;
+      });
     }
   };
+
+
+
+
+
+
+
+
+  const handleBlur = (e) => {
+
+
+    const { name, value } = e.target;
+
+
+    setTouched(prev => ({
+
+      ...prev,
+
+      [name]: true
+
+    }));
+
+
+
+    setErrors(prev => ({
+
+      ...prev,
+
+      [name]: validateField(name, value)
+
+    }));
+
+
+
+  };
+
+
+
+
+
+
+
+
+  // IMAGE UPLOAD
+
+  const handleImageChange = (e) => {
+
+
+    const file = e.target.files[0];
+
+
+    if (!file)
+
+      return;
+
+
+
+    const allowed = [
+
+      "image/jpeg",
+
+      "image/png",
+
+      "image/jpg"
+
+    ];
+
+
+
+    if (!allowed.includes(file.type)) {
+
+
+      alert("Only JPG PNG allowed");
+
+      return;
+
+
+    }
+
+
+
+    if (file.size > 5 * 1024 * 1024) {
+
+
+      alert("Maximum 5MB allowed");
+
+      return;
+
+
+    }
+
+
+
+    if (imagePreview)
+
+      URL.revokeObjectURL(imagePreview);
+
+
+
+    const preview = URL.createObjectURL(file);
+
+
+
+    setImageFile(file);
+
+    setImagePreview(preview);
+
+
+
+  };
+
+
+
+
+
+
+
+  const removeImage = () => {
+
+
+    if (imagePreview)
+
+      URL.revokeObjectURL(imagePreview);
+
+
+
+    setImageFile(null);
+
+    setImagePreview(null);
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+  useEffect(() => {
+
+
+    return () => {
+
+
+      if (imagePreview)
+
+        URL.revokeObjectURL(imagePreview);
+
+
+    };
+
+
+  }, [imagePreview]);
+
+
+
+
+
+
+
+
+
+  const resetForm = () => {
+
+
+    setFormData({
+
+      productName: "",
+      categoryId: "",
+      subCategoryId: "",
+      price: "",
+      stockQuantity: "",
+      description: ""
+
+    });
+
+
+
+    setImageFile(null);
+
+    setImagePreview(null);
+
+    setErrors({});
+
+    setTouched({});
+
+
+  };
+
+
+
+
+
+
+
+
+
+  // SUBMIT
+
+  const handleSubmit = async (e) => {
+
+
+    e.preventDefault();
+
+
+
+    let validationErrors = {};
+
+    let allTouched = {};
+
+
+
+    Object.keys(formData).forEach(field => {
+
+
+      allTouched[field] = true;
+
+
+
+      let error = validateField(
+
+        field,
+
+        formData[field]
+
+      );
+
+
+
+      if (error)
+
+        validationErrors[field] = error;
+
+
+
+    });
+
+
+
+    setTouched(allTouched);
+
+    setErrors(validationErrors);
+
+
+
+    if (Object.keys(validationErrors).length > 0)
+
+      return;
+
+
+
+
+    if (!imageFile) {
+
+
+      alert("Please select product image");
+
+      return;
+
+
+    }
+
+
+
+
+
+
+
+    const product = {
+
+
+      categoryId: Number(formData.categoryId),
+
+      subCategoryId: Number(formData.subCategoryId),
+
+      productName: formData.productName,
+
+      description: formData.description,
+
+      price: Number(formData.price),
+
+      stockQuantity: Number(formData.stockQuantity)
+
+
+    };
+
+
+
+
+
+
+
+
+
+    const multipartData = new FormData();
+
+
+
+
+
+    multipartData.append(
+
+      "product",
+
+      new Blob(
+
+        [JSON.stringify(product)],
+
+        {
+
+          type: "application/json"
+
+        }
+
+      )
+
+    );
+
+
+
+
+
+    multipartData.append(
+
+      "image",
+
+      imageFile
+
+    );
+
+
+
+
+
+
+
+
+
+
+    try {
+
+
+      const response = await axios.post(
+
+
+        "http://localhost:8080/api/products/add",
+
+
+        multipartData
+
+
+      );
+
+
+
+
+
+
+      alert("Product Added Successfully");
+
+
+
+      resetForm();
+
+
+
+      if (onSubmit)
+
+        onSubmit(response.data);
+
+
+
+    }
+
+    catch (error) {
+
+
+      console.error(error);
+
+
+      alert("Failed to add product");
+
+
+    }
+
+
+
+
+  };
+
 
   return (
     <div className="w-full max-w-4xl mx-auto bg-white rounded-3xl border border-[#e5e4e7] shadow-xl overflow-hidden animate-fadeIn">

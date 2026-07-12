@@ -5,13 +5,12 @@ import { ChevronDown } from 'lucide-react';
 export default function SubNavbarM({ activeSector = 'All', onSectorChange }) {
     const [activeDropdown, setActiveDropdown] = useState(null);
 
-    const sectors = ['All', 'Anniversary', 'Birthday', 'Convocation'];
+    const sectors = ['All', 'Boquets', 'Individual Flowers', 'Head Dresses'];
     
     const dropdownOptions = {
-        All: ['Boquets', 'Individual Flowers', 'Head Dresses'],
-        Anniversary: ['Boquets', 'Individual Flowers'],
-        Birthday: ['Boquets', 'Individual Flowers', 'Head Dresses'],
-        Convocation: ['Boquets', 'Individual Flowers']
+        Boquets: ['Anniversary', 'Birthday', 'Convocation'],
+        'Individual Flowers': ['Anniversary', 'Birthday', 'Convocation'],
+        'Head Dresses': ['Birthday']
     };
 
     // Close dropdowns when clicking outside
@@ -39,7 +38,7 @@ export default function SubNavbarM({ activeSector = 'All', onSectorChange }) {
     const handleDropdownOptionClick = (sector, option) => {
         setActiveDropdown(null);
         if (onSectorChange) {
-            onSectorChange(`${sector} - ${option}`);
+            onSectorChange(`${option} - ${sector}`);
         }
     };
 
@@ -48,11 +47,15 @@ export default function SubNavbarM({ activeSector = 'All', onSectorChange }) {
             {sectors.map((sector) => {
                 const options = dropdownOptions[sector];
                 const isDropdown = !!options;
-                const isSelected = activeSector.startsWith(sector);
+                const isSelected = sector === 'All' ? activeSector === 'All' : activeSector.endsWith(sector);
 
                 if (isDropdown) {
                     return (
-                        <div key={sector} className="dropdown-container" style={{ position: 'relative' }}>
+                        <div 
+                            key={sector} 
+                            className={`dropdown-container ${sector === 'Head Dresses' ? 'sub-navbar-head-dresses' : ''}`} 
+                            style={{ position: 'relative' }}
+                        >
                             <button
                                 className={`sub-navbar-btn flex items-center justify-center gap-1 ${isSelected ? 'active' : ''}`}
                                 onClick={() => handleSectorClick(sector)}
@@ -64,7 +67,7 @@ export default function SubNavbarM({ activeSector = 'All', onSectorChange }) {
                             {activeDropdown === sector && (
                                 <div className="dropdown-menu">
                                     {options.map((option) => {
-                                        const optionValue = `${sector} - ${option}`;
+                                        const optionValue = `${option} - ${sector}`;
                                         const isActive = activeSector === optionValue;
                                         return (
                                             <button
