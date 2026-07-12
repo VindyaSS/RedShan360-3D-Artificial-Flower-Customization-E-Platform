@@ -886,8 +886,9 @@ nav ul li a:hover {
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
-  padding: 8px 0;
-  width: 110px;
+  padding: 8px 16px;
+  min-width: 110px;
+  width: auto;
   text-align: center;
   border-radius: 8px;
   cursor: pointer;
@@ -903,6 +904,10 @@ nav ul li a:hover {
 .sub-navbar-btn.active {
   background: rgba(116, 79, 81, 0.1);
   color: var(--color-primary);
+}
+
+.sub-navbar-head-dresses {
+  margin-left: 16px;
 }
 
 /* Dropdown Menu Styles */
