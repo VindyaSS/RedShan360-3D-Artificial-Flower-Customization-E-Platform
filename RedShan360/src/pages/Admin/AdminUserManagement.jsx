@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminSidebar from "../../components/adminComponent/AdminSidebar";
 import AdminTopbar from "../../components/adminComponent/AdminTopbar";
 import AdminUserTable from "../../components/adminComponent/AdminUserTable";
@@ -44,20 +44,90 @@ const defaultFormState = {
   permissions: [],
 };
 
+// Helper to map backend status to frontend capitalized display status
+const mapStatusToFrontend = (backendStatus) => {
+  if (!backendStatus) return "Active";
+  const statusUpper = backendStatus.toUpperCase();
+  if (statusUpper === "ACTIVE") return "Active";
+  if (statusUpper === "INACTIVE") return "Inactive";
+  if (statusUpper === "SUSPEND" || statusUpper === "SUSPENDED") return "Suspended";
+  return backendStatus.charAt(0).toUpperCase() + backendStatus.slice(1).toLowerCase();
+};
+
+// Helper mapper
+const mapToFrontendFormat = (user) => ({
+  id: user.id,
+  name: user.name,
+  type: user.role === "MANAGER" ? "Manager" : user.role === "EMPLOYEE" ? "Executive" : "Standard",
+  contact: `${user.email} | ${user.phone || ""}`,
+  status: mapStatusToFrontend(user.status),
+  employeeId: user.employeeId || user.managerId || "",
+  joiningDate: user.registeredDate ? user.registeredDate.split("T")[0] : ""
+});
+
 function AdminUserManagement() {
   const [activeTab, setActiveTab] = useState("customers");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Lists state
-  const [customers, setCustomers] = useState(initialCustomers);
-  const [managers, setManagers] = useState(initialManagers);
-  const [employees, setEmployees] = useState(initialEmployees);
+  const [customers, setCustomers] = useState([]);
+  const [managers, setManagers] = useState([]);
+  const [employees, setEmployees] = useState([]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // "add", "edit", "view"
   const [formData, setFormData] = useState({ ...defaultFormState });
   const [editingUserId, setEditingUserId] = useState(null);
+
+  const fetchUsers = () => {
+    // Fetch Customers
+    fetch("http://localhost:8080/api/admin/users?role=CUSTOMER")
+      .then(res => res.json())
+      .then(data => setCustomers(data.map(mapToFrontendFormat)))
+      .catch(err => console.error("Error fetching customers:", err));
+    // Fetch Managers
+    fetch("http://localhost:8080/api/admin/users?role=MANAGER")
+      .then(res => res.json())
+      .then(data => setManagers(data.map(mapToFrontendFormat)))
+      .catch(err => console.error("Error fetching managers:", err));
+    // Fetch Employees
+    fetch("http://localhost:8080/api/admin/users?role=EMPLOYEE")
+      .then(res => res.json())
+      .then(data => setEmployees(data.map(mapToFrontendFormat)))
+      .catch(err => console.error("Error fetching employees:", err));
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const triggerSearch = (role, query) => {
+    fetch(`http://localhost:8080/api/admin/users?role=${role}&search=${query}`)
+      .then(res => res.json())
+      .then(data => {
+        const list = data.map(mapToFrontendFormat);
+        if (role === "CUSTOMER") setCustomers(list);
+        else if (role === "MANAGER") setManagers(list);
+        else setEmployees(list);
+      })
+      .catch(err => console.error("Error searching users:", err));
+  };
+
+  const isFirstMount = useRef(true);
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    const roleMap = {
+      customers: "CUSTOMER",
+      managers: "MANAGER",
+      employees: "EMPLOYEE"
+    };
+    const role = roleMap[activeTab];
+    triggerSearch(role, searchQuery);
+  }, [searchQuery, activeTab]);
 
   // Auto-generate employee ID
   const generateEmpId = () => {
@@ -192,12 +262,19 @@ function AdminUserManagement() {
           name: formData.fullName,
           email: formData.email,
           password: formData.password,
-          phone: formData.phone
+          phone: formData.phone,
+          status: formData.status
         })
       })
       .then(async (response) => {
         const data = await response.json();
         if (!response.ok) {
+          if (data && typeof data === "object" && !data.message) {
+            const errorMsgs = Object.entries(data)
+              .map(([field, msg]) => `${field}: ${msg}`)
+              .join(", ");
+            throw new Error(errorMsgs || `Failed to register ${formData.role.toLowerCase()}`);
+          }
           throw new Error(data.message || `Failed to register ${formData.role.toLowerCase()}`);
         }
         return data;
@@ -208,7 +285,7 @@ function AdminUserManagement() {
           name: data.name,
           type: isManager ? "Manager" : "Executive",
           contact: `${data.email} | ${data.phone || ""}`,
-          status: "Active",
+          status: mapStatusToFrontend(data.status),
           employeeId: formData.employeeId,
           department: formData.department,
           gender: formData.gender,
@@ -233,23 +310,39 @@ function AdminUserManagement() {
       });
     } else {
       // Edit mode
-      if (formData.role === "Manager") {
-        // If role was changed from Employee to Manager
-        setEmployees((prev) => prev.filter((emp) => emp.id !== editingUserId));
-        setManagers((prev) => {
-          const filtered = prev.filter((m) => m.id !== editingUserId);
-          return [...filtered, newUserObj];
-        });
-      } else {
-        // If role was changed from Manager to Employee
-        setManagers((prev) => prev.filter((m) => m.id !== editingUserId));
-        setEmployees((prev) => {
-          const filtered = prev.filter((emp) => emp.id !== editingUserId);
-          return [...filtered, newUserObj];
-        });
-      }
-      alert("Manager/Employee updated successfully!");
-      setIsModalOpen(false);
+      fetch(`http://localhost:8080/api/admin/users/${editingUserId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password || "",
+          role: formData.role.toUpperCase(),
+          status: formData.status
+        })
+      })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          if (data && typeof data === "object" && !data.message) {
+            const errorMsgs = Object.entries(data)
+              .map(([field, msg]) => `${field}: ${msg}`)
+              .join(", ");
+            throw new Error(errorMsgs || "Failed to update user");
+          }
+          throw new Error(data.message || "Failed to update user");
+        }
+        return data;
+      })
+      .then(data => {
+        alert("User details updated successfully!");
+        setIsModalOpen(false);
+        fetchUsers(); // Reload/refresh local lists
+      })
+      .catch((error) => {
+        alert("Update Error: " + error.message);
+      });
     }
   };
 
@@ -323,14 +416,26 @@ function AdminUserManagement() {
     const confirmDelete = window.confirm(`Are you sure you want to delete ${user.name}?`);
     if (!confirmDelete) return;
 
-    if (type === "customers") {
-      setCustomers((prev) => prev.filter((c) => c.id !== user.id));
-    } else if (type === "managers") {
-      setManagers((prev) => prev.filter((m) => m.id !== user.id));
-    } else {
-      setEmployees((prev) => prev.filter((emp) => emp.id !== user.id));
-    }
-    alert("Record deleted successfully.");
+    fetch(`http://localhost:8080/api/admin/users/${user.id}`, {
+      method: "DELETE"
+    })
+    .then(res => {
+      if (res.ok) {
+        alert("User deleted successfully!");
+        if (type === "customers") {
+          setCustomers((prev) => prev.filter((c) => c.id !== user.id));
+        } else if (type === "managers") {
+          setManagers((prev) => prev.filter((m) => m.id !== user.id));
+        } else {
+          setEmployees((prev) => prev.filter((emp) => emp.id !== user.id));
+        }
+      } else {
+        alert("Failed to delete user.");
+      }
+    })
+    .catch(err => {
+      alert("Error deleting user: " + err.message);
+    });
   };
 
   // Get active items based on activeTab
@@ -342,16 +447,7 @@ function AdminUserManagement() {
 
   // Filter items based on search query
   const getFilteredList = () => {
-    const list = getActiveList();
-    if (!searchQuery.trim()) return list;
-
-    const query = searchQuery.toLowerCase();
-    return list.filter(
-      (user) =>
-        user.name.toLowerCase().includes(query) ||
-        user.contact.toLowerCase().includes(query) ||
-        (user.employeeId && user.employeeId.toLowerCase().includes(query))
-    );
+    return getActiveList();
   };
 
   return (
