@@ -26,31 +26,31 @@ export default function MTabs() {
         {
             OrderID: "ORD001",
             CustomerName: "John",
-            OrderName: "lily",
+            ItemName: "lily",
             Price: "Rs.1500",
         },
         {
             OrderID: "ORD002",
             CustomerName: "Kamal",
-            OrderName: "Rose",
+            ItemName: "Rose",
             Price: "Rs.1000",
         },
         {
             OrderID: "ORD003",
             CustomerName: "Nimal",
-            OrderName: "Desi",
+            ItemName: "Desi",
             Price: "Rs.1200",
         },
         {
             OrderID: "ORD004",
             CustomerName: "Saman",
-            OrderName: "Orchid",
+            ItemName: "Orchid",
             Price: "Rs.1800",
         },
         {
             OrderID: "ORD007",
             CustomerName: "Tharindu",
-            OrderName: "Lotus",
+            ItemName: "Lotus",
             Price: "Rs.1700",
         },
 
@@ -60,31 +60,31 @@ export default function MTabs() {
         {
             OrderID: "ORD001",
             CustomerName: "John",
-            OrderName: "lily",
+            ItemName: "lily",
             Price: "Rs.1500",
         },
         {
             OrderID: "ORD002",
             CustomerName: "Kamal",
-            OrderName: "Rose",
+            ItemName: "Rose",
             Price: "Rs.1000",
         },
         {
             OrderID: "ORD003",
             CustomerName: "Nimal",
-            OrderName: "Desi",
+            ItemName: "Desi",
             Price: "Rs.1200",
         },
         {
             OrderID: "ORD004",
             CustomerName: "Saman",
-            OrderName: "Orchid",
+            ItemName: "Orchid",
             Price: "Rs.1800",
         },
         {
             OrderID: "ORD007",
             CustomerName: "Tharindu",
-            OrderName: "Lotus",
+            ItemName: "Lotus",
             Price: "Rs.1700",
         },
     ];
@@ -93,31 +93,31 @@ export default function MTabs() {
         {
             OrderID: "ORD001",
             CustomerName: "John",
-            OrderName: "lily",
+            ItemName: "lily",
             Price: "Rs.1500",
         },
         {
             OrderID: "ORD002",
             CustomerName: "Kamal",
-            OrderName: "Rose",
+            ItemName: "Rose",
             Price: "Rs.1000",
         },
         {
             OrderID: "ORD003",
             CustomerName: "Nimal",
-            OrderName: "Desi",
+            ItemName: "Desi",
             Price: "Rs.1200",
         },
         {
             OrderID: "ORD004",
             CustomerName: "Saman",
-            OrderName: "Orchid",
+            ItemName: "Orchid",
             Price: "Rs.1800",
         },
         {
             OrderID: "ORD007",
             CustomerName: "Tharindu",
-            OrderName: "Lotus",
+            ItemName: "Lotus",
             Price: "Rs.1700",
         },
     ];
@@ -126,31 +126,31 @@ export default function MTabs() {
         {
             OrderID: "ORD001",
             CustomerName: "John",
-            OrderName: "lily",
+            ItemName: "lily",
             Price: "Rs.1500",
         },
         {
             OrderID: "ORD002",
             CustomerName: "Kamal",
-            OrderName: "Rose",
+            ItemName: "Rose",
             Price: "Rs.1000",
         },
         {
             OrderID: "ORD003",
             CustomerName: "Nimal",
-            OrderName: "Desi",
+            ItemName: "Desi",
             Price: "Rs.1200",
         },
         {
             OrderID: "ORD004",
             CustomerName: "Saman",
-            OrderName: "Orchid",
+            ItemName: "Orchid",
             Price: "Rs.1800",
         },
         {
             OrderID: "ORD007",
             CustomerName: "Tharindu",
-            OrderName: "Lotus",
+            ItemName: "Lotus",
             Price: "Rs.1700",
         },
     ];
@@ -206,7 +206,7 @@ export default function MTabs() {
                         <MPOrderTable
                             t1="Order ID"
                             t2="Customer Name"
-                            t3="Order Name"
+                            t3="Item Name"
                             t4="Price"
                             orders={orders}
                         />
@@ -218,7 +218,7 @@ export default function MTabs() {
                         <MProcessingOrderTable
                             t1="Order ID"
                             t2="Customer Name"
-                            t3="Order Name"
+                            t3="Item Name"
                             t4="Price"
                             processingorders={processingorders}
 
@@ -232,7 +232,7 @@ export default function MTabs() {
                         <MCompletedOrderTable
                             t1="Order ID"
                             t2="Customer Name"
-                            t3="Order Name"
+                            t3="Item Name"
                             t4="Price"
                             completedorders={completedorders}
 
@@ -246,13 +246,13 @@ export default function MTabs() {
                         <MDispatchOrderTable
                             t1="Order ID"
                             t2="Customer Name"
-                            t3="Order Name"
+                            t3="Item Name"
                             t4="Price"
                             dispatchedorders={dispatchedorders}
 
                         />
 
-                        
+
                     </div>
                 )}
 

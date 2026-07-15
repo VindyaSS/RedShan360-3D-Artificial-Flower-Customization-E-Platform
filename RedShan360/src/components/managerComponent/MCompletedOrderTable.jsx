@@ -21,7 +21,7 @@ export default function MCompletedOrderTable(props) {
                         <tr key={completedorder.orderID}>
                             <td>{completedorder.OrderID}</td>
                             <td>{completedorder.CustomerName}</td>
-                            <td>{completedorder.OrderName}</td>
+                            <td>{completedorder.ItemName}</td>
                             <td>{completedorder.Price}</td>
                             <td colSpan="2">
                                 <button className="btn-dispatch">Dispatching to Courier</button>
