@@ -74,13 +74,29 @@ function AdminUserManagement() {
   const [managers, setManagers] = useState([]);
   const [employees, setEmployees] = useState([]);
 
+  // Stats state
+  const [stats, setStats] = useState({
+    totalCustomers: 0,
+    customerIncreasePercentage: 0.0,
+    totalManagers: 0,
+    totalEmployees: 0
+  });
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // "add", "edit", "view"
   const [formData, setFormData] = useState({ ...defaultFormState });
   const [editingUserId, setEditingUserId] = useState(null);
 
+  const fetchStats = () => {
+    fetch("http://localhost:8080/api/admin/users/stats")
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .catch(err => console.error("Error fetching stats:", err));
+  };
+
   const fetchUsers = () => {
+    fetchStats();
     // Fetch Customers
     fetch("http://localhost:8080/api/admin/users?role=CUSTOMER")
       .then(res => res.json())
@@ -302,6 +318,7 @@ function AdminUserManagement() {
         } else {
           setEmployees((prev) => [...prev, savedUserObj]);
         }
+        fetchStats();
         alert(`${formData.role} registered successfully on backend!`);
         setIsModalOpen(false);
       })
@@ -429,6 +446,7 @@ function AdminUserManagement() {
         } else {
           setEmployees((prev) => prev.filter((emp) => emp.id !== user.id));
         }
+        fetchStats();
       } else {
         alert("Failed to delete user.");
       }
@@ -478,20 +496,32 @@ function AdminUserManagement() {
             {/* Total Customers Card */}
             <div className="stat-card">
               <div className="stat-icon-wrapper customer-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
               </div>
               <div className="stat-content">
                 <span className="stat-label">TOTAL CUSTOMERS</span>
-                <h2 className="stat-value">{(customers.length + 1280).toLocaleString()}</h2>
-                <div className="stat-trend positive">
+                <h2 className="stat-value">{stats.totalCustomers.toLocaleString()}</h2>
+                <div className={`stat-trend ${stats.customerIncreasePercentage >= 0 ? 'positive' : 'negative'}`}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                    <polyline points="17 6 23 6 23 12"></polyline>
+                    {stats.customerIncreasePercentage >= 0 ? (
+                      <>
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                      </>
+                    ) : (
+                      <>
+                        <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                        <polyline points="17 18 23 18 23 12"></polyline>
+                      </>
+                    )}
                   </svg>
-                  <span>+12% from last month</span>
+                  <span>
+                    {stats.customerIncreasePercentage >= 0 ? "+" : ""}
+                    {stats.customerIncreasePercentage.toFixed(0)}% from last month
+                  </span>
                 </div>
               </div>
             </div>
@@ -499,32 +529,33 @@ function AdminUserManagement() {
             {/* Total Managers Card */}
             <div className="stat-card">
               <div className="stat-icon-wrapper manager-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                  <path d="M7 17a5 5 0 0 1 10 0"></path>
                 </svg>
               </div>
               <div className="stat-content">
                 <span className="stat-label">TOTAL MANAGERS</span>
-                <h2 className="stat-value">{managers.length + 21}</h2>
-                <span className="stat-desc">Active across 8 locations</span>
+                <h2 className="stat-value">{stats.totalManagers}</h2>
               </div>
             </div>
 
             {/* Total Employees Card */}
             <div className="stat-card">
               <div className="stat-icon-wrapper employee-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                  <path d="M16 8h2"></path>
+                  <path d="M16 12h2"></path>
+                  <path d="M16 16h2"></path>
+                  <path d="M7 14h6a3 3 0 0 0-6 0z"></path>
+                  <circle cx="10" cy="9" r="2"></circle>
                 </svg>
               </div>
               <div className="stat-content">
                 <span className="stat-label">TOTAL EMPLOYEES</span>
-                <h2 className="stat-value">{employees.length + 154}</h2>
-                <span className="stat-desc">Including seasonal florists</span>
+                <h2 className="stat-value">{stats.totalEmployees}</h2>
               </div>
             </div>
           </div>
