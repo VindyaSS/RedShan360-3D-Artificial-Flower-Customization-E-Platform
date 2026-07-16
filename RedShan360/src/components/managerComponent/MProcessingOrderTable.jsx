@@ -20,7 +20,7 @@ export default function MProcessingOrderTable(props) {
                         <tr key={processingorder.OrderID}>
                             <td>{processingorder.OrderID}</td>
                             <td>{processingorder.CustomerName}</td>
-                            <td>{processingorder.OrderName}</td>
+                            <td>{processingorder.ItemName}</td>
                             <td>{processingorder.Price}</td>
                         </tr>
                     ))}

@@ -20,7 +20,7 @@ export default function MPendingOrderTable(props) {
                         <tr key={order.OrderID}>
                             <td>{order.OrderID}</td>
                             <td>{order.CustomerName}</td>
-                            <td>{order.OrderName}</td>
+                            <td>{order.ItemName}</td>
                             <td>{order.Price}</td>
                         </tr>
                     ))}

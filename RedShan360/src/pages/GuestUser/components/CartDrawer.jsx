@@ -8,6 +8,9 @@ const CartDrawer = ({ isOpen, onClose }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const drawerRef = useRef(null);
+  const [loyaltyCheckout, setLoyaltyCheckout] = useState(null);
+  const [applyMembershipDiscount, setApplyMembershipDiscount] = useState(false);
+  const [applyRedeemPoints, setApplyRedeemPoints] = useState(false);
 
   // Load cart items from API + local storage
   const loadCart = async () => {
@@ -25,9 +28,17 @@ const CartDrawer = ({ isOpen, onClose }) => {
     }
     
     if (currentUser) {
+      const currentUserId = currentUser.id || currentUser.userId;
       try {
-        const response = await cartApi.getCart();
-        const items = response.data.items || [];
+        const [cartResponse, loyaltyResponse] = await Promise.all([
+          cartApi.getCart(),
+          api.get(`/api/loyalty/redeem/${currentUserId}`).catch(err => {
+            console.error('Failed to load loyalty checkout details:', err);
+            return { data: null };
+          })
+        ]);
+        
+        const items = cartResponse.data.items || [];
         standardItems = items.map((item) => {
           const productDetail = products.find((p) => p.id === item.productId);
           return {
@@ -35,9 +46,15 @@ const CartDrawer = ({ isOpen, onClose }) => {
             image: productDetail ? productDetail.image : '/images/peonies_vase.png'
           };
         });
+        
+        if (loyaltyResponse.data) {
+          setLoyaltyCheckout(loyaltyResponse.data);
+        }
       } catch (error) {
         console.error('Error fetching standard cart items:', error);
       }
+    } else {
+      setLoyaltyCheckout(null);
     }
 
     // 2. Fetch custom bouquets from local storage
@@ -150,12 +167,24 @@ const CartDrawer = ({ isOpen, onClose }) => {
     return acc + priceNum * item.quantity;
   }, 0);
 
+  // Calculate checkout discounts
+  const membershipDiscountVal = applyMembershipDiscount && loyaltyCheckout ? (subtotal * (loyaltyCheckout.membershipDiscount || 0)) / 100 : 0;
+  const redeemDiscountVal = applyRedeemPoints && loyaltyCheckout ? (loyaltyCheckout.redeemDiscount || 0) : 0;
+  const finalTotal = Math.max(0, subtotal - membershipDiscountVal - redeemDiscountVal);
+
   // Trigger PayHere Payment Gateway Checkout Flow
   const handleCheckout = async () => {
     if (cartItems.length === 0 || isProcessing) return;
 
     setIsProcessing(true);
     try {
+      const savedUser = localStorage.getItem('user');
+      let currentUser = null;
+      if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+        currentUser = JSON.parse(savedUser);
+      }
+      const currentUserId = currentUser ? (currentUser.id || currentUser.userId) : null;
+
       // Initialize payment session on the backend
       const response = await api.post('/api/checkout', {
         items: cartItems.map((item) => ({
@@ -166,7 +195,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
           numericPrice: item.numericPrice || 0,
           bouquetDesign: item.bouquetDesign || null
         })),
-        currency: "LKR"
+        currency: "LKR",
+        discountAmount: membershipDiscountVal + redeemDiscountVal
       });
 
       const checkoutData = response.data;
@@ -184,6 +214,19 @@ const CartDrawer = ({ isOpen, onClose }) => {
               // Verify the payment status securely on the backend
               const statusResponse = await api.get(`/api/checkout/status/${completedOrderId}`);
               if (statusResponse.data.status === "SUCCESS") {
+                
+                // If points were redeemed, call the POST /api/loyalty/redeem endpoint to deduct them in the DB!
+                if (applyRedeemPoints && loyaltyCheckout && loyaltyCheckout.redeemablePoints > 0 && currentUserId) {
+                  try {
+                    await api.post('/api/loyalty/redeem', {
+                      userId: currentUserId,
+                      points: loyaltyCheckout.redeemablePoints
+                    });
+                  } catch (e) {
+                    console.error('Failed to deduct redeemed loyalty points:', e);
+                  }
+                }
+
                 alert(`Payment successful! Order ID: ${completedOrderId}`);
                 
                 // Clear custom items from local storage
@@ -349,24 +392,76 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
         {/* Drawer Footer (Fixed Height, Pins to Bottom) */}
         {cartItems.length > 0 && (
-          <div className="border-t border-[#d9d2d0]/40 bg-[#faf8f6] p-6 space-y-4 flex-shrink-0">
+          <div className="border-t border-[#d9d2d0]/40 bg-[#faf8f6] p-6 space-y-4 flex-shrink-0 overflow-y-auto max-h-[50vh]">
             
+            {/* Loyalty Points Section */}
+            {loyaltyCheckout && (
+              <div className="bg-[#fdfbf9] p-3 rounded-lg border border-[#d9d2d0]/30 space-y-2 text-xs text-[#563c37] mb-2">
+                <div className="flex items-center justify-between font-bold text-[10px] uppercase tracking-wider text-[#ea580c] mb-1">
+                  <span>Loyalty Checkout Benefits</span>
+                  <span>🥈 {loyaltyCheckout.membership}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer select-none font-semibold">
+                    <input 
+                      type="checkbox" 
+                      checked={applyMembershipDiscount}
+                      onChange={(e) => setApplyMembershipDiscount(e.target.checked)}
+                      className="rounded border-gray-300 text-[#ea580c] focus:ring-[#ea580c] w-4 h-4 cursor-pointer"
+                    />
+                    <span>Apply Membership Discount ({loyaltyCheckout.membershipDiscount}%)</span>
+                  </label>
+                  <span className="font-mono font-bold text-[#ea580c]">-Rs.{((subtotal * (loyaltyCheckout.membershipDiscount || 0)) / 100).toFixed(2)}</span>
+                </div>
+                {loyaltyCheckout.redeemablePoints > 0 && (
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 cursor-pointer select-none font-semibold">
+                      <input 
+                        type="checkbox" 
+                        checked={applyRedeemPoints}
+                        onChange={(e) => setApplyRedeemPoints(e.target.checked)}
+                        className="rounded border-gray-300 text-[#ea580c] focus:ring-[#ea580c] w-4 h-4 cursor-pointer"
+                      />
+                      <span>Redeem Loyalty Points ({loyaltyCheckout.redeemablePoints} pts)</span>
+                    </label>
+                    <span className="font-mono font-bold text-green-600">-Rs.{loyaltyCheckout.redeemDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Subtotal and Total Prices */}
-            <div className="space-y-2.5">
+            <div className="space-y-2 border-b border-[#d9d2d0]/25 pb-3">
               <div className="flex justify-between items-center text-xs font-semibold text-[#1a1a1a]/60">
                 <span>Shipping</span>
                 <span className="text-[#8c5e5e] uppercase tracking-widest text-[9px] font-bold">Complimentary</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-[#1a1a1a]">Subtotal</span>
+              <div className="flex justify-between items-center text-xs font-semibold text-[#1a1a1a]/60">
+                <span>Order Total</span>
+                <span className="font-mono">Rs {subtotal.toFixed(2)}</span>
+              </div>
+              {applyMembershipDiscount && (
+                <div className="flex justify-between items-center text-xs font-semibold text-orange-600">
+                  <span>Membership Discount</span>
+                  <span className="font-mono">-Rs.{membershipDiscountVal.toFixed(2)}</span>
+                </div>
+              )}
+              {applyRedeemPoints && (
+                <div className="flex justify-between items-center text-xs font-semibold text-green-600">
+                  <span>Redeem Discount</span>
+                  <span className="font-mono">-Rs.{redeemDiscountVal.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-sm font-bold text-[#1a1a1a]">Final Total</span>
                 <span className="text-lg font-bold text-[#8c5e5e] font-mono" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Rs {subtotal.toFixed(2)}
+                  Rs {finalTotal.toFixed(2)}
                 </span>
               </div>
             </div>
 
             {/* Action buttons */}
-            <div className="pt-2 space-y-2">
+            <div className="pt-1 space-y-2">
               <button 
                 onClick={handleCheckout}
                 disabled={isProcessing}

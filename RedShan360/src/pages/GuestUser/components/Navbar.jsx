@@ -376,7 +376,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                   <button
                     onClick={() => {
                       setIsProfileOpen(false);
-                      alert('Loyalty Points: You have 150 points!');
+                      navigate('/loyalty-points');
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
                   >
@@ -554,7 +554,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                       onClick={() => {
                         setIsMobileProfileOpen(false);
                         setMobileMenuOpen(false);
-                        alert('Loyalty Points: You have 150 points!');
+                        navigate('/loyalty-points');
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
                     >

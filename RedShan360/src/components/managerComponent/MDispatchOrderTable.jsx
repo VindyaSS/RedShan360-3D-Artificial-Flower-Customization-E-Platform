@@ -20,7 +20,7 @@ export default function MDispatchOrderTable(props) {
                         <tr key={dispatchedorder.orderID}>
                             <td>{dispatchedorder.OrderID}</td>
                             <td>{dispatchedorder.CustomerName}</td>
-                            <td>{dispatchedorder.OrderName}</td>
+                            <td>{dispatchedorder.ItemName}</td>
                             <td>{dispatchedorder.Price}</td>
                         </tr>
                     ))}
