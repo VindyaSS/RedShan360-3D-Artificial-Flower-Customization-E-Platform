@@ -376,6 +376,16 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                   <button
                     onClick={() => {
                       setIsProfileOpen(false);
+                      navigate('/orders');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                  >
+                    My Orders
+                  </button>
+                  <div className="border-t border-[#d9d2d0]/30 my-1"></div>
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false);
                       navigate('/loyalty-points');
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
@@ -550,6 +560,17 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
                 {isMobileProfileOpen && (
                   <div className="absolute right-0 mt-2 w-44 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-[10px] font-bold uppercase tracking-wider text-[#1a1a1a]/80" style={{background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)'}}>
+                    <button
+                      onClick={() => {
+                        setIsMobileProfileOpen(false);
+                        setMobileMenuOpen(false);
+                        navigate('/orders');
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
+                    >
+                      My Orders
+                    </button>
+                    <div className="border-t border-[#d9d2d0]/30 my-1"></div>
                     <button
                       onClick={() => {
                         setIsMobileProfileOpen(false);

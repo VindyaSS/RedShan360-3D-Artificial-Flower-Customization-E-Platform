@@ -73,6 +73,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCart();
 
     // Listen for cart updates
@@ -187,14 +188,59 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
       // Initialize payment session on the backend
       const response = await api.post('/api/checkout', {
-        items: cartItems.map((item) => ({
-          id: item.isCustom ? null : Number(item.productId),
-          title: item.title,
-          quantity: item.quantity,
-          isCustom: item.isCustom || false,
-          numericPrice: item.numericPrice || 0,
-          bouquetDesign: item.bouquetDesign || null
-        })),
+        items: cartItems.map((item) => {
+          if (item.isCustom && item.bouquetDesign) {
+            const rawFlowers = item.bouquetDesign.flowers || [];
+            const flowersMapped = rawFlowers.map(f => {
+              const pid = Number(f.stemId);
+              const pX = f.position ? Number(f.position[0]) : 0;
+              const pY = f.position ? Number(f.position[1]) : 0;
+              const pZ = f.position ? Number(f.position[2]) : 0;
+
+              const rX = f.rotation ? Number(f.rotation[0]) : 0;
+              const rY = f.rotation ? Number(f.rotation[1]) : 0;
+              const rZ = f.rotation ? Number(f.rotation[2]) : 0;
+
+              const sX = f.scale ? Number(f.scale[0]) : 1.0;
+              const sY = f.scale ? Number(f.scale[1]) : 1.0;
+              const sZ = f.scale ? Number(f.scale[2]) : 1.0;
+
+              return {
+                instanceId: String(f.flowerId || f.id),
+                productId: pid,
+                position: { x: pX, y: pY, z: pZ },
+                rotation: { x: rX, y: rY, z: rZ },
+                scale: { x: sX, y: sY, z: sZ },
+                isManuallyEdited: !!f.isManuallyEdited
+              };
+            });
+
+            return {
+              id: null,
+              title: item.title,
+              quantity: item.quantity,
+              isCustom: true,
+              numericPrice: item.numericPrice || 0,
+              bouquetDesign: {
+                style: item.bouquetDesign.style || '',
+                bouquetStyle: item.bouquetDesign.bouquetStyle || 'ROUND',
+                wrappingId: item.bouquetDesign.wrappingId || '',
+                ribbonId: item.bouquetDesign.ribbonId || '',
+                sizeKey: item.bouquetDesign.sizeKey || '',
+                flowers: flowersMapped
+              }
+            };
+          }
+
+          return {
+            id: Number(item.productId),
+            title: item.title,
+            quantity: item.quantity,
+            isCustom: false,
+            numericPrice: item.numericPrice || 0,
+            bouquetDesign: null
+          };
+        }),
         currency: "LKR",
         discountAmount: membershipDiscountVal + redeemDiscountVal
       });
@@ -344,6 +390,11 @@ const CartDrawer = ({ isOpen, onClose }) => {
                         <p className="text-[10px] font-semibold text-[#1a1a1a]/55 uppercase mt-0.5">
                           Color: <span className="font-black text-[#1d1b1a]">{item.selectedColor}</span>
                         </p>
+                        {item.bouquetDesign?.sizeLabel && (
+                          <p className="text-[10px] font-semibold text-[#1a1a1a]/55 uppercase mt-0.5">
+                            Bouquet Size: <span className="font-black text-[#1d1b1a]">{item.bouquetDesign.sizeLabel}</span>
+                          </p>
+                        )}
                       </div>
 
                       {/* Spacious Pill Shape Quantity Controls */}
