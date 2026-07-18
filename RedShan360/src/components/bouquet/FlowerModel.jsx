@@ -1,7 +1,73 @@
-import React, { useRef, useMemo } from 'react';
+import { useRef, useMemo, Component } from 'react';
 import { useGLTF, Clone, TransformControls } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+
+// URL validator to ensure a path is non-empty and structurally usable
+const isValidUrl = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim().toLowerCase();
+  if (trimmed === '' || trimmed.includes('undefined') || trimmed.includes('null')) return false;
+  return true;
+};
+
+// R3F-safe Error Boundary class component that renders valid 3D groups on failure
+class GLBErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    if (import.meta.env.DEV) {
+      console.warn('GLBErrorBoundary caught loading failure for URL:', this.props.url, error);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+// Lightweight procedural fallback flower mesh
+function FallbackFlowerMesh({ color = '#a82c2c', scale = 1 }) {
+  return (
+    <group scale={scale}>
+      <mesh castShadow>
+        <sphereGeometry args={[0.15, 12, 12]} />
+        <meshStandardMaterial color="#eedd82" roughness={0.7} />
+      </mesh>
+      {Array.from({ length: 5 }).map((_, i) => {
+        const angle = (i * Math.PI * 2) / 5;
+        const x = Math.cos(angle) * 0.16;
+        const z = Math.sin(angle) * 0.16;
+        return (
+          <mesh key={i} position={[x, 0.04, z]} castShadow>
+            <sphereGeometry args={[0.12, 12, 12]} />
+            <meshStandardMaterial color={color} roughness={0.6} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+// Dedicated child component wrapping useGLTF and Clone
+function DynamicGLBFlower({ url, scale, rotationOffset }) {
+  const { scene } = useGLTF(url);
+  return (
+    <group rotation={rotationOffset}>
+      <Clone object={scene} scale={scale} castShadow receiveShadow />
+    </group>
+  );
+}
 
 // Map database stem IDs to GLB files in /models/
 const MODEL_MAPPING = {
@@ -55,7 +121,6 @@ function EucalyptusModel({ scale }) {
       {Array.from({ length: 8 }).map((_, i) => {
         const y = -0.8 + i * 0.25;
         const angle = i * 2.4; // Golden angle-like offset for spiral leaves
-        const leafScale = 0.35 - (i * 0.015);
         return (
           <group key={i} position={[0, y, 0]} rotation={[0.2, angle, 0.1]}>
             {/* Left Leaf leaf */}
@@ -113,12 +178,6 @@ function FernModel({ scale }) {
   );
 }
 
-// GLB Model Loader Component to avoid conditional hook call (useGLTF)
-function GLBModel({ url, scale }) {
-  const { scene } = useGLTF(url);
-  return <Clone object={scene} scale={scale} castShadow receiveShadow />;
-}
-
 // Main Flower Model renderer wrapper
 export default function FlowerModel({ 
   flower, 
@@ -130,7 +189,20 @@ export default function FlowerModel({
   stemsDatabase 
 }) {
   const { stemId, position, rotation, scale } = flower;
-  const glbUrl = MODEL_MAPPING[stemId];
+  const dbItem = useMemo(() => stemsDatabase.find(s => String(s.id) === String(stemId)), [stemsDatabase, stemId]);
+  
+  // Resolve model URL with dynamic -> legacy ordering
+  const glbUrl = useMemo(() => {
+    if (dbItem && isValidUrl(dbItem.modelUrl)) {
+      return dbItem.modelUrl;
+    }
+    const legacyPath = MODEL_MAPPING[stemId];
+    if (isValidUrl(legacyPath)) {
+      return legacyPath;
+    }
+    return null;
+  }, [dbItem, stemId]);
+
   const groupRef = useRef();
   const stemRef = useRef();
 
@@ -160,7 +232,6 @@ export default function FlowerModel({
   const isFern = stemId === 'emerald-fern';
 
   // Dynamic selection ring/mesh color helper
-  const dbItem = useMemo(() => stemsDatabase.find(s => s.id === stemId), [stemsDatabase, stemId]);
   const colorHex = dbItem?.color || '#a82c2c';
 
   // Vector / Euler targets for smooth lerping
@@ -241,17 +312,14 @@ export default function FlowerModel({
           ) : isFern ? (
             <FernModel scale={0.8} />
           ) : (
-            // Fallback generic flower shape if model doesn't exist
-            <mesh castShadow>
-              <sphereGeometry args={[0.3, 16, 16]} />
-              <meshStandardMaterial color={colorHex} roughness={0.6} />
-            </mesh>
+            // Fallback lightweight daisy shape if model doesn't exist
+            <FallbackFlowerMesh color={colorHex} scale={1.2} />
           )
         ) : (
-          // Render cached GLB clone
-          <group rotation={rotationOffset}>
-            <GLBModel url={glbUrl} scale={modelScale} />
-          </group>
+          // Render cached GLB clone wrapped in ErrorBoundary with unique url key
+          <GLBErrorBoundary key={glbUrl} url={glbUrl} fallback={<FallbackFlowerMesh color={colorHex} scale={1.2} />}>
+            <DynamicGLBFlower url={glbUrl} scale={modelScale} rotationOffset={rotationOffset} />
+          </GLBErrorBoundary>
         )}
 
         {/* 3. Selection outline highlight (standard mode) */}

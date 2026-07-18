@@ -1,16 +1,16 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { products } from '../../data/products';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useMemo, useEffect } from 'react';
+import api from '../../services/api';
 import { arrangeBouquet, relaxOverlaps } from '../../components/bouquet/LayoutEngine';
+import { BOUQUET_SIZE_CONFIG } from '../../components/bouquet/sizeConfig';
+import { getPriceBreakdown } from '../../components/bouquet/PriceEngine';
 import BouquetCanvas from '../../components/bouquet/BouquetCanvas';
 import CartDrawer from '../GuestUser/components/CartDrawer';
 import Navbar from '../GuestUser/components/Navbar';
+import { BOUQUET_STYLE_OPTIONS, BOUQUET_STYLE_CONFIG } from '../../components/bouquet/bouquetStyleConfig';
 
 import {
   Search,
-  Heart,
-  ShoppingCart,
-  User,
   ChevronDown,
   ChevronUp,
   Plus,
@@ -29,16 +29,9 @@ import {
 } from 'lucide-react';
 
 // Predefined stems database with rich details and local/system images
-const STEMS_DATABASE = [
-  ...products.filter(p => p.type === 'single-stem').map(p => ({
-    id: p.id.toString(),
-    name: p.title,
-    category: 'premium-blooms',
-    price: p.numericPrice ? p.numericPrice : 1500.00,
-    image: p.image,
-    color: p.colors[0]?.hex || '#a82c2c',
-    description: p.description
-  })),
+const generateCustomBouquetId = () => 'custom-' + Date.now();
+
+const FIXED_CUSTOMIZATION_OPTIONS = [
   {
     id: 'spiral-handtied',
     name: 'Hand-tied Spiral Style',
@@ -104,20 +97,120 @@ const STEMS_DATABASE = [
   }
 ];
 
-export default function BoquetCustomization() {
-  const navigate = useNavigate();
+// Centralized occasion mapping
+const OCCASION_SUBCATEGORY_MAP = {
+  ANNIVERSARY: 7,
+  BIRTHDAY: 8,
+  CONVOCATION: 9
+};
 
+const OCCASION_OPTIONS = [
+  { key: 'ANNIVERSARY', label: 'Anniversary' },
+  { key: 'BIRTHDAY', label: 'Birthday' },
+  { key: 'CONVOCATION', label: 'Convocation' }
+];
+
+export default function BoquetCustomization() {
   // Page states
   const [selectedStems, setSelectedStems] = useState([]); // Array of { stemId, quantity }
   const [searchQuery, setSearchQuery] = useState('');
-  const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
-  const [isWishlistActive, setIsWishlistActive] = useState(false);
+  const [selectedOccasion, setSelectedOccasion] = useState('ANNIVERSARY');
+  const [bouquetSize, setBouquetSize] = useState('MEDIUM');
+  const [bouquetStyle, setBouquetStyle] = useState('ROUND');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Dynamic products states
+  const [backendFlowers, setBackendFlowers] = useState([]);
+  const [loadingFlowers, setLoadingFlowers] = useState(true);
+  const [flowersError, setFlowersError] = useState(null);
+
+  const stemsDatabase = useMemo(() => {
+    return [...backendFlowers, ...FIXED_CUSTOMIZATION_OPTIONS];
+  }, [backendFlowers]);
+
+  const activeSizeConfig = useMemo(() => {
+    return BOUQUET_SIZE_CONFIG[bouquetSize];
+  }, [bouquetSize]);
+
+  const currentFlowerCount = useMemo(() => {
+    return selectedStems.reduce((sum, item) => {
+      const dbItem = stemsDatabase.find(s => String(s.id) === String(item.stemId));
+      if (dbItem && dbItem.category === 'premium-blooms') {
+        return sum + item.quantity;
+      }
+      return sum;
+    }, 0);
+  }, [selectedStems, stemsDatabase]);
+
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
+
+  // Fetch individual flowers on mount
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const fetchStems = async () => {
+      setLoadingFlowers(true);
+      setFlowersError(null);
+      try {
+        const response = await api.get('/api/products', { signal: controller.signal });
+        const data = response.data || [];
+        
+        // Filter by category_id === 3
+        const filtered = data.filter(p => {
+          const categoryId = p.categoryId !== undefined ? p.categoryId : p.category_id;
+          return Number(categoryId) === 3;
+        });
+
+        // Map to frontend structure
+        const mapped = filtered.map(p => {
+          const productId = p.productId !== undefined ? p.productId : p.product_id;
+          const productName = p.productName !== undefined ? p.productName : p.product_name;
+          const imageUrl = p.imageUrl !== undefined ? p.imageUrl : p.image_url;
+          const modelUrl = p.modelUrl !== undefined ? p.modelUrl : p.model_url;
+          const stockQuantity = p.stockQuantity !== undefined ? p.stockQuantity : p.stock_quantity;
+          const subCategoryId = p.subCategoryId !== undefined ? p.subCategoryId : p.sub_category_id;
+          const categoryId = p.categoryId !== undefined ? p.categoryId : p.category_id;
+
+          return {
+            id: String(productId),
+            productId: Number(productId),
+            name: productName || 'Unnamed Flower',
+            category: 'premium-blooms',
+            categoryId: Number(categoryId),
+            subCategoryId: subCategoryId ? Number(subCategoryId) : null,
+            price: Number(p.price) || 1500.00,
+            stockQuantity: stockQuantity ? Number(stockQuantity) : 0,
+            image: imageUrl || '/images/product-placeholder.png',
+            modelUrl: modelUrl || null,
+            description: p.description || ""
+          };
+        });
+
+        if (isMounted) {
+          setBackendFlowers(mapped);
+        }
+      } catch (err) {
+        if (err.name !== 'CanceledError' && isMounted) {
+          console.error('Error fetching stems:', err);
+          setFlowersError('Failed to load botanicals. Please try again.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingFlowers(false);
+        }
+      }
+    };
+
+    fetchStems();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -125,54 +218,7 @@ export default function BoquetCustomization() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Synchronize cart count from localStorage and listen to updates
-  useEffect(() => {
-    const updateCartCount = () => {
-      const savedCart = localStorage.getItem('redshan360_cart');
-      if (savedCart) {
-        const cartList = JSON.parse(savedCart);
-        const validItems = cartList.filter((item) => item.isCustom || products.some((p) => p.id === item.id));
-        setCartCount(validItems.reduce((acc, item) => acc + item.quantity, 0));
-      } else {
-        setCartCount(0);
-      }
-    };
 
-    updateCartCount();
-
-    const handleOpenCart = () => setIsCartOpen(true);
-
-    window.addEventListener('cart-updated', updateCartCount);
-    window.addEventListener('open-cart', handleOpenCart);
-
-    return () => {
-      window.removeEventListener('cart-updated', updateCartCount);
-      window.removeEventListener('open-cart', handleOpenCart);
-    };
-  }, []);
-
-  // Synchronize wishlist count
-  useEffect(() => {
-    const updateWishlistCount = () => {
-      const savedWishlist = localStorage.getItem('redshan360_wishlist');
-      if (savedWishlist) {
-        const wishlistObj = JSON.parse(savedWishlist);
-        const count = Object.keys(wishlistObj).filter(
-          (key) => wishlistObj[key] === true && products.some((p) => p.id === Number(key))
-        ).length;
-        setWishlistCount(count);
-      } else {
-        setWishlistCount(0);
-      }
-    };
-
-    updateWishlistCount();
-
-    window.addEventListener('wishlist-updated', updateWishlistCount);
-    return () => {
-      window.removeEventListener('wishlist-updated', updateWishlistCount);
-    };
-  }, []);
   const [activeCategory, setActiveCategory] = useState({
     'premium-blooms': true,
     'bouquet-styles': false,
@@ -248,7 +294,6 @@ export default function BoquetCustomization() {
       setSelectedFlowerId(flowerId);
     }
   };
-
   // Update position and rotation for manually edited flowers
   const handleUpdateFlowerTransform = (flowerId, position, rotation) => {
     setFlowers(prevFlowers => {
@@ -263,7 +308,7 @@ export default function BoquetCustomization() {
         }
         return f;
       });
-      return relaxOverlaps(updated, STEMS_DATABASE, 10);
+      return relaxOverlaps(updated, stemsDatabase, 10, activeSizeConfig);
     });
   };
 
@@ -275,11 +320,11 @@ export default function BoquetCustomization() {
 
   const wrappingId = useMemo(() => {
     const wrap = selectedStems.find(s => {
-      const dbItem = STEMS_DATABASE.find(item => item.id === s.stemId);
+      const dbItem = stemsDatabase.find(item => String(item.id) === String(s.stemId));
       return dbItem?.category === 'wrapping-accents' && s.stemId !== 'velvet-ribbon';
     });
     return wrap ? wrap.stemId : null;
-  }, [selectedStems]);
+  }, [selectedStems, stemsDatabase]);
 
   const ribbonId = useMemo(() => {
     const hasRibbon = selectedStems.some(s => s.stemId === 'velvet-ribbon');
@@ -290,11 +335,10 @@ export default function BoquetCustomization() {
   useEffect(() => {
     setFlowers((prevFlowers) => {
       let updatedFlowers = [...prevFlowers];
-      let needsRearrange = false;
 
       // Filter out non-flower selections from stems database (exclude styles/ribbons/wraps)
       const validStems = selectedStems.filter(s => {
-        const dbItem = STEMS_DATABASE.find(item => item.id === s.stemId);
+        const dbItem = stemsDatabase.find(item => String(item.id) === String(s.stemId));
         return dbItem && dbItem.category !== 'bouquet-styles' && dbItem.category !== 'wrapping-accents';
       });
 
@@ -314,7 +358,6 @@ export default function BoquetCustomization() {
               isManuallyEdited: false
             });
           }
-          needsRearrange = true;
         }
       });
 
@@ -347,32 +390,62 @@ export default function BoquetCustomization() {
             const toRemove = groupedFlowers[stemId].pop();
             updatedFlowers = updatedFlowers.filter(f => f.id !== toRemove.id);
           }
-          needsRearrange = true;
         }
       });
 
       // 3. Clear non-selected items from state
       const validStemIds = validStems.map(s => s.stemId);
-      const preCleanupCount = updatedFlowers.length;
       updatedFlowers = updatedFlowers.filter(f => validStemIds.includes(f.stemId));
-      if (updatedFlowers.length !== preCleanupCount) {
-        needsRearrange = true;
-      }
 
-      if (needsRearrange) {
-        return arrangeBouquet(updatedFlowers, selectedStyle, STEMS_DATABASE);
-      }
-      return updatedFlowers;
+      // Always arrange coordinates to apply scaled size config parameters (radius, height, spacing) correctly
+      return arrangeBouquet(updatedFlowers, {
+        bindingStyle: selectedStyle,
+        stemsDatabase,
+        sizeConfig: activeSizeConfig,
+        bouquetStyle
+      });
     });
-  }, [selectedStems, selectedStyle]);
+  }, [selectedStems, selectedStyle, stemsDatabase, activeSizeConfig, bouquetStyle]);
+
+  // Check if selected occasion has any database flowers
+  const hasOccasionFlowers = useMemo(() => {
+    const selectedSubCategoryId = OCCASION_SUBCATEGORY_MAP[selectedOccasion];
+    return stemsDatabase.some(flower => 
+      flower.category === 'premium-blooms' &&
+      flower.subCategoryId !== null &&
+      flower.subCategoryId !== undefined &&
+      !isNaN(Number(flower.subCategoryId)) &&
+      Number(flower.subCategoryId) === selectedSubCategoryId
+    );
+  }, [stemsDatabase, selectedOccasion]);
 
   // Search and filter stems
   const filteredStems = useMemo(() => {
-    return STEMS_DATABASE.filter(stem =>
-      stem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stem.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
+    const selectedSubCategoryId = OCCASION_SUBCATEGORY_MAP[selectedOccasion];
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+
+    return stemsDatabase.filter(flower => {
+      // 1. Search query filtering (applies to all stems)
+      const flowerName = String(flower.name ?? '').toLowerCase();
+      const flowerDescription = String(flower.description ?? '').toLowerCase();
+
+      const matchesSearch =
+        flowerName.includes(normalizedSearch) ||
+        flowerDescription.includes(normalizedSearch);
+      if (!matchesSearch) return false;
+
+      // 2. Occasion filtering (applies ONLY to premium-blooms category)
+      if (flower.category === 'premium-blooms') {
+        if (flower.subCategoryId === null || flower.subCategoryId === undefined || isNaN(Number(flower.subCategoryId))) {
+          return false;
+        }
+        return Number(flower.subCategoryId) === selectedSubCategoryId;
+      }
+
+      // 3. Other categories bypass occasion filtering
+      return true;
+    });
+  }, [stemsDatabase, selectedOccasion, searchQuery]);
 
   // Toggle category expand/collapse
   const toggleCategory = (categoryKey) => {
@@ -382,13 +455,40 @@ export default function BoquetCustomization() {
     }));
   };
 
+  const handleSizeChange = (newSizeKey) => {
+    if (newSizeKey === bouquetSize) return;
+
+    const targetConfig = BOUQUET_SIZE_CONFIG[newSizeKey];
+    if (currentFlowerCount > targetConfig.maxFlowers) {
+      const excess = currentFlowerCount - targetConfig.maxFlowers;
+      triggerToast(
+        `${targetConfig.label} supports up to ${targetConfig.maxFlowers} flowers. Remove ${excess} flower${excess > 1 ? 's' : ''} before selecting this size.`
+      );
+      return;
+    }
+
+    setBouquetSize(newSizeKey);
+    triggerToast(`Bouquet size updated to ${targetConfig.label}`);
+  };
+
   // Add a stem to the customizer selection
   const handleAddStem = (stemId) => {
+    const dbItem = stemsDatabase.find(s => String(s.id) === String(stemId));
+    const isFlower = dbItem && dbItem.category === 'premium-blooms';
+
+    if (isFlower) {
+      const maxFlowers = activeSizeConfig.maxFlowers;
+      if (currentFlowerCount >= maxFlowers) {
+        triggerToast(`Limit reached: ${activeSizeConfig.label} size supports up to ${maxFlowers} flowers.`);
+        return;
+      }
+    }
+
     setSelectedStems(prev => {
-      const existing = prev.find(item => item.stemId === stemId);
+      const existing = prev.find(item => String(item.stemId) === String(stemId));
       if (existing) {
         return prev.map(item =>
-          item.stemId === stemId ? { ...item, quantity: item.quantity + 1 } : item
+          String(item.stemId) === String(stemId) ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
         return [...prev, { stemId, quantity: 1 }];
@@ -399,21 +499,21 @@ export default function BoquetCustomization() {
   // Remove or decrement a stem from the selection
   const handleRemoveStem = (stemId) => {
     setSelectedStems(prev => {
-      const existing = prev.find(item => item.stemId === stemId);
+      const existing = prev.find(item => String(item.stemId) === String(stemId));
       if (!existing) return prev;
       if (existing.quantity > 1) {
         return prev.map(item =>
-          item.stemId === stemId ? { ...item, quantity: item.quantity - 1 } : item
+          String(item.stemId) === String(stemId) ? { ...item, quantity: item.quantity - 1 } : item
         );
       } else {
-        return prev.filter(item => item.stemId !== stemId);
+        return prev.filter(item => String(item.stemId) !== String(stemId));
       }
     });
   };
 
   // Complete removal of a stem category
   const handleClearStem = (stemId) => {
-    setSelectedStems(prev => prev.filter(item => item.stemId !== stemId));
+    setSelectedStems(prev => prev.filter(item => String(item.stemId) !== String(stemId)));
   };
 
   const handleSelectWrapping = (id) => {
@@ -470,12 +570,12 @@ export default function BoquetCustomization() {
     const cartList = savedCart ? JSON.parse(savedCart) : [];
 
     // Generate a unique ID for this specific curation
-    const customBouquetId = 'custom-' + Date.now();
+    const customBouquetId = generateCustomBouquetId();
 
     // Map selected stems to descriptive names
     const selectedStemsDetails = selectedStems
       .map(item => {
-        const dbItem = STEMS_DATABASE.find(s => s.id === item.stemId);
+        const dbItem = stemsDatabase.find(s => String(s.id) === String(item.stemId));
         return dbItem ? `${item.quantity}x ${dbItem.name}` : '';
       })
       .filter(Boolean)
@@ -485,8 +585,8 @@ export default function BoquetCustomization() {
       id: customBouquetId,
       isCustom: true,
       title: 'Custom Bouquet Arrangement',
-      price: 'Rs ' + estimatedTotal.toFixed(2),
-      numericPrice: estimatedTotal,
+      price: 'Rs. ' + priceBreakdown.grandTotal.toFixed(2),
+      numericPrice: priceBreakdown.grandTotal,
       image: '/images/peonies_vase.png',
       selectedColor: selectedStemsDetails || 'Custom Curation',
       quantity: 1,
@@ -501,8 +601,24 @@ export default function BoquetCustomization() {
           isManuallyEdited: f.isManuallyEdited
         })),
         style: selectedStyle,
+        bouquetStyle: bouquetStyle,
         wrappingId,
-        ribbonId
+        ribbonId,
+        sizeKey: bouquetSize,
+        sizeLabel: activeSizeConfig.label,
+        maxFlowers: activeSizeConfig.maxFlowers,
+        radiusMultiplier: activeSizeConfig.radiusMultiplier,
+        heightMultiplier: activeSizeConfig.heightMultiplier,
+        spacingMultiplier: activeSizeConfig.spacingMultiplier,
+        priceMultiplier: activeSizeConfig.priceMultiplier,
+        priceBreakdown: {
+          flowerSubtotal: priceBreakdown.flowerSubtotal,
+          sizeMultiplier: priceBreakdown.sizeMultiplier,
+          sizeAdjustment: priceBreakdown.sizeAdjustment,
+          scaledFlowerTotal: priceBreakdown.scaledFlowerTotal,
+          serviceCharge: priceBreakdown.serviceCharge,
+          grandTotal: priceBreakdown.grandTotal
+        }
       }
     };
 
@@ -518,15 +634,16 @@ export default function BoquetCustomization() {
   };
 
   // Price calculations
-  const basePrice = 13500.00; // Crystal Vase (Base)
-  const botanicalSelectionPrice = useMemo(() => {
-    return selectedStems.reduce((sum, item) => {
-      const dbItem = STEMS_DATABASE.find(s => s.id === item.stemId);
-      return sum + (dbItem ? dbItem.price * item.quantity : 0);
-    }, 0);
-  }, [selectedStems]);
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const priceBreakdown = useMemo(() => {
+    return getPriceBreakdown(selectedStems, stemsDatabase, bouquetSize, activeSizeConfig);
+  }, [selectedStems, stemsDatabase, bouquetSize, activeSizeConfig]);
 
-  const estimatedTotal = basePrice + botanicalSelectionPrice;
+  const formatCurrency = (value) => {
+    const num = Number(value) || 0;
+    const absVal = Math.abs(num).toFixed(2);
+    return num < 0 ? `-Rs. ${absVal}` : `Rs. ${absVal}`;
+  };
 
   // Map category tags for rendering
   const categoriesList = [
@@ -571,6 +688,88 @@ export default function BoquetCustomization() {
             </p>
           </div>
 
+          {/* Bouquet Size Selector */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-[#563c37]/60">
+              Bouquet Size
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.keys(BOUQUET_SIZE_CONFIG).map((sizeKey) => {
+                const config = BOUQUET_SIZE_CONFIG[sizeKey];
+                const isActive = bouquetSize === sizeKey;
+                return (
+                  <button
+                    key={sizeKey}
+                    type="button"
+                    onClick={() => handleSizeChange(sizeKey)}
+                    className={`flex flex-col text-left p-2.5 rounded-xl border transition-all duration-300 ${
+                      isActive
+                        ? 'bg-[#563c37] text-white border-[#563c37] shadow-sm'
+                        : 'bg-[#fdfbf9]/40 border-[#ece7e2] text-[#563c37] hover:border-[#8c5e5e]/30'
+                    }`}
+                  >
+                    <span className="text-xs font-bold">{config.label}</span>
+                    <span className={`text-[9px] mt-0.5 ${isActive ? 'text-white/70' : 'text-[#563c37]/50'}`}>
+                      Up to {config.maxFlowers} flowers
+                    </span>
+                    <span className={`text-[9px] mt-0.5 font-semibold ${isActive ? 'text-white/80' : 'text-[#8c5e5e]'}`}>
+                      {config.priceMultiplier}x price
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Bouquet Style Selector */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-[#563c37]/60">
+              Bouquet Style
+            </span>
+            <div className="grid grid-cols-3 gap-2">
+              {BOUQUET_STYLE_OPTIONS.map((styleOpt) => {
+                const isActive = bouquetStyle === styleOpt.key;
+                return (
+                  <button
+                    key={styleOpt.key}
+                    type="button"
+                    onClick={() => {
+                      setBouquetStyle(styleOpt.key);
+                      triggerToast(`Style updated to ${styleOpt.label}`);
+                    }}
+                    className={`py-2 px-1 rounded-xl border text-[10.5px] font-bold uppercase tracking-wider text-center transition-all duration-300 ${
+                      isActive
+                        ? 'bg-[#563c37] text-white border-[#563c37] shadow-sm'
+                        : 'bg-[#fdfbf9]/40 border-[#ece7e2] text-[#563c37] hover:border-[#8c5e5e]/30'
+                    }`}
+                  >
+                    {styleOpt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Occasion Selection Buttons */}
+          <div className="flex gap-2 p-1 bg-[#fdfbf9] border border-[#ece7e2] rounded-xl">
+            {OCCASION_OPTIONS.map((option) => {
+              const isActive = selectedOccasion === option.key;
+              return (
+                <button
+                  key={option.key}
+                  onClick={() => setSelectedOccasion(option.key)}
+                  className={`flex-1 text-[10px] font-bold py-2 px-1 rounded-lg transition-all duration-300 ${
+                    isActive
+                      ? 'bg-[#563c37] text-white shadow-sm'
+                      : 'text-[#563c37]/60 hover:text-[#563c37] hover:bg-[#f5efeb]/40'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Search bar */}
           <div className="relative flex items-center bg-[#fdfbf9] border border-[#ece7e2] rounded-lg px-3 py-2.5">
             <Search size={14} className="text-[#563c37]/40 mr-2" />
@@ -583,7 +782,17 @@ export default function BoquetCustomization() {
             />
           </div>
 
-          {/* Categories list accordion */}
+          {loadingFlowers ? (
+            <div className="flex flex-col items-center justify-center py-20 text-[#563c37]/60">
+              <div className="w-8 h-8 border-3 border-[#563c37]/20 border-t-[#8c5e5e] rounded-full animate-spin mb-3"></div>
+              <p className="text-xs font-semibold uppercase tracking-wider">Curation Loading...</p>
+            </div>
+          ) : flowersError ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center text-red-500/80 px-4">
+              <p className="text-xs font-semibold">{flowersError}</p>
+            </div>
+          ) : (
+            /* Categories list accordion */
           <div className="flex flex-col gap-2">
             {categoriesList.map((category) => {
               const categoryStems = filteredStems.filter(s => s.category === category.key);
@@ -602,7 +811,15 @@ export default function BoquetCustomization() {
                   {isExpanded && (
                     <div className="mt-2 flex flex-col gap-4 animate-fadeIn">
                       {categoryStems.length === 0 ? (
-                        <p className="text-[11px] text-[#563c37]/40 italic py-1">No stems match your search.</p>
+                        category.key === 'premium-blooms' ? (
+                          !hasOccasionFlowers ? (
+                            <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers are available for this occasion.</p>
+                          ) : (
+                            <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers match your search.</p>
+                          )
+                        ) : (
+                          <p className="text-[11px] text-[#563c37]/60 italic py-1">No stems match your search.</p>
+                        )
                       ) : (
                         <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1.5 scroll-smooth custom-scrollbar">
                           {/* Special check for wrapping-accents category */}
@@ -641,7 +858,7 @@ export default function BoquetCustomization() {
 
                           {/* Normal List Rendering (accents/ribbons or standard categories) */}
                           {categoryStems
-                            .filter(stem => category.key !== 'wrapping-accents')
+                            .filter(() => category.key !== 'wrapping-accents')
                             .map((stem) => {
                               const quantitySelected = selectedStems.find(s => s.stemId === stem.id)?.quantity || 0;
 
@@ -691,6 +908,7 @@ export default function BoquetCustomization() {
               );
             })}
           </div>
+          )}
         </section>
 
         {/* MIDDLE PANEL: 3D INTERACTIVE CANVAS */}
@@ -713,7 +931,7 @@ export default function BoquetCustomization() {
                 flowers={flowers}
                 wrappingId={wrappingId}
                 ribbonId={ribbonId}
-                stemsDatabase={STEMS_DATABASE}
+                stemsDatabase={stemsDatabase}
                 selectedFlowerId={selectedFlowerId}
                 selectedSwapFlowerId={selectedSwapFlowerId}
                 isSwapMode={isSwapMode}
@@ -824,7 +1042,7 @@ export default function BoquetCustomization() {
                 // List of selection items
                 <div className="flex flex-col gap-3 max-h-[220px] overflow-y-auto pr-1">
                   {selectedStems.map((item) => {
-                    const dbItem = STEMS_DATABASE.find(s => s.id === item.stemId);
+                    const dbItem = stemsDatabase.find(s => String(s.id) === String(item.stemId));
                     if (!dbItem) return null;
 
                     return (
@@ -857,12 +1075,24 @@ export default function BoquetCustomization() {
             <div className="border-t border-[#fdfbf9] pt-4 flex flex-col gap-3">
               {/* Pricing list */}
               <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
-                <span>CRYSTAL VASE (BASE)</span>
-                <span className="text-[#563c37]">Rs {basePrice.toFixed(2)}</span>
+                <span>FLOWER SUBTOTAL</span>
+                <span className="text-[#563c37]">{formatCurrency(priceBreakdown.flowerSubtotal)}</span>
               </div>
               <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
-                <span>BOTANICAL SELECTION</span>
-                <span className="text-[#563c37]">Rs {botanicalSelectionPrice.toFixed(2)}</span>
+                <span>BOUQUET SIZE</span>
+                <span className="text-[#563c37] uppercase">{priceBreakdown.sizeLabel} ({priceBreakdown.sizeMultiplier}X)</span>
+              </div>
+              <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
+                <span>SIZE ADJUSTMENT</span>
+                <span className="text-[#563c37]">{formatCurrency(priceBreakdown.sizeAdjustment)}</span>
+              </div>
+              <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
+                <span>ADJUSTED FLOWER TOTAL</span>
+                <span className="text-[#563c37]">{formatCurrency(priceBreakdown.scaledFlowerTotal)}</span>
+              </div>
+              <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
+                <span>SERVICE CHARGE</span>
+                <span className="text-[#563c37]">{formatCurrency(priceBreakdown.serviceCharge)}</span>
               </div>
 
               <div className="border-t border-[#fdfbf9] my-1" />
@@ -874,7 +1104,7 @@ export default function BoquetCustomization() {
                     Estimated Total
                   </span>
                   <span className="text-3xl font-extrabold text-[#563c37] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    Rs {estimatedTotal.toFixed(2)}
+                    {formatCurrency(priceBreakdown.grandTotal)}
                   </span>
                 </div>
 

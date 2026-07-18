@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Star, Heart, Eye, ShoppingCart, ChevronLeft, ChevronRight, Filter, SlidersHorizontal, Check, Info, AlertCircle, X } from 'lucide-react';
 import api, { cartApi } from '../../services/api';
+import { getProductImageUrl } from '../../utils/imageHelper';
 
 // Import Images for Anniversary Boquets
 import A1 from '../../assets/A1.jpg';
@@ -69,8 +70,7 @@ const Shop = () => {
   // Image resolver helper to map products dynamically to either database images or fallback local assets
   const getProductImage = (product) => {
     if (product.imageUrl) {
-      const baseUrl = api.defaults.baseURL || 'http://localhost:8080';
-      return `${baseUrl}${product.imageUrl}`;
+      return getProductImageUrl(product.imageUrl);
     }
 
     const name = (product.productName || '').toLowerCase();
@@ -753,7 +753,7 @@ const Shop = () => {
                       <div>
                         {/* Image box */}
                         <div className="relative aspect-[3/4] rounded-sm overflow-hidden bg-[#f4f0ed] shadow-sm mb-4 border border-[#d9d2d0]/15">
-                          <Link to={`/product/${product.id}`} className="block w-full h-full">
+                          <Link to={`/product/${product.productId}`} className="block w-full h-full">
                             <img
                               src={product.imageUrl}
                               alt={product.title}
@@ -808,7 +808,7 @@ const Shop = () => {
 
                         {/* Text meta */}
                         <div className="pt-1 px-1 text-left">
-                          <Link to={`/product/${product.id}`} className="hover:text-[#8c5e5e] transition-colors">
+                          <Link to={`/product/${product.productId}`} className="hover:text-[#8c5e5e] transition-colors">
                             <h4 className="text-[15px] text-[#1a1a1a] font-bold tracking-tight truncate leading-tight group-hover:text-[#8c5e5e]" style={{ fontFamily: 'Playfair Display, serif' }}>
                               {product.title}
                             </h4>
