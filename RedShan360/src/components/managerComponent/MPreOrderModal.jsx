@@ -7,7 +7,7 @@ export default function MPreOrderModal({
     onClose,
     order,          // Single order for detail mode
     onApprove,      // Action for detail mode
-    employeeName,   // Selected employee for assignment mode
+    employee,   // Selected employee for assignment mode
     preOrders = [], // List of pre-orders for assignment mode
     onAssign        // Callback when assigning an order to an employee
 }) {
@@ -15,7 +15,7 @@ export default function MPreOrderModal({
 
     if (!isOpen) return null;
 
-    const isAssignmentMode = !!employeeName;
+    const isAssignmentMode = !!employee?.EmployeeName;
 
     const toggleExpandOrder = (orderId) => {
         if (expandedOrderId === orderId) {
@@ -35,7 +35,7 @@ export default function MPreOrderModal({
                         <span className="modal-badge">{isAssignmentMode ? "Assignment" : "Pre-Order"}</span>
                         <h3>
                             {isAssignmentMode
-                                ? `Assign Order to ${employeeName}`
+                                ? `Assign Order to ${employee?.EmployeeName}`
                                 : `Order Details: ${order?.OrderID}`}
                         </h3>
                     </div>
@@ -50,7 +50,7 @@ export default function MPreOrderModal({
                         // --- Assignment Mode ---
                         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                             <p style={{ fontSize: "14px", color: "var(--color-text-muted)", margin: 0 }}>
-                                Select a preorder from the list below to assign to <strong>{employeeName}</strong>.
+                                Select a preorder from the list below to assign to <strong>{employee?.EmployeeName}</strong>.
                                 Click on customize order row to preview its 3D customization specifications.
                             </p>
 
@@ -74,7 +74,6 @@ export default function MPreOrderModal({
                                             <tr>
                                                 <th>Order ID</th>
                                                 <th>Customer</th>
-                                                <th>Order Name</th>
                                                 <th>Price</th>
                                                 <th>Type</th>
                                                 <th style={{ textAlign: "right" }}>Action</th>
@@ -99,7 +98,6 @@ export default function MPreOrderModal({
                                                                 </div>
                                                             </td>
                                                             <td>{po.CustomerName}</td>
-                                                            <td>{po.OrderName}</td>
                                                             <td style={{ fontWeight: "600", color: "var(--color-primary)" }}>{po.Price}</td>
                                                             <td>
                                                                 <span className="modal-badge" style={{
@@ -117,7 +115,7 @@ export default function MPreOrderModal({
                                                                     className="btn-dispatch"
                                                                     style={{ padding: "6px 12px", fontSize: "12px" }}
                                                                     onClick={() => {
-                                                                        if (onAssign) onAssign(employeeName, po);
+                                                                        if (onAssign) onAssign(employee, po);
                                                                         onClose();
                                                                     }}
                                                                 >
@@ -129,7 +127,7 @@ export default function MPreOrderModal({
                                                         {/* Expanded Customization Details Row */}
                                                         {isExpanded && isCustom && (
                                                             <tr style={{ background: "rgba(116, 79, 81, 0.02)" }}>
-                                                                <td colSpan="6" style={{ padding: "16px 24px", borderBottom: "1px solid var(--color-border)" }}>
+                                                                <td colSpan="5" style={{ padding: "16px 24px", borderBottom: "1px solid var(--color-border)" }}>
                                                                     <div className="modal-grid" style={{ margin: 0 }}>
                                                                         <div className="modal-card-info" style={{ padding: "12px", gap: "8px" }}>
                                                                             <div className="card-header" style={{ paddingBottom: "6px" }}>
@@ -225,10 +223,6 @@ export default function MPreOrderModal({
                                             <h4>Flower Customization Specifications</h4>
                                         </div>
                                         <div className="card-content">
-                                            <div className="info-row">
-                                                <span className="info-label">Design Preset:</span>
-                                                <span className="info-val highlight-val">{order.OrderName}</span>
-                                            </div>
                                             <div className="info-row">
                                                 <span className="info-label">Primary Flower:</span>
                                                 <span className="info-val">{order.FlowerType || "Rose/Lily Hybrid"}</span>
