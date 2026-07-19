@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import EmployeeDashboard from "./pages/Employee/employeeDashboard";
 import LoginPage from "./pages/Login_Register/Login_Page";
 import RegistrationPage from "./pages/Login_Register/Registration";
+import ForgotPasswordPage from "./pages/Login_Register/ForgotPassword";
 import GuestUserDashboard from './pages/GuestUser/guestUserDashboard';
 
 
@@ -93,6 +94,7 @@ function App() {
           <Route path="/" element={<GuestUserDashboard />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
 
           <Route path="/guestUserDashboard" element={<GuestUserDashboard />} />
