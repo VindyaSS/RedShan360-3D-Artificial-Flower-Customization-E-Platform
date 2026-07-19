@@ -11,8 +11,7 @@ export default function AssignedEmployeeTable(props) {
                     <tr >
                         <th>{props.t1}</th>
                         <th>{props.t2}</th>
-                        <th>{props.t3}</th>
-                        <th colSpan="2">{props.t4}</th>
+                        <th colSpan="2">{props.t3}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,7 +24,6 @@ export default function AssignedEmployeeTable(props) {
                             <tr key={assignedEmployee.EmployeeName}>
                                 <td>{assignedEmployee.EmployeeName}</td>
                                 <td>{assignedEmployee.OrderID}</td>
-                                <td>{assignedEmployee.OrderName}</td>
                                 <td colSpan="2">
                                     <button className={`btn-dispatch ${isActive ? "active-status" : ""} ${isOffline ? "offline-status" : ""} ${isNotStarted ? "not-started-status" : ""}`}>
                                         {status}

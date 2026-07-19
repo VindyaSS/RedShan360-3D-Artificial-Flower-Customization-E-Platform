@@ -16,13 +16,13 @@ export default function UnAssignedEmployeeTable(props) {
                 </thead>
                 <tbody>
                     {props.unAssignedEmployees?.map((unAssignedEmployee) => (
-                        <tr key={unAssignedEmployee.EmployeeName}>
+                        <tr key={unAssignedEmployee.employeeId}>
                             <td>{unAssignedEmployee.EmployeeName}</td>
 
                             <td colSpan="2">
                                 <button 
                                     className="btn-dispatch"
-                                    onClick={() => props.onAssignClick && props.onAssignClick(unAssignedEmployee.EmployeeName)}
+                                    onClick={() => props.onAssignClick && props.onAssignClick(unAssignedEmployee)}
                                 >
                                     Assign For Order
                                 </button>
