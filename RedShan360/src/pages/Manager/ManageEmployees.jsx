@@ -7,29 +7,12 @@ import MPreOrderModal from "../../components/managerComponent/mPreOrderModal";
 import api from '../../services/api';
 
 export default function MmanageEmployees() {
-    const [assignedEmployees, setAssignedEmployees] = useState([
-        {
-            EmployeeName: "John",
-            OrderID: "ORD001",
-            WorkingStatus: "Active",
-        },
-
-        {
-            EmployeeName: "Kamal",
-            OrderID: "ORD002",
-            WorkingStatus: "Offline",
-        },
-
-        {
-            EmployeeName: "Nimal",
-            OrderID: "ORD003",
-            WorkingStatus: "Active",
-        },
-    ]);
+    
 
     const [unAssignedEmployees, setUnAssignedEmployees] = useState([]);
 
     const [preOrders, setPreOrders] = useState([]);
+    const [assignedEmployees, setAssignedEmployees] = useState([]);
 
     const fetchPreOrders = async () => {
         try {
@@ -56,6 +39,26 @@ export default function MmanageEmployees() {
         }
     };
 
+    const fetchAssignedEmployees = async () => {
+    try {
+        const response = await api.get("http://localhost:8080/api/employees/assigned");
+
+        const employees = response.data.map(emp => ({
+            employeeId: emp.employeeId,
+            EmployeeName: emp.employeeName,
+            OrderID: emp.orderId,
+            WorkingStatus: emp.workingStatus
+        }));
+
+        setAssignedEmployees(employees);
+
+        console.log("Assigned Employees :", employees);
+
+    } catch (error) {
+        console.error("Error fetching assigned employees :", error);
+    }
+};
+
     const fetchUnAssignedEmployees = async () => {
         try {
             const response = await api.get("http://localhost:8080/api/employees/not-assigned");
@@ -78,6 +81,8 @@ export default function MmanageEmployees() {
     useEffect(() => {
         fetchPreOrders();
         fetchUnAssignedEmployees();
+        fetchAssignedEmployees();
+
     }, []);
 
     const [selectedEmployee, setSelectedEmployee] = useState(null);
