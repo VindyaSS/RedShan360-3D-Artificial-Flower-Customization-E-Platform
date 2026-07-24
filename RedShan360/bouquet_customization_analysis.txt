@@ -1,0 +1,291 @@
+REDSHAN360 3D BOUQUET CUSTOMIZATION ANALYSIS REPORT
+===================================================
+
+This document provides a detailed code-level analysis of the current 3D bouquet customization system implemented in RedShan360.
+
+---------------------------------------------------
+1. PRODUCT AND FLOWER DATA SOURCE
+---------------------------------------------------
+* API Fetching: Individual flowers are NOT fetched from the backend API `/api/products` on the customization page. Instead, Boquet_Customization.jsx imports the static `products` array from `src/data/products.js`.
+* Identifying Individual Flowers: There is no query checking for `category_id = 3` (Individual Flowers) from the database. The single-stem items are loaded statically by filtering `products` where `p.type === 'single-stem'`.
+* Field Mapping:
+  - id: p.id.toString()
+  - name: p.title
+  - category: 'premium-blooms'
+  - price: p.numericPrice (fallback: 1500.00)
+  - image: p.image
+  - color: p.colors[0]?.hex || '#a82c2c'
+  - description: p.description
+* Image Path Normalization: Images are resolved via compile-time ES6 static imports from the local assets directory inside `products.js`, rather than dynamic URLs from the backend database.
+* Selection Listing: These filtered mock items become the stems presented inside the accordion under the "Premium Blooms" selection menu.
+
+---------------------------------------------------
+2. OCCASION FILTERING
+---------------------------------------------------
+* Selecting Occasions: There is no occasion filtering (Anniversary, Birthday, Convocation) implemented in Boquet_Customization.jsx. No occasion buttons or state fields exist in the UI.
+* Sub-category Usage: The `subcategory` property present in the static products list (e.g., 'anniversary', 'birthday', 'convocation') is completely unused.
+* Displayed Flowers: Since no occasion filter is active, all single-stem items from the static database are displayed together, subject only to keyword search matches.
+* State Transition: Changing occasions has no effect as the component lacks occasion state variables.
+
+---------------------------------------------------
+3. FLOWER SELECTION STATE
+---------------------------------------------------
+* Structure of selectedStems: Array of `{ stemId, quantity }` objects:
+  [
+    { "stemId": "8", "quantity": 3 },
+    { "stemId": "10", "quantity": 1 }
+  ]
+* Add Stem: Clicking the plus button calls `handleAddStem(stemId)`. If the item exists in `selectedStems`, it increments the quantity; otherwise, it appends `{ stemId, quantity: 1 }`.
+* Remove / Decrement Stem:
+  - Decrement: Clicking minus calls `handleRemoveStem(stemId)`. It decrements the quantity by 1, and filters it out if it reaches 0.
+  - Complete Removal: Clicking trash calls `handleClearStem(stemId)`, filtering the item out of the array immediately.
+* Maximum Limit: There is no maximum flower limit check implemented. Users can add an infinite number of stems.
+* Color Selection: Flower colors cannot be changed individually; the default color hex from the product definition is used only to render 3D selection highlights.
+
+---------------------------------------------------
+4. BOUQUET SIZE SYSTEM
+---------------------------------------------------
+* Sizes Available: None. The customization page operates on a single default size configuration.
+* Config Values: Since there are no size selectors (S, M, L), there are no varying flower limits, radial constraints, spacing boundaries, or heights mapped to size properties.
+* Layout Constants: Hardcoded in LayoutEngine.js:
+  - R_MAX_CLASSIC = 2.8
+  - R_MAX_SPIRAL = 3.1
+  - R_DOME = 3.6
+  - Y_MAX = 4.6
+  - Y_BASE = Y_MAX - R_DOME (1.0)
+* Size Reductions: There is no mechanism to evict excess flowers since size changes are not supported.
+* Saving Size in Cart: No size metadata is generated or saved in the cart item.
+
+---------------------------------------------------
+5. ARRANGEMENT STYLE SYSTEM
+---------------------------------------------------
+* Selection: Computed automatically in Boquet_Customization.jsx using useMemo:
+  - If selectedStems contains 'spiral-handtied', selectedStyle = 'spiral-handtied'.
+  - Otherwise, defaults to 'classic-dome'.
+  * Note: Because the 'bouquet-styles' category is omitted from the UI accordion categories list, 'spiral-handtied' cannot be chosen, causing the layout to default to 'classic-dome'.
+* Communication: The style string is passed to `arrangeBouquet(updatedFlowers, selectedStyle, STEMS_DATABASE)` in the stems sync useEffect.
+* Calculations in LayoutEngine.js:
+  - Uses Fermat Spiral (Golden Spiral) algorithm.
+  - Angle: `theta = index * goldenAngle` ( goldenAngle = 2.39996322978 radians ).
+  - Radial distance: `r = R_max * Math.pow(index / (totalCount - 1), 0.65)`.
+  - Coordinates projected to horizontal plane: `x = r * Math.cos(theta)`, `z = r * Math.sin(theta)`.
+  - Height Y is calculated strictly along the hemisphere dome equation: `y = Y_BASE + Math.sqrt(R_DOME * R_DOME - r * r)`.
+  - Rotation aligns the flower to point outwards along the dome normal.
+* Layout Scaling: Scaled horizontally by R_max:
+  - 'classic-dome': R_max = R_MAX_CLASSIC * 0.75 (2.1)
+  - 'spiral-handtied': R_max = R_MAX_SPIRAL * 0.75 (2.325)
+* Recalculations: Fired whenever selectedStems or selectedStyle updates.
+* Collision Relaxation:
+  - Implemented in `relaxOverlaps` with 8 iterations.
+  - Checks for collisions in XZ-plane ONLY.
+  - Push force is 18% of the overlap distance (`pushForce = 0.18`) per iteration.
+  - If a flower is manually edited, it acts as a static obstacle (push force on the other flower doubles to 36%).
+  - Boundary limits clamp flowers back within R_max, and their Y height and outward orientation are recomputed.
+  - Relaxation is enabled for both styles and cannot be skipped.
+
+---------------------------------------------------
+6. 3D FLOWER SYNCHRONIZATION
+---------------------------------------------------
+* State Conversion: In Boquet_Customization.jsx, a useEffect syncs selectedStems (excluding wraps/styles) to individual flower objects in the `flowers` state.
+* Unique IDs: Created using `${item.stemId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`.
+* Additions: If quantity in selectedStems is higher than the count of that stemId in the `flowers` state, missing items are appended with default position `[0, 2.5, 0]` and `isManuallyEdited: false`.
+* Removals: If quantity is lower, it groups items, sorts them to prioritize removing non-manually edited ones, and pops the excess. Any stem ID not present in selectedStems is completely removed.
+* Model URL in FlowerModel.jsx:
+  - Resolved using a hardcoded mapping:
+    ```javascript
+    const MODEL_MAPPING = {
+      '2': '/models/redChrysanthemums.glb',
+      '3': '/models/purplrcarnation.glb',
+      '5': '/models/pinkChrysanthemums.glb',
+      '7': '/models/LilyHeadDress.glb',
+      '8': '/models/redrose.glb',
+      '10': '/models/Liliflowerpink.glb',
+    };
+    ```
+  - It does NOT fetch any backend `model_url` dynamically.
+* Fallback GLB Model: If a stem ID is not mapped:
+  - If it is 'silver-eucalyptus' or 'emerald-fern', it renders procedural foliage models.
+  - Otherwise, it falls back to rendering a generic wireframe-like colored sphere.
+
+---------------------------------------------------
+7. ANIMATION AND MANUAL EDITING
+---------------------------------------------------
+* Smooth Transitions: Managed in FlowerModel.jsx's useFrame loop.
+* Lerp Usage:
+  - If not selected, the group position and rotation are smoothly interpolated to target coordinates:
+    `groupRef.current.position.lerp(targetPos, delta * 6.5)`
+    `groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetRot.x, delta * 6.5)`
+  - If selected, position and rotation copy the target instantly to prevent lag during active dragging.
+* Dragging: Enabled via `@react-three/drei`'s `<TransformControls>` which overlays a translation gizmo when selected.
+* isManuallyEdited: Drag release calls `onUpdateFlowerTransform(id, pos, rot)`, updating state and setting `isManuallyEdited = true`.
+* Preserving Manual Edits: Manually edited flowers bypass the auto-arrangement Fermat spiral and remain in their custom positions, acting as static barriers in collision relaxation.
+* Resetting Positions: Fired by the "Reset arrangement" button, clearing selections and state.
+* Swapping Flowers: Clicking the "Shuffle" button enables Swap Mode. Clicking two flowers in sequence calls `swapFlowers(id1, id2)`, which swaps their positions, rotations, and scales in state and locks them with `isManuallyEdited: true`.
+
+---------------------------------------------------
+8. 3D CANVAS
+---------------------------------------------------
+* Camera: position `[0, 2, 7]`, fov `45`. Preserves drawing buffer for snapshots.
+* Lighting: ambientLight (0.7), directionalLight key light (1.5) at `[5, 8, 5]` casting shadows, directionalLight fill light (0.5) at `[-5, 5, -5]`, pointLight back light (0.8, color: #fbf4eb) at `[0, 5, -2]`.
+* Orbit Controls: makeDefault, zoom and panning enabled, minDistance 3.5, maxDistance 12, polar angle limit to prevent camera going below table floor (`Math.PI / 2 + 0.1`).
+* Vase Model: Renders a crystal physical glass cylinder containing a cylinder representing water and cylinders representing submerged stems, resting on a grid table plane.
+* Wrapping and Ribbon:
+  - wrappingId = 'kraft-paper': renders a flared double-sided cylinder representing brown paper wrap.
+  - ribbonId = 'velvet-ribbon': renders a torus collar ring and a 3D ribbon bow node with hanging tails around the vase neck.
+* Performance: Loops through `MODEL_MAPPING` and calls `useGLTF.preload(url)` at load time to preload assets. Uses `<Clone>` to copy cached scenes.
+
+---------------------------------------------------
+9. CURRENT PRICE CALCULATION
+---------------------------------------------------
+* Formulas:
+  - botanicalSelectionPrice = sum of `(dbItem.price * quantity)` for items in selectedStems.
+  - estimatedTotal = basePrice + botanicalSelectionPrice.
+* Vase Base Price: Hardcoded base price of `basePrice = 13500.00` (Crystal Vase) in Boquet_Customization.jsx.
+* Wrapping & Ribbon Prices: If selected (e.g. kraft-paper or velvet-ribbon), their prices (1200.00 and 2100.00) are added to `botanicalSelectionPrice` because they are present in the `selectedStems` array and have prices configured in `STEMS_DATABASE`.
+* Bouquet Size Multiplier: None.
+* Duplication and Inconsistencies:
+  - Yes! The helper file `PriceEngine.js` exists but is completely unused.
+  - `PriceEngine.js` defines an entirely different base pricing scheme (vase: 45.00, wrapping: 4.00, ribbon: 7.00), which is completely out of sync with the LKR prices (13500.00) used in `Boquet_Customization.jsx`.
+* Stored Cart Prices:
+  - price: 'Rs ' + estimatedTotal.toFixed(2)
+  - numericPrice: estimatedTotal
+* Double Calculation Risks: If we implement `PriceEngine.js` calculations later, they must be updated to match the correct base price values, otherwise, it will conflict with the cart totals.
+
+---------------------------------------------------
+10. CART INTEGRATION
+---------------------------------------------------
+* Saved Custom Bouquet Object:
+  {
+    "id": "custom-1720932029584",
+    "isCustom": true,
+    "title": "Custom Bouquet Arrangement",
+    "price": "Rs 25000.00",
+    "numericPrice": 25000,
+    "image": "/images/peonies_vase.png",
+    "selectedColor": "3x Red Rose, 1x Pink Lily",
+    "quantity": 1,
+    "bouquetDesign": {
+      "flowers": [
+        {
+          "flowerId": "8_1720932029584_abc123xyz",
+          "stemId": "8",
+          "position": [0.5, 3.2, 0.2],
+          "rotation": [0.1, 1.2, 0],
+          "scale": [1, 1, 1],
+          "isManuallyEdited": false
+        }
+      ],
+      "style": "classic-dome",
+      "wrappingId": null,
+      "ribbonId": "velvet-ribbon"
+    }
+  }
+* Cart Count Update: Handled by saving to `localStorage` and dispatching a custom window event `'cart-updated'`. CartDrawer and Navbar listen to this event and reload items.
+* CartDrawer Identification: Items are identified as custom bouquets by checking `item.isCustom === true`. Standard products are loaded from the backend API, whereas custom items are read from local storage and merged into the display array.
+* Checkout & PayHere Integration:
+  - `CartDrawer.jsx` calls `api.post('/api/checkout')` sending the mapped items.
+  - Custom bouquets are sent with `id: null`, `isCustom: true`, and the client-computed `numericPrice` and `bouquetDesign`.
+  - The backend returns checkout configurations, including a secure hash based on the client-sent amount, which is then passed to PayHere's `triggerPayHereCheckout(...)` function.
+
+---------------------------------------------------
+11. CURRENT PROBLEMS AND TECHNICAL RISKS
+---------------------------------------------------
+* Hardcoded Values: The `basePrice = 13500.00` is hardcoded inside Boquet_Customization.jsx.
+* Mismatched Pricing: Mismatch between PriceEngine.js (unused) and Boquet_Customization.jsx.
+* Static Mock Database: Stems are loaded from products.js mock data instead of `/api/products` database items. Any changes made to the database by managers or admins will not be reflected on the customizer canvas.
+* Hardcoded Model Mapping: Model mapping in FlowerModel.jsx is hardcoded to specific product IDs. If new single-stem products are added to the database, they will fall back to wireframe spheres.
+* No Size Configuration: The system has no size config, meaning sizes like Small, Medium, or Large are completely unimplemented.
+* No Occasion Filtering: Occasion selectors (Anniversary, Birthday, Convocation) do not exist in the customizer UI or logic.
+* Dead Code / UI Accordion Mismatch: Stems database categories like 'bouquet-styles' and 'decorative-foliage' are not rendered because they are missing from `categoriesList`, making them unselectable in the UI.
+* Cart Inconsistencies: Custom bouquets are only stored in local storage, while standard items are stored in the database. If a user logs in from a different device, their custom bouquets will be lost.
+* Checkout Price Manipulation: The backend receives and trusts the client-computed `numericPrice` for custom bouquets, which poses a severe security risk if users modify checkout payloads.
+
+---------------------------------------------------
+12. COMPLETE CURRENT WORKFLOW
+---------------------------------------------------
+User logs in
+→ Customization page opens
+→ Statically imports products list from products.js
+→ Filters single-stem variety items
+→ Initializes stems database selector in sidebar accordion
+→ User clicks plus button to select flowers
+→ selectedStems state array updates
+→ useEffect compares quantities and syncs 3D flower instances
+→ LayoutEngine.arrangeBouquet computes Fermat spiral coordinates
+→ Collision relaxation runs 8 iterations to push overlapping heads apart
+→ Canvas renders BouquetScene with VaseModel and cloned FlowerModels
+→ useFrame interpolates lerps movement towards target coordinates
+→ Live summary card computes inline Estimated Total price
+→ User clicks Add to Cart
+→ Custom bouquet object with bouquetDesign coordinates is saved to localStorage
+→ CartDrawer loads custom items from localStorage and merges with API cart items
+→ User checks out and proceeds to PayHere using client-computed total price
+
+---------------------------------------------------
+13. FILE-BY-FILE RESPONSIBILITY
+---------------------------------------------------
+* Boquet_Customization.jsx:
+  - Responsibility: Main page component for customization UI, sidebar controls, categories accordion, toolbar controls, state management for selected stems, and cart saving.
+  - Important State/Functions: selectedStems, flowers, searchQuery, toastMessage, selectedFlowerId, handleAddStem, handleRemoveStem, handleAddToCart.
+  - Dependencies: products (from products.js), arrangeBouquet (from LayoutEngine.js), BouquetCanvas, CartDrawer, Navbar.
+  - Risk Level: High
+* BouquetCanvas.jsx:
+  - Responsibility: Renders the React Three Fiber Canvas with ambient, directional, and point lights, studio environment map, contact shadows, and orbit controls.
+  - Important State/Functions: Stateless.
+  - Dependencies: @react-three/fiber, @react-three/drei, BouquetScene.
+  - Risk Level: Medium
+* BouquetScene.jsx:
+  - Responsibility: Parent component within the Canvas that positions the VaseModel and maps the list of flowers into FlowerModel components.
+  - Important State/Functions: Stateless.
+  - Dependencies: VaseModel, FlowerModel.
+  - Risk Level: Low
+* FlowerModel.jsx:
+  - Responsibility: Loads 3D GLB models for each flower type, renders procedural models for foliage (e.g. eucalyptus/fern) or fallbacks, draws selection/swap highlights, manages smooth sliding transitions (lerp) in useFrame, and integrates TransformControls for dragging.
+  - Important State/Functions: Ref-based references, Stem, EucalyptusModel, FernModel, GLBModel.
+  - Dependencies: @react-three/drei, @react-three/fiber, three.
+  - Risk Level: High
+* LayoutEngine.js:
+  - Responsibility: Coordinates positions and rotations of flowers based on Fermi spirals and dome projection equations. Runs iterative collision relaxation in the XZ plane.
+  - Important State/Functions: calculateFlowerPosition, relaxOverlaps, arrangeBouquet, constants.
+  - Dependencies: None.
+  - Risk Level: High
+* VaseModel.jsx:
+  - Responsibility: Renders table surface, simulated water/stems, crystal glass physical material for the vase, and optional wrapping/ribbon meshes.
+  - Important State/Functions: Stateless.
+  - Dependencies: three.
+  - Risk Level: Low
+* PriceEngine.js:
+  - Responsibility: Contains skeleton logic to calculate custom bouquet prices. Currently unused/dead code.
+  - Important State/Functions: calculateBouquetPrice, BASE_PRICES.
+  - Dependencies: None.
+  - Risk Level: Low
+* CartDrawer.jsx:
+  - Responsibility: Renders the shopping cart drawer, fetches backend standard items, loads custom items from local storage, updates quantities, deletes items, calculates final totals, and triggers the PayHere payment gateway checkout flow.
+  - Important State/Functions: cartItems, loadCart, updateQuantity, removeItem, handleCheckout.
+  - Dependencies: cartApi, triggerPayHereCheckout, api, products.
+  - Risk Level: High
+
+---------------------------------------------------
+14. FINAL ASSESSMENT
+---------------------------------------------------
+* Fully Working:
+  - 3D Canvas rendering, lighting, and camera controls.
+  - Fermat spiral dome layout calculations and collision relaxation.
+  - Adding and subtracting flowers to coordinate 3D models dynamically.
+  - Manual flower dragging and position locking.
+  - Flower swapping/shuffling.
+  - Basic local-storage cart integration and PayHere redirection using client price totals.
+* Partially Implemented:
+  - Product stem data catalog (statically mapped from products.js instead of backend DB).
+  - 3D flower GLTF loading (uses hardcoded ID mappings, falls back to spheres for unmapped IDs).
+  - Wrapping paper and ribbon accents (kraft paper and ribbon bows display, but are missing selector categories in the sidebar accordion).
+* Placeholders / Unimplemented:
+  - Occasion filtering (Anniversary, Birthday, Convocation selectors are completely missing).
+  - Bouquet size system (Small, Medium, Large sizes do not exist in the code).
+  - Shared price calculation engine (the separate PriceEngine.js is a placeholder with mismatched pricing).
+
+* Next Steps Before Implementing Pricing Engine:
+  - Consolidate pricing constants and mathematical logic into a unified, clean PriceEngine.js.
+  - Query single-stem products from the backend `/api/products` using `category_id = 3` instead of the static mock data.
+  - Read `modelUrl` dynamically from backend database properties rather than the hardcoded ID mapping in FlowerModel.jsx.
+  - Map sizes and limits in UI configuration before applying size-based pricing.
