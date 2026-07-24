@@ -16,7 +16,7 @@ export default function MmanageEmployees() {
 
     const fetchPreOrders = async () => {
         try {
-            const response = await api.get("http://localhost:8080/api/orders");
+            const response = await api.get("http://localhost:8080/api/orders/unassigned");
             const mappedData = response.data.map(item => ({
                 OrderID: item.OrderID !== undefined ? item.OrderID : item.orderId,
                 CustomerName: item.CustomerName !== undefined ? item.CustomerName : item.customerName,
