@@ -89,6 +89,10 @@ export default function MmanageProducts() {
     const fetchProducts = async () => {
         try {
             const response = await api.get('/api/products');
+
+            if (response.data.length > 0) {
+            console.log("First product image URL:", response.data[0].imageUrl);
+        }
             setProductsList(response.data);
 
             console.log(response.data);
@@ -105,69 +109,10 @@ export default function MmanageProducts() {
     // Image resolver helper to map products dynamically to either database images or fallback local assets
     const getProductImage = (product) => {
         if (product.imageUrl) {
-            return `http://localhost:8080${product.imageUrl}`;
+            return product.imageUrl;
         }
 
-        const name = (product.productName || '').toLowerCase();
-
-        // Anniversary Bouquets
-        if (name.includes("crimson romance")) return A1;
-        if (name.includes("pastel dream")) return A2;
-        if (name.includes("velvet blush")) return A3;
-        if (name.includes("golden grace")) return A4;
-        if (name.includes("lily white")) return A5;
-        if (name.includes("garden bloom")) return A6;
-
-        // Anniversary Individual Flowers
-        if (name.includes("rose stem") && name.includes("crimson")) return AI1;
-        if (name.includes("lily stem") && name.includes("white")) return AI2;
-        if (name.includes("peony stem") && name.includes("blush")) return AI3;
-        if (name.includes("tulip stem") && name.includes("golden")) return AI4;
-        if (name.includes("hydrangea stem") && name.includes("serene")) return AI5;
-        if (name.includes("orchid splendor")) return AI6;
-        if (name.includes("mystique iris")) return AI7;
-
-        // Birthday Bouquets
-        if (name.includes("rose stem") && name.includes("birthday")) return ABB1;
-        if (name.includes("lily stem") && name.includes("birthday")) return ABB2;
-        if (name.includes("peony stem") && name.includes("birthday")) return ABB3;
-        if (name.includes("tulip stem") && name.includes("birthday")) return ABB4;
-        if (name.includes("hydrangea stem") && name.includes("birthday")) return ABB5;
-        if (name.includes("orchid splendor") && name.includes("birthday")) return ABB6;
-
-        // Birthday Individual Flowers
-        if (name.includes("yellow daisy")) return BI1;
-        if (name.includes("pink grace rose")) return BI2;
-        if (name.includes("purple magic")) return BI3;
-        if (name.includes("blushing tulip")) return BI4;
-        if (name.includes("white celebration")) return BI5;
-
-        // Birthday Headdresses
-        if (name.includes("queen crown")) return BH1;
-        if (name.includes("petal tiara")) return BH2;
-        if (name.includes("headband elegance")) return BH3;
-        if (name.includes("dream wreath")) return BH4;
-        if (name.includes("lily halo")) return BH5;
-
-        // Convocation Bouquets
-        if (name.includes("achievement bloom")) return C1;
-        if (name.includes("golden glory")) return C2;
-        if (name.includes("sapphire sparkle")) return C3;
-        if (name.includes("crimson pride")) return C4;
-        if (name.includes("violet dream")) return C5;
-        if (name.includes("sunflower burst")) return C6;
-        if (name.includes("lavender elegance")) return C7;
-        if (name.includes("pastel harmony")) return C8;
-
-        // Convocation Individual Flowers
-        if (name.includes("scholar's crimson rose")) return CI1;
-        if (name.includes("success golden lily")) return CI2;
-        if (name.includes("academic orchid")) return CI3;
-        if (name.includes("triumphant tulip")) return CI4;
-        if (name.includes("graduation hydrangea")) return CI5;
-        if (name.includes("honors lavender")) return CI6;
-        if (name.includes("valedictorian iris")) return CI7;
-
+        
         return '/images/placeholder.png';
     };
 
@@ -282,6 +227,8 @@ export default function MmanageProducts() {
 
     return (
         <>
+                 {console.log(filteredBouquets)}
+
             {successNotification && (
                 <div className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-[#eefaf4] border border-emerald-100 text-green-800 rounded-2xl shadow-xl animate-slideIn">
                     <span className="p-1.5 bg-emerald-500 text-white rounded-full flex items-center justify-center">
