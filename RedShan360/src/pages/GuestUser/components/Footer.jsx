@@ -39,7 +39,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-[#d9d2d0]/30 pt-7 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-          <p className="text-sm text-[#1a1a1a]/60 font-medium">© 2024 Redshan Flora. Everlasting Elegance.</p>
+          <p className="text-sm text-[#1a1a1a]/60 font-medium">© 2026 Redshan Flora. Everlasting Elegance.</p>
           <div className="flex items-center gap-5">
             <a href="#" className="text-sm text-[#1a1a1a]/60 font-medium hover:text-[#8c5e5e] transition-colors duration-300">Terms of Service</a>
             <a href="#" className="text-sm text-[#1a1a1a]/60 font-medium hover:text-[#8c5e5e] transition-colors duration-300">Privacy Policy</a>
