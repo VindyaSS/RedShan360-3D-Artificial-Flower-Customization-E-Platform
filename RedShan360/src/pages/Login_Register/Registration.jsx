@@ -364,15 +364,15 @@ export default function RegistrationPage() {
       <footer className="registration-footer">
         <div className="footer-left">
           <a href="/" className="logo-text">Redshan Flora</a>
-          <span className="copyright-text">© 2024 Redshan Flora. Everlasting Elegance. Crafting botanical wonders for the modern sanctuary.</span>
+          <span className="copyright-text">© 2026 Redshan Flora. Everlasting Elegance. Crafting botanical wonders for the modern sanctuary.</span>
         </div>
 
-        <div className="footer-center">
+        {/*<div className="footer-center">
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">FACEBOOK</a>
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">INSTAGRAM</a>
           <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">PINTEREST</a>
           <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">TWITTER</a>
-        </div>
+        </div>*/}
 
         <div className="footer-right">
           <div className="footer-links-row">

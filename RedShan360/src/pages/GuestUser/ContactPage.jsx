@@ -414,7 +414,9 @@ const ContactPage = () => {
                   <div>
                     <h4 className="font-bold text-xs text-[#1a1a1a]/60 uppercase tracking-wider">Address</h4>
                     <p className="text-xs md:text-sm text-[#1a1a1a]/85 leading-relaxed font-semibold mt-1">
-                      Huejay International Multi Flora LTD<br />Sri Lanka
+                      Redshan Flora,
+                      32B, Sir Mohamed Macan Marker Mawatha,
+                      Colombo<br />Sri Lanka
                     </p>
                     <button
                       onClick={() => window.open("https://maps.app.goo.gl/422Yf2rPWjKNsLtr7", "_blank", "noopener,noreferrer")}
@@ -451,7 +453,7 @@ const ContactPage = () => {
                       href="mailto:info@redshan360.com"
                       className="text-xs md:text-sm text-[#C2185B] font-bold hover:underline leading-relaxed mt-1 block"
                     >
-                      info@redshan360.com
+                      redshanflora@gmail.com
                     </a>
                   </div>
                 </div>
