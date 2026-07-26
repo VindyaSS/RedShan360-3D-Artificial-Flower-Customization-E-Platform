@@ -136,8 +136,15 @@ const Shop = () => {
     return '/images/placeholder.png';
   };
   const [searchParams, setSearchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const CATEGORY_NAME_MAP = {
+    Bouquet: "Bouquets",
+    "Head Dresses": "Head Dresses",
+    "Individual Flowers": "Individual Flowers"
+  };
 
   // Products and states
   const [productsState, setProductsState] = useState([]);
@@ -220,24 +227,43 @@ const Shop = () => {
     loadFilters();
   }, []);
 
-  // Fetch products according to active filters from backend
+  // Fetch products according to categoryParam (URL source of truth) or active filters from backend
   useEffect(() => {
-    const fetchProducts = async () => {
+    setCurrentPage(1);
+
+    const loadProducts = async () => {
       setLoading(true);
       setError(null);
+
+      const categoryParam = searchParams.get('category');
+      const backendCategoryName = categoryParam ? CATEGORY_NAME_MAP[categoryParam] : null;
+
+      let selectedCategory = null;
+      if (backendCategoryName && dbCategories.length > 0) {
+        selectedCategory = dbCategories.find(
+          (category) =>
+            (category.categoryName || category.name || '').trim().toLowerCase() ===
+            backendCategoryName.trim().toLowerCase()
+        );
+      } else if (selectedCategories.length > 0 && dbCategories.length > 0) {
+        selectedCategory = dbCategories.find(
+          (category) =>
+            (category.categoryName || category.name || '').trim().toLowerCase() ===
+            selectedCategories[0].trim().toLowerCase()
+        );
+      }
+
       try {
         let endpoint = '/api/products';
 
-        const activeCat = dbCategories.find(c => c.categoryName === selectedCategories[0]);
-        const activeSub = dbSubCategories.find(s =>
-          s.subCategoryName === selectedSubcategories[0] &&
-          (!activeCat || s.categoryId === activeCat.id)
+        const activeSub = dbSubCategories.find(
+          (s) => s.subCategoryName === selectedSubcategories[0] && (!selectedCategory || s.categoryId === selectedCategory.id)
         );
 
-        if (activeCat && activeSub) {
-          endpoint = `/api/products/category/${activeCat.id}/subcategory/${activeSub.id}`;
-        } else if (activeCat) {
-          endpoint = `/api/products/category/${activeCat.id}`;
+        if (selectedCategory && activeSub) {
+          endpoint = `/api/products/category/${selectedCategory.id}/subcategory/${activeSub.id}`;
+        } else if (selectedCategory) {
+          endpoint = `/api/products/category/${selectedCategory.id}`;
         } else if (activeSub) {
           endpoint = `/api/products/subcategory/${activeSub.id}`;
         }
@@ -253,8 +279,8 @@ const Shop = () => {
             discPriceVal = numPrice * (1 - discountPct / 100);
           }
 
-          const productCategory = dbCategories.find(c => c.id === p.categoryId);
-          const productSubCategory = dbSubCategories.find(s => s.id === p.subCategoryId);
+          const productCategory = dbCategories.find((c) => c.id === p.categoryId);
+          const productSubCategory = dbSubCategories.find((s) => s.id === p.subCategoryId);
 
           return {
             id: p.productId,
@@ -297,9 +323,9 @@ const Shop = () => {
     };
 
     if (dbCategories.length > 0) {
-      fetchProducts();
+      loadProducts();
     }
-  }, [selectedCategories, selectedSubcategories, dbCategories, dbSubCategories]);
+  }, [searchParams, dbCategories, dbSubCategories, selectedCategories, selectedSubcategories]);
 
   const toggleWishlist = async (id) => {
     if (!userId) {
@@ -369,18 +395,34 @@ const Shop = () => {
   const categoriesList = dbCategories.map((c) => c.categoryName);
 
   // Show subcategories filtered by active category if selected, otherwise show all unique subcategory names
-  const activeCat = dbCategories.find(c => c.categoryName === selectedCategories[0]);
+  const activeBackendCategoryName = categoryParam ? CATEGORY_NAME_MAP[categoryParam] : selectedCategories[0];
+  const activeCat = dbCategories.find(c => (c.categoryName || c.name || '').trim().toLowerCase() === (activeBackendCategoryName || '').trim().toLowerCase());
   const filteredSubcategories = activeCat
     ? dbSubCategories.filter(s => s.categoryId === activeCat.id)
     : dbSubCategories;
   const subcategoriesList = [...new Set(filteredSubcategories.map((s) => s.subCategoryName).filter(Boolean))];
 
+  const isCatChecked = (catName) => {
+    if (activeBackendCategoryName) {
+      return catName.trim().toLowerCase() === activeBackendCategoryName.trim().toLowerCase();
+    }
+    return selectedCategories.includes(catName);
+  };
+
   const handleCategoryToggle = (cat) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? [] : [cat]
-    );
-    setSelectedSubcategories([]); // Clear subcategory when category changes
-    setCurrentPage(1);
+    const isCurrentlyChecked = isCatChecked(cat);
+    const newParams = new URLSearchParams(searchParams);
+    if (isCurrentlyChecked) {
+      newParams.delete('category');
+      setSelectedCategories([]);
+    } else {
+      const urlCategoryKey = Object.keys(CATEGORY_NAME_MAP).find(
+        (key) => CATEGORY_NAME_MAP[key].toLowerCase() === cat.toLowerCase()
+      ) || cat;
+      newParams.set('category', urlCategoryKey);
+      setSelectedCategories([cat]);
+    }
+    setSearchParams(newParams);
   };
 
   const handleSubcategoryToggle = (sub) => {
@@ -532,7 +574,7 @@ const Shop = () => {
                   <label key={cat} className="flex items-center gap-2.5 cursor-pointer text-sm font-medium text-[#1a1a1a]/85">
                     <input
                       type="checkbox"
-                      checked={selectedCategories.includes(cat)}
+                      checked={isCatChecked(cat)}
                       onChange={() => handleCategoryToggle(cat)}
                       className="w-4 h-4 rounded-sm border-[#d9d2d0] text-[#8c5e5e] focus:ring-[#8c5e5e] accent-[#8c5e5e]"
                     />
@@ -1081,7 +1123,7 @@ const Shop = () => {
                     <label key={cat} className="flex items-center gap-2.5 cursor-pointer text-sm font-medium text-[#1a1a1a]/85">
                       <input
                         type="checkbox"
-                        checked={selectedCategories.includes(cat)}
+                        checked={isCatChecked(cat)}
                         onChange={() => handleCategoryToggle(cat)}
                         className="w-4 h-4 rounded-sm border-[#d9d2d0] text-[#8c5e5e] accent-[#8c5e5e]"
                       />
