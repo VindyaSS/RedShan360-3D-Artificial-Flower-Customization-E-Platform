@@ -6,10 +6,11 @@ import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import Product3DViewer from '../../components/Product3DViewer';
 import api, { cartApi } from '../../services/api';
+import { getProductImageUrl } from '../../utils/imageHelper';
 
 const ProductDetails = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,7 +48,7 @@ const ProductDetails = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await api.get(`/api/products/${id}`);
+        const response = await api.get(`/api/products/${productId}`);
         const p = response.data;
 
         if (p) {
@@ -81,6 +82,9 @@ const ProductDetails = () => {
               { name: 'Pastel Pink', hex: '#f5ccd4' },
               { name: 'Pale Yellow', hex: '#fbfbe3' },
               { name: 'Soft White', hex: '#ffffff' }
+            ],
+            thumbnails: [
+              p.imageUrl || '/images/placeholder.png'
             ]
           };
 
@@ -92,7 +96,7 @@ const ProductDetails = () => {
           setModelPath(mappedProduct.modelUrl || "");
 
           // Load reviews
-          const savedReviews = localStorage.getItem(`redshan360_reviews_${id}`);
+          const savedReviews = localStorage.getItem(`redshan360_reviews_${productId}`);
           if (savedReviews) {
             setReviewsList(JSON.parse(savedReviews));
           } else {
@@ -175,7 +179,7 @@ const ProductDetails = () => {
     };
 
     fetchProductDetails();
-  }, [id]);
+  }, [productId]);
 
   // Wishlist Toggle
   const toggleWishlist = async () => {
@@ -271,7 +275,7 @@ const ProductDetails = () => {
 
     const updatedReviews = [newReview, ...reviewsList];
     setReviewsList(updatedReviews);
-    localStorage.setItem(`redshan360_reviews_${id}`, JSON.stringify(updatedReviews));
+    localStorage.setItem(`redshan360_reviews_${productId}`, JSON.stringify(updatedReviews));
 
     setNewReviewName('');
     setNewReviewText('');
@@ -361,8 +365,12 @@ const ProductDetails = () => {
             {/* Main Interactive Product Image */}
             <div className="w-full aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative group shadow-sm border border-[#d9d2d0]/25">
               <img
-                src={product.imageUrl}
+                src={getProductImageUrl(product.imageUrl)}
                 alt={product.productName}
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = "/images/product-placeholder.png";
+                }}
                 className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.03] animate-fade-in"
               />
 
@@ -723,8 +731,12 @@ const ProductDetails = () => {
                 >
                   <div className="relative aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden mb-4 border border-[#d9d2d0]/15">
                     <img
-                      src={piece.imageUrl}
+                      src={getProductImageUrl(piece.imageUrl)}
                       alt={piece.title}
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = "/images/product-placeholder.png";
+                      }}
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                       loading="lazy"
                     />
@@ -794,8 +806,12 @@ const ProductDetails = () => {
                   {/* Product Frame */}
                   <div className="w-64 aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative shadow-md select-none border border-[#d9d2d0]/20">
                     <img
-                      src={product.thumbnails[rotationIndex]}
+                      src={getProductImageUrl(product.thumbnails[rotationIndex])}
                       alt=""
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = "/images/product-placeholder.png";
+                      }}
                       className="w-full h-full object-cover pointer-events-none"
                     />
 

@@ -30,28 +30,7 @@ export default function MmanageEmployees() {
         },
     ]);
 
-    const [unAssignedEmployees, setUnAssignedEmployees] = useState([
-        {
-            EmployeeName: "Anura",
-        },
-
-        {
-            EmployeeName: "Kawshi",
-        },
-
-        {
-            EmployeeName: "Vihanga",
-        },
-        {
-            EmployeeName: "Chathura",
-        },
-        {
-            EmployeeName: "Pahan",
-        },
-        {
-            EmployeeName: "Dineth",
-        },
-    ]);
+    const [unAssignedEmployees, setUnAssignedEmployees] = useState([]);
 
     const [preOrders, setPreOrders] = useState([]);
 
@@ -80,8 +59,28 @@ export default function MmanageEmployees() {
         }
     };
 
+    const fetchUnAssignedEmployees = async () => {
+        try {
+            const response = await api.get("http://localhost:8080/api/employees/not-assigned");
+
+            const employees = response.data.map(emp => ({
+                employeeId: emp.employeeId,
+                userId: emp.userId,
+                EmployeeName: emp.employeeName
+            }));
+
+            setUnAssignedEmployees(employees);
+
+            console.log("Unassigned Employees :", employees);
+
+        } catch (error) {
+            console.error("Error fetching unassigned employees :", error);
+        }
+    };
+
     useEffect(() => {
         fetchPreOrders();
+        fetchUnAssignedEmployees();
     }, []);
 
     const [selectedEmployee, setSelectedEmployee] = useState(null);
