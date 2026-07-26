@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Camera, Share2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -57,9 +58,28 @@ const Footer = () => {
 
           <div>
             <h4 className="font-semibold text-sm tracking-[0.14em] uppercase mb-5 text-[#1a1a1a]/60">Company</h4>
-            <ul className="space-y-3">{['Our Story', 'Sustainability', 'Journal', 'Careers'].map((item) => (
-              <li key={item}><a href="#" className="font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">{item}</a></li>
-            ))}</ul>
+            <ul className="space-y-3">
+              <li>
+                <Link to="/about#our-story" className="font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">
+                  Our Story
+                </Link>
+              </li>
+              <li>
+                <Link to="/about#sustainable-practices" className="font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">
+                  Sustainability
+                </Link>
+              </li>
+              <li>
+                <Link to="/about#quality-promise" className="font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">
+                  Journal
+                </Link>
+              </li>
+              <li>
+                <Link to="/about#social-impact" className="font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">
+                  Careers
+                </Link>
+              </li>
+            </ul>
           </div>
 
           <div>

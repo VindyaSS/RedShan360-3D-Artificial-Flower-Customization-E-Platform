@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { ArrowRight, Droplet, Beaker, Zap, Flower, PenTool, Globe, Award, Sparkles, Heart } from 'lucide-react';
@@ -6,6 +7,7 @@ import { ArrowRight, Droplet, Beaker, Zap, Flower, PenTool, Globe, Award, Sparkl
 const AboutPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     // Solid navbar on scroll or always show solid if desired.
@@ -15,10 +17,25 @@ const AboutPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const timer = setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [location]);
+
   const navItems = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
 
   const scrollToHeritage = () => {
-    const element = document.getElementById('heritage');
+    const element = document.getElementById('our-story');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
@@ -75,7 +92,7 @@ const AboutPage = () => {
       </section>
 
       {/* Our Story / How We Began (Our Legacy of Craft) */}
-      <section id="heritage" className="py-24 bg-white border-b border-[#d9d2d0]/20 scroll-mt-[80px]">
+      <section id="our-story" className="py-24 bg-white border-b border-[#d9d2d0]/20 scroll-mt-[90px]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left Column - Image */}
@@ -142,7 +159,7 @@ const AboutPage = () => {
       </section>
 
       {/* Empowering Individuals & Communities */}
-      <section className="py-24 bg-[#faf8f6] border-b border-[#d9d2d0]/20">
+      <section id="social-impact" className="py-24 bg-[#faf8f6] border-b border-[#d9d2d0]/20 scroll-mt-[90px]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left Column - Content */}
@@ -211,7 +228,7 @@ const AboutPage = () => {
       </section>
 
       {/* Sustainable Practices */}
-      <section className="py-24 bg-white border-b border-[#d9d2d0]/20">
+      <section id="sustainable-practices" className="py-24 bg-white border-b border-[#d9d2d0]/20 scroll-mt-[90px]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 text-center">
           <span className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-2 block">
             Environmental Responsibility
@@ -267,7 +284,7 @@ const AboutPage = () => {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-24 bg-[#faf8f6] border-b border-[#d9d2d0]/20">
+      <section id="quality-promise" className="py-24 bg-[#faf8f6] border-b border-[#d9d2d0]/20 scroll-mt-[90px]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 text-center">
           <span className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-2 block">
             Our Quality Promise
