@@ -1,7 +1,22 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trophy, Camera, Share2 } from 'lucide-react';
 
 const Footer = () => {
+  const navigate = useNavigate();
+
+  const collectionLinks = [
+    { label: "Bouquets", category: "Bouquet" },
+    { label: "Head Dresses", category: "Head Dresses" },
+    { label: "Individual Flowers", category: "Individual Flowers" }
+  ];
+
+  const handleCollectionNavigation = (category) => {
+    const params = new URLSearchParams();
+    params.set("category", category);
+    navigate(`/shop?${params.toString()}`);
+  };
+
   return (
     <footer id="contact" className="bg-[#f4f0ed] text-[#1a1a1a] py-20 px-5 md:px-10 lg:px-14 border-t border-[#d9d2d0]/10">
       <div className="max-w-7xl mx-auto">
@@ -18,9 +33,26 @@ const Footer = () => {
 
           <div>
             <h4 className="font-semibold text-sm tracking-[0.14em] uppercase mb-5 text-[#1a1a1a]/60">Collections</h4>
-            <ul className="space-y-3">{['Silk Signature', 'Velvet Luxe', 'Everlasting Dried', 'Seasonal Limited'].map((item) => (
-              <li key={item}><a href={`#${item.toLowerCase()}`} className="font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">{item}</a></li>
-            ))}</ul>
+            <ul className="space-y-3">
+              {collectionLinks.map((item) => {
+                const params = new URLSearchParams();
+                params.set("category", item.category);
+                return (
+                  <li key={item.label}>
+                    <a
+                      href={`/shop?${params.toString()}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleCollectionNavigation(item.category);
+                      }}
+                      className="font-semibold text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300"
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
           <div>
