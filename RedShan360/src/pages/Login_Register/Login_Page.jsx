@@ -59,7 +59,7 @@ export default function LoginPage() {
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
         }
-        
+
         // Ensure id compatibility mapping alongside other fields
         const userData = {
           ...response.data,
@@ -211,14 +211,14 @@ export default function LoginPage() {
                   <a href="/forgot-password" className="forgot-password-link">Forgot Password?</a>
                 </div>
                 <div className="input-wrapper">
-                <PasswordInput
-                  id="password-input"
-                  className="form-input"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={errors.password ? { borderColor: '#d32f2f' } : {}}
-                />
+                  <PasswordInput
+                    id="password-input"
+                    className="form-input"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={errors.password ? { borderColor: '#d32f2f' } : {}}
+                  />
                 </div>
                 {errors.password && (
                   <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '6px' }}>
@@ -297,15 +297,15 @@ export default function LoginPage() {
       <footer className="login-footer">
         <div className="footer-left">
           <a href="/" className="logo-text">Redshan Flora</a>
-          <span className="copyright-text">© 2024 Redshan Flora. Everlasting Elegance.</span>
+          <span className="copyright-text">© 2026 Redshan Flora. Everlasting Elegance.</span>
         </div>
 
-        <div className="footer-center">
+        {/*<div className="footer-center">
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">FACEBOOK</a>
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">INSTAGRAM</a>
           <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">PINTEREST</a>
           <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">TWITTER</a>
-        </div>
+        </div>*/}
 
         <div className="footer-right">
           <div className="footer-links-row">
