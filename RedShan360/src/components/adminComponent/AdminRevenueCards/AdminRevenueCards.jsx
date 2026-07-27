@@ -11,27 +11,32 @@ function AdminRevenueCards({ data }) {
     }).format(val);
   };
 
+  const getBarWidth = (changeVal) => {
+    const absVal = Math.abs(changeVal);
+    return `${Math.min(absVal, 100)}%`;
+  };
+
   const cards = [
     {
       id: "daily",
       label: "DAILY REVENUE",
       value: data.daily.amount,
       change: data.daily.change,
-      barWidth: "40%",
+      barWidth: getBarWidth(data.daily.change),
     },
     {
       id: "weekly",
       label: "WEEKLY REVENUE",
       value: data.weekly.amount,
       change: data.weekly.change,
-      barWidth: "65%",
+      barWidth: getBarWidth(data.weekly.change),
     },
     {
       id: "monthly",
       label: "MONTHLY REVENUE",
       value: data.monthly.amount,
       change: data.monthly.change,
-      barWidth: "80%",
+      barWidth: getBarWidth(data.monthly.change),
     },
   ];
 
@@ -56,7 +61,7 @@ function AdminRevenueCards({ data }) {
               {/* Progress visualizer bar at bottom of content */}
               <div className="card-progress-track">
                 <div
-                  className="card-progress-fill"
+                  className={`card-progress-fill ${isPositive ? "positive" : "negative"}`}
                   style={{ width: card.barWidth }}
                 ></div>
               </div>
@@ -69,3 +74,4 @@ function AdminRevenueCards({ data }) {
 }
 
 export default AdminRevenueCards;
+
