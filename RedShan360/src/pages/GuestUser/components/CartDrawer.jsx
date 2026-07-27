@@ -310,7 +310,12 @@ const CartDrawer = ({ isOpen, onClose }) => {
       });
     } catch (error) {
       console.error("Failed to initialize checkout session:", error);
-      alert(error.response?.data?.message || "An error occurred while initializing checkout. Please try again.");
+      const errMsg = error.response?.data?.message;
+      if (errMsg === "Insufficient stock.") {
+        alert("Sorry, this product does not have enough stock available.");
+      } else {
+        alert(errMsg || "An error occurred while initializing checkout. Please try again.");
+      }
     } finally {
       setIsProcessing(false);
     }

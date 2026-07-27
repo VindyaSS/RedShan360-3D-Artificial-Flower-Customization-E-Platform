@@ -3,12 +3,12 @@ import { useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import api from '../../services/api';
-import { 
-  Star, 
-  Award, 
-  Gift, 
+import {
+  Star,
+  Award,
+  Gift,
   Coins,
-  Check, 
+  Check,
   ArrowRight,
   Sparkles,
   HelpCircle,
@@ -20,7 +20,7 @@ const LoyaltyPoints = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  
+
   // State for live API data (conforming to requested state naming)
   const [loyalty, setLoyalty] = useState({
     points: 0,
@@ -107,7 +107,7 @@ const LoyaltyPoints = () => {
   const handleRedeemPoints = async () => {
     if (!userId) return;
     const redeemablePoints = checkoutData.redeemablePoints || 0;
-    
+
     if (redeemablePoints <= 0) {
       setToast({ type: 'error', message: 'You need at least 100 points to perform a redemption.' });
       return;
@@ -116,7 +116,7 @@ const LoyaltyPoints = () => {
     try {
       setIsRedeeming(true);
       setToast(null);
-      
+
       const response = await api.post('/api/loyalty/redeem', {
         userId: userId,
         points: redeemablePoints
@@ -124,13 +124,13 @@ const LoyaltyPoints = () => {
 
       // Update balance
       setLoyalty(response.data);
-      
+
       // Show success toast
       setToast({ type: 'success', message: 'Loyalty points redeemed successfully.' });
-      
+
       // Dispatch update event to refresh navbar badges
       window.dispatchEvent(new Event('wishlist-updated')); // triggers generic navbar count update
-      
+
       // Re-fetch remaining data
       await fetchLoyaltyData();
     } catch (err) {
@@ -221,11 +221,10 @@ const LoyaltyPoints = () => {
       {/* Toast popup alerts */}
       {toast && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 animate-slide-up-card">
-          <div className={`p-4 rounded-xl shadow-lg flex items-start gap-3 border ${
-            toast.type === 'success'
+          <div className={`p-4 rounded-xl shadow-lg flex items-start gap-3 border ${toast.type === 'success'
               ? 'bg-[#E8F5E9] text-[#2E7D32] border-[#A5D6A7]'
               : 'bg-[#FFEBEE] text-[#C62828] border-[#FFCDD2]'
-          }`}>
+            }`}>
             <AlertCircle className="shrink-0 mt-0.5" size={16} />
             <div className="flex-1 text-xs font-semibold leading-normal">
               {toast.message}
@@ -242,7 +241,7 @@ const LoyaltyPoints = () => {
 
       {/* Main dashboard content container */}
       <main className="flex-1 py-12 max-w-7xl w-full mx-auto px-4 sm:px-6 md:px-12 lg:px-16 flex flex-col gap-10">
-        
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="w-10 h-10 border-4 border-[#ea580c]/30 border-t-[#ea580c] rounded-full animate-spin" />
@@ -250,10 +249,10 @@ const LoyaltyPoints = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
+
             {/* LEFT COLUMN: TIER METRIC OVERVIEWS */}
             <div className="lg:col-span-7 flex flex-col gap-8">
-              
+
               {/* Dynamic Points Balance & Level Progress */}
               <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#f0ebe4] shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-6 text-left hover:shadow-[0_6px_25px_rgba(86,60,55,0.04)] transition-all">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -277,8 +276,8 @@ const LoyaltyPoints = () => {
                     <span className="text-[#ea580c] font-bold">Next Level: {loyalty.nextLevel} ({loyalty.pointsToNext} pts required)</span>
                   </div>
                   <div className="w-full bg-[#f5efeb] h-3 rounded-full overflow-hidden p-0.5 border border-[#ece7e2]">
-                    <div 
-                      className="bg-gradient-to-r from-orange-400 to-[#ea580c] h-full rounded-full transition-all duration-1000 ease-out" 
+                    <div
+                      className="bg-gradient-to-r from-orange-400 to-[#ea580c] h-full rounded-full transition-all duration-1000 ease-out"
                       style={{ width: `${getProgressPercent()}%` }}
                     />
                   </div>
@@ -303,13 +302,12 @@ const LoyaltyPoints = () => {
                   {tierBenefits.map((tb) => {
                     const isCurrent = tb.name.toLowerCase() === loyalty.membership?.toLowerCase();
                     return (
-                      <div 
+                      <div
                         key={tb.name}
-                        className={`p-4 rounded-xl border flex flex-col justify-between transition-all duration-300 ${
-                          isCurrent 
+                        className={`p-4 rounded-xl border flex flex-col justify-between transition-all duration-300 ${isCurrent
                             ? 'border-orange-500 bg-[#f97316]/5 ring-1 ring-orange-500/20 scale-[1.02] shadow-sm'
                             : 'border-[#f5efeb] bg-[#fdfbf9]/20 hover:border-[#ea580c]/15'
-                        }`}
+                          }`}
                       >
                         <div className="flex justify-between items-start">
                           <span className="font-extrabold text-xs uppercase tracking-wider text-[#563c37]">{tb.name}</span>
@@ -336,7 +334,7 @@ const LoyaltyPoints = () => {
 
             {/* RIGHT COLUMN: REDEMPTION & VOUCHER CONTROLS */}
             <div className="lg:col-span-5 flex flex-col gap-8">
-              
+
               {/* Redeem Points Card */}
               <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#f0ebe4] shadow-[0_4px_20px_rgba(86,60,55,0.02)] text-left hover:shadow-[0_6px_25px_rgba(86,60,55,0.04)] transition-all">
                 <div className="flex items-center gap-2.5 mb-6 border-b border-[#fdfbf9] pb-4">
@@ -375,11 +373,10 @@ const LoyaltyPoints = () => {
                 <button
                   onClick={handleRedeemPoints}
                   disabled={isRedeeming || (checkoutData.redeemablePoints || 0) <= 0}
-                  className={`w-full text-center py-3.5 px-6 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer active:scale-95 flex justify-center items-center gap-2 ${
-                    (checkoutData.redeemablePoints || 0) > 0
+                  className={`w-full text-center py-3.5 px-6 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer active:scale-95 flex justify-center items-center gap-2 ${(checkoutData.redeemablePoints || 0) > 0
                       ? 'bg-gradient-to-r from-orange-500 to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white shadow-md'
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed active:scale-100'
-                  }`}
+                    }`}
                 >
                   {isRedeeming ? (
                     <>
