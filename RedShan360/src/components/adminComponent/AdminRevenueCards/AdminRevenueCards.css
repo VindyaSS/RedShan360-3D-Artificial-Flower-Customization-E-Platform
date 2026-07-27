@@ -59,21 +59,25 @@
   border-radius: 6px;
 }
 
-/* Color theme matching mockup exactly */
-.revenue-card:nth-child(1) .card-change-badge {
-  background-color: #fcebeb;
-  color: #c0392b;
-}
-
-.revenue-card:nth-child(2) .card-change-badge {
+/* Green colors for positive increment, Red colors for negative increment */
+.card-change-badge.positive {
   background-color: #e8f9f0;
   color: #27ae60;
 }
 
-.revenue-card:nth-child(3) .card-change-badge {
+.card-change-badge.negative {
   background-color: #fcebeb;
   color: #c0392b;
 }
+
+.card-progress-fill.positive {
+  background-color: #27ae60;
+}
+
+.card-progress-fill.negative {
+  background-color: #c0392b;
+}
+
 
 .card-value {
   font-family: "Inter", sans-serif;
