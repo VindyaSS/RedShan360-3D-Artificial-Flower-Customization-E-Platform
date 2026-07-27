@@ -42,7 +42,9 @@ export default function AniversaryBFlowerCard({
         <div className="bg-[#faf8f6] rounded-2xl border border-[#e5e4e7] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group h-full">
             {/* Image Container displaying full image without crop */}
             <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f4f0ed] border-b border-[#e5e4e7] flex items-center justify-center">
+                 {console.log(image)}
                 {image ? (
+                   
                     <img
                         src={image}
                         alt={BoquetName}

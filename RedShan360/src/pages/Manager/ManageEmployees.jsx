@@ -7,36 +7,16 @@ import MPreOrderModal from "../../components/managerComponent/mPreOrderModal";
 import api from '../../services/api';
 
 export default function MmanageEmployees() {
-    const [assignedEmployees, setAssignedEmployees] = useState([
-        {
-            EmployeeName: "John",
-            OrderID: "ORD001",
-            OrderName: "lily",
-            WorkingStatus: "Active",
-        },
-
-        {
-            EmployeeName: "Kamal",
-            OrderID: "ORD002",
-            OrderName: "Rose",
-            WorkingStatus: "Offline",
-        },
-
-        {
-            EmployeeName: "Nimal",
-            OrderID: "ORD003",
-            OrderName: "Desi",
-            WorkingStatus: "Active",
-        },
-    ]);
+    
 
     const [unAssignedEmployees, setUnAssignedEmployees] = useState([]);
 
     const [preOrders, setPreOrders] = useState([]);
+    const [assignedEmployees, setAssignedEmployees] = useState([]);
 
     const fetchPreOrders = async () => {
         try {
-            const response = await api.get("http://localhost:8080/api/orders");
+            const response = await api.get("http://localhost:8080/api/orders/unassigned");
             const mappedData = response.data.map(item => ({
                 OrderID: item.OrderID !== undefined ? item.OrderID : item.orderId,
                 CustomerName: item.CustomerName !== undefined ? item.CustomerName : item.customerName,
@@ -58,6 +38,26 @@ export default function MmanageEmployees() {
             console.error("Error fetching pre orders:", error);
         }
     };
+
+    const fetchAssignedEmployees = async () => {
+    try {
+        const response = await api.get("http://localhost:8080/api/employees/assigned");
+
+        const employees = response.data.map(emp => ({
+            employeeId: emp.employeeId,
+            EmployeeName: emp.employeeName,
+            OrderID: emp.orderId,
+            WorkingStatus: emp.workingStatus
+        }));
+
+        setAssignedEmployees(employees);
+
+        console.log("Assigned Employees :", employees);
+
+    } catch (error) {
+        console.error("Error fetching assigned employees :", error);
+    }
+};
 
     const fetchUnAssignedEmployees = async () => {
         try {
@@ -81,26 +81,52 @@ export default function MmanageEmployees() {
     useEffect(() => {
         fetchPreOrders();
         fetchUnAssignedEmployees();
+        fetchAssignedEmployees();
+
     }, []);
 
     const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-    const handleAssignClick = (employeeName) => {
-        setSelectedEmployee(employeeName);
+    const handleAssignClick = (employee) => {
+        console.log("emp ", employee)
+        setSelectedEmployee(employee);
     };
 
-    const handleAssignOrder = (employeeName, order) => {
-        setUnAssignedEmployees(prev => prev.filter(emp => emp.EmployeeName !== employeeName));
-        setAssignedEmployees(prev => [
-            ...prev,
-            {
-                EmployeeName: employeeName,
-                OrderID: order.OrderID,
-                OrderName: order.OrderName,
-                WorkingStatus: "Not yet Start Work"
-            }
-        ]);
-        setPreOrders(prev => prev.filter(po => po.OrderID !== order.OrderID));
+    const handleAssignOrder = async (selectedEmployee, order) => {
+        console.log("Employee:", selectedEmployee.employeeId);
+        console.log("Order:", order.OrderID);
+
+        try {
+            await api.post("http://localhost:8080/api/employees/assign-order", {
+                employeeId: selectedEmployee.employeeId,
+                orderId: order.OrderID
+            });
+
+            setUnAssignedEmployees(prev =>
+                prev.filter(emp => emp.employeeId !== selectedEmployee.employeeId)
+            );
+
+            setAssignedEmployees(prev => [
+                ...prev,
+                {
+                    employeeId: selectedEmployee.employeeId,
+                    OrderID: order.OrderID,
+                    WorkingStatus: "Not yet Start Work"
+                }
+            ]);
+
+            setPreOrders(prev =>
+                prev.filter(po => po.OrderID !== order.OrderID)
+            );
+
+            setSelectedEmployee(null);
+
+            alert("Order assigned successfully!");
+
+        } catch (error) {
+            console.error(error);
+            alert("Failed to assign order.");
+        }
     };
 
     return (
@@ -124,8 +150,7 @@ export default function MmanageEmployees() {
                             <AssignedEmployeeTable
                                 t1="Employee Name"
                                 t2="Order ID"
-                                t3="Order Name"
-                                t4="Working Status"
+                                t3="Working Status"
                                 assignedEmployees={assignedEmployees}
                             />
                         </div>
@@ -156,50 +181,10 @@ export default function MmanageEmployees() {
             <MPreOrderModal
                 isOpen={!!selectedEmployee}
                 onClose={() => setSelectedEmployee(null)}
-                employeeName={selectedEmployee}
+                employee={selectedEmployee}
                 preOrders={preOrders}
                 onAssign={handleAssignOrder}
             />
         </>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
