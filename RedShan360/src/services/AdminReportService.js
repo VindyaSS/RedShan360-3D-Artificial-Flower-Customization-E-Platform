@@ -26,17 +26,22 @@ const normalizePeriod = (period) => {
  * Employs request deduplication to prevent multiple concurrent requests for the same period.
  * Automatically falls back to mock data if the API is offline.
  */
-const fetchDashboardData = async (period) => {
+const fetchDashboardData = async (period, startDate, endDate) => {
   const normPeriod = normalizePeriod(period);
+  const cacheKey = `${normPeriod}_${startDate || ""}_${endDate || ""}`;
 
-  if (currentFetchPromise && currentFetchPeriod === normPeriod) {
+  if (currentFetchPromise && currentFetchPeriod === cacheKey) {
     return currentFetchPromise;
   }
 
-  currentFetchPeriod = normPeriod;
+  currentFetchPeriod = cacheKey;
   currentFetchPromise = (async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/reports/dashboard?period=${normPeriod}`);
+      let url = `${API_BASE_URL}/reports/dashboard?period=${normPeriod}`;
+      if (normPeriod === "customdaterange" && startDate && endDate) {
+        url += `&startDate=${startDate}&endDate=${endDate}`;
+      }
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch report dashboard from Spring Boot: ${response.statusText}`);
       }
@@ -45,7 +50,7 @@ const fetchDashboardData = async (period) => {
       return data;
     } catch (err) {
       console.warn(
-        `Backend API (${API_BASE_URL}/reports/dashboard) is offline or failed. Falling back to local simulated data.`,
+        `Backend API is offline or failed. Falling back to local simulated data.`,
         err
       );
       // Return simulated mock payload matching backend schema
@@ -53,7 +58,7 @@ const fetchDashboardData = async (period) => {
     } finally {
       // Clear deduplication cache after a tiny window
       setTimeout(() => {
-        if (currentFetchPeriod === normPeriod) {
+        if (currentFetchPeriod === cacheKey) {
           currentFetchPromise = null;
           currentFetchPeriod = null;
         }
@@ -68,8 +73,8 @@ export const AdminReportService = {
   /**
    * Fetches revenue KPI metrics (Daily, Weekly, Monthly) and their growth comparison metrics.
    */
-  getRevenueSummary: async (period) => {
-    const data = await fetchDashboardData(period);
+  getRevenueSummary: async (period, startDate, endDate) => {
+    const data = await fetchDashboardData(period, startDate, endDate);
     
     // Map backend JSON to the format React expects
     return {
@@ -91,8 +96,8 @@ export const AdminReportService = {
   /**
    * Fetches revenue growth data (grouped by month) for the Bar Chart.
    */
-  getRevenueGrowthData: async (period) => {
-    const data = await fetchDashboardData(period);
+  getRevenueGrowthData: async (period, startDate, endDate) => {
+    const data = await fetchDashboardData(period, startDate, endDate);
     
     if (data.revenueGrowth) {
       return data.revenueGrowth;
@@ -128,8 +133,8 @@ export const AdminReportService = {
   /**
    * Fetches performance metrics (percentages) for product categories.
    */
-  getCategoryPerformance: async (period) => {
-    const data = await fetchDashboardData(period);
+  getCategoryPerformance: async (period, startDate, endDate) => {
+    const data = await fetchDashboardData(period, startDate, endDate);
     
     return data.categoryPerformance || [
       { category: "Silk Peonies", percentage: 85 },
@@ -142,8 +147,8 @@ export const AdminReportService = {
   /**
    * Fetches customer insight statistics (New, Active, Returning).
    */
-  getCustomerInsights: async (period) => {
-    const data = await fetchDashboardData(period);
+  getCustomerInsights: async (period, startDate, endDate) => {
+    const data = await fetchDashboardData(period, startDate, endDate);
     
     if (data.customers) {
       return {
@@ -164,8 +169,8 @@ export const AdminReportService = {
   /**
    * Fetches order processing and status fulfillment counts.
    */
-  getOrderFulfillment: async (period) => {
-    const data = await fetchDashboardData(period);
+  getOrderFulfillment: async (period, startDate, endDate) => {
+    const data = await fetchDashboardData(period, startDate, endDate);
     
     if (data.orders) {
       return data.orders;
@@ -182,8 +187,9 @@ export const AdminReportService = {
   /**
    * Fetches list of top 4 best-selling products.
    */
-  getTopSellingProducts: async (period) => {
-    const data = await fetchDashboardData(period);
+  getTopSellingProducts: async (period, startDate, endDate) => {
+    const data = await fetchDashboardData(period, startDate, endDate);
+
     
     if (data.topProducts) {
       return data.topProducts.map((p, idx) => ({

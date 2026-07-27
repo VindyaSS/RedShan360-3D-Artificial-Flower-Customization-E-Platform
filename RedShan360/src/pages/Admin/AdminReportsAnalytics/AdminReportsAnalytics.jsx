@@ -16,6 +16,16 @@ function AdminReportsAnalytics() {
   const [selectedPeriod, setSelectedPeriod] = useState("Last 30 Days");
   const [loading, setLoading] = useState(true);
 
+  // Custom date range state
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split("T")[0];
+  });
+  const [endDate, setEndDate] = useState(() => {
+    return new Date().toISOString().split("T")[0];
+  });
+
   // Analytics states
   const [revenueData, setRevenueData] = useState(null);
   const [chartData, setChartData] = useState(null);
@@ -31,12 +41,12 @@ function AdminReportsAnalytics() {
       setLoading(true);
       try {
         const [rev, chart, cat, cust, full, prod] = await Promise.all([
-          AdminReportService.getRevenueSummary(selectedPeriod),
-          AdminReportService.getRevenueGrowthData(selectedPeriod),
-          AdminReportService.getCategoryPerformance(selectedPeriod),
-          AdminReportService.getCustomerInsights(selectedPeriod),
-          AdminReportService.getOrderFulfillment(selectedPeriod),
-          AdminReportService.getTopSellingProducts(selectedPeriod),
+          AdminReportService.getRevenueSummary(selectedPeriod, startDate, endDate),
+          AdminReportService.getRevenueGrowthData(selectedPeriod, startDate, endDate),
+          AdminReportService.getCategoryPerformance(selectedPeriod, startDate, endDate),
+          AdminReportService.getCustomerInsights(selectedPeriod, startDate, endDate),
+          AdminReportService.getOrderFulfillment(selectedPeriod, startDate, endDate),
+          AdminReportService.getTopSellingProducts(selectedPeriod, startDate, endDate),
         ]);
 
         if (active) {
@@ -61,7 +71,8 @@ function AdminReportsAnalytics() {
     return () => {
       active = false;
     };
-  }, [selectedPeriod]);
+  }, [selectedPeriod, startDate, endDate]);
+
 
   return (
     <div className="admin-reports-page">
@@ -84,6 +95,23 @@ function AdminReportsAnalytics() {
             </div>
 
             <div className="reports-actions-block">
+              {selectedPeriod === "Custom Date Range" && (
+                <div className="reports-date-picker">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="reports-date-input"
+                  />
+                  <span>to</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="reports-date-input"
+                  />
+                </div>
+              )}
               <AdminReportFilter
                 value={selectedPeriod}
                 onChange={setSelectedPeriod}
