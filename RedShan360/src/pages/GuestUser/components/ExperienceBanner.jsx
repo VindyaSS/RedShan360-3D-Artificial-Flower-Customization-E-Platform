@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import { ZoomIn, RotateCw, Sun } from 'lucide-react';
 
 const ExperienceBanner = () => {
+  const navigate = useNavigate();
   return (
     <section id="customization" className="py-24 px-6 md:px-12 lg:px-16 bg-[#f4f0ed]">
       <div className="max-w-7xl mx-auto">
@@ -62,7 +64,10 @@ const ExperienceBanner = () => {
               </div>
             </div>
 
-            <button className="mt-10 px-8 py-3.5 rounded-sm bg-[#555555] hover:bg-[#444444] text-white font-medium text-sm tracking-wide transition-all duration-300">
+            <button 
+              onClick={() => navigate('/customization')}
+              className="mt-10 px-8 py-3.5 rounded-sm bg-[#555555] hover:bg-[#444444] text-white font-medium text-sm tracking-wide transition-all duration-300"
+            >
               Try the Visualizer
             </button>
           </div>
