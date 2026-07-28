@@ -71,7 +71,9 @@ const Shop = () => {
   const getProductImage = (product) => {
     if (product.imageUrl) {
       return getProductImageUrl(product.imageUrl);
+      
     }
+    console.log(product.imageUrl);
 
     const name = (product.productName || '').toLowerCase();
 
@@ -283,6 +285,7 @@ const Shop = () => {
           const productSubCategory = dbSubCategories.find((s) => s.id === p.subCategoryId);
 
           return {
+          
             id: p.productId,
             productId: p.productId,
             title: p.productName || 'Unnamed Arrangement',
