@@ -20,6 +20,8 @@ export default function AssignedEmployeeTable(props) {
                         const isActive = status.toLowerCase() === "active";
                         const isOffline = status.toLowerCase() === "offline";
                         const isNotStarted = status.toLowerCase() === "not yet start work";
+                        const isFinished = status.toLowerCase() === "finished";
+
                         return (
                             <tr key={assignedEmployee.EmployeeName}>
                                 <td>{assignedEmployee.EmployeeName}</td>
