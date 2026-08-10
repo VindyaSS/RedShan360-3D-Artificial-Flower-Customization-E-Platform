@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Check, Play, Pause, AlertCircle, Inbox, ChevronDown, ChevronUp, Database } from 'lucide-react';
+import {
+  Check,
+  Play,
+  Pause,
+  AlertCircle,
+  Inbox,
+  ChevronDown,
+  ChevronUp,
+  Database
+} from 'lucide-react';
 
 import EStartButton from './EStartButton';
 import EStopButton from './EStopButton';
@@ -12,7 +21,19 @@ import redRoseBunch from '../../assets/redRoseBouquet.jpg';
 import lilyBunch from '../../assets/lilyBoquet.jpg';
 
 
-/* Default orders */
+/*
+ * ============================================
+ * BACKEND BASE URL
+ * ============================================
+ */
+const BACKEND_BASE_URL = 'http://localhost:8080';
+
+
+/*
+ * ============================================
+ * DEFAULT ORDERS
+ * ============================================
+ */
 const DEFAULT_ORDERS = [
   {
     OrderID: 'ORD-1002',
@@ -65,7 +86,11 @@ const DEFAULT_ORDERS = [
 ];
 
 
-/* Mock stock */
+/*
+ * ============================================
+ * MOCK STOCK
+ * ============================================
+ */
 const MOCK_STOCK = {
   'ITM-5001': 0,
   'ITM-5002': 0,
@@ -75,7 +100,6 @@ const MOCK_STOCK = {
 
 export default function ENormalOrderTable({
   orders,
-  /* Item details fetched from backend */
   orderItems,
   onStart,
   onStop,
@@ -83,434 +107,1305 @@ export default function ENormalOrderTable({
   onComplete,
   onReadyToPacking,
   onItemClick,
-  /* Called when Show Items is clicked */
   onShowItems
 }) {
 
-  /* Use API orders if available */
+  /*
+   * ============================================
+   * USE API ORDERS IF AVAILABLE
+   * ============================================
+   */
   const displayOrders = orders || DEFAULT_ORDERS;
 
-  /* Track status for each row */
+
+  /*
+   * ============================================
+   * ROW STATUS
+   * ============================================
+   */
   const [rowStatuses, setRowStatuses] = useState({});
 
-  /* Track expanded orders */
+
+  /*
+   * ============================================
+   * EXPANDED ORDERS
+   * ============================================
+   */
   const [expandedOrders, setExpandedOrders] = useState({});
 
-  /* Stock checking states */
+
+  /*
+   * ============================================
+   * STOCK STATES
+   * ============================================
+   */
   const [checkingStock, setCheckingStock] = useState({});
   const [stockChecked, setStockChecked] = useState({});
 
-  /* Initialize row statuses */
+
+  /*
+   * ============================================
+   * INITIALIZE ROW STATUSES
+   * ============================================
+   */
   useEffect(() => {
+
     const newStatuses = {};
-    displayOrders.forEach(order => {
-      const rowKey = `${order.OrderID}-${order.ItemID}`;
-      newStatuses[rowKey] = order.Status || order.status || order.initialStatus || 'Pending';
+
+    displayOrders.forEach((order) => {
+
+      /*
+       * API order only contains order-level data.
+       *
+       * Item status will be initialized later
+       * when the item details are loaded.
+       */
+      const orderId =
+        order.orderId ??
+        order.OrderID;
+
+      const itemId =
+        order.itemId ??
+        order.ItemID;
+
+      const rowKey =
+        `${orderId}-${itemId}`;
+
+      newStatuses[rowKey] =
+        order.Status ||
+        order.status ||
+        order.initialStatus ||
+        'Pending';
     });
+
     setRowStatuses(newStatuses);
+
   }, [orders]);
 
 
-  /* Group orders */
+  /*
+   * ============================================
+   * GROUP ORDERS
+   * ============================================
+   */
   const groupedOrders = useMemo(() => {
-    return displayOrders.map(order => {
-      const orderId = order.orderId;
+
+    return displayOrders.map((order) => {
+
+      const orderId =
+        order.orderId ??
+        order.OrderID;
+
       return {
         OrderID: orderId,
-        numberOfItems: order.numberOfItems,
-        totalQuantity: order.totalQuantity,
-        items: orderItems?.[orderId] || []
+
+        numberOfItems:
+          order.numberOfItems ?? 0,
+
+        totalQuantity:
+          order.totalQuantity ?? 0,
+
+        /*
+         * Actual item details come from:
+         *
+         * orderItems[orderId]
+         */
+        items:
+          orderItems?.[orderId] || []
       };
+
     });
+
   }, [displayOrders, orderItems]);
 
 
-  /* Expand / collapse order */
-  const toggleExpand = (orderId) => {
-    const isCurrentlyExpanded = !!expandedOrders[orderId];
-    console.log("SHOW ITEMS CLICKED - ORDER ID:", orderId);
+  /*
+   * ============================================
+   * IMAGE URL HELPER
+   *
+   * Backend returns:
+   *
+   * /uploads/products/C5.jpg
+   *
+   * We convert it to:
+   *
+   * http://localhost:8080/uploads/products/C5.jpg
+   * ============================================
+   */
+  const getImageUrl = (imageUrl) => {
 
-    /* Fetch item details only when opening the order */
-    if (!isCurrentlyExpanded && onShowItems) {
-      onShowItems(orderId);
+    if (!imageUrl) {
+      return daisyBunch;
     }
 
-    setExpandedOrders(prev => ({ ...prev, [orderId]: !prev[orderId] }));
+    /*
+     * Already a complete URL
+     *
+     * Example:
+     * http://localhost:8080/uploads/products/C5.jpg
+     */
+    if (
+      imageUrl.startsWith('http://') ||
+      imageUrl.startsWith('https://')
+    ) {
+      return imageUrl;
+    }
+
+    /*
+     * Blob / data URL
+     */
+    if (
+      imageUrl.startsWith('blob:') ||
+      imageUrl.startsWith('data:')
+    ) {
+      return imageUrl;
+    }
+
+    /*
+     * Relative backend URL
+     *
+     * /uploads/products/C5.jpg
+     */
+    if (imageUrl.startsWith('/')) {
+      return `${BACKEND_BASE_URL}${imageUrl}`;
+    }
+
+    /*
+     * Relative path without /
+     */
+    return `${BACKEND_BASE_URL}/${imageUrl}`;
   };
 
 
   /*
-   * Check the Store
-   * Frontend only for now. Backend will be connected later.
+   * ============================================
+   * EXPAND / COLLAPSE ORDER
+   * ============================================
    */
-  const handleCheckTheStore = (orderId, item) => {
-    console.log("=================================");
-    console.log("CHECK THE STORE CLICKED");
-    console.log("ORDER ID:", orderId);
-    console.log("ITEM ID:", item.itemId);
-    console.log("ITEM NAME:", item.itemName);
-    console.log("REQUIRED QUANTITY:", item.quantity);
-    console.log("FULL ITEM OBJECT:", item);
-    console.log("=================================");
+  const toggleExpand = async (orderId) => {
+
+    const isCurrentlyExpanded =
+      !!expandedOrders[orderId];
+
+    console.log(
+      '================================='
+    );
+
+    console.log(
+      'SHOW ITEMS CLICKED'
+    );
+
+    console.log(
+      'ORDER ID:',
+      orderId
+    );
+
+
+    /*
+     * If opening the order,
+     * fetch item details.
+     */
+    if (
+      !isCurrentlyExpanded &&
+      onShowItems
+    ) {
+
+      console.log(
+        'FETCHING ITEMS FOR ORDER:',
+        orderId
+      );
+
+      await onShowItems(orderId);
+    }
+
+
+    /*
+     * Toggle expansion.
+     */
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderId]: !prev[orderId]
+    }));
+
   };
 
 
-  /* Existing stock checking function - Kept unchanged. */
-  const handleCheckStock = (rowKey, itemId, quantity) => {
-    setCheckingStock(prev => ({ ...prev, [rowKey]: true }));
+  /*
+   * ============================================
+   * CHECK THE STORE
+   * ============================================
+   */
+  const handleCheckTheStore = (
+    orderId,
+    item
+  ) => {
+
+    console.log(
+      '================================='
+    );
+
+    console.log(
+      'CHECK THE STORE CLICKED'
+    );
+
+    console.log(
+      'ORDER ID:',
+      orderId
+    );
+
+    console.log(
+      'ITEM ID:',
+      item.itemId
+    );
+
+    console.log(
+      'ITEM NAME:',
+      item.itemName
+    );
+
+    console.log(
+      'REQUIRED QUANTITY:',
+      item.quantity
+    );
+
+    console.log(
+      'FULL ITEM OBJECT:',
+      item
+    );
+
+    console.log(
+      '================================='
+    );
+
+  };
+
+
+  /*
+   * ============================================
+   * CHECK STOCK
+   * ============================================
+   */
+  const handleCheckStock = (
+    rowKey,
+    itemId,
+    quantity
+  ) => {
+
+    setCheckingStock((prev) => ({
+      ...prev,
+      [rowKey]: true
+    }));
+
 
     setTimeout(() => {
-      const stock = MOCK_STOCK[itemId] !== undefined ? MOCK_STOCK[itemId] : 3;
-      const isSufficient = stock >= quantity;
 
-      setStockChecked(prev => ({
+      const stock =
+        MOCK_STOCK[itemId] !== undefined
+          ? MOCK_STOCK[itemId]
+          : 3;
+
+      const isSufficient =
+        stock >= quantity;
+
+
+      setStockChecked((prev) => ({
         ...prev,
-        [rowKey]: { available: stock, isSufficient }
+        [rowKey]: {
+          available: stock,
+          isSufficient
+        }
       }));
 
-      setCheckingStock(prev => ({ ...prev, [rowKey]: false }));
+
+      setCheckingStock((prev) => ({
+        ...prev,
+        [rowKey]: false
+      }));
+
     }, 1000);
+
   };
 
 
-  /* Ready to packing */
-  const handleReadyToPackingClick = (rowKey, orderId, itemId) => {
-    setRowStatuses(prev => ({ ...prev, [rowKey]: 'Ready to Packing' }));
+  /*
+   * ============================================
+   * READY TO PACKING
+   * ============================================
+   */
+  const handleReadyToPackingClick = (
+    rowKey,
+    orderId,
+    itemId
+  ) => {
+
+    setRowStatuses((prev) => ({
+      ...prev,
+      [rowKey]: 'Ready to Packing'
+    }));
+
+
     if (onReadyToPacking) {
-      onReadyToPacking(orderId, itemId);
+
+      onReadyToPacking(
+        orderId,
+        itemId
+      );
+
     }
+
   };
 
 
-  /* Start */
-  const handleStart = async (rowKey, orderId, itemId) => {
-    if (!onStart) return;
+  /*
+   * ============================================
+   * START
+   * ============================================
+   */
+  const handleStart = async (
+    rowKey,
+    orderId,
+    itemId
+  ) => {
 
-    const success = await onStart(orderId, itemId);
+    if (!onStart) {
+      return;
+    }
+
+
+    const success =
+      await onStart(
+        orderId,
+        itemId
+      );
+
 
     if (success) {
+
       setRowStatuses((prev) => ({
         ...prev,
-        [rowKey]: 'In Progress',
+        [rowKey]: 'In Progress'
       }));
+
     }
+
   };
 
 
-  /* Stop */
-  const handleStop = async (rowKey, orderId, itemId) => {
-    if (!onStop) return;
+  /*
+   * ============================================
+   * STOP
+   * ============================================
+   */
+  const handleStop = async (
+    rowKey,
+    orderId,
+    itemId
+  ) => {
 
-    const success = await onStop(orderId, itemId);
+    if (!onStop) {
+      return;
+    }
+
+
+    const success =
+      await onStop(
+        orderId,
+        itemId
+      );
+
 
     if (success) {
+
       setRowStatuses((prev) => ({
         ...prev,
-        [rowKey]: 'Stopped',
+        [rowKey]: 'Stopped'
       }));
+
     }
+
   };
 
 
-  /* Resume */
-  const handleResume = async (rowKey, orderId, itemId) => {
-    if (!onResume) return;
+  /*
+   * ============================================
+   * RESUME
+   * ============================================
+   */
+  const handleResume = async (
+    rowKey,
+    orderId,
+    itemId
+  ) => {
 
-    const success = await onResume(orderId, itemId);
+    if (!onResume) {
+      return;
+    }
+
+
+    const success =
+      await onResume(
+        orderId,
+        itemId
+      );
+
 
     if (success) {
+
       setRowStatuses((prev) => ({
         ...prev,
-        [rowKey]: 'In Progress',
+        [rowKey]: 'In Progress'
       }));
+
     }
+
   };
 
 
-  /* Complete */
-  const handleComplete = async (rowKey, orderId, itemId) => {
-    if (!onComplete) return;
+  /*
+   * ============================================
+   * COMPLETE
+   * ============================================
+   */
+  const handleComplete = async (
+    rowKey,
+    orderId,
+    itemId
+  ) => {
 
-    const success = await onComplete(orderId, itemId);
+    if (!onComplete) {
+      return;
+    }
+
+
+    const success =
+      await onComplete(
+        orderId,
+        itemId
+      );
+
 
     if (success) {
+
       setRowStatuses((prev) => ({
         ...prev,
-        [rowKey]: 'Completed',
+        [rowKey]: 'Completed'
       }));
+
     }
+
   };
 
 
-  /* Status badge */
+  /*
+   * ============================================
+   * NORMALIZE STATUS
+   * ============================================
+   */
+  const normalizeStatus = (status) => {
+
+    if (!status) {
+      return 'Pending';
+    }
+
+
+    const lower =
+      String(status)
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .trim();
+
+
+    if (lower === 'pending') {
+      return 'Pending';
+    }
+
+
+    if (
+      lower === 'in progress' ||
+      lower === 'inprogress' ||
+      lower === 'started' ||
+      lower === 'processing'
+    ) {
+      return 'In Progress';
+    }
+
+
+    if (
+      lower === 'stopped' ||
+      lower === 'paused' ||
+      lower === 'stop'
+    ) {
+      return 'Stopped';
+    }
+
+
+    if (
+      lower === 'completed' ||
+      lower === 'complete' ||
+      lower === 'done'
+    ) {
+      return 'Completed';
+    }
+
+
+    if (
+      lower === 'ready to packing' ||
+      lower === 'ready to pack' ||
+      lower === 'ready_to_packing'
+    ) {
+      return 'Ready to Packing';
+    }
+
+
+    return 'Pending';
+
+  };
+
+
+  /*
+   * ============================================
+   * STATUS BADGE
+   * ============================================
+   */
   const renderStatusBadge = (status) => {
+
     switch (status) {
+
       case 'In Progress':
+
         return (
-          <span className="status-badge status-badge-progress">
-            <Play size={10} fill="currentColor" />
+          <span
+            style={{
+              color: '#1d4ed8',
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: '700',
+              fontSize: '12.5px'
+            }}
+          >
+            <Play size={12} />
             In Progress
           </span>
         );
+
+
       case 'Stopped':
+
         return (
-          <span className="status-badge status-badge-stopped">
-            <Pause size={10} fill="currentColor" />
+          <span
+            style={{
+              color: '#b45309',
+              backgroundColor: '#fffbeb',
+              border: '1px solid #fde68a',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: '700',
+              fontSize: '12.5px'
+            }}
+          >
+            <Pause size={12} />
             Stopped
           </span>
         );
+
+
       case 'Completed':
+
         return (
-          <span className="status-badge status-badge-completed">
-            <Check size={10} />
+          <span
+            style={{
+              color: '#0f766e',
+              backgroundColor: '#f0fdfa',
+              border: '1px solid #ccfbf1',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: '700',
+              fontSize: '12.5px'
+            }}
+          >
+            <Check size={12} />
             Completed
           </span>
         );
+
+
       case 'Ready to Packing':
+
         return (
-          <span className="status-badge status-badge-ready-packing">
-            <Inbox size={10} />
+          <span
+            style={{
+              color: '#3730a3',
+              backgroundColor: '#e0e7ff',
+              border: '1px solid #c7d2fe',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: '700',
+              fontSize: '12.5px'
+            }}
+          >
+            <Inbox size={12} />
             Ready to Packing
           </span>
         );
+
+
       case 'Pending':
       default:
+
         return (
-          <span className="status-badge status-badge-pending">
-            <AlertCircle size={10} />
+          <span
+            style={{
+              color: '#92400e',
+              backgroundColor: '#fffbeb',
+              border: '1px solid #fde68a',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: '700',
+              fontSize: '12.5px'
+            }}
+          >
+            <AlertCircle size={12} />
             Pending
           </span>
         );
+
     }
+
   };
 
 
-  /* Empty state */
+  /*
+   * ============================================
+   * EMPTY STATE
+   * ============================================
+   */
   if (groupedOrders.length === 0) {
+
     return (
       <div className="employee-empty-state">
-        <div className="employee-empty-icon-wrapper">
-          <Inbox size={32} />
+
+        <Database
+          size={40}
+          className="employee-empty-icon"
+        />
+
+        <div>
+          <strong>
+            No assigned works
+          </strong>
+
+          <br />
+
+          <span>
+            You currently have no normal orders
+            assigned. Check back later!
+          </span>
         </div>
-        <h3 className="employee-empty-title">No assigned works</h3>
-        <p className="employee-empty-text">
-          You currently have no normal orders assigned. Check back later!
-        </p>
       </div>
     );
+
   }
 
 
+  /*
+   * ============================================
+   * MAIN TABLE
+   * ============================================
+   */
   return (
+
     <div className="employee-table-container">
-      <table className="employee-table">
+
+      <table className="employee-main-table">
+
         <thead>
+
           <tr>
-            <th>Order ID</th>
-            <th>Number of Items</th>
-            <th>Total Quantity</th>
-            <th style={{ textAlign: 'right', paddingRight: '40px' }}>Items Details</th>
+
+            <th>
+              Order ID
+            </th>
+
+            <th>
+              Number of Items
+            </th>
+
+            <th>
+              Total Quantity
+            </th>
+
+            <th className="th-align-right">
+              Items Details
+            </th>
+
           </tr>
+
         </thead>
 
+
         <tbody>
+
           {groupedOrders.map((group) => {
-            const isExpanded = !!expandedOrders[group.OrderID];
+
+            const isExpanded =
+              !!expandedOrders[group.OrderID];
+
+
+            console.log(
+              '================================='
+            );
+
+            console.log(
+              'ASSIGNED ORDER:',
+              group.OrderID
+            );
+
+            console.log(
+              'ASSIGNED ITEMS:',
+              group.items
+            );
+
 
             return (
-              <React.Fragment key={group.OrderID}>
 
-                {/* Main order row */}
+              <React.Fragment
+                key={group.OrderID}
+              >
+
+                {/* ==========================================
+                    MAIN ORDER ROW
+                   ========================================== */}
+
                 <tr>
-                  <td style={{ fontWeight: '700', color: 'var(--color-primary, #744F51)' }}>
+
+                  <td className="td-order-id">
                     {group.OrderID}
                   </td>
-                  <td style={{ fontWeight: '600' }}>
+
+
+                  <td className="td-semibold">
                     {group.numberOfItems}{' '}
-                    {group.numberOfItems === 1 ? 'Item' : 'Items'}
+
+                    {group.numberOfItems === 1
+                      ? 'Item'
+                      : 'Items'}
                   </td>
-                  <td style={{ fontWeight: '600' }}>
+
+
+                  <td className="td-semibold">
                     {group.totalQuantity}
                   </td>
-                  <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+
+
+                  <td className="td-align-right">
+
                     <button
+                      type="button"
                       className="expand-btn"
-                      onClick={() => toggleExpand(group.OrderID)}
+                      onClick={() =>
+                        toggleExpand(
+                          group.OrderID
+                        )
+                      }
                     >
+
                       {isExpanded ? (
-                        <>Hide Items <ChevronUp size={16} /></>
+
+                        <>
+                          Hide Items
+                          <ChevronUp size={16} />
+                        </>
+
                       ) : (
-                        <>Show Items <ChevronDown size={16} /></>
+
+                        <>
+                          Show Items
+                          <ChevronDown size={16} />
+                        </>
+
                       )}
+
                     </button>
+
                   </td>
+
                 </tr>
 
-                {/* Expanded item section */}
+
+                {/* ==========================================
+                    EXPANDED ITEMS
+                   ========================================== */}
+
                 {isExpanded && (
+
                   <tr>
+
                     <td
                       colSpan={4}
-                      style={{ padding: 0, backgroundColor: 'var(--color-bg-page)' }}
+                      className="td-expanded-outer"
                     >
-                      <div className="expanded-row-container">
-                        <table className="employee-sub-table">
-                          <thead>
-                            <tr>
-                              <th>Item ID</th>
-                              <th>Picture</th>
-                              <th>Item Name</th>
-                              <th>Quantity</th>
-                              <th>Status</th>
-                              <th>Actions</th>
-                            </tr>
-                          </thead>
 
-                          <tbody>
-                            {group.items.length === 0 ? (
+                      <div
+                        className="expanded-row-container"
+                      >
+
+                        {group.items.length === 0 ? (
+
+                          <div className="items-loading">
+                            Loading item details...
+                          </div>
+
+                        ) : (
+
+                          <table
+                            className="employee-sub-table"
+                          >
+
+                            <thead>
+
                               <tr>
-                                <td colSpan={6} style={{ textAlign: 'center', padding: '20px' }}>
-                                  Loading item details...
-                                </td>
+
+                                <th>
+                                  Item ID
+                                </th>
+
+                                <th>
+                                  Picture
+                                </th>
+
+                                <th>
+                                  Item Name
+                                </th>
+
+                                <th>
+                                  Quantity
+                                </th>
+
+                                <th>
+                                  Status
+                                </th>
+
+                                <th>
+                                  Actions
+                                </th>
+
                               </tr>
-                            ) : (
-                              group.items.map((item) => {
-                                /* Backend item fields */
-                                const itemId = item.itemId;
-                                const rowKey = `${group.OrderID}-${itemId}`;
 
-                                const rawStatus = rowStatuses[rowKey] || item.status || 'Pending';
+                            </thead>
 
-                                /* Normalize status to match comparison strings */
-                                const normalizeStatus = (s) => {
-                                  if (!s) return 'Pending';
-                                  const lower = s.toLowerCase().replace(/_/g, ' ');
-                                  if (lower === 'pending') return 'Pending';
-                                  if (lower === 'in progress' || lower === 'inprogress' || lower === 'started') return 'In Progress';
-                                  if (lower === 'stopped' || lower === 'paused') return 'Stopped';
-                                  if (lower === 'completed' || lower === 'done' || lower === 'complete') return 'Completed';
-                                  if (lower === 'ready to packing' || lower === 'ready to pack') return 'Ready to Packing';
-                                  return 'Pending';
-                                };
 
-                                const status = normalizeStatus(rawStatus);
-                                const displayImage = item.imageUrl || item.image || daisyBunch;
+                            <tbody>
 
-                                return (
-                                  <tr key={rowKey}>
+                              {group.items.map(
+                                (item) => {
 
-                                    {/* Item ID */}
-                                    <td>
-                                      <span
-                                        className="item-id-clickable"
-                                        onClick={() => {
-                                          console.log("ITEM CLICKED:", item);
-                                          if (onItemClick) {
-                                            onItemClick(item);
+                                  /*
+                                   * ==================================
+                                   * ITEM DATA
+                                   * ==================================
+                                   */
+
+                                  const itemId =
+                                    item.itemId;
+
+                                  const rowKey =
+                                    `${group.OrderID}-${itemId}`;
+
+
+                                  /*
+                                   * Status
+                                   */
+                                  const rawStatus =
+                                    rowStatuses[rowKey] ||
+                                    item.status ||
+                                    'Pending';
+
+                                  const status =
+                                    normalizeStatus(
+                                      rawStatus
+                                    );
+
+
+                                  /*
+                                   * ==================================
+                                   * IMPORTANT IMAGE FIX
+                                   * ==================================
+                                   *
+                                   * Backend:
+                                   *
+                                   * /uploads/products/C5.jpg
+                                   *
+                                   * Browser:
+                                   *
+                                   * http://localhost:8080/uploads/products/C5.jpg
+                                   */
+
+                                  const imageUrl =
+                                    item.imageUrl ||
+                                    item.image ||
+                                    null;
+
+                                  const displayImage =
+                                    getImageUrl(
+                                      imageUrl
+                                    );
+
+
+                                  console.log(
+                                    '================================='
+                                  );
+
+                                  console.log(
+                                    'ASSIGNED ITEM:'
+                                  );
+
+                                  console.log(
+                                    'ORDER ID:',
+                                    group.OrderID
+                                  );
+
+                                  console.log(
+                                    'ITEM ID:',
+                                    item.itemId
+                                  );
+
+                                  console.log(
+                                    'ITEM NAME:',
+                                    item.itemName
+                                  );
+
+                                  console.log(
+                                    'IMAGE FROM BACKEND:',
+                                    item.imageUrl
+                                  );
+
+                                  console.log(
+                                    'FINAL IMAGE URL:',
+                                    displayImage
+                                  );
+
+                                  console.log(
+                                    'QUANTITY:',
+                                    item.quantity
+                                  );
+
+                                  console.log(
+                                    'STATUS:',
+                                    item.status
+                                  );
+
+
+                                  return (
+
+                                    <tr
+                                      key={rowKey}
+                                    >
+
+                                      {/* =========================
+                                          ITEM ID
+                                         ========================= */}
+
+                                      <td>
+
+                                        <span
+                                          className="item-id-clickable"
+                                          onClick={() => {
+
+                                            console.log(
+                                              'ITEM CLICKED:',
+                                              item
+                                            );
+
+                                            if (
+                                              onItemClick
+                                            ) {
+
+                                              onItemClick(
+                                                item
+                                              );
+
+                                            }
+
+                                          }}
+                                        >
+                                          {item.itemId}
+                                        </span>
+
+                                      </td>
+
+
+                                      {/* =========================
+                                          IMAGE
+                                         ========================= */}
+
+                                      <td>
+
+                                        <img
+                                          src={displayImage}
+                                          alt={
+                                            item.itemName ||
+                                            'Item'
                                           }
-                                        }}
-                                      >
-                                        {item.itemId}
-                                      </span>
-                                    </td>
+                                          className="employee-table-thumbnail"
 
-                                    {/* Image */}
-                                    <td>
-                                      <img
-                                        src={displayImage}
-                                        alt={item.itemName}
-                                        className="employee-table-thumbnail"
-                                        onError={(e) => { e.target.src = daisyBunch; }}
-                                      />
-                                    </td>
+                                          onLoad={(e) => {
 
-                                    {/* Item name */}
-                                    <td style={{ fontWeight: '600' }}>
-                                      {item.itemName}
-                                    </td>
+                                            console.log(
+                                              'IMAGE LOADED:',
+                                              e.currentTarget.src
+                                            );
 
-                                    {/* Quantity */}
-                                    <td style={{ fontWeight: '600' }}>
-                                      {item.quantity}
-                                    </td>
+                                          }}
 
-                                    {/* Status */}
-                                    <td>
-                                      {renderStatusBadge(status)}
-                                    </td>
+                                          onError={(e) => {
 
-                                    {/* Actions */}
-                                    <td>
-                                      <div
-                                        className="employee-table-actions-cell"
-                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                                      >
-                                        {/* Pending: Start button */}
-                                        {status === 'Pending' && (
-                                          <EStartButton
-                                            onClick={() => handleStart(rowKey, group.OrderID, item.itemId)}
-                                            label="Start"
-                                          />
+                                            console.error(
+                                              'IMAGE FAILED:',
+                                              e.currentTarget.src
+                                            );
+
+                                            console.error(
+                                              'ITEM:',
+                                              item
+                                            );
+
+                                            /*
+                                             * Prevent infinite
+                                             * onError loop.
+                                             */
+                                            e.currentTarget.onerror =
+                                              null;
+
+                                            e.currentTarget.src =
+                                              daisyBunch;
+
+                                          }}
+
+                                        />
+
+                                      </td>
+
+
+                                      {/* =========================
+                                          ITEM NAME
+                                         ========================= */}
+
+                                      <td className="td-semibold">
+                                        {item.itemName ||
+                                          'Unknown Item'}
+                                      </td>
+
+
+                                      {/* =========================
+                                          QUANTITY
+                                         ========================= */}
+
+                                      <td className="td-semibold">
+                                        {item.quantity ?? 0}
+                                      </td>
+
+
+                                      {/* =========================
+                                          STATUS
+                                         ========================= */}
+
+                                      <td>
+                                        {renderStatusBadge(
+                                          status
                                         )}
+                                      </td>
 
-                                        {/* In Progress: Stop + Complete */}
-                                        {status === 'In Progress' && (
-                                          <>
-                                            <EStopButton
-                                              onClick={() => handleStop(rowKey, group.OrderID, item.itemId)}
-                                              label="Stop"
-                                            />
-                                            <ECompletedButton
-                                              onClick={() => handleComplete(rowKey, group.OrderID, item.itemId)}
-                                              label="Complete"
-                                            />
-                                          </>
-                                        )}
 
-                                        {/* Stopped: Resume + Complete */}
-                                        {status === 'Stopped' && (
-                                          <>
+                                      {/* =========================
+                                          ACTIONS
+                                         ========================= */}
+
+                                      <td>
+
+                                        <div
+                                          className="employee-table-actions-cell"
+                                        >
+
+                                          {/* PENDING */}
+
+                                          {status ===
+                                            'Pending' && (
+
                                             <EStartButton
-                                              onClick={() => handleResume(rowKey, group.OrderID, item.itemId)}
-                                              label="Resume"
+                                              onClick={() =>
+                                                handleStart(
+                                                  rowKey,
+                                                  group.OrderID,
+                                                  item.itemId
+                                                )
+                                              }
+                                              label="Start"
                                             />
-                                            <ECompletedButton
-                                              onClick={() => handleComplete(rowKey, group.OrderID, item.itemId)}
-                                              label="Complete"
-                                            />
-                                          </>
-                                        )}
 
-                                        {status === 'Completed' && (
-                                          <span>
-                                            <Check size={14} /> Completed
-                                          </span>
-                                        )}
+                                          )}
 
-                                        {status === 'Ready to Packing' && (
-                                          <span>
-                                            <Inbox size={14} /> Ready to Packing
-                                          </span>
-                                        )}
-                                      </div>
-                                    </td>
 
-                                  </tr>
-                                );
-                              })
-                            )}
-                          </tbody>
-                        </table>
+                                          {/* IN PROGRESS */}
+
+                                          {status ===
+                                            'In Progress' && (
+
+                                            <>
+
+                                              <EStopButton
+                                                onClick={() =>
+                                                  handleStop(
+                                                    rowKey,
+                                                    group.OrderID,
+                                                    item.itemId
+                                                  )
+                                                }
+                                                label="Stop"
+                                              />
+
+                                              <ECompletedButton
+                                                onClick={() =>
+                                                  handleComplete(
+                                                    rowKey,
+                                                    group.OrderID,
+                                                    item.itemId
+                                                  )
+                                                }
+                                                label="Complete"
+                                              />
+
+                                            </>
+
+                                          )}
+
+
+                                          {/* STOPPED */}
+
+                                          {status ===
+                                            'Stopped' && (
+
+                                            <>
+
+                                              <EStartButton
+                                                onClick={() =>
+                                                  handleResume(
+                                                    rowKey,
+                                                    group.OrderID,
+                                                    item.itemId
+                                                  )
+                                                }
+                                                label="Resume"
+                                              />
+
+                                              <ECompletedButton
+                                                onClick={() =>
+                                                  handleComplete(
+                                                    rowKey,
+                                                    group.OrderID,
+                                                    item.itemId
+                                                  )
+                                                }
+                                                label="Complete"
+                                              />
+
+                                            </>
+
+                                          )}
+
+
+                                          {/* COMPLETED */}
+
+                                          {status ===
+                                            'Completed' && (
+
+                                            <span
+                                              className="action-status-label action-status-completed"
+                                            >
+
+                                              <Check
+                                                size={14}
+                                              />
+
+                                              Completed
+
+                                            </span>
+
+                                          )}
+
+
+                                          {/* READY TO PACKING */}
+
+                                          {status ===
+                                            'Ready to Packing' && (
+
+                                            <span
+                                              className="action-status-label action-status-packing"
+                                            >
+
+                                              <Inbox
+                                                size={14}
+                                              />
+
+                                              Ready to Packing
+
+                                            </span>
+
+                                          )}
+
+                                        </div>
+
+                                      </td>
+
+                                    </tr>
+
+                                  );
+
+                                }
+                              )}
+
+                            </tbody>
+
+                          </table>
+
+                        )}
+
                       </div>
+
                     </td>
+
                   </tr>
+
                 )}
 
               </React.Fragment>
+
             );
+
           })}
+
         </tbody>
+
       </table>
+
     </div>
+
   );
+
 }
