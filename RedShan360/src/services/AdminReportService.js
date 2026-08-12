@@ -71,6 +71,36 @@ const fetchDashboardData = async (period, startDate, endDate) => {
 
 export const AdminReportService = {
   /**
+   * Fetches full dashboard data containing raw counts, percentages, and trends.
+   */
+  getDashboardKPIs: async (period, startDate, endDate) => {
+    return await fetchDashboardData(period, startDate, endDate);
+  },
+
+  /**
+   * Fetches monthly sales overview details for the last 6 months.
+   */
+  getMonthlySalesOverview: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reports/monthly-sales`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch monthly sales: ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (err) {
+      console.warn("Backend monthly-sales offline, falling back to mock");
+      return [
+        { month: "Jan", revenue: 12000, ordersCount: 120, completedOrdersCount: 110 },
+        { month: "Feb", revenue: 15000, ordersCount: 150, completedOrdersCount: 140 },
+        { month: "Mar", revenue: 14000, ordersCount: 140, completedOrdersCount: 130 },
+        { month: "Apr", revenue: 22000, ordersCount: 220, completedOrdersCount: 210 },
+        { month: "May", revenue: 20000, ordersCount: 200, completedOrdersCount: 190 },
+        { month: "Jun", revenue: 28000, ordersCount: 280, completedOrdersCount: 270 }
+      ];
+    }
+  },
+
+  /**
    * Fetches revenue KPI metrics (Daily, Weekly, Monthly) and their growth comparison metrics.
    */
   getRevenueSummary: async (period, startDate, endDate) => {
@@ -330,6 +360,19 @@ function getMockDashboardPayload(period) {
     weeklyChange: weeklyChange,
     monthlyRevenue: monthlyVal,
     monthlyChange: monthlyChange,
+    
+    totalCustomers: 12840,
+    totalCustomersChange: 12.0,
+    totalManagers: 24,
+    totalManagersChange: 5.0,
+    totalEmployees: 156,
+    totalEmployeesChange: 12.0,
+    totalProducts: 2450,
+    totalProductsChange: 0.0,
+    pendingOrders: 48,
+    pendingOrdersChange: 15.0,
+    completedOrders: 2142,
+    completedOrdersChange: 18.0,
     
     customers: {
       new: period === "Today" ? 4 : (period === "Last 7 Days" ? 34 : 124),
