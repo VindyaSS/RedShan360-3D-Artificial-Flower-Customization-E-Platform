@@ -49,6 +49,8 @@ export default function EmployeeDashboard() {
       return;
     }
     fetchAssignedOrders();
+      fetchCompletedOrders();
+
   }, [employeeId]);
 
   /* Fetch assigned orders */
@@ -60,7 +62,7 @@ export default function EmployeeDashboard() {
       const token = localStorage.getItem('token');
 
       const response = await fetch(
-        `${API_BASE_URL}/employee/tasks/assigned/${employeeId}`,
+        `${API_BASE_URL}/employee/tasks/assigned/normal/${employeeId}`,
         {
           method: 'GET',
           headers: {
@@ -166,7 +168,7 @@ export default function EmployeeDashboard() {
       console.log("ITEM ID:", itemId);
 
       const response = await fetch(
-        `${API_BASE_URL}/employee/tasks/${orderId}/start`,
+        `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/start`,
         {
           method: "PUT", // Change to PUT if your backend uses PUT
           headers: {
@@ -215,7 +217,7 @@ export default function EmployeeDashboard() {
       console.log("ITEM ID:", itemId);
 
       const response = await fetch(
-        `${API_BASE_URL}/employee/tasks/${orderId}/stop`,
+       `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/stop`,
         {
           method: "PUT",
           headers: {
@@ -260,7 +262,7 @@ export default function EmployeeDashboard() {
       console.log("ITEM ID:", itemId);
 
       const response = await fetch(
-        `${API_BASE_URL}/employee/tasks/${orderId}/resume`,
+        `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/resume`,
         {
           method: "PUT",
           headers: {
@@ -305,7 +307,7 @@ export default function EmployeeDashboard() {
       console.log("ITEM ID:", itemId);
 
       const response = await fetch(
-        `${API_BASE_URL}/employee/tasks/${orderId}/complete`,
+        `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/complete`,
         {
           method: "PUT",
           headers: {
@@ -338,6 +340,51 @@ export default function EmployeeDashboard() {
       return false;
     }
   };
+
+  const fetchCompletedOrders = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    console.log("====================================");
+    console.log("FETCHING COMPLETED ORDERS");
+    console.log("EMPLOYEE ID:", employeeId);
+
+    const response = await fetch(
+      `${API_BASE_URL}/employee/tasks/completed/normal/${employeeId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log(
+      "COMPLETED ORDERS RESPONSE STATUS:",
+      response.status
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch completed orders");
+    }
+
+    const data = await response.json();
+
+    console.log("COMPLETED ORDERS:", data);
+
+    setCompletedOrders(data);
+
+  } catch (error) {
+
+    console.error(
+      "ERROR FETCHING COMPLETED ORDERS:",
+      error
+    );
+
+    setCompletedOrders([]);
+  }
+};
 
 
   const handleShowItems = async (orderId) => {
@@ -458,9 +505,11 @@ export default function EmployeeDashboard() {
             </h3>
 
             <ENormalCompletedTable
-              orders={completedOrders}
-              onItemClick={handleItemClick}
-            />
+  orders={completedOrders}
+  orderItems={orderItems}
+  onItemClick={handleItemClick}
+  onShowItems={handleShowItems}
+/>
 
           </div>
         </div>
