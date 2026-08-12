@@ -43,3 +43,8 @@
     font-size: 14px;
   }
 }
+
+.order-segmentation-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
