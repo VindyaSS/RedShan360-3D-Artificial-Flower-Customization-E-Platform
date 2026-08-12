@@ -9,19 +9,19 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
   // Track which orders are expanded
   const [expandedOrders, setExpandedOrders] = useState({});
 
-  // Group displayOrders by OrderID
+  // Group displayOrders by orderId
   const groupedOrders = useMemo(() => {
     const groups = {};
     displayOrders.forEach(item => {
-      if (!groups[item.OrderID]) {
-        groups[item.OrderID] = {
-          OrderID: item.OrderID,
+      if (!groups[item.orderId]) {
+        groups[item.orderId] = {
+          orderId: item.orderId,
           items: [],
           totalQuantity: 0,
         };
       }
-      groups[item.OrderID].items.push(item);
-      groups[item.OrderID].totalQuantity += item.Quantity || 1;
+      groups[item.orderId].items.push(item);
+      groups[item.orderId].totalQuantity += item.Quantity || 1;
     });
     return Object.values(groups);
   }, [displayOrders]);
@@ -58,13 +58,13 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
         </thead>
         <tbody>
           {groupedOrders.map((group) => {
-            const isExpanded = !!expandedOrders[group.OrderID];
+            const isExpanded = !!expandedOrders[group.orderId];
 
             return (
-              <React.Fragment key={group.OrderID}>
+              <React.Fragment key={group.orderId}>
                 <tr>
                   <td style={{ fontWeight: '700', color: 'var(--color-primary, #744F51)' }}>
-                    {group.OrderID}
+                    {group.orderId}
                   </td>
                   <td style={{ fontWeight: '600' }}>
                     {group.items.length} {group.items.length === 1 ? 'Item' : 'Items'}
@@ -75,7 +75,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                   <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                     <button 
                       className="expand-btn" 
-                      onClick={() => toggleExpand(group.OrderID)}
+                      onClick={() => toggleExpand(group.orderId)}
                     >
                       {isExpanded ? (
                         <>
@@ -105,7 +105,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                           </thead>
                           <tbody>
                             {group.items.map((item) => {
-                              const rowKey = `${item.OrderID}-${item.ItemID}`;
+                              const rowKey = `${item.orderId}-${item.ItemID}`;
                               const displayImage = item.image || item.OrderPicture || daisyBunch;
 
                               return (

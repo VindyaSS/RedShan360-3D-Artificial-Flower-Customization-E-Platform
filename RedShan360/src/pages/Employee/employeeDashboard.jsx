@@ -62,7 +62,7 @@ export default function EmployeeDashboard() {
       const token = localStorage.getItem('token');
 
       const response = await fetch(
-        `${API_BASE_URL}/employee/tasks/assigned/${employeeId}`,
+        `${API_BASE_URL}/employee/tasks/assigned/normal/${employeeId}`,
         {
           method: 'GET',
           headers: {
@@ -350,7 +350,7 @@ export default function EmployeeDashboard() {
     console.log("EMPLOYEE ID:", employeeId);
 
     const response = await fetch(
-      `${API_BASE_URL}/employee/tasks/completed/${employeeId}`,
+      `${API_BASE_URL}/employee/tasks/completed/normal/${employeeId}`,
       {
         method: "GET",
         headers: {
