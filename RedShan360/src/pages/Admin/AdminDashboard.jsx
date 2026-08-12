@@ -60,7 +60,7 @@ function AdminDashboard() {
           </div>
 
           <div className="dashboard-right">
-            <AdminDashboardOrderSegmentation />
+            <AdminDashboardOrderSegmentation data={kpiData} loading={loading} />
             <AdminDashboardLiveActivity />
           </div>
         </div>
