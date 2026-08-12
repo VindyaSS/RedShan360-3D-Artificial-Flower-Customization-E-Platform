@@ -56,7 +56,7 @@ function AdminDashboard() {
         <div className="dashboard-grid">
           <div className="dashboard-left">
             <AdminDashboardCharts />
-            <AdminDashboardRecentOrders />
+            <AdminDashboardRecentOrders data={kpiData?.recentOrders} loading={loading} />
           </div>
 
           <div className="dashboard-right">
