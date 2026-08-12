@@ -75,3 +75,8 @@
     /* stack vertically on mobile */
   }
 }
+
+.kpi-grid.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
