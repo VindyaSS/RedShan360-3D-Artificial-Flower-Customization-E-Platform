@@ -1,264 +1,860 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+    useState,
+    useEffect,
+    useRef,
+    useCallback
+} from "react";
+
 import "../../css/manager.css";
+
 import MPOrderTable from "./MPendingOrderTable";
 import MProcessingOrderTable from "./MProcessingOrderTable";
 import MCompletedOrderTable from "./MCompletedOrderTable";
 import MDispatchOrderTable from "./MDispatchOrderTable";
 
+
+const API_BASE_URL =
+    "http://localhost:8080/api";
+
+
 export default function MTabs() {
-    const [currentTab, setCurrentTab] = useState(1);
+
+    // ============================================================
+    // TAB STATE
+    // ============================================================
+
+    const [currentTab, setCurrentTab] =
+        useState(1);
+
+
+    // ============================================================
+    // ORDER STATES
+    // ============================================================
+
+    const [orders, setOrders] =
+        useState([]);
+
+    const [processingorders, setProcessingOrders] =
+        useState([]);
+
+    const [completedorders, setCompletedOrders] =
+        useState([]);
+
+    const [dispatchedorders, setDispatchedOrders] =
+        useState([]);
+
+
+    // ============================================================
+    // LOADING / ERROR
+    // ============================================================
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [error, setError] =
+        useState("");
+
+
     const totalTabs = 4;
-    const wrapperRef = useRef(null);
 
-    const handleKeyDown = (e) => {
-        if (!wrapperRef.current?.contains(document.activeElement)) return;
+    const wrapperRef =
+        useRef(null);
 
-        if (e.key === "ArrowRight") {
-            setCurrentTab((prev) => (prev < totalTabs ? prev + 1 : 1));
-        }
 
-        if (e.key === "ArrowLeft") {
-            setCurrentTab((prev) => (prev > 1 ? prev - 1 : totalTabs));
-        }
-    };
+    // ============================================================
+    // FETCH ALL ORDERS
+    // ============================================================
 
-    const orders = [
-        {
-            OrderID: "ORD001",
-            CustomerName: "John",
-            ItemName: "lily",
-            Price: "Rs.1500",
-        },
-        {
-            OrderID: "ORD002",
-            CustomerName: "Kamal",
-            ItemName: "Rose",
-            Price: "Rs.1000",
-        },
-        {
-            OrderID: "ORD003",
-            CustomerName: "Nimal",
-            ItemName: "Desi",
-            Price: "Rs.1200",
-        },
-        {
-            OrderID: "ORD004",
-            CustomerName: "Saman",
-            ItemName: "Orchid",
-            Price: "Rs.1800",
-        },
-        {
-            OrderID: "ORD007",
-            CustomerName: "Tharindu",
-            ItemName: "Lotus",
-            Price: "Rs.1700",
-        },
+    const fetchOrders = useCallback(
+        async () => {
 
-    ];
+            console.log("");
+            console.log(
+                "===================================================="
+            );
 
-    const processingorders = [
-        {
-            OrderID: "ORD001",
-            CustomerName: "John",
-            ItemName: "lily",
-            Price: "Rs.1500",
-        },
-        {
-            OrderID: "ORD002",
-            CustomerName: "Kamal",
-            ItemName: "Rose",
-            Price: "Rs.1000",
-        },
-        {
-            OrderID: "ORD003",
-            CustomerName: "Nimal",
-            ItemName: "Desi",
-            Price: "Rs.1200",
-        },
-        {
-            OrderID: "ORD004",
-            CustomerName: "Saman",
-            ItemName: "Orchid",
-            Price: "Rs.1800",
-        },
-        {
-            OrderID: "ORD007",
-            CustomerName: "Tharindu",
-            ItemName: "Lotus",
-            Price: "Rs.1700",
-        },
-    ];
+            console.log(
+                " STARTING ORDER FETCH"
+            );
 
-    const completedorders = [
-        {
-            OrderID: "ORD001",
-            CustomerName: "John",
-            ItemName: "lily",
-            Price: "Rs.1500",
-        },
-        {
-            OrderID: "ORD002",
-            CustomerName: "Kamal",
-            ItemName: "Rose",
-            Price: "Rs.1000",
-        },
-        {
-            OrderID: "ORD003",
-            CustomerName: "Nimal",
-            ItemName: "Desi",
-            Price: "Rs.1200",
-        },
-        {
-            OrderID: "ORD004",
-            CustomerName: "Saman",
-            ItemName: "Orchid",
-            Price: "Rs.1800",
-        },
-        {
-            OrderID: "ORD007",
-            CustomerName: "Tharindu",
-            ItemName: "Lotus",
-            Price: "Rs.1700",
-        },
-    ];
+            console.log(
+                "===================================================="
+            );
 
-    const dispatchedorders = [
-        {
-            OrderID: "ORD001",
-            CustomerName: "John",
-            ItemName: "lily",
-            Price: "Rs.1500",
+
+            setLoading(true);
+            setError("");
+
+
+            try {
+
+                // ------------------------------------------------
+                // URLs
+                // ------------------------------------------------
+
+                const preOrdersURL =
+                    `${API_BASE_URL}/orders/pre-orders`;
+
+                const processingURL =
+                    `${API_BASE_URL}/orders/processing`;
+
+                const completedURL =
+                    `${API_BASE_URL}/orders/completed`;
+
+                const dispatchedURL =
+                    `${API_BASE_URL}/orders/dispatched`;
+
+
+                console.log(
+                    " PRE ORDERS URL:",
+                    preOrdersURL
+                );
+
+                console.log(
+                    " PROCESSING URL:",
+                    processingURL
+                );
+
+                console.log(
+                    " COMPLETED URL:",
+                    completedURL
+                );
+
+                console.log(
+                    " DISPATCHED URL:",
+                    dispatchedURL
+                );
+
+
+                // ------------------------------------------------
+                // FETCH FOUR APIs
+                // ------------------------------------------------
+
+                const [
+                    preOrdersResponse,
+                    processingResponse,
+                    completedResponse,
+                    dispatchedResponse
+                ] = await Promise.all([
+
+                    fetch(preOrdersURL),
+
+                    fetch(processingURL),
+
+                    fetch(completedURL),
+
+                    fetch(dispatchedURL)
+
+                ]);
+
+
+                // ------------------------------------------------
+                // HTTP STATUS
+                // ------------------------------------------------
+
+                console.log("");
+                console.log(
+                    "========== HTTP STATUS =========="
+                );
+
+
+                console.log(
+                    " Pre Orders:",
+                    preOrdersResponse.status,
+                    preOrdersResponse.ok
+                );
+
+                console.log(
+                    " Processing:",
+                    processingResponse.status,
+                    processingResponse.ok
+                );
+
+                console.log(
+                    " Completed:",
+                    completedResponse.status,
+                    completedResponse.ok
+                );
+
+                console.log(
+                    " Dispatched:",
+                    dispatchedResponse.status,
+                    dispatchedResponse.ok
+                );
+
+
+                // ------------------------------------------------
+                // CHECK RESPONSE
+                // ------------------------------------------------
+
+                if (!preOrdersResponse.ok) {
+
+                    throw new Error(
+                        `Pre Orders API returned ${preOrdersResponse.status}`
+                    );
+
+                }
+
+
+                if (!processingResponse.ok) {
+
+                    throw new Error(
+                        `Processing API returned ${processingResponse.status}`
+                    );
+
+                }
+
+
+                if (!completedResponse.ok) {
+
+                    throw new Error(
+                        `Completed API returned ${completedResponse.status}`
+                    );
+
+                }
+
+
+                if (!dispatchedResponse.ok) {
+
+                    throw new Error(
+                        `Dispatched API returned ${dispatchedResponse.status}`
+                    );
+
+                }
+
+
+                // ------------------------------------------------
+                // JSON
+                // ------------------------------------------------
+
+                const preOrdersData =
+                    await preOrdersResponse.json();
+
+                const processingData =
+                    await processingResponse.json();
+
+                const completedData =
+                    await completedResponse.json();
+
+                const dispatchedData =
+                    await dispatchedResponse.json();
+
+
+                // ------------------------------------------------
+                // RAW DATA LOG
+                // ------------------------------------------------
+
+                console.log("");
+                console.log(
+                    "===================================================="
+                );
+
+                console.log(
+                    " RAW BACKEND RESPONSES"
+                );
+
+                console.log(
+                    "===================================================="
+                );
+
+
+                console.log(
+                    " PRE ORDERS:",
+                    preOrdersData
+                );
+
+                console.log(
+                    " PROCESSING:",
+                    processingData
+                );
+
+                console.log(
+                    " COMPLETED:",
+                    completedData
+                );
+
+                console.log(
+                    " DISPATCHED:",
+                    dispatchedData
+                );
+
+
+                // ------------------------------------------------
+                // SAVE STATES
+                // ------------------------------------------------
+
+                setOrders(
+                    Array.isArray(preOrdersData)
+                        ? preOrdersData
+                        : []
+                );
+
+
+                setProcessingOrders(
+                    Array.isArray(processingData)
+                        ? processingData
+                        : []
+                );
+
+
+                setCompletedOrders(
+                    Array.isArray(completedData)
+                        ? completedData
+                        : []
+                );
+
+
+                setDispatchedOrders(
+                    Array.isArray(dispatchedData)
+                        ? dispatchedData
+                        : []
+                );
+
+
+                console.log("");
+                console.log(
+                    " ORDER DATA SAVED TO REACT STATE"
+                );
+
+
+            } catch (error) {
+
+                console.error("");
+                console.error(
+                    "===================================================="
+                );
+
+                console.error(
+                    " ORDER FETCH ERROR"
+                );
+
+                console.error(
+                    "===================================================="
+                );
+
+
+                console.error(
+                    "Error:",
+                    error
+                );
+
+
+                console.error(
+                    "Message:",
+                    error?.message
+                );
+
+
+                setError(
+                    error?.message ||
+                    "Failed to fetch orders"
+                );
+
+
+            } finally {
+
+                setLoading(false);
+
+            }
+
         },
-        {
-            OrderID: "ORD002",
-            CustomerName: "Kamal",
-            ItemName: "Rose",
-            Price: "Rs.1000",
-        },
-        {
-            OrderID: "ORD003",
-            CustomerName: "Nimal",
-            ItemName: "Desi",
-            Price: "Rs.1200",
-        },
-        {
-            OrderID: "ORD004",
-            CustomerName: "Saman",
-            ItemName: "Orchid",
-            Price: "Rs.1800",
-        },
-        {
-            OrderID: "ORD007",
-            CustomerName: "Tharindu",
-            ItemName: "Lotus",
-            Price: "Rs.1700",
-        },
-    ];
+        []
+    );
+
+
+    // ============================================================
+    // INITIAL FETCH
+    // ============================================================
 
     useEffect(() => {
-        window.addEventListener("keydown", handleKeyDown);
+
+        console.log(
+            " MTabs mounted - fetching orders"
+        );
+
+        fetchOrders();
+
+    }, [fetchOrders]);
+
+
+    // ============================================================
+    // DISPATCH SUCCESS CALLBACK
+    // ============================================================
+
+    const handleOrderDispatched =
+        async (updatedOrder) => {
+
+            console.log("");
+            console.log(
+                "===================================================="
+            );
+
+            console.log(
+                " [MTabs] ORDER DISPATCHED"
+            );
+
+            console.log(
+                " [MTabs] Updated order:",
+                updatedOrder
+            );
+
+            console.log(
+                " [MTabs] Order ID:",
+                updatedOrder?.orderId
+            );
+
+            console.log(
+                " [MTabs] New status:",
+                updatedOrder?.orderStatus
+            );
+
+
+            if (
+                updatedOrder?.orderStatus ===
+                "DISPATCHED_TO_COURIER"
+            ) {
+
+                console.log(
+                    " [MTabs] Refreshing all order lists..."
+                );
+
+
+                // ------------------------------------------------
+                // REFETCH ALL FOUR STATUS LISTS
+                // ------------------------------------------------
+
+                await fetchOrders();
+
+
+                console.log(
+                    " [MTabs] All order lists refreshed"
+                );
+
+            }
+
+
+            console.log(
+                "===================================================="
+            );
+
+        };
+
+
+    // ============================================================
+    // STATE DEBUG
+    // ============================================================
+
+    useEffect(() => {
+
+        console.log(
+            " [STATE] Pre Orders:",
+            orders
+        );
+
+    }, [orders]);
+
+
+    useEffect(() => {
+
+        console.log(
+            " [STATE] Processing Orders:",
+            processingorders
+        );
+
+    }, [processingorders]);
+
+
+    useEffect(() => {
+
+        console.log(
+            " [STATE] Completed Orders:",
+            completedorders
+        );
+
+    }, [completedorders]);
+
+
+    useEffect(() => {
+
+        console.log(
+            " [STATE] Dispatched Orders:",
+            dispatchedorders
+        );
+
+    }, [dispatchedorders]);
+
+
+    // ============================================================
+    // KEYBOARD NAVIGATION
+    // ============================================================
+
+    const handleKeyDown = (e) => {
+
+        if (
+            !wrapperRef.current?.contains(
+                document.activeElement
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        if (e.key === "ArrowRight") {
+
+            setCurrentTab(
+                (prev) =>
+                    prev < totalTabs
+                        ? prev + 1
+                        : 1
+            );
+
+        }
+
+
+        if (e.key === "ArrowLeft") {
+
+            setCurrentTab(
+                (prev) =>
+                    prev > 1
+                        ? prev - 1
+                        : totalTabs
+            );
+
+        }
+
+    };
+
+
+    useEffect(() => {
+
+        window.addEventListener(
+            "keydown",
+            handleKeyDown
+        );
+
 
         return () => {
-            window.removeEventListener("keydown", handleKeyDown);
+
+            window.removeEventListener(
+                "keydown",
+                handleKeyDown
+            );
+
         };
+
     }, []);
 
 
+    // ============================================================
+    // LOADING
+    // ============================================================
+
+    if (loading) {
+
+        return (
+
+            <div
+                className="tabs-container"
+                ref={wrapperRef}
+            >
+
+                <div className="tabs-header">
+
+                    <button className="tab-btn active">
+                        Pre Orders
+                    </button>
+
+                    <button className="tab-btn">
+                        Processing Orders
+                    </button>
+
+                    <button className="tab-btn">
+                        Completed Orders
+                    </button>
+
+                    <button className="tab-btn">
+                        Dispatched Orders To Courier
+                    </button>
+
+                </div>
+
+
+                <div className="tab-content">
+
+                    <div
+                        style={{
+                            padding: "40px",
+                            textAlign: "center"
+                        }}
+                    >
+
+                        Loading orders...
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        );
+
+    }
+
+
+    // ============================================================
+    // ERROR
+    // ============================================================
+
+    if (error) {
+
+        return (
+
+            <div
+                className="tabs-container"
+                ref={wrapperRef}
+            >
+
+                <div className="tabs-header">
+
+                    <button className="tab-btn active">
+                        Pre Orders
+                    </button>
+
+                    <button className="tab-btn">
+                        Processing Orders
+                    </button>
+
+                    <button className="tab-btn">
+                        Completed Orders
+                    </button>
+
+                    <button className="tab-btn">
+                        Dispatched Orders To Courier
+                    </button>
+
+                </div>
+
+
+                <div className="tab-content">
+
+                    <div
+                        style={{
+                            padding: "40px",
+                            textAlign: "center"
+                        }}
+                    >
+
+                        <h3>
+                            Failed to load orders
+                        </h3>
+
+                        <p>
+                            {error}
+                        </p>
+
+
+                        <button
+                            onClick={fetchOrders}
+                        >
+                            Retry
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        );
+
+    }
+
+
+    // ============================================================
+    // MAIN UI
+    // ============================================================
 
     return (
-        <div className="tabs-container" ref={wrapperRef}>
-            {/* Tab Buttons */}
+
+        <div
+            className="tabs-container"
+            ref={wrapperRef}
+        >
+
+            {/* ==================================================
+                TABS
+            ================================================== */}
+
             <div className="tabs-header">
+
                 <button
-                    className={`tab-btn ${currentTab === 1 ? "active" : ""}`}
-                    onClick={() => setCurrentTab(1)}
+                    className={`tab-btn ${
+                        currentTab === 1
+                            ? "active"
+                            : ""
+                    }`}
+
+                    onClick={() =>
+                        setCurrentTab(1)
+                    }
                 >
                     Pre Orders
                 </button>
 
+
                 <button
-                    className={`tab-btn ${currentTab === 2 ? "active" : ""}`}
-                    onClick={() => setCurrentTab(2)}
+                    className={`tab-btn ${
+                        currentTab === 2
+                            ? "active"
+                            : ""
+                    }`}
+
+                    onClick={() =>
+                        setCurrentTab(2)
+                    }
                 >
                     Processing Orders
                 </button>
 
+
                 <button
-                    className={`tab-btn ${currentTab === 3 ? "active" : ""}`}
-                    onClick={() => setCurrentTab(3)}
+                    className={`tab-btn ${
+                        currentTab === 3
+                            ? "active"
+                            : ""
+                    }`}
+
+                    onClick={() =>
+                        setCurrentTab(3)
+                    }
                 >
                     Completed Orders
                 </button>
 
+
                 <button
-                    className={`tab-btn ${currentTab === 4 ? "active" : ""}`}
-                    onClick={() => setCurrentTab(4)}
+                    className={`tab-btn ${
+                        currentTab === 4
+                            ? "active"
+                            : ""
+                    }`}
+
+                    onClick={() =>
+                        setCurrentTab(4)
+                    }
                 >
                     Dispatched Orders To Courier
                 </button>
 
             </div>
 
-            {/* Content */}
+
+            {/* ==================================================
+                CONTENT
+            ================================================== */}
+
             <div className="tab-content">
+
+
+                {/* ==================================================
+                    PRE ORDERS
+                ================================================== */}
+
                 {currentTab === 1 && (
-                    <div>
-                        <MPOrderTable
-                            t1="Order ID"
-                            t2="Customer Name"
-                            t3="Item Name"
-                            t4="Price"
-                            orders={orders}
-                        />
-                    </div>
+
+                    <MPOrderTable
+
+                        t1="Order ID"
+
+                        t2="Customer Name"
+
+                        t3="Price"
+
+                        orders={orders}
+
+                    />
+
                 )}
+
+
+                {/* ==================================================
+                    PROCESSING ORDERS
+                ================================================== */}
 
                 {currentTab === 2 && (
-                    <div>
-                        <MProcessingOrderTable
-                            t1="Order ID"
-                            t2="Customer Name"
-                            t3="Item Name"
-                            t4="Price"
-                            processingorders={processingorders}
 
+                    <MProcessingOrderTable
 
-                        />
-                    </div>
+                        t1="Order ID"
+
+                        t2="Customer Name"
+
+                        t3="Price"
+
+                        processingorders={
+                            processingorders
+                        }
+
+                    />
+
                 )}
+
+
+                {/* ==================================================
+                    COMPLETED ORDERS
+                ================================================== */}
 
                 {currentTab === 3 && (
-                    <div>
-                        <MCompletedOrderTable
-                            t1="Order ID"
-                            t2="Customer Name"
-                            t3="Item Name"
-                            t4="Price"
-                            completedorders={completedorders}
 
+                    <MCompletedOrderTable
 
-                        />
-                    </div>
+                        t1="Order ID"
+
+                        t2="Customer Name"
+
+                        t3="Price"
+
+                        completedorders={
+                            completedorders
+                        }
+
+                        onOrderDispatched={
+                            handleOrderDispatched
+                        }
+
+                    />
+
                 )}
+
+
+                {/* ==================================================
+                    DISPATCHED ORDERS
+                ================================================== */}
 
                 {currentTab === 4 && (
-                    <div>
-                        <MDispatchOrderTable
-                            t1="Order ID"
-                            t2="Customer Name"
-                            t3="Item Name"
-                            t4="Price"
-                            dispatchedorders={dispatchedorders}
 
-                        />
+                    <MDispatchOrderTable
 
+                        t1="Order ID"
 
-                    </div>
+                        t2="Customer Name"
+
+                        t3="Price"
+
+                        dispatchedorders={
+                            dispatchedorders
+                        }
+
+                    />
+
                 )}
 
-
-
             </div>
+
         </div>
+
     );
+
 }
