@@ -2,6 +2,7 @@ import React from 'react';
 import { Pause } from 'lucide-react';
 import '../../css/employee.css';
 
+// ---------------- STOP WORK BUTTON ----------------
 export default function EStopButton({ onClick, disabled, label = 'Stop Work', style }) {
   return (
     <button

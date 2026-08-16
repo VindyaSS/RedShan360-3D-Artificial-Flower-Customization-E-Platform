@@ -17,87 +17,11 @@ import ECompletedButton from './ECompletedButton';
 import '../../css/employee.css';
 
 import daisyBunch from '../../assets/daisyFlowerBouquet.jpg';
-import redRoseBunch from '../../assets/redRoseBouquet.jpg';
-import lilyBunch from '../../assets/lilyBoquet.jpg';
 
-
-/*
- * ============================================
- * BACKEND BASE URL
- * ============================================
- */
+// ---------------- BACKEND BASE URL ----------------
 const BACKEND_BASE_URL = 'http://localhost:8080';
 
-
-/*
- * ============================================
- * DEFAULT ORDERS
- * ============================================
- */
-const DEFAULT_ORDERS = [
-  {
-    OrderID: 'ORD-1002',
-    ItemID: 'ITM-5001',
-    OrderName: 'Vibrant Daisy Bunch',
-    image: daisyBunch,
-    Quantity: 2,
-    initialStatus: 'Pending'
-  },
-  {
-    OrderID: 'ORD-1002',
-    ItemID: 'ITM-5003',
-    OrderName: 'Elegant Lily Arrangement',
-    image: lilyBunch,
-    Quantity: 1,
-    initialStatus: 'Pending'
-  },
-  {
-    OrderID: 'ORD-1003',
-    ItemID: 'ITM-5002',
-    OrderName: 'Romantic Red Rose Bouquet',
-    image: redRoseBunch,
-    Quantity: 1,
-    initialStatus: 'In Progress'
-  },
-  {
-    OrderID: 'ORD-1004',
-    ItemID: 'ITM-5003',
-    OrderName: 'Elegant Lily Arrangement',
-    image: lilyBunch,
-    Quantity: 1,
-    initialStatus: 'Completed'
-  },
-  {
-    OrderID: 'ORD-1004',
-    ItemID: 'ITM-5001',
-    OrderName: 'Vibrant Daisy Bunch',
-    image: daisyBunch,
-    Quantity: 2,
-    initialStatus: 'Completed'
-  },
-  {
-    OrderID: 'ORD-1004',
-    ItemID: 'ITM-5002',
-    OrderName: 'Romantic Red Rose Bouquet',
-    image: redRoseBunch,
-    Quantity: 1,
-    initialStatus: 'Completed'
-  }
-];
-
-
-/*
- * ============================================
- * MOCK STOCK
- * ============================================
- */
-const MOCK_STOCK = {
-  'ITM-5001': 0,
-  'ITM-5002': 0,
-  'ITM-5003': 3
-};
-
-
+// ---------------- NORMAL ORDER TABLE ----------------
 export default function ENormalOrderTable({
   orders,
   orderItems,
@@ -110,66 +34,23 @@ export default function ENormalOrderTable({
   onShowItems
 }) {
 
-  /*
-   * ============================================
-   * USE API ORDERS IF AVAILABLE
-   * ============================================
-   */
-  const displayOrders = orders || DEFAULT_ORDERS;
+  // ---------------- BACKEND DATA ----------------
+  const displayOrders = orders || [];
 
-
-  /*
-   * ============================================
-   * ROW STATUS
-   * ============================================
-   */
+  // ---------------- STATE ----------------
   const [rowStatuses, setRowStatuses] = useState({});
-
-
-  /*
-   * ============================================
-   * EXPANDED ORDERS
-   * ============================================
-   */
   const [expandedOrders, setExpandedOrders] = useState({});
 
-
-  /*
-   * ============================================
-   * STOCK STATES
-   * ============================================
-   */
-  const [checkingStock, setCheckingStock] = useState({});
-  const [stockChecked, setStockChecked] = useState({});
-
-
-  /*
-   * ============================================
-   * INITIALIZE ROW STATUSES
-   * ============================================
-   */
+  // ---------------- INITIALIZE ROW STATUSES ----------------
   useEffect(() => {
 
     const newStatuses = {};
 
     displayOrders.forEach((order) => {
 
-      /*
-       * API order only contains order-level data.
-       *
-       * Item status will be initialized later
-       * when the item details are loaded.
-       */
-      const orderId =
-        order.orderId ??
-        order.OrderID;
-
-      const itemId =
-        order.itemId ??
-        order.ItemID;
-
-      const rowKey =
-        `${orderId}-${itemId}`;
+      const orderId = order.orderId ?? order.OrderID;
+      const itemId = order.itemId ?? order.ItemID;
+      const rowKey = `${orderId}-${itemId}`;
 
       newStatuses[rowKey] =
         order.Status ||
@@ -182,146 +63,59 @@ export default function ENormalOrderTable({
 
   }, [orders]);
 
-
-  /*
-   * ============================================
-   * GROUP ORDERS
-   * ============================================
-   */
+  // ---------------- GROUP ORDERS ----------------
+  // Actual item details come from orderItems[orderId]
   const groupedOrders = useMemo(() => {
 
     return displayOrders.map((order) => {
 
-      const orderId =
-        order.orderId ??
-        order.OrderID;
+      const orderId = order.orderId ?? order.OrderID;
 
       return {
         OrderID: orderId,
-
-        numberOfItems:
-          order.numberOfItems ?? 0,
-
-        totalQuantity:
-          order.totalQuantity ?? 0,
-
-        /*
-         * Actual item details come from:
-         *
-         * orderItems[orderId]
-         */
-        items:
-          orderItems?.[orderId] || []
+        numberOfItems: order.numberOfItems ?? 0,
+        totalQuantity: order.totalQuantity ?? 0,
+        items: orderItems?.[orderId] || []
       };
 
     });
 
   }, [displayOrders, orderItems]);
 
-
-  /*
-   * ============================================
-   * IMAGE URL HELPER
-   *
-   * Backend returns:
-   *
-   * /uploads/products/C5.jpg
-   *
-   * We convert it to:
-   *
-   * http://localhost:8080/uploads/products/C5.jpg
-   * ============================================
-   */
+  // ---------------- IMAGE URL HELPER ----------------
+  // Backend returns relative paths (e.g. /uploads/products/C5.jpg).
+  // Prepend the backend base URL to make them absolute.
   const getImageUrl = (imageUrl) => {
 
     if (!imageUrl) {
       return daisyBunch;
     }
 
-    /*
-     * Already a complete URL
-     *
-     * Example:
-     * http://localhost:8080/uploads/products/C5.jpg
-     */
-    if (
-      imageUrl.startsWith('http://') ||
-      imageUrl.startsWith('https://')
-    ) {
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return imageUrl;
     }
 
-    /*
-     * Blob / data URL
-     */
-    if (
-      imageUrl.startsWith('blob:') ||
-      imageUrl.startsWith('data:')
-    ) {
+    if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
       return imageUrl;
     }
 
-    /*
-     * Relative backend URL
-     *
-     * /uploads/products/C5.jpg
-     */
     if (imageUrl.startsWith('/')) {
       return `${BACKEND_BASE_URL}${imageUrl}`;
     }
 
-    /*
-     * Relative path without /
-     */
     return `${BACKEND_BASE_URL}/${imageUrl}`;
   };
 
-
-  /*
-   * ============================================
-   * EXPAND / COLLAPSE ORDER
-   * ============================================
-   */
+  // ---------------- TOGGLE ORDER EXPAND / COLLAPSE ----------------
   const toggleExpand = async (orderId) => {
 
-    const isCurrentlyExpanded =
-      !!expandedOrders[orderId];
+    const isCurrentlyExpanded = !!expandedOrders[orderId];
 
-    console.log(
-      '================================='
-    );
-
-    console.log(
-      'SHOW ITEMS CLICKED'
-    );
-
-    console.log(
-      'ORDER ID:',
-      orderId
-    );
-
-
-    /*
-     * If opening the order,
-     * fetch item details.
-     */
-    if (
-      !isCurrentlyExpanded &&
-      onShowItems
-    ) {
-
-      console.log(
-        'FETCHING ITEMS FOR ORDER:',
-        orderId
-      );
-
+    // Fetch item details when opening the order for the first time
+    if (!isCurrentlyExpanded && onShowItems) {
       await onShowItems(orderId);
     }
 
-
-    /*
-     * Toggle expansion.
-     */
     setExpandedOrders((prev) => ({
       ...prev,
       [orderId]: !prev[orderId]
@@ -329,350 +123,132 @@ export default function ENormalOrderTable({
 
   };
 
-
-  /*
-   * ============================================
-   * CHECK THE STORE
-   * ============================================
-   */
-  const handleCheckTheStore = (
-    orderId,
-    item
-  ) => {
-
-    console.log(
-      '================================='
-    );
-
-    console.log(
-      'CHECK THE STORE CLICKED'
-    );
-
-    console.log(
-      'ORDER ID:',
-      orderId
-    );
-
-    console.log(
-      'ITEM ID:',
-      item.itemId
-    );
-
-    console.log(
-      'ITEM NAME:',
-      item.itemName
-    );
-
-    console.log(
-      'REQUIRED QUANTITY:',
-      item.quantity
-    );
-
-    console.log(
-      'FULL ITEM OBJECT:',
-      item
-    );
-
-    console.log(
-      '================================='
-    );
-
-  };
-
-
-  /*
-   * ============================================
-   * CHECK STOCK
-   * ============================================
-   */
-  const handleCheckStock = (
-    rowKey,
-    itemId,
-    quantity
-  ) => {
-
-    setCheckingStock((prev) => ({
-      ...prev,
-      [rowKey]: true
-    }));
-
-
-    setTimeout(() => {
-
-      const stock =
-        MOCK_STOCK[itemId] !== undefined
-          ? MOCK_STOCK[itemId]
-          : 3;
-
-      const isSufficient =
-        stock >= quantity;
-
-
-      setStockChecked((prev) => ({
-        ...prev,
-        [rowKey]: {
-          available: stock,
-          isSufficient
-        }
-      }));
-
-
-      setCheckingStock((prev) => ({
-        ...prev,
-        [rowKey]: false
-      }));
-
-    }, 1000);
-
-  };
-
-
-  /*
-   * ============================================
-   * READY TO PACKING
-   * ============================================
-   */
-  const handleReadyToPackingClick = (
-    rowKey,
-    orderId,
-    itemId
-  ) => {
+  // ---------------- READY TO PACKING ----------------
+  const handleReadyToPackingClick = (rowKey, orderId, itemId) => {
 
     setRowStatuses((prev) => ({
       ...prev,
       [rowKey]: 'Ready to Packing'
     }));
 
-
     if (onReadyToPacking) {
-
-      onReadyToPacking(
-        orderId,
-        itemId
-      );
-
+      onReadyToPacking(orderId, itemId);
     }
 
   };
 
-
-  /*
-   * ============================================
-   * START
-   * ============================================
-   */
-  const handleStart = async (
-    rowKey,
-    orderId,
-    itemId
-  ) => {
+  // ---------------- START ----------------
+  const handleStart = async (rowKey, orderId, itemId) => {
 
     if (!onStart) {
       return;
     }
 
-
-    const success =
-      await onStart(
-        orderId,
-        itemId
-      );
-
+    const success = await onStart(orderId, itemId);
 
     if (success) {
-
       setRowStatuses((prev) => ({
         ...prev,
         [rowKey]: 'In Progress'
       }));
-
     }
 
   };
 
-
-  /*
-   * ============================================
-   * STOP
-   * ============================================
-   */
-  const handleStop = async (
-    rowKey,
-    orderId,
-    itemId
-  ) => {
+  // ---------------- STOP ----------------
+  const handleStop = async (rowKey, orderId, itemId) => {
 
     if (!onStop) {
       return;
     }
 
-
-    const success =
-      await onStop(
-        orderId,
-        itemId
-      );
-
+    const success = await onStop(orderId, itemId);
 
     if (success) {
-
       setRowStatuses((prev) => ({
         ...prev,
         [rowKey]: 'Stopped'
       }));
-
     }
 
   };
 
-
-  /*
-   * ============================================
-   * RESUME
-   * ============================================
-   */
-  const handleResume = async (
-    rowKey,
-    orderId,
-    itemId
-  ) => {
+  // ---------------- RESUME ----------------
+  const handleResume = async (rowKey, orderId, itemId) => {
 
     if (!onResume) {
       return;
     }
 
-
-    const success =
-      await onResume(
-        orderId,
-        itemId
-      );
-
+    const success = await onResume(orderId, itemId);
 
     if (success) {
-
       setRowStatuses((prev) => ({
         ...prev,
         [rowKey]: 'In Progress'
       }));
-
     }
 
   };
 
-
-  /*
-   * ============================================
-   * COMPLETE
-   * ============================================
-   */
-  const handleComplete = async (
-    rowKey,
-    orderId,
-    itemId
-  ) => {
+  // ---------------- COMPLETE ----------------
+  const handleComplete = async (rowKey, orderId, itemId) => {
 
     if (!onComplete) {
       return;
     }
 
-
-    const success =
-      await onComplete(
-        orderId,
-        itemId
-      );
-
+    const success = await onComplete(orderId, itemId);
 
     if (success) {
-
       setRowStatuses((prev) => ({
         ...prev,
         [rowKey]: 'Completed'
       }));
-
     }
 
   };
 
-
-  /*
-   * ============================================
-   * NORMALIZE STATUS
-   * ============================================
-   */
+  // ---------------- NORMALIZE STATUS ----------------
+  // Maps backend/API status strings to display-ready values
   const normalizeStatus = (status) => {
 
     if (!status) {
       return 'Pending';
     }
 
-
-    const lower =
-      String(status)
-        .toLowerCase()
-        .replace(/_/g, ' ')
-        .trim();
-
+    const lower = String(status).toLowerCase().replace(/_/g, ' ').trim();
 
     if (lower === 'pending') {
       return 'Pending';
     }
 
-
-    if (
-      lower === 'in progress' ||
-      lower === 'inprogress' ||
-      lower === 'started' ||
-      lower === 'processing'
-    ) {
+    if (lower === 'in progress' || lower === 'inprogress' || lower === 'started' || lower === 'processing') {
       return 'In Progress';
     }
 
-
-    if (
-      lower === 'stopped' ||
-      lower === 'paused' ||
-      lower === 'stop'
-    ) {
+    if (lower === 'stopped' || lower === 'paused' || lower === 'stop') {
       return 'Stopped';
     }
 
-
-    if (
-      lower === 'completed' ||
-      lower === 'complete' ||
-      lower === 'done'
-    ) {
+    if (lower === 'completed' || lower === 'complete' || lower === 'done') {
       return 'Completed';
     }
 
-
-    if (
-      lower === 'ready to packing' ||
-      lower === 'ready to pack' ||
-      lower === 'ready_to_packing'
-    ) {
+    if (lower === 'ready to packing' || lower === 'ready to pack' || lower === 'ready_to_packing') {
       return 'Ready to Packing';
     }
-
 
     return 'Pending';
 
   };
 
-
-  /*
-   * ============================================
-   * STATUS BADGE
-   * ============================================
-   */
+  // ---------------- STATUS BADGE ----------------
   const renderStatusBadge = (status) => {
 
     switch (status) {
 
       case 'In Progress':
-
         return (
           <span
             style={{
@@ -693,9 +269,7 @@ export default function ENormalOrderTable({
           </span>
         );
 
-
       case 'Stopped':
-
         return (
           <span
             style={{
@@ -716,9 +290,7 @@ export default function ENormalOrderTable({
           </span>
         );
 
-
       case 'Completed':
-
         return (
           <span
             style={{
@@ -739,9 +311,7 @@ export default function ENormalOrderTable({
           </span>
         );
 
-
       case 'Ready to Packing':
-
         return (
           <span
             style={{
@@ -762,10 +332,8 @@ export default function ENormalOrderTable({
           </span>
         );
 
-
       case 'Pending':
       default:
-
         return (
           <span
             style={{
@@ -790,12 +358,7 @@ export default function ENormalOrderTable({
 
   };
 
-
-  /*
-   * ============================================
-   * EMPTY STATE
-   * ============================================
-   */
+  // ---------------- EMPTY STATE ----------------
   if (groupedOrders.length === 0) {
 
     return (
@@ -807,15 +370,10 @@ export default function ENormalOrderTable({
         />
 
         <div>
-          <strong>
-            No assigned works
-          </strong>
-
+          <strong>No assigned works</strong>
           <br />
-
           <span>
-            You currently have no normal orders
-            assigned. Check back later!
+            You currently have no normal orders assigned. Check back later!
           </span>
         </div>
       </div>
@@ -823,12 +381,7 @@ export default function ENormalOrderTable({
 
   }
 
-
-  /*
-   * ============================================
-   * MAIN TABLE
-   * ============================================
-   */
+  // ---------------- MAIN TABLE ----------------
   return (
 
     <div className="employee-table-container">
@@ -836,62 +389,23 @@ export default function ENormalOrderTable({
       <table className="employee-main-table">
 
         <thead>
-
           <tr>
-
-            <th>
-              Order ID
-            </th>
-
-            <th>
-              Number of Items
-            </th>
-
-            <th>
-              Total Quantity
-            </th>
-
-            <th className="th-align-right">
-              Items Details
-            </th>
-
+            <th>Order ID</th>
+            <th>Number of Items</th>
+            <th>Total Quantity</th>
+            <th className="th-align-right">Items Details</th>
           </tr>
-
         </thead>
-
 
         <tbody>
 
           {groupedOrders.map((group) => {
 
-            const isExpanded =
-              !!expandedOrders[group.OrderID];
-
-
-            console.log(
-              '================================='
-            );
-
-            console.log(
-              'ASSIGNED ORDER:',
-              group.OrderID
-            );
-
-            console.log(
-              'ASSIGNED ITEMS:',
-              group.items
-            );
-
+            const isExpanded = !!expandedOrders[group.OrderID];
 
             return (
 
-              <React.Fragment
-                key={group.OrderID}
-              >
-
-                {/* ==========================================
-                    MAIN ORDER ROW
-                   ========================================== */}
+              <React.Fragment key={group.OrderID}>
 
                 <tr>
 
@@ -899,59 +413,36 @@ export default function ENormalOrderTable({
                     {group.OrderID}
                   </td>
 
-
                   <td className="td-semibold">
                     {group.numberOfItems}{' '}
-
-                    {group.numberOfItems === 1
-                      ? 'Item'
-                      : 'Items'}
+                    {group.numberOfItems === 1 ? 'Item' : 'Items'}
                   </td>
-
 
                   <td className="td-semibold">
                     {group.totalQuantity}
                   </td>
 
-
                   <td className="td-align-right">
-
                     <button
                       type="button"
                       className="expand-btn"
-                      onClick={() =>
-                        toggleExpand(
-                          group.OrderID
-                        )
-                      }
+                      onClick={() => toggleExpand(group.OrderID)}
                     >
-
                       {isExpanded ? (
-
                         <>
                           Hide Items
                           <ChevronUp size={16} />
                         </>
-
                       ) : (
-
                         <>
                           Show Items
                           <ChevronDown size={16} />
                         </>
-
                       )}
-
                     </button>
-
                   </td>
 
                 </tr>
-
-
-                {/* ==========================================
-                    EXPANDED ITEMS
-                   ========================================== */}
 
                 {isExpanded && (
 
@@ -962,9 +453,7 @@ export default function ENormalOrderTable({
                       className="td-expanded-outer"
                     >
 
-                      <div
-                        className="expanded-row-container"
-                      >
+                      <div className="expanded-row-container">
 
                         {group.items.length === 0 ? (
 
@@ -974,399 +463,144 @@ export default function ENormalOrderTable({
 
                         ) : (
 
-                          <table
-                            className="employee-sub-table"
-                          >
+                          <table className="employee-sub-table">
 
                             <thead>
-
                               <tr>
-
-                                <th>
-                                  Item ID
-                                </th>
-
-                                <th>
-                                  Picture
-                                </th>
-
-                                <th>
-                                  Item Name
-                                </th>
-
-                                <th>
-                                  Quantity
-                                </th>
-
-                                <th>
-                                  Status
-                                </th>
-
-                                <th>
-                                  Actions
-                                </th>
-
+                                <th>Item ID</th>
+                                <th>Picture</th>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                               </tr>
-
                             </thead>
-
 
                             <tbody>
 
                               {group.items.map(
                                 (item) => {
 
-                                  /*
-                                   * ==================================
-                                   * ITEM DATA
-                                   * ==================================
-                                   */
+                                  const itemId = item.itemId;
+                                  const rowKey = `${group.OrderID}-${itemId}`;
 
-                                  const itemId =
-                                    item.itemId;
-
-                                  const rowKey =
-                                    `${group.OrderID}-${itemId}`;
-
-
-                                  /*
-                                   * Status
-                                   */
                                   const rawStatus =
                                     rowStatuses[rowKey] ||
                                     item.status ||
                                     'Pending';
 
-                                  const status =
-                                    normalizeStatus(
-                                      rawStatus
-                                    );
+                                  const status = normalizeStatus(rawStatus);
 
-
-                                  /*
-                                   * ==================================
-                                   * IMPORTANT IMAGE FIX
-                                   * ==================================
-                                   *
-                                   * Backend:
-                                   *
-                                   * /uploads/products/C5.jpg
-                                   *
-                                   * Browser:
-                                   *
-                                   * http://localhost:8080/uploads/products/C5.jpg
-                                   */
-
-                                  const imageUrl =
-                                    item.imageUrl ||
-                                    item.image ||
-                                    null;
-
-                                  const displayImage =
-                                    getImageUrl(
-                                      imageUrl
-                                    );
-
-
-                                  console.log(
-                                    '================================='
-                                  );
-
-                                  console.log(
-                                    'ASSIGNED ITEM:'
-                                  );
-
-                                  console.log(
-                                    'ORDER ID:',
-                                    group.OrderID
-                                  );
-
-                                  console.log(
-                                    'ITEM ID:',
-                                    item.itemId
-                                  );
-
-                                  console.log(
-                                    'ITEM NAME:',
-                                    item.itemName
-                                  );
-
-                                  console.log(
-                                    'IMAGE FROM BACKEND:',
-                                    item.imageUrl
-                                  );
-
-                                  console.log(
-                                    'FINAL IMAGE URL:',
-                                    displayImage
-                                  );
-
-                                  console.log(
-                                    'QUANTITY:',
-                                    item.quantity
-                                  );
-
-                                  console.log(
-                                    'STATUS:',
-                                    item.status
-                                  );
-
+                                  // Resolve image URL — backend returns relative path
+                                  const imageUrl = item.imageUrl || item.image || null;
+                                  const displayImage = getImageUrl(imageUrl);
 
                                   return (
 
-                                    <tr
-                                      key={rowKey}
-                                    >
-
-                                      {/* =========================
-                                          ITEM ID
-                                         ========================= */}
+                                    <tr key={rowKey}>
 
                                       <td>
-
                                         <span
                                           className="item-id-clickable"
                                           onClick={() => {
-
-                                            console.log(
-                                              'ITEM CLICKED:',
-                                              item
-                                            );
-
-                                            if (
-                                              onItemClick
-                                            ) {
-
-                                              onItemClick(
-                                                item
-                                              );
-
+                                            if (onItemClick) {
+                                              onItemClick(item);
                                             }
-
                                           }}
                                         >
                                           {item.itemId}
                                         </span>
-
                                       </td>
-
-
-                                      {/* =========================
-                                          IMAGE
-                                         ========================= */}
 
                                       <td>
-
                                         <img
                                           src={displayImage}
-                                          alt={
-                                            item.itemName ||
-                                            'Item'
-                                          }
+                                          alt={item.itemName || 'Item'}
                                           className="employee-table-thumbnail"
-
-                                          onLoad={(e) => {
-
-                                            console.log(
-                                              'IMAGE LOADED:',
-                                              e.currentTarget.src
-                                            );
-
-                                          }}
-
                                           onError={(e) => {
-
-                                            console.error(
-                                              'IMAGE FAILED:',
-                                              e.currentTarget.src
-                                            );
-
-                                            console.error(
-                                              'ITEM:',
-                                              item
-                                            );
-
-                                            /*
-                                             * Prevent infinite
-                                             * onError loop.
-                                             */
-                                            e.currentTarget.onerror =
-                                              null;
-
-                                            e.currentTarget.src =
-                                              daisyBunch;
-
+                                            // Prevent infinite error loop and fall back to default image
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.src = daisyBunch;
                                           }}
-
                                         />
-
                                       </td>
-
-
-                                      {/* =========================
-                                          ITEM NAME
-                                         ========================= */}
 
                                       <td className="td-semibold">
-                                        {item.itemName ||
-                                          'Unknown Item'}
+                                        {item.itemName || 'Unknown Item'}
                                       </td>
-
-
-                                      {/* =========================
-                                          QUANTITY
-                                         ========================= */}
 
                                       <td className="td-semibold">
                                         {item.quantity ?? 0}
                                       </td>
 
-
-                                      {/* =========================
-                                          STATUS
-                                         ========================= */}
-
                                       <td>
-                                        {renderStatusBadge(
-                                          status
-                                        )}
+                                        {renderStatusBadge(status)}
                                       </td>
 
-
-                                      {/* =========================
-                                          ACTIONS
-                                         ========================= */}
-
                                       <td>
 
-                                        <div
-                                          className="employee-table-actions-cell"
-                                        >
+                                        <div className="employee-table-actions-cell">
 
-                                          {/* PENDING */}
-
-                                          {status ===
-                                            'Pending' && (
-
+                                          {/* Pending: show Start */}
+                                          {status === 'Pending' && (
                                             <EStartButton
                                               onClick={() =>
-                                                handleStart(
-                                                  rowKey,
-                                                  group.OrderID,
-                                                  item.itemId
-                                                )
+                                                handleStart(rowKey, group.OrderID, item.itemId)
                                               }
                                               label="Start"
                                             />
-
                                           )}
 
-
-                                          {/* IN PROGRESS */}
-
-                                          {status ===
-                                            'In Progress' && (
-
+                                          {/* In progress: show Stop and Complete */}
+                                          {status === 'In Progress' && (
                                             <>
-
                                               <EStopButton
                                                 onClick={() =>
-                                                  handleStop(
-                                                    rowKey,
-                                                    group.OrderID,
-                                                    item.itemId
-                                                  )
+                                                  handleStop(rowKey, group.OrderID, item.itemId)
                                                 }
                                                 label="Stop"
                                               />
-
                                               <ECompletedButton
                                                 onClick={() =>
-                                                  handleComplete(
-                                                    rowKey,
-                                                    group.OrderID,
-                                                    item.itemId
-                                                  )
+                                                  handleComplete(rowKey, group.OrderID, item.itemId)
                                                 }
                                                 label="Complete"
                                               />
-
                                             </>
-
                                           )}
 
-
-                                          {/* STOPPED */}
-
-                                          {status ===
-                                            'Stopped' && (
-
+                                          {/* Stopped: show Resume and Complete */}
+                                          {status === 'Stopped' && (
                                             <>
-
                                               <EStartButton
                                                 onClick={() =>
-                                                  handleResume(
-                                                    rowKey,
-                                                    group.OrderID,
-                                                    item.itemId
-                                                  )
+                                                  handleResume(rowKey, group.OrderID, item.itemId)
                                                 }
                                                 label="Resume"
                                               />
-
                                               <ECompletedButton
                                                 onClick={() =>
-                                                  handleComplete(
-                                                    rowKey,
-                                                    group.OrderID,
-                                                    item.itemId
-                                                  )
+                                                  handleComplete(rowKey, group.OrderID, item.itemId)
                                                 }
                                                 label="Complete"
                                               />
-
                                             </>
-
                                           )}
 
-
-                                          {/* COMPLETED */}
-
-                                          {status ===
-                                            'Completed' && (
-
-                                            <span
-                                              className="action-status-label action-status-completed"
-                                            >
-
-                                              <Check
-                                                size={14}
-                                              />
-
+                                          {/* Completed: show completed label */}
+                                          {status === 'Completed' && (
+                                            <span className="action-status-label action-status-completed">
+                                              <Check size={14} />
                                               Completed
-
                                             </span>
-
                                           )}
 
-
-                                          {/* READY TO PACKING */}
-
-                                          {status ===
-                                            'Ready to Packing' && (
-
-                                            <span
-                                              className="action-status-label action-status-packing"
-                                            >
-
-                                              <Inbox
-                                                size={14}
-                                              />
-
+                                          {/* Ready to Packing: show packing label */}
+                                          {status === 'Ready to Packing' && (
+                                            <span className="action-status-label action-status-packing">
+                                              <Inbox size={14} />
                                               Ready to Packing
-
                                             </span>
-
                                           )}
 
                                         </div>

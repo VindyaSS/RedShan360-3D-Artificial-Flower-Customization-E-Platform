@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { Check, Inbox, ChevronDown, ChevronUp } from 'lucide-react';
 import '../../css/employee.css';
-
 import daisyBunch from '../../assets/daisyFlowerBouquet.jpg';
 
+// ---------------- CUSTOMIZED COMPLETED ORDERS TABLE ----------------
 export default function ECustomizedCompletedTable({ orders, onItemClick }) {
   const displayOrders = orders || [];
-  // Track which orders are expanded
+
+  // ---------------- STATE ----------------
   const [expandedOrders, setExpandedOrders] = useState({});
 
-  // Group displayOrders by orderId
+  // ---------------- GROUP ORDERS BY ORDER ID ----------------
   const groupedOrders = useMemo(() => {
     const groups = {};
     displayOrders.forEach(item => {
@@ -26,6 +27,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
     return Object.values(groups);
   }, [displayOrders]);
 
+  // ---------------- TOGGLE ORDER EXPAND / COLLAPSE ----------------
   const toggleExpand = (orderId) => {
     setExpandedOrders(prev => ({
       ...prev,
@@ -33,6 +35,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
     }));
   };
 
+  // ---------------- EMPTY STATE ----------------
   if (groupedOrders.length === 0) {
     return (
       <div className="employee-empty-state">
@@ -45,6 +48,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
     );
   }
 
+  // ---------------- MAIN TABLE ----------------
   return (
     <div className="employee-table-container">
       <table className="employee-table">
@@ -62,6 +66,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
 
             return (
               <React.Fragment key={group.orderId}>
+
                 <tr>
                   <td style={{ fontWeight: '700', color: 'var(--color-primary, #744F51)' }}>
                     {group.orderId}
@@ -73,22 +78,19 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                     {group.totalQuantity}
                   </td>
                   <td style={{ textAlign: 'right', paddingRight: '20px' }}>
-                    <button 
-                      className="expand-btn" 
+                    <button
+                      className="expand-btn"
                       onClick={() => toggleExpand(group.orderId)}
                     >
                       {isExpanded ? (
-                        <>
-                          Hide Items <ChevronUp size={16} />
-                        </>
+                        <>Hide Items <ChevronUp size={16} /></>
                       ) : (
-                        <>
-                          Show Items <ChevronDown size={16} />
-                        </>
+                        <>Show Items <ChevronDown size={16} /></>
                       )}
                     </button>
                   </td>
                 </tr>
+
                 {isExpanded && (
                   <tr>
                     <td colSpan={4} style={{ padding: 0, backgroundColor: 'var(--color-bg-page)' }}>
@@ -111,7 +113,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                               return (
                                 <tr key={rowKey}>
                                   <td>
-                                    <span 
+                                    <span
                                       className="item-id-clickable"
                                       onClick={() => onItemClick && onItemClick(item)}
                                     >
@@ -119,25 +121,21 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                                     </span>
                                   </td>
                                   <td>
-                                    <img 
-                                      src={displayImage} 
-                                      alt={item.OrderName} 
+                                    <img
+                                      src={displayImage}
+                                      alt={item.OrderName}
                                       className="employee-table-thumbnail"
                                       onError={(e) => {
                                         e.target.src = daisyBunch;
                                       }}
                                     />
                                   </td>
-                                  <td style={{ fontWeight: '600' }}>
-                                    {item.OrderName}
-                                  </td>
-                                  <td style={{ fontWeight: '600' }}>
-                                    {item.Quantity || 1}
-                                  </td>
+                                  <td style={{ fontWeight: '600' }}>{item.OrderName}</td>
+                                  <td style={{ fontWeight: '600' }}>{item.Quantity || 1}</td>
                                   <td>
-                                    <span style={{ 
-                                      color: '#0f766e', 
-                                      fontWeight: '700', 
+                                    <span style={{
+                                      color: '#0f766e',
+                                      fontWeight: '700',
                                       fontSize: '12.5px',
                                       display: 'inline-flex',
                                       alignItems: 'center',
@@ -159,6 +157,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                     </td>
                   </tr>
                 )}
+
               </React.Fragment>
             );
           })}

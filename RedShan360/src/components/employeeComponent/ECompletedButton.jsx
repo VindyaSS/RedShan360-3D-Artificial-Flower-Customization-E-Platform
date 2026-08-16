@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle } from 'lucide-react';
 import '../../css/employee.css';
 
+// ---------------- COMPLETE WORK BUTTON ----------------
 export default function ECompletedButton({ onClick, disabled, label = 'Complete Work', style }) {
   return (
     <button

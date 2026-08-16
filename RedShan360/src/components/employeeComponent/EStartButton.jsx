@@ -2,6 +2,7 @@ import React from 'react';
 import { Play } from 'lucide-react';
 import '../../css/employee.css';
 
+// ---------------- START WORK BUTTON ----------------
 export default function EStartButton({ onClick, disabled, label = 'Start Work', style }) {
   return (
     <button
