@@ -181,7 +181,6 @@ export default function MmanageProducts() {
                 </div>
                 <div className="Mpart2" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-                    {/* Top bar: search, sub-navbar and add product button */}
                     <div className="flex flex-col gap-4 border-b border-[#e5e4e7] pb-6">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <SearchBarM
@@ -202,7 +201,6 @@ export default function MmanageProducts() {
                         </div>
                     </div>
 
-                    {/* Product grid content area */}
                     <div className="flex-1">
                         {isAddingProduct ? (
                             <MAddNewProductForm
@@ -214,7 +212,6 @@ export default function MmanageProducts() {
                             />
                         ) : activeSector === 'All' ? (
                             <div className="flex flex-col gap-12">
-                                {/* All - Boquets */}
                                 <div>
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
@@ -268,7 +265,6 @@ export default function MmanageProducts() {
                                     )}
                                 </div>
 
-                                {/* All - Individual Flowers */}
                                 <div>
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
@@ -322,7 +318,6 @@ export default function MmanageProducts() {
                                     )}
                                 </div>
 
-                                {/* All - Head Dresses */}
                                 <div>
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">

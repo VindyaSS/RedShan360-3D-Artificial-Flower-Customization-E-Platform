@@ -40,7 +40,7 @@ export default function ManagerOverview() {
                 return;
             }
 
-            // Map backend order fields to table-compatible format
+            // Map backend fields to table-compatible format
             const formattedOrders = data.map((order) => ({
                 orderId: order?.orderId,
                 customerName: order?.customerName,
@@ -69,7 +69,7 @@ export default function ManagerOverview() {
     }, []);
 
     // ---------------- WORKING EMPLOYEES ----------------
-    // No backend endpoint available yet — keep empty until endpoint is provided
+    // No backend endpoint yet — placeholder until endpoint is available
     const workingEmployees = [];
 
 
@@ -85,10 +85,8 @@ export default function ManagerOverview() {
 
                 <div className="Mpart2">
 
-                    {/* Order summary cards */}
                     <div className="MOrderCard">
 
-                        {/* Total Orders card */}
                         <MOrderCard
                             icon={
                                 <svg
@@ -106,7 +104,6 @@ export default function ManagerOverview() {
                             value={50}
                         />
 
-                        {/* Total Products card */}
                         <MOrderCard
                             icon={
                                 <svg
@@ -124,7 +121,6 @@ export default function ManagerOverview() {
                             value={100}
                         />
 
-                        {/* Total Employees card */}
                         <MOrderCard
                             icon={
                                 <svg
@@ -146,10 +142,8 @@ export default function ManagerOverview() {
 
                     <MOrderGraph />
 
-                    {/* Dashboard data tables */}
                     <div className="dashboard-row">
 
-                        {/* Recent orders table */}
                         <div
                             className="tabs-container"
                             style={{
@@ -208,7 +202,6 @@ export default function ManagerOverview() {
 
                         </div>
 
-                        {/* Working employees table */}
                         <div
                             className="tabs-container"
                             style={{

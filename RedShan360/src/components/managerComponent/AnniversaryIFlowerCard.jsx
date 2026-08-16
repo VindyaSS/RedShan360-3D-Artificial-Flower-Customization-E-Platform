@@ -9,13 +9,14 @@ export default function AniversaryIFlowerCard({
     onEdit,
     onDelete
 }) {
-    // Check if item is low in stock (< 10) for custom badge colors
+    // Stock level flags for badge color
     const isLowStock = quantity <= 5;
     const isOutOfStock = quantity === 0;
 
     return (
         <div className="bg-[#faf8f6] rounded-2xl border border-[#e5e4e7] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group h-full">
-            {/* Image Container displaying full image without crop */}
+
+            {/* ---------------- Product Image ---------------- */}
             <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f4f0ed] border-b border-[#e5e4e7] flex items-center justify-center">
                 {image ? (
                     <img
@@ -31,7 +32,7 @@ export default function AniversaryIFlowerCard({
                 )}
             </div>
 
-            {/* Card Content */}
+            {/* ---------------- Card Content ---------------- */}
             <div className="p-4 flex flex-col flex-1 gap-3 justify-between">
                 <div>
                     <span className="text-[11px] font-semibold text-[#744F51]/75 uppercase tracking-widest font-sans">
@@ -42,7 +43,7 @@ export default function AniversaryIFlowerCard({
                     </h3>
                 </div>
 
-                {/* Price, Quantity and Actions Row */}
+                {/* ---------------- Price & Actions ---------------- */}
                 <div className="pt-3 border-t border-[#e5e4e7]/60 flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                         <div>
@@ -59,7 +60,7 @@ export default function AniversaryIFlowerCard({
                         </div>
                     </div>
 
-                    {/* Actions under the Price */}
+                    {/* ---------------- Action Buttons ---------------- */}
                     <div className="flex items-center gap-2">
                         {onEdit && (
                             <button

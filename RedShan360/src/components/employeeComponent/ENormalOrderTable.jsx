@@ -210,7 +210,6 @@ export default function ENormalOrderTable({
   };
 
   // ---------------- NORMALIZE STATUS ----------------
-  // Maps backend/API status strings to display-ready values
   const normalizeStatus = (status) => {
 
     if (!status) {
@@ -541,7 +540,6 @@ export default function ENormalOrderTable({
 
                                         <div className="employee-table-actions-cell">
 
-                                          {/* Pending: show Start */}
                                           {status === 'Pending' && (
                                             <EStartButton
                                               onClick={() =>
@@ -551,7 +549,6 @@ export default function ENormalOrderTable({
                                             />
                                           )}
 
-                                          {/* In progress: show Stop and Complete */}
                                           {status === 'In Progress' && (
                                             <>
                                               <EStopButton
@@ -569,7 +566,6 @@ export default function ENormalOrderTable({
                                             </>
                                           )}
 
-                                          {/* Stopped: show Resume and Complete */}
                                           {status === 'Stopped' && (
                                             <>
                                               <EStartButton
@@ -587,7 +583,6 @@ export default function ENormalOrderTable({
                                             </>
                                           )}
 
-                                          {/* Completed: show completed label */}
                                           {status === 'Completed' && (
                                             <span className="action-status-label action-status-completed">
                                               <Check size={14} />
@@ -595,7 +590,6 @@ export default function ENormalOrderTable({
                                             </span>
                                           )}
 
-                                          {/* Ready to Packing: show packing label */}
                                           {status === 'Ready to Packing' && (
                                             <span className="action-status-label action-status-packing">
                                               <Inbox size={14} />

@@ -12,6 +12,7 @@ import {
     Filler,
 } from "chart.js";
 
+// ---------------- Register Chart.js Components ----------------
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -24,11 +25,10 @@ ChartJS.register(
 );
 
 export default function MOrderGraph() {
+
+    // ---------------- Chart Data ----------------
     const data = {
-        labels: [
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul"
-        ],
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
         datasets: [
             {
                 label: "Income Orders",
@@ -47,6 +47,7 @@ export default function MOrderGraph() {
         ],
     };
 
+    // ---------------- Chart Options ----------------
     const options = {
         responsive: true,
         maintainAspectRatio: false,
@@ -81,9 +82,7 @@ export default function MOrderGraph() {
         },
         scales: {
             x: {
-                grid: {
-                    display: false,
-                },
+                grid: { display: false },
                 ticks: {
                     color: "#777",
                     font: {
@@ -94,9 +93,7 @@ export default function MOrderGraph() {
                 },
             },
             y: {
-                grid: {
-                    color: "#e5e4e7",
-                },
+                grid: { color: "#e5e4e7" },
                 ticks: {
                     color: "#777",
                     font: {
@@ -109,6 +106,7 @@ export default function MOrderGraph() {
         },
     };
 
+    // ---------------- Render ----------------
     return (
         <div className="tabs-container" style={{ padding: "24px" }}>
             <h3 style={{
@@ -121,7 +119,7 @@ export default function MOrderGraph() {
                 Order Analytics (Monthly)
             </h3>
 
-            {/* IMPORTANT: fixed height container */}
+            {/* Fixed height container required by Chart.js */}
             <div style={{ height: "350px", width: "100%" }}>
                 <Line data={data} options={options} />
             </div>
