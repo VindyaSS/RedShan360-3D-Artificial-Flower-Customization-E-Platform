@@ -26,7 +26,6 @@ export default function ENormalCompletedTable({
 
     const currentlyExpanded = !!expandedOrders[orderId];
 
-    // Collapse if already expanded
     if (currentlyExpanded) {
       setExpandedOrders((prev) => ({
         ...prev,
@@ -91,7 +90,7 @@ export default function ENormalCompletedTable({
             const orderId = order.orderId;
             const isExpanded = !!expandedOrders[orderId];
 
-            // Item details are stored separately in orderItems[orderId]
+            // Item details stored separately, keyed by orderId
             const items =
               orderItems && Array.isArray(orderItems[orderId])
                 ? orderItems[orderId]

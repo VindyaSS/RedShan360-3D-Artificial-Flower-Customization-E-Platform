@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Check, Inbox, ChevronDown, ChevronUp } from 'lucide-react';
 import '../../css/employee.css';
 import daisyBunch from '../../assets/daisyFlowerBouquet.jpg';
@@ -11,7 +11,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
   const [expandedOrders, setExpandedOrders] = useState({});
 
   // ---------------- GROUP ORDERS BY ORDER ID ----------------
-  const groupedOrders = useMemo(() => {
+  const groupedOrders = React.useMemo(() => {
     const groups = {};
     displayOrders.forEach(item => {
       if (!groups[item.orderId]) {

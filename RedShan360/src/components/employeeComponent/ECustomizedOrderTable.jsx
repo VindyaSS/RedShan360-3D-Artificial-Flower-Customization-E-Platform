@@ -33,7 +33,6 @@ export default function ECustomizedOrderTable({
     const [expandedOrders, setExpandedOrders] = useState({});
 
     // ---------------- NORMALIZE STATUS ----------------
-    // Maps backend status strings to internal status keys
     const normalizeStatus = (status) => {
         if (!status) {
             return 'PENDING';
@@ -93,7 +92,6 @@ export default function ECustomizedOrderTable({
         try {
             const result = onStart ? await onStart(orderId, itemId) : true;
 
-            // Skip UI update if backend request failed
             if (result === false) {
                 return;
             }
@@ -103,7 +101,7 @@ export default function ECustomizedOrderTable({
                 [rowKey]: 'START'
             }));
         } catch (error) {
-            // Start request failed silently
+            // Request failed silently
         }
     };
 
@@ -121,7 +119,7 @@ export default function ECustomizedOrderTable({
                 [rowKey]: 'STOP'
             }));
         } catch (error) {
-            // Stop request failed silently
+            // Request failed silently
         }
     };
 
@@ -139,7 +137,7 @@ export default function ECustomizedOrderTable({
                 [rowKey]: 'COMPLETED'
             }));
         } catch (error) {
-            // Complete request failed silently
+            // Request failed silently
         }
     };
 
@@ -290,7 +288,6 @@ export default function ECustomizedOrderTable({
                                                             </tr>
                                                         ) : (
                                                             group.items.map((item) => {
-                                                                // item.itemId = customized_bouquet.custom_id (numeric)
                                                                 const customId = item.itemId;
                                                                 const rowKey = `${group.orderId}-${customId}`;
 
@@ -344,7 +341,6 @@ export default function ECustomizedOrderTable({
                                                                         <td>
                                                                             <div className="employee-table-actions-cell">
 
-                                                                                {/* Pending: show Start button */}
                                                                                 {status === 'PENDING' && (
                                                                                     <EStartButton
                                                                                         onClick={() =>
@@ -354,7 +350,6 @@ export default function ECustomizedOrderTable({
                                                                                     />
                                                                                 )}
 
-                                                                                {/* In progress: show Stop and Complete */}
                                                                                 {status === 'START' && (
                                                                                     <>
                                                                                         <EStopButton
@@ -372,7 +367,6 @@ export default function ECustomizedOrderTable({
                                                                                     </>
                                                                                 )}
 
-                                                                                {/* Stopped: show Resume and Complete */}
                                                                                 {status === 'STOP' && (
                                                                                     <>
                                                                                         <EStartButton
@@ -390,7 +384,6 @@ export default function ECustomizedOrderTable({
                                                                                     </>
                                                                                 )}
 
-                                                                                {/* Completed: show completed label */}
                                                                                 {status === 'COMPLETED' && (
                                                                                     <span
                                                                                         style={{

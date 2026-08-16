@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { X, User, ShoppingBag, DollarSign, Calendar, Heart, ShieldAlert, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { X, User, ShoppingBag, DollarSign, ShieldAlert, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import "../../css/manager.css";
 
 export default function MPreOrderModal({
     isOpen,
     onClose,
     order,          // Single order for detail mode
-    onApprove,      // Action for detail mode
-    employee,   // Selected employee for assignment mode
+    onApprove,      // Callback for approving an order in detail mode
+    employee,       // Selected employee for assignment mode
     preOrders = [], // List of pre-orders for assignment mode
     onAssign        // Callback when assigning an order to an employee
 }) {
@@ -15,21 +15,20 @@ export default function MPreOrderModal({
 
     if (!isOpen) return null;
 
+    // Determine which mode the modal is in
     const isAssignmentMode = !!employee?.EmployeeName;
 
+    // ---------------- Toggle Expanded Order Row ----------------
     const toggleExpandOrder = (orderId) => {
-        if (expandedOrderId === orderId) {
-            setExpandedOrderId(null);
-        } else {
-            setExpandedOrderId(orderId);
-        }
+        setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
     };
 
+    // ---------------- Render ----------------
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-container" onClick={(e) => e.stopPropagation()}>
 
-                {/* Modal Header */}
+                {/* ---------------- Modal Header ---------------- */}
                 <div className="modal-header">
                     <div className="modal-title-area">
                         <span className="modal-badge">{isAssignmentMode ? "Assignment" : "Pre-Order"}</span>
@@ -44,10 +43,10 @@ export default function MPreOrderModal({
                     </button>
                 </div>
 
-                {/* Modal Body */}
+                {/* ---------------- Modal Body ---------------- */}
                 <div className="modal-body">
                     {isAssignmentMode ? (
-                        // --- Assignment Mode ---
+                        // ---------------- Assignment Mode ----------------
                         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                             <p style={{ fontSize: "14px", color: "var(--color-text-muted)", margin: 0 }}>
                                 Select a preorder from the list below to assign to <strong>{employee?.EmployeeName}</strong>.
@@ -85,7 +84,7 @@ export default function MPreOrderModal({
                                                 const isExpanded = expandedOrderId === po.OrderID;
                                                 return (
                                                     <React.Fragment key={po.OrderID}>
-                                                        {/* Main row */}
+                                                        {/* ---------------- Pre-Order Row ---------------- */}
                                                         <tr
                                                             onClick={() => isCustom && toggleExpandOrder(po.OrderID)}
                                                             style={{ cursor: isCustom ? "pointer" : "default" }}
@@ -124,7 +123,7 @@ export default function MPreOrderModal({
                                                             </td>
                                                         </tr>
 
-                                                        {/* Expanded Customization Details Row */}
+                                                        {/* ---------------- Expanded Customization Details ---------------- */}
                                                         {isExpanded && isCustom && (
                                                             <tr style={{ background: "rgba(116, 79, 81, 0.02)" }}>
                                                                 <td colSpan="5" style={{ padding: "16px 24px", borderBottom: "1px solid var(--color-border)" }}>
@@ -186,11 +185,11 @@ export default function MPreOrderModal({
                             )}
                         </div>
                     ) : (
-                        // --- Single Order Detail Mode ---
+                        // ---------------- Single Order Detail Mode ----------------
                         order && (
                             <>
                                 <div className="modal-grid">
-                                    {/* Customer Info Card */}
+                                    {/* ---------------- Customer Info Card ---------------- */}
                                     <div className="modal-card-info">
                                         <div className="card-header">
                                             <User size={18} className="card-icon" />
@@ -216,7 +215,7 @@ export default function MPreOrderModal({
                                         </div>
                                     </div>
 
-                                    {/* Customization Details Card */}
+                                    {/* ---------------- Customization Details Card ---------------- */}
                                     <div className="modal-card-info">
                                         <div className="card-header">
                                             <Sparkles size={18} className="card-icon" />
@@ -250,7 +249,7 @@ export default function MPreOrderModal({
                                     </div>
                                 </div>
 
-                                {/* Cost & Summary Banner */}
+                                {/* ---------------- Cost & Summary Banner ---------------- */}
                                 <div className="modal-summary-banner">
                                     <div className="banner-item">
                                         <DollarSign size={20} className="banner-icon" />
@@ -272,7 +271,7 @@ export default function MPreOrderModal({
                     )}
                 </div>
 
-                {/* Modal Footer */}
+                {/* ---------------- Modal Footer ---------------- */}
                 <div className="modal-footer">
                     <button className="btn-cancel" onClick={onClose}>
                         Close Window

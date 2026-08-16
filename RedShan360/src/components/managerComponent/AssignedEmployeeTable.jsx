@@ -1,14 +1,12 @@
-import React, { useState } from "react";
-import '../../css/manager.css'
+import React from "react";
+import '../../css/manager.css';
 
 export default function AssignedEmployeeTable(props) {
-
-
     return (
         <>
             <table className="MPtable">
                 <thead>
-                    <tr >
+                    <tr>
                         <th>{props.t1}</th>
                         <th>{props.t2}</th>
                         <th colSpan="2">{props.t3}</th>
@@ -20,7 +18,6 @@ export default function AssignedEmployeeTable(props) {
                         const isActive = status.toLowerCase() === "active";
                         const isOffline = status.toLowerCase() === "offline";
                         const isNotStarted = status.toLowerCase() === "not yet start work";
-                        const isFinished = status.toLowerCase() === "finished";
 
                         return (
                             <tr key={assignedEmployee.EmployeeName}>
@@ -34,12 +31,8 @@ export default function AssignedEmployeeTable(props) {
                             </tr>
                         );
                     })}
-
                 </tbody>
             </table>
-
-
         </>
     );
 }
-

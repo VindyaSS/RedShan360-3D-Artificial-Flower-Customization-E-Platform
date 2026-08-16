@@ -1,16 +1,13 @@
-import React, { useState } from "react";
-import '../../css/manager.css'
+import React from "react";
+import '../../css/manager.css';
 
 export default function UnAssignedEmployeeTable(props) {
-
-
     return (
         <>
             <table className="MPtable">
                 <thead>
-                    <tr >
+                    <tr>
                         <th>{props.t1}</th>
-
                         <th colSpan="2">{props.t2 || "Action"}</th>
                     </tr>
                 </thead>
@@ -18,9 +15,8 @@ export default function UnAssignedEmployeeTable(props) {
                     {props.unAssignedEmployees?.map((unAssignedEmployee) => (
                         <tr key={unAssignedEmployee.employeeId}>
                             <td>{unAssignedEmployee.EmployeeName}</td>
-
                             <td colSpan="2">
-                                <button 
+                                <button
                                     className="btn-dispatch"
                                     onClick={() => props.onAssignClick && props.onAssignClick(unAssignedEmployee)}
                                 >
@@ -29,12 +25,8 @@ export default function UnAssignedEmployeeTable(props) {
                             </td>
                         </tr>
                     ))}
-
                 </tbody>
             </table>
-
-
         </>
     );
 }
-
