@@ -70,6 +70,11 @@ export default function MTabs() {
             const completedData = await completedResponse.json();
             const dispatchedData = await dispatchedResponse.json();
 
+            console.log('[MTabs] fetchOrders preOrders - Status:', preOrdersResponse.status, '| Data:', preOrdersData);
+            console.log('[MTabs] fetchOrders processing - Status:', processingResponse.status, '| Data:', processingData);
+            console.log('[MTabs] fetchOrders completed - Status:', completedResponse.status, '| Data:', completedData);
+            console.log('[MTabs] fetchOrders dispatched - Status:', dispatchedResponse.status, '| Data:', dispatchedData);
+
             // Save fetched data to state
             setOrders(Array.isArray(preOrdersData) ? preOrdersData : []);
             setProcessingOrders(Array.isArray(processingData) ? processingData : []);

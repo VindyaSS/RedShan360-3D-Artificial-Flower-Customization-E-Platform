@@ -4,6 +4,7 @@ import "../../css/employee.css";
 
 // ---------------- NORMAL ITEM DETAILS CARD ----------------
 const ENormalItemCard = (props) => {
+  console.log('[ENormalItemCard] Props received:', props);
   return (
     <div className="blog-card">
       <button className="item-modal-close" onClick={props.onClose} aria-label="Close">

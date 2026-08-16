@@ -2,6 +2,7 @@ import React from "react";
 import "../../css/manager.css";
 
 export default function MProcessingOrderTable(props) {
+    console.log('[MProcessingOrderTable] Props received:', props);
 
     const processingorders = Array.isArray(props.processingorders)
         ? props.processingorders

@@ -9,6 +9,7 @@ export default function BirthdayBFlowerCard({
     onEdit,
     onDelete
 }) {
+    console.log('[BirthdayBFlowerCard] Props received:', { image, quantity, BoquetName, Price, onEdit, onDelete });
     const [isEditing, setIsEditing] = useState(false);
     const [newPrice, setNewPrice] = useState(Price);
 

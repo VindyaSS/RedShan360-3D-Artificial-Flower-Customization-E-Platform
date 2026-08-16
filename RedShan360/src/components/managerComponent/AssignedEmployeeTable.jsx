@@ -2,6 +2,7 @@ import React from "react";
 import '../../css/manager.css';
 
 export default function AssignedEmployeeTable(props) {
+    console.log('[AssignedEmployeeTable] Props received:', props);
     return (
         <>
             <table className="MPtable">

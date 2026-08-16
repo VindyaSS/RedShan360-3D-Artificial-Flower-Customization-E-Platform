@@ -5,6 +5,7 @@ import daisyBunch from '../../assets/daisyFlowerBouquet.jpg';
 
 // ---------------- CUSTOMIZED COMPLETED ORDERS TABLE ----------------
 export default function ECustomizedCompletedTable({ orders, onItemClick }) {
+  console.log('[ECustomizedCompletedTable] Props received:', { orders, onItemClick });
   const displayOrders = orders || [];
 
   // ---------------- STATE ----------------

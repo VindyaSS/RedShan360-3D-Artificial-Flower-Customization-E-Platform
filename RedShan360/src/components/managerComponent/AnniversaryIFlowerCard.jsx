@@ -9,6 +9,7 @@ export default function AniversaryIFlowerCard({
     onEdit,
     onDelete
 }) {
+    console.log('[AniversaryIFlowerCard] Props received:', { image, quantity, BoquetName, Price, onEdit, onDelete });
     // Stock level flags for badge color
     const isLowStock = quantity <= 5;
     const isOutOfStock = quantity === 0;

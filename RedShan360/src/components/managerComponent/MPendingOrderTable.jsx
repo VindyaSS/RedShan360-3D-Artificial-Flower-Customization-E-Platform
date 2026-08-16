@@ -2,6 +2,7 @@ import React from "react";
 import "../../css/manager.css";
 
 export default function MPendingOrderTable(props) {
+    console.log('[MPendingOrderTable] Props received:', props);
 
     const orders = Array.isArray(props.orders) ? props.orders : [];
 

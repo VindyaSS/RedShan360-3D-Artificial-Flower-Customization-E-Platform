@@ -16,6 +16,7 @@ export default function ENormalCompletedTable({
   onItemClick,
   onShowItems
 }) {
+  console.log('[ENormalCompletedTable] Props received:', { orders, orderItems, onItemClick, onShowItems });
   const displayOrders = orders || [];
 
   // ---------------- STATE ----------------
