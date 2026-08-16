@@ -4,6 +4,7 @@ import "../../css/employee.css";
 
 // ---------------- CUSTOMIZED ITEM DETAILS CARD ----------------
 const ECustomizedItemCard = (props) => {
+    console.log('[ECustomizedItemCard] Props received:', props);
     return (
         <div className="blog-card">
             <button className="item-modal-close" onClick={props.onClose} aria-label="Close">

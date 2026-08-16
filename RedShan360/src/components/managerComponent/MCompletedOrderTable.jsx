@@ -5,6 +5,7 @@ import "../../css/manager.css";
 const API_BASE_URL = "http://localhost:8080/api";
 
 export default function MCompletedOrderTable(props) {
+    console.log('[MCompletedOrderTable] Props received:', props);
 
     const completedorders = Array.isArray(props.completedorders)
         ? props.completedorders
@@ -57,6 +58,7 @@ export default function MCompletedOrderTable(props) {
 
             // ---------------- Handle Success Response ----------------
             const updatedOrder = await response.json();
+            console.log('[MCompletedOrderTable] handleDispatch - Status:', response.status, '| Data:', updatedOrder);
 
             // Verify backend returned the expected status
             if (updatedOrder?.orderStatus !== "DISPATCHED_TO_COURIER") {

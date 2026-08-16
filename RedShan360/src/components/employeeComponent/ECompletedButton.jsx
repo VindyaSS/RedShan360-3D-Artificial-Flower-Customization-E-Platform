@@ -4,6 +4,7 @@ import '../../css/employee.css';
 
 // ---------------- COMPLETE WORK BUTTON ----------------
 export default function ECompletedButton({ onClick, disabled, label = 'Complete Work', style }) {
+  console.log('[ECompletedButton] Props received:', { onClick, disabled, label, style });
   return (
     <button
       onClick={onClick}

@@ -33,6 +33,7 @@ export default function ENormalOrderTable({
   onItemClick,
   onShowItems
 }) {
+  console.log('[ENormalOrderTable] Props received:', { orders, orderItems, onStart, onStop, onResume, onComplete, onReadyToPacking, onItemClick, onShowItems });
 
   // ---------------- BACKEND DATA ----------------
   const displayOrders = orders || [];

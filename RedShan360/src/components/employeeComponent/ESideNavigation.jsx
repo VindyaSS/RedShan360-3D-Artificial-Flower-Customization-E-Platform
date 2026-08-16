@@ -4,6 +4,7 @@ import '../../css/employee.css';
 
 // ---------------- EMPLOYEE SIDE NAVIGATION ----------------
 export default function ESideNavigation() {
+    console.log('[ESideNavigation] Component rendered (no props)');
     const currentPath = window.location.pathname;
 
     // ---------------- LOGGED-IN EMPLOYEE ----------------

@@ -19,6 +19,7 @@ export default function MmanageEmployees() {
     const fetchPreOrders = async () => {
         try {
             const response = await api.get("http://localhost:8080/api/orders/unassigned");
+            console.log('[ManageEmployees] fetchPreOrders - Status:', response.status, '| Data:', response.data);
             const mappedData = response.data.map(item => ({
                 OrderID: item.OrderID !== undefined ? item.OrderID : item.orderId,
                 CustomerName: item.CustomerName !== undefined ? item.CustomerName : item.customerName,
@@ -44,6 +45,7 @@ export default function MmanageEmployees() {
     const fetchAssignedEmployees = async () => {
         try {
             const response = await api.get("http://localhost:8080/api/employees/assigned");
+            console.log('[ManageEmployees] fetchAssignedEmployees - Status:', response.status, '| Data:', response.data);
 
             const employees = response.data.map(emp => ({
                 employeeId: emp.employeeId,
@@ -63,6 +65,7 @@ export default function MmanageEmployees() {
     const fetchUnAssignedEmployees = async () => {
         try {
             const response = await api.get("http://localhost:8080/api/employees/not-assigned");
+            console.log('[ManageEmployees] fetchUnAssignedEmployees - Status:', response.status, '| Data:', response.data);
 
             const employees = response.data.map(emp => ({
                 employeeId: emp.employeeId,

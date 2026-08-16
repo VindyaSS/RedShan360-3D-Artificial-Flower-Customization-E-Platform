@@ -24,6 +24,7 @@ export default function ECustomizedOrderTable({
     onComplete,
     onItemClick
 }) {
+    console.log('[ECustomizedOrderTable] Props received:', { orders, orderItems, onStart, onStop, onComplete, onItemClick });
 
     // ---------------- BACKEND DATA ----------------
     const displayOrders = Array.isArray(orders) ? orders : [];

@@ -29,6 +29,7 @@ export default function MmanageProducts() {
     const fetchProducts = async () => {
         try {
             const response = await api.get('/api/products');
+            console.log('[ManageProducts] fetchProducts - Status:', response.status, '| Data:', response.data);
             setProductsList(response.data);
         } catch (error) {
             // Failed to load products

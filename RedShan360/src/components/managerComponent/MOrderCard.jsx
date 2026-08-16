@@ -1,6 +1,7 @@
 import React from "react";
 
 export default function MOrderCard({ icon, title, value }) {
+    console.log('[MOrderCard] Props received:', { icon, title, value });
     return (
         <div className="overflow-hidden text-center bg-white rounded shadow-md text-slate-500 shadow-slate-200">
 

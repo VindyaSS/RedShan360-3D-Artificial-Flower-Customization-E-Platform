@@ -63,6 +63,7 @@ export default function EmployeeDashboard() {
       }
 
       const data = await response.json();
+      console.log('[employeeDashboard] fetchAssignedOrders - Status:', response.status, '| Data:', data);
 
       setAssignedOrders(data);
 
@@ -94,6 +95,7 @@ export default function EmployeeDashboard() {
       }
 
       const data = await response.json();
+      console.log('[employeeDashboard] fetchOrderItems - Status:', response.status, '| OrderId:', orderId, '| Data:', data);
 
       return data;
 
@@ -271,6 +273,7 @@ export default function EmployeeDashboard() {
       }
 
       const data = await response.json();
+      console.log('[employeeDashboard] fetchCompletedOrders - Status:', response.status, '| Data:', data);
 
       setCompletedOrders(data);
 

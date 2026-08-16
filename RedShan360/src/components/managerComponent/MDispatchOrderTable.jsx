@@ -2,6 +2,7 @@ import React from "react";
 import "../../css/manager.css";
 
 export default function MDispatchOrderTable(props) {
+    console.log('[MDispatchOrderTable] Props received:', props);
 
     const dispatchedorders = Array.isArray(props.dispatchedorders)
         ? props.dispatchedorders

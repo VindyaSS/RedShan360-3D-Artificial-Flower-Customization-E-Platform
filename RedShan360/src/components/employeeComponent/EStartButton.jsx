@@ -4,6 +4,7 @@ import '../../css/employee.css';
 
 // ---------------- START WORK BUTTON ----------------
 export default function EStartButton({ onClick, disabled, label = 'Start Work', style }) {
+  console.log('[EStartButton] Props received:', { onClick, disabled, label, style });
   return (
     <button
       onClick={onClick}

@@ -88,6 +88,7 @@ export default function EcustomizedProducts() {
             });
 
             const data = await readJsonResponse(response);
+            console.log('[EcustomizedProducts] fetchAssignedOrders - Status:', response.status, '| Data:', data);
 
             setAssignedOrders(Array.isArray(data) ? data : []);
 
@@ -121,6 +122,7 @@ export default function EcustomizedProducts() {
             });
 
             const data = await readJsonResponse(response);
+            console.log('[EcustomizedProducts] fetchCompletedOrders - Status:', response.status, '| Data:', data);
 
             setCompletedOrders(Array.isArray(data) ? data : []);
 
@@ -149,6 +151,7 @@ export default function EcustomizedProducts() {
             });
 
             const data = await readJsonResponse(response);
+            console.log('[EcustomizedProducts] fetchOrderItems - Status:', response.status, '| Data:', data);
 
             if (!Array.isArray(data)) {
                 return [];
