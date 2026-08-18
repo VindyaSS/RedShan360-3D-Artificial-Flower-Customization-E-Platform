@@ -19,22 +19,27 @@ export default function BirthdayIFlowerCard({
 
     // ---------------- Handle Price Change ----------------
     const handleChangePrice = () => {
-        if (!newPrice.trim()) return;
+    if (!newPrice.trim()) return;
 
-        let formatted = newPrice.trim();
-        const numericString = formatted.replace(/Rs\s*/gi, '').replace(/,/g, '').trim();
-        if (!isNaN(numericString) && numericString !== '') {
-            const num = parseFloat(numericString);
-            formatted = `Rs ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        }
+    const numericString = newPrice
+        .replace(/Rs\s*/gi, '')
+        .replace(/,/g, '')
+        .trim();
+
+    if (!isNaN(numericString) && numericString !== '') {
+
+        const num = parseFloat(numericString);
 
         if (window.confirm("Are you sure you want to change the price?")) {
+
             if (onEdit) {
-                onEdit(formatted);
+                onEdit(num);
             }
+
             setIsEditing(false);
         }
-    };
+    }
+};
 
     // Stock level flags for badge color
     const isLowStock = quantity <= 5;

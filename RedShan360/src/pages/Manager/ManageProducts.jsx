@@ -15,6 +15,8 @@ import ConvocationBFlowerCard from '../../components/managerComponent/Convocatio
 import ConvocationIFlowerCard from '../../components/managerComponent/ConvocationIFlowerCard';
 import api from '../../services/api';
 
+const API_BASE_URL = "http://localhost:8080/api";
+
 // ---------------- MANAGE PRODUCTS PAGE ----------------
 export default function MmanageProducts() {
 
@@ -64,7 +66,7 @@ export default function MmanageProducts() {
     // ---------------- MAP PRODUCT TO CARD FORMAT ----------------
     // Maps database product fields to the format expected by card components
     const mapProduct = (p) => ({
-        id: p.id,
+        id: p.productId,
         BoquetName: p.productName,
         FlowerName: p.productName,
         HeaddressName: p.productName,
@@ -118,27 +120,37 @@ export default function MmanageProducts() {
     );
 
     // ---------------- EDIT PRODUCT PRICE ----------------
-    const handleEdit = async (id, type, newPrice) => {
-        try {
-            const numericString = newPrice.replace(/Rs\s*/gi, '').replace(/,/g, '').trim();
-            const numericPrice = parseFloat(numericString) || 0;
+    
+const handleEdit = async (productId, type, newPrice) => {
+    await updateProductPrice(productId, newPrice);
+};
 
-            // Fetch existing product details to preserve all fields
-            const getResponse = await api.get(`/api/products/${id}`);
-            const existingProduct = getResponse.data;
+const updateProductPrice = async (productId, newPrice) => {
+    try {
 
-            await api.put(`/api/products/${id}`, {
-                ...existingProduct,
-                price: numericPrice
-            });
+        console.log("Product ID:", productId);
+        console.log("New Price:", newPrice);
+        console.log("Price type:", typeof newPrice);
 
-            // Update price locally to avoid full re-fetch
-            setProductsList(prev => prev.map(p => p.id === id ? { ...p, price: numericPrice } : p));
-            setSuccessNotification(`Price updated to ${newPrice} successfully.`);
-        } catch (error) {
-            alert("Failed to update product price in backend.");
-        }
-    };
+        await api.put(
+            `/api/products/${productId}/price`,
+            {
+                price: newPrice
+            }
+        );
+
+        await fetchProducts();
+
+        alert("Price updated successfully!");
+
+    } catch (error) {
+
+        console.error("Error updating price:", error);
+        console.error("Backend response:", error.response?.data);
+
+        alert("Failed to update price");
+    }
+};
 
     // ---------------- DELETE PRODUCT ----------------
     const handleDelete = async (id, type) => {
