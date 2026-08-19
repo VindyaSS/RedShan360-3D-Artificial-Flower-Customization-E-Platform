@@ -9,7 +9,7 @@ export default function sideNavigation() {
 
                 <div className="profile">
                     <h3>Manager Dashboard</h3>
-                    <h3>Vinura</h3>
+                    <h3>John</h3>
 
                 </div>
                 <nav>

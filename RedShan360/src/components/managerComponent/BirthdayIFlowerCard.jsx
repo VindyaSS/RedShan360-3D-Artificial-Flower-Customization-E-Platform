@@ -4,18 +4,64 @@ import { Edit3, Trash2, Box } from 'lucide-react';
 export default function BirthdayIFlowerCard({
     image,
     quantity,
-    BoquetName,
+    FlowerName,
     Price,
     onEdit,
-    onDelete
+    onQuantityChange
+    
 }) {
     const [isEditing, setIsEditing] = useState(false);
     const [newPrice, setNewPrice] = useState(Price);
+
+    const [isEditingQuantity, setIsEditingQuantity] = useState(false);
+    const [newQuantity, setNewQuantity] = useState(quantity);
 
     // Sync price input when prop changes
     useEffect(() => {
         setNewPrice(Price);
     }, [Price]);
+
+    useEffect(() => {
+        setNewQuantity(quantity);
+    }, [quantity]);
+
+
+    // ---------------- Handle Quantity Change ----------------
+    const handleChangeQuantity = () => {
+        const numericQuantity = parseInt(newQuantity, 10);
+
+        // Validate quantity
+        if (
+            newQuantity === '' ||
+            isNaN(numericQuantity) ||
+            numericQuantity < 0
+        ) {
+            alert("Please enter a valid quantity.");
+            return;
+        }
+
+        if (window.confirm("Are you sure you want to change the quantity?")) {
+
+            if (onQuantityChange) {
+                // Send NUMBER to parent/backend
+                onQuantityChange(numericQuantity);
+            }
+
+            setIsEditingQuantity(false);
+        }
+    };
+
+    // ---------------- Handle Quantity Enter Key ----------------
+    const handleQuantityKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleChangeQuantity();
+        }
+
+        if (e.key === 'Escape') {
+            setNewQuantity(quantity);
+            setIsEditingQuantity(false);
+        }
+    };
 
     // ---------------- Handle Price Change ----------------
     const handleChangePrice = () => {
@@ -42,7 +88,7 @@ export default function BirthdayIFlowerCard({
 };
 
     // Stock level flags for badge color
-    const isLowStock = quantity <= 5;
+    const isLowStock = quantity <= 10;
     const isOutOfStock = quantity === 0;
 
     return (
@@ -53,7 +99,7 @@ export default function BirthdayIFlowerCard({
                 {image ? (
                     <img
                         src={image}
-                        alt={BoquetName}
+                        alt={FlowerName}
                         className="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
                     />
                 ) : (
@@ -71,7 +117,7 @@ export default function BirthdayIFlowerCard({
                         Birthday Individual Flower
                     </span>
                     <h3 className="text-base font-bold text-[#1a1a1a] mt-1 line-clamp-2 font-sans">
-                        {BoquetName}
+                        {FlowerName}
                     </h3>
                 </div>
 
@@ -124,10 +170,58 @@ export default function BirthdayIFlowerCard({
                                 <div className="text-right">
                                     <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">Quantity</span>
                                     <span className={`text-sm font-bold font-sans ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-amber-600' : 'text-[#1a1a1a]'}`}>
-                                        {quantity}
+                                        
                                     </span>
+                    {isEditingQuantity ? (
+                                        <input
+                                            type="number"
+                                            value={newQuantity}
+                                            min="0"
+                                            autoFocus
+                                            onChange={(e) => setNewQuantity(e.target.value)}
+                                            onKeyDown={handleQuantityKeyDown}
+                                            onBlur={handleChangeQuantity}
+                                            className="w-20 px-2 py-1 text-sm font-bold text-right bg-white border border-[#744F51] rounded-md focus:outline-none focus:ring-1 focus:ring-[#744F51]"
+                                        />
+                                    ) : (
+                                        <span
+                                            onClick={() => {
+                                                if (onQuantityChange) {
+                                                    setNewQuantity(quantity);
+                                                    setIsEditingQuantity(true);
+                                                }
+                                            }}
+                                            className={`
+text-sm font-bold font-sans
+                ${isOutOfStock
+                                                    ? 'text-red-600'
+                                                    : isLowStock
+                                                        ? 'text-amber-600'
+                                                        : 'text-[#1a1a1a]'
+                                                }
+                ${onQuantityChange
+                                                    ? 'cursor-pointer hover:underline'
+                                                    : ''
+                                                }
+            `}
+                                            title={
+                                                onQuantityChange
+                                                    ? "Click to change quantity"
+                                                    : ""
+                                            }
+                                        >
+                                            {quantity}
+                                        </span>
+                                    )}
                                 </div>
+
                             </div>
+
+
+
+
+                                
+                            
 
                             {/* ---------------- Action Buttons ---------------- */}
                             <div className="flex items-center gap-2">
@@ -141,15 +235,7 @@ export default function BirthdayIFlowerCard({
                                         <span>Edit</span>
                                     </button>
                                 )}
-                                {onDelete && (
-                                    <button
-                                        onClick={onDelete}
-                                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg border border-[#e5e4e7] transition-all"
-                                        title="Delete Bouquet"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
+                                
                             </div>
                         </>
                     )}
