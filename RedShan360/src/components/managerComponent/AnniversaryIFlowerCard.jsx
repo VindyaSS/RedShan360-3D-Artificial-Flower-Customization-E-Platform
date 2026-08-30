@@ -93,6 +93,7 @@ export default function AniversaryIFlowerCard({
         }
     };
 
+
     // Stock level flags for badge color
     const isLowStock = quantity <= 5;
     const isOutOfStock = quantity === 0;

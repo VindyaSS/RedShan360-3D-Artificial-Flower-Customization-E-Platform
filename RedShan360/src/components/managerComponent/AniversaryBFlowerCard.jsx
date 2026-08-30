@@ -11,7 +11,11 @@ export default function AniversaryBFlowerCard({
 
 
 }) {
+
     console.log('[AniversaryBFlowerCard] Props received:', { image, quantity, BoquetName, Price, onEdit, onQuantityChange });
+
+    
+
     const [isEditing, setIsEditing] = useState(false);
     const [newPrice, setNewPrice] = useState(Price);
 

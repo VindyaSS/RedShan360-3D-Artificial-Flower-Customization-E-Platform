@@ -11,6 +11,7 @@ export default function BirthdayBFlowerCard({
     
 }) {
     console.log('[BirthdayBFlowerCard] Props received:', { image, quantity, BoquetName, Price, onEdit,onQuantityChange });
+
     const [isEditing, setIsEditing] = useState(false);
     const [newPrice, setNewPrice] = useState(Price);
     const [isEditingQuantity, setIsEditingQuantity] = useState(false);

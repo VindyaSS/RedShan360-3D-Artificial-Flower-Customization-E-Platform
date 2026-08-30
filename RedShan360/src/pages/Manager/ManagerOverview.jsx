@@ -49,6 +49,7 @@ export default function ManagerOverview() {
             }
 
             const data = await response.json();
+            console.log('[ManagerOverview] fetchRecentOrders - Status:', response.status, '| Data:', data);
 
             console.log("Recent orders:", data);
 
