@@ -7,34 +7,85 @@ export default function ConvocationBFlowerCard({
     BoquetName,
     Price,
     onEdit,
-    onDelete
+    onQuantityChange
+    
 }) {
     const [isEditing, setIsEditing] = useState(false);
     const [newPrice, setNewPrice] = useState(Price);
+    const [isEditingQuantity, setIsEditingQuantity] = useState(false);
+    const [newQuantity, setNewQuantity] = useState(quantity);
 
     // Sync price input when prop changes
     useEffect(() => {
         setNewPrice(Price);
     }, [Price]);
 
-    // ---------------- Handle Price Change ----------------
-    const handleChangePrice = () => {
-        if (!newPrice.trim()) return;
+    useEffect(() => {
+        setNewQuantity(quantity);
+    }, [quantity]);
 
-        let formatted = newPrice.trim();
-        const numericString = formatted.replace(/Rs\s*/gi, '').replace(/,/g, '').trim();
-        if (!isNaN(numericString) && numericString !== '') {
-            const num = parseFloat(numericString);
-            formatted = `Rs ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    // ---------------- Handle Quantity Change ----------------
+    const handleChangeQuantity = () => {
+        const numericQuantity = parseInt(newQuantity, 10);
+
+        // Validate quantity
+        if (
+            newQuantity === '' ||
+            isNaN(numericQuantity) ||
+            numericQuantity < 0
+        ) {
+            alert("Please enter a valid quantity.");
+            return;
         }
 
-        if (window.confirm("Are you sure you want to change the price?")) {
-            if (onEdit) {
-                onEdit(formatted);
+        if (window.confirm("Are you sure you want to change the quantity?")) {
+
+            if (onQuantityChange) {
+                // Send NUMBER to parent/backend
+                onQuantityChange(numericQuantity);
             }
-            setIsEditing(false);
+
+            setIsEditingQuantity(false);
         }
     };
+
+    // ---------------- Handle Quantity Enter Key ----------------
+    const handleQuantityKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleChangeQuantity();
+        }
+
+        if (e.key === 'Escape') {
+            setNewQuantity(quantity);
+            setIsEditingQuantity(false);
+        }
+    };
+
+
+    // ---------------- Handle Price Change ----------------
+    const handleChangePrice = () => {
+    if (!newPrice.trim()) return;
+
+    const numericString = newPrice
+        .replace(/Rs\s*/gi, '')
+        .replace(/,/g, '')
+        .trim();
+
+    if (!isNaN(numericString) && numericString !== '') {
+
+        const num = parseFloat(numericString);
+
+        if (window.confirm("Are you sure you want to change the price?")) {
+
+            if (onEdit) {
+                // Send NUMBER to backend
+                onEdit(num);
+            }
+
+            setIsEditing(false);
+        }
+    }
+};
 
     // Stock level flags for badge color
     const isLowStock = quantity <= 5;
@@ -118,11 +169,58 @@ export default function ConvocationBFlowerCard({
                                 </div>
                                 <div className="text-right">
                                     <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">Quantity</span>
-                                    <span className={`text-sm font-bold font-sans ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-amber-600' : 'text-[#1a1a1a]'}`}>
-                                        {quantity}
-                                    </span>
+                                       
+                                  
+
+                                    {isEditingQuantity ? (
+                                        <input
+                                            type="number"
+                                            value={newQuantity}
+                                            min="0"
+                                            autoFocus
+                                            onChange={(e) => setNewQuantity(e.target.value)}
+                                            onKeyDown={handleQuantityKeyDown}
+                                            onBlur={handleChangeQuantity}
+                                            className="w-20 px-2 py-1 text-sm font-bold text-right bg-white border border-[#744F51] rounded-md focus:outline-none focus:ring-1 focus:ring-[#744F51]"
+                                        />
+                                    ) : (
+                                        <span
+                                            onClick={() => {
+                                                if (onQuantityChange) {
+                                                    setNewQuantity(quantity);
+                                                    setIsEditingQuantity(true);
+                                                }
+                                            }}
+                                            className={`
+                text-sm font-bold font-sans
+                ${isOutOfStock
+                                                    ? 'text-red-600'
+                                                    : isLowStock
+                                                        ? 'text-amber-600'
+                                                        : 'text-[#1a1a1a]'
+                                                }
+                ${onQuantityChange
+                                                    ? 'cursor-pointer hover:underline'
+                                                    : ''
+                                                }
+            `}
+                                            title={
+                                                onQuantityChange
+                                                    ? "Click to change quantity"
+                                                    : ""
+                                            }
+                                        >
+                                            {quantity}
+                                        </span>
+                                    )}
                                 </div>
+
                             </div>
+
+
+
+                                
+                            
 
                             {/* ---------------- Action Buttons ---------------- */}
                             <div className="flex items-center gap-2">
@@ -136,15 +234,7 @@ export default function ConvocationBFlowerCard({
                                         <span>Edit</span>
                                     </button>
                                 )}
-                                {onDelete && (
-                                    <button
-                                        onClick={onDelete}
-                                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg border border-[#e5e4e7] transition-all"
-                                        title="Delete Bouquet"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
+                                
                             </div>
                         </>
                     )}

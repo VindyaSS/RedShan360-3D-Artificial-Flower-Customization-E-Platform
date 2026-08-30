@@ -1,36 +1,66 @@
-import React, { useState } from "react";
-import '../../css/manager.css'
+import React from "react";
+import "../../css/manager.css";
 
-export default function MrecentOrderTable(props) {
-
+export default function MrecentOrderTable({
+    t1 = "Order ID",
+    t2 = "Customer Name",
+    t3 = "Price",
+    Mrecentorders = []
+}) {
 
     return (
-        <>
-            <table className="MPtable">
-                <thead>
-                    <tr >
-                        <th>{props.t1}</th>
-                        <th>{props.t2}</th>
-                        <th>{props.t3}</th>
-                        <th>{props.t4}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {props.Mrecentorders?.map((Mrecentorder) => (
-                        <tr key={Mrecentorder.OrderID}>
-                            <td>{Mrecentorder.OrderID}</td>
-                            <td>{Mrecentorder.CustomerName}</td>
-                            <td>{Mrecentorder.OrderName}</td>
-                            <td>{Mrecentorder.Price}</td>
+        <table className="MPtable">
+
+            <thead>
+                <tr>
+                    <th>{t1}</th>
+                    <th>{t2}</th>
+                    <th>{t3}</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {Mrecentorders.length > 0 ? (
+
+                    Mrecentorders.map((order) => (
+
+                        <tr key={order.orderId}>
+
+                            <td>
+                                {order.orderId}
+                            </td>
+
+                            <td>
+                                {order.customerName}
+                            </td>
+
+                            <td>
+                                {order.price}
+                            </td>
+
                         </tr>
-                    ))}
 
-                </tbody>
-            </table>
+                    ))
 
+                ) : (
 
+                    <tr>
+                        <td
+                            colSpan="3"
+                            style={{
+                                textAlign: "center",
+                                padding: "20px"
+                            }}
+                        >
+                            No recent orders found.
+                        </td>
+                    </tr>
 
-        </>
+                )}
+
+            </tbody>
+
+        </table>
     );
 }
-

@@ -4,7 +4,7 @@ import SideNavigation from "../../components/managerComponent/sideNavigation";
 import MOrderCard from "../../components/managerComponent/MOrderCard";
 import MOrderGraph from "../../components/managerComponent/MOrderGraph";
 import MrecentOrderTable from "../../components/managerComponent/MrecentOrderTable";
-import MworkingEmployeeTable from "../../components/managerComponent/MworkingEmployeeTable";
+import MlowQuantityProductTable from "../../components/managerComponent/MlowQuantityProductTable";
 
 import "../../css/manager.css";
 
@@ -18,8 +18,19 @@ export default function ManagerOverview() {
     const [recentOrders, setRecentOrders] = useState([]);
     const [loadingOrders, setLoadingOrders] = useState(true);
     const [orderError, setOrderError] = useState(null);
+    const [dashboardStats, setDashboardStats] = useState({
+        totalOrders: 0,
+        totalProducts: 0,
+        totalEmployees: 0
+    });
 
-    // ---------------- FETCH RECENT ORDERS ----------------
+    const [loadingStats, setLoadingStats] = useState(true);
+    const [statsError, setStatsError] = useState(null);
+
+    const [lowStockProducts, setLowStockProducts] = useState([]);
+    const [loadingLowStock, setLoadingLowStock] = useState(true);
+    const [lowStockError, setLowStockError] = useState(null);
+
     const fetchRecentOrders = async () => {
 
         try {
@@ -27,52 +38,119 @@ export default function ManagerOverview() {
             setLoadingOrders(true);
             setOrderError(null);
 
-            const response = await fetch(`${API_BASE_URL}/orders/pre-orders`);
+            const response = await fetch(
+                `${API_BASE_URL}/dashboard/recent-orders`
+            );
 
             if (!response.ok) {
-                throw new Error(`Failed to fetch orders. Status: ${response.status}`);
+                throw new Error(
+                    `Failed to fetch recent orders: ${response.status}`
+                );
             }
 
             const data = await response.json();
             console.log('[ManagerOverview] fetchRecentOrders - Status:', response.status, '| Data:', data);
 
-            if (!Array.isArray(data)) {
-                setRecentOrders([]);
-                return;
-            }
+            console.log("Recent orders:", data);
 
-            // Map backend fields to table-compatible format
-            const formattedOrders = data.map((order) => ({
-                orderId: order?.orderId,
-                customerName: order?.customerName,
-                totalAmount: order?.totalAmount,
-                orderStatus: order?.orderStatus
-            }));
-
-            setRecentOrders(formattedOrders);
+            setRecentOrders(data);
 
         } catch (error) {
 
-            setOrderError(error.message || "Unable to load recent orders.");
-            setRecentOrders([]);
+            console.error("Recent orders error:", error);
+
+            setOrderError(
+                error.message || "Failed to load recent orders."
+            );
 
         } finally {
 
             setLoadingOrders(false);
 
         }
+    };
 
+
+    const fetchDashboardStats = async () => {
+        try {
+            setLoadingStats(true);
+            setStatsError(null);
+
+            const response = await fetch(`${API_BASE_URL}/dashboard/stats`);
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch dashboard stats: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            console.log("Dashboard stats:", data);
+
+            setDashboardStats({
+                totalOrders: data.totalOrders,
+                totalProducts: data.totalProducts,
+                totalEmployees: data.totalEmployees
+            });
+
+        } catch (error) {
+            console.error("Dashboard stats error:", error);
+            setStatsError(error.message);
+        } finally {
+            setLoadingStats(false);
+        }
+    };
+
+    const fetchLowStockProducts = async () => {
+
+        try {
+
+            setLoadingLowStock(true);
+            setLowStockError(null);
+
+            const response = await fetch(
+                `${API_BASE_URL}/dashboard/low-stock-products`
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Failed to fetch low stock products: ${response.status}`
+                );
+            }
+
+            const data = await response.json();
+
+            console.log("Low stock products:", data);
+
+            setLowStockProducts(data);
+
+        } catch (error) {
+
+            console.error(
+                "Low stock products error:",
+                error
+            );
+
+            setLowStockError(
+                error.message ||
+                "Failed to load low stock products."
+            );
+
+        } finally {
+
+            setLoadingLowStock(false);
+
+        }
     };
 
     // ---------------- INITIAL LOAD ----------------
     useEffect(() => {
+        fetchDashboardStats();
         fetchRecentOrders();
+        fetchLowStockProducts();
+
+
+
     }, []);
-
-    // ---------------- WORKING EMPLOYEES ----------------
-    // No backend endpoint yet — placeholder until endpoint is available
-    const workingEmployees = [];
-
 
     return (
 
@@ -102,7 +180,7 @@ export default function ManagerOverview() {
                                 </svg>
                             }
                             title="Total Orders"
-                            value={50}
+                            value={loadingStats ? "..." : dashboardStats.totalOrders}
                         />
 
                         <MOrderCard
@@ -119,7 +197,7 @@ export default function ManagerOverview() {
                                 </svg>
                             }
                             title="Total Products"
-                            value={100}
+                            value={loadingStats ? "..." : dashboardStats.totalProducts}
                         />
 
                         <MOrderCard
@@ -136,7 +214,7 @@ export default function ManagerOverview() {
                                 </svg>
                             }
                             title="Total Employees"
-                            value={90}
+                            value={loadingStats ? "..." : dashboardStats.totalEmployees}
                         />
 
                     </div>
@@ -155,7 +233,8 @@ export default function ManagerOverview() {
 
                             <h3
                                 style={{
-                                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                                    fontFamily:
+                                        "'Plus Jakarta Sans', sans-serif",
                                     fontSize: "16px",
                                     fontWeight: "700",
                                     color: "#1a1a1a",
@@ -165,7 +244,9 @@ export default function ManagerOverview() {
                                 Recent Orders
                             </h3>
 
+
                             {loadingOrders && (
+
                                 <div
                                     style={{
                                         textAlign: "center",
@@ -174,34 +255,49 @@ export default function ManagerOverview() {
                                 >
                                     Loading recent orders...
                                 </div>
+
                             )}
 
+
                             {!loadingOrders && orderError && (
+
                                 <div
                                     style={{
                                         textAlign: "center",
                                         padding: "20px"
                                     }}
                                 >
-                                    <p>{orderError}</p>
 
-                                    <button onClick={fetchRecentOrders}>
+                                    <p>
+                                        {orderError}
+                                    </p>
+
+                                    <button
+                                        onClick={fetchRecentOrders}
+                                    >
                                         Retry
                                     </button>
 
                                 </div>
+
                             )}
 
+
                             {!loadingOrders && !orderError && (
+
                                 <MrecentOrderTable
                                     t1="Order ID"
                                     t2="Customer Name"
                                     t3="Price"
                                     Mrecentorders={recentOrders}
                                 />
+
                             )}
 
                         </div>
+
+
+
 
                         <div
                             className="tabs-container"
@@ -220,15 +316,65 @@ export default function ManagerOverview() {
                                     marginBottom: "16px"
                                 }}
                             >
-                                Employees Working On Orders
+                                Low Quantity Products
                             </h3>
 
-                            <MworkingEmployeeTable
-                                t1="Employee Name"
-                                t2="Order ID"
-                                t3="Price"
-                                MworkingEmployees={workingEmployees}
-                            />
+
+                            {/* Loading */}
+
+                            {loadingLowStock && (
+
+                                <div
+                                    style={{
+                                        textAlign: "center",
+                                        padding: "20px"
+                                    }}
+                                >
+                                    Loading low quantity products...
+                                </div>
+
+                            )}
+
+
+                            {/* Error */}
+
+                            {!loadingLowStock && lowStockError && (
+
+                                <div
+                                    style={{
+                                        textAlign: "center",
+                                        padding: "20px"
+                                    }}
+                                >
+
+                                    <p>
+                                        {lowStockError}
+                                    </p>
+
+                                    <button
+                                        onClick={fetchLowStockProducts}
+                                    >
+                                        Retry
+                                    </button>
+
+                                </div>
+
+                            )}
+
+
+                            {/* Table */}
+
+                            {!loadingLowStock && !lowStockError && (
+
+                                <MlowQuantityProductTable
+                                    t1="Product ID"
+                                    t2="Product Name"
+                                    t3="Quantity"
+                                    t4="Price"
+                                    lowStockProducts={lowStockProducts}
+                                />
+
+                            )}
 
                         </div>
 

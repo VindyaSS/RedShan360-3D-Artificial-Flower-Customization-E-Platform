@@ -207,7 +207,7 @@ export default function ECustomizedOrderTable({
                     <tr>
                         <th>Order ID</th>
                         <th>Number of Items</th>
-                        <th>Total Quantity</th>
+                        {/* <th>Total Quantity</th> */}
                         <th style={{ textAlign: 'right', paddingRight: '40px' }}>
                             Items Details
                         </th>
@@ -231,9 +231,9 @@ export default function ECustomizedOrderTable({
                                         {group.numberOfItems === 1 ? 'Item' : 'Items'}
                                     </td>
 
-                                    <td style={{ fontWeight: '600' }}>
+                                    {/* <td style={{ fontWeight: '600' }}>
                                         {group.totalQuantity}
-                                    </td>
+                                    </td> */}
 
                                     <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                                         <button
@@ -268,7 +268,7 @@ export default function ECustomizedOrderTable({
                                                         <tr>
                                                             <th>Custom ID</th>
                                                             <th>Item Name</th>
-                                                            <th>Quantity</th>
+                                                            {/* <th>Quantity</th> */}
                                                             <th>Flower Type</th>
                                                             <th>Number of Flowers</th>
                                                             <th>Bouquet Style</th>
@@ -319,9 +319,9 @@ export default function ECustomizedOrderTable({
                                                                             {item.itemName || 'Customized Bouquet'}
                                                                         </td>
 
-                                                                        <td style={{ fontWeight: '600' }}>
+                                                                        {/* <td style={{ fontWeight: '600' }}>
                                                                             {item.quantity ?? 0}
-                                                                        </td>
+                                                                        </td> */}
 
                                                                         <td>
                                                                             {item.flowerType || 'N/A'}

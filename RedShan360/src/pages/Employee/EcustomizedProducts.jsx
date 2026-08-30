@@ -457,7 +457,7 @@ export default function EcustomizedProducts() {
                             Completed Tasks (Customized Items)
                         </h3>
 
-                        <ECustomizedCompletedTable
+                        <ECustomizedOrderTable
                             orders={completedOrders}
                             orderItems={orderItems}
                             onItemClick={handleItemClick}

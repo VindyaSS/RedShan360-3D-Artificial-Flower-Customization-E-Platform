@@ -57,7 +57,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
           <tr>
             <th>Order ID</th>
             <th>Number of Items</th>
-            <th>Total Quantity</th>
+            {/* <th>Total Quantity</th> */}
             <th style={{ textAlign: 'right', paddingRight: '40px' }}>Items Details</th>
           </tr>
         </thead>
@@ -75,9 +75,9 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                   <td style={{ fontWeight: '600' }}>
                     {group.items.length} {group.items.length === 1 ? 'Item' : 'Items'}
                   </td>
-                  <td style={{ fontWeight: '600' }}>
+                  {/* <td style={{ fontWeight: '600' }}>
                     {group.totalQuantity}
-                  </td>
+                  </td> */}
                   <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                     <button
                       className="expand-btn"
