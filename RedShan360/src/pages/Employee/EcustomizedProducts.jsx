@@ -7,17 +7,17 @@ import ECustomizedItemCard from '../../components/employeeComponent/ECusomizedIt
 
 import '../../css/employee.css';
 
-// ---------------- API BASE URL ----------------
+//------------------ API BASE URL -----------------------------------------------
 const API_BASE_URL = 'http://localhost:8080/api';
 
-// ---------------- CUSTOMIZED PRODUCTS PAGE ----------------
+//------------------ CUSTOMIZED PRODUCTS PAGE -----------------------------------
 export default function EcustomizedProducts() {
 
-    // ---------------- LOGGED-IN EMPLOYEE ----------------
+    //------------------ LOGGED-IN EMPLOYEE -----------------------------------------
     const loggedInUser = JSON.parse(localStorage.getItem('user'));
     const employeeId = loggedInUser?.employeeId;
 
-    // ---------------- STATE ----------------
+    //------------------ STATE ------------------------------------------------------
     const [assignedOrders, setAssignedOrders] = useState([]);
     const [completedOrders, setCompletedOrders] = useState([]);
     const [orderItems, setOrderItems] = useState({});
@@ -25,9 +25,8 @@ export default function EcustomizedProducts() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // ---------------- INITIAL LOAD ----------------
+    //------------------ INITIAL LOAD -----------------------------------------------
     useEffect(() => {
-
         if (!employeeId) {
             setError('Employee information not found. Please login again.');
             setLoading(false);
@@ -36,13 +35,10 @@ export default function EcustomizedProducts() {
 
         fetchAssignedOrders();
         fetchCompletedOrders();
-
     }, [employeeId]);
 
-    // ---------------- HELPER: SAFE JSON READER ----------------
-    // Reads response as text first to avoid 'Unexpected token <' on HTML error pages
+    //------------------ HELPER: SAFE JSON READER -----------------------------------
     const readJsonResponse = async (response) => {
-
         const contentType = response.headers.get('content-type') || '';
         const responseText = await response.text();
 
@@ -54,10 +50,7 @@ export default function EcustomizedProducts() {
         }
 
         if (!contentType.toLowerCase().includes('application/json')) {
-            throw new Error(
-                `Expected JSON but server returned ${contentType || 'HTML/text'}. ` +
-                `Response starts with: ${responseText.substring(0, 100)}`
-            );
+            return responseText;
         }
 
         try {
@@ -67,16 +60,13 @@ export default function EcustomizedProducts() {
         }
     };
 
-    // ---------------- FETCH CUSTOMIZED ASSIGNED ORDERS ----------------
+    //------------------ FETCH CUSTOMIZED ASSIGNED ORDERS ---------------------------
     const fetchAssignedOrders = async () => {
-
         try {
-
             setLoading(true);
             setError(null);
 
             const token = localStorage.getItem('token');
-
             const url = `${API_BASE_URL}/employee/tasks/assigned/customized/${employeeId}`;
 
             const response = await fetch(url, {
@@ -91,26 +81,18 @@ export default function EcustomizedProducts() {
             console.log('[EcustomizedProducts] fetchAssignedOrders - Status:', response.status, '| Data:', data);
 
             setAssignedOrders(Array.isArray(data) ? data : []);
-
         } catch (error) {
-
             setError(error.message || 'Unable to load customized assigned tasks');
             setAssignedOrders([]);
-
         } finally {
-
             setLoading(false);
-
         }
     };
 
-    // ---------------- FETCH CUSTOMIZED COMPLETED ORDERS ----------------
+    //------------------ FETCH CUSTOMIZED COMPLETED ORDERS -------------------------
     const fetchCompletedOrders = async () => {
-
         try {
-
             const token = localStorage.getItem('token');
-
             const url = `${API_BASE_URL}/employee/tasks/completed/customized/${employeeId}`;
 
             const response = await fetch(url, {
@@ -125,21 +107,15 @@ export default function EcustomizedProducts() {
             console.log('[EcustomizedProducts] fetchCompletedOrders - Status:', response.status, '| Data:', data);
 
             setCompletedOrders(Array.isArray(data) ? data : []);
-
         } catch (error) {
-
             setCompletedOrders([]);
-
         }
     };
 
-    // ---------------- FETCH CUSTOMIZED ORDER ITEMS ----------------
+    //------------------ FETCH CUSTOMIZED ORDER ITEMS -------------------------------
     const fetchOrderItems = async (orderId) => {
-
         try {
-
             const token = localStorage.getItem('token');
-
             const url = `${API_BASE_URL}/employee/tasks/order/${orderId}`;
 
             const response = await fetch(url, {
@@ -151,13 +127,10 @@ export default function EcustomizedProducts() {
             });
 
             const data = await readJsonResponse(response);
-            console.log('[EcustomizedProducts] fetchOrderItems - Status:', response.status, '| Data:', data);
-
             if (!Array.isArray(data)) {
                 return [];
             }
 
-            // Normalize each customized item from backend format
             const normalizedItems = data.map((item) => ({
                 ...item,
                 itemId: item.itemId != null ? String(item.itemId) : '',
@@ -170,18 +143,14 @@ export default function EcustomizedProducts() {
             }));
 
             return normalizedItems;
-
         } catch (error) {
-
             alert(error.message || 'Unable to load customized order items.');
             return [];
         }
     };
 
-    // ---------------- SHOW ORDER ITEMS ----------------
-    // Skip fetch if items are already loaded for this order
+    //------------------ SHOW ORDER ITEMS -------------------------------------------
     const handleShowItems = async (orderId) => {
-
         if (Object.prototype.hasOwnProperty.call(orderItems, orderId)) {
             return;
         }
@@ -194,15 +163,13 @@ export default function EcustomizedProducts() {
         }));
     };
 
-    // ---------------- START ITEM ----------------
+    //------------------ START CUSTOMIZED ITEM --------------------------------------
     const handleStart = async (orderId, itemId) => {
-
         try {
-
             const token = localStorage.getItem('token');
 
             const response = await fetch(
-                `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/start`,
+                `${API_BASE_URL}/employee/tasks/${orderId}/customized/${itemId}/start`,
                 {
                     method: 'PUT',
                     headers: {
@@ -215,44 +182,43 @@ export default function EcustomizedProducts() {
             const result = await response.text();
 
             if (!response.ok) {
-                throw new Error(result || 'Failed to start item');
+                throw new Error(result || 'Failed to start customized bouquet');
             }
 
-            // Update local item status to reflect the started state
-            setOrderItems((previousItems) => {
-                const currentItems = previousItems[orderId] || [];
-                return {
-                    ...previousItems,
-                    [orderId]: currentItems.map(
-                        (item) =>
-                            String(item.itemId) === String(itemId)
-                                ? { ...item, status: 'START' }
-                                : item
-                    )
-                };
-            });
+            // Update local item status
+            setAssignedOrders((prev) =>
+                prev.map((order) => {
+                    if (order.orderId === orderId) {
+                        return {
+                            ...order,
+                            items: (order.items || []).map((item) =>
+                                String(item.itemId) === String(itemId)
+                                    ? { ...item, status: 'START' }
+                                    : item
+                            )
+                        };
+                    }
+                    return order;
+                })
+            );
 
             await fetchAssignedOrders();
             await fetchCompletedOrders();
 
             return true;
-
         } catch (error) {
-
             alert(error.message || 'Unable to start customized item.');
             return false;
         }
     };
 
-    // ---------------- STOP ITEM ----------------
+    //------------------ STOP CUSTOMIZED ITEM ---------------------------------------
     const handleStop = async (orderId, itemId) => {
-
         try {
-
             const token = localStorage.getItem('token');
 
             const response = await fetch(
-                `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/stop`,
+                `${API_BASE_URL}/employee/tasks/${orderId}/customized/${itemId}/stop`,
                 {
                     method: 'PUT',
                     headers: {
@@ -265,44 +231,42 @@ export default function EcustomizedProducts() {
             const result = await response.text();
 
             if (!response.ok) {
-                throw new Error(result || 'Failed to stop item');
+                throw new Error(result || 'Failed to stop customized bouquet');
             }
 
-            // Update local item status to reflect the stopped state
-            setOrderItems((previousItems) => {
-                const currentItems = previousItems[orderId] || [];
-                return {
-                    ...previousItems,
-                    [orderId]: currentItems.map(
-                        (item) =>
-                            String(item.itemId) === String(itemId)
-                                ? { ...item, status: 'STOP' }
-                                : item
-                    )
-                };
-            });
+            setAssignedOrders((prev) =>
+                prev.map((order) => {
+                    if (order.orderId === orderId) {
+                        return {
+                            ...order,
+                            items: (order.items || []).map((item) =>
+                                String(item.itemId) === String(itemId)
+                                    ? { ...item, status: 'STOP' }
+                                    : item
+                            )
+                        };
+                    }
+                    return order;
+                })
+            );
 
             await fetchAssignedOrders();
             await fetchCompletedOrders();
 
             return true;
-
         } catch (error) {
-
             alert(error.message || 'Unable to stop customized item.');
             return false;
         }
     };
 
-    // ---------------- COMPLETE ITEM ----------------
-    const handleComplete = async (orderId, itemId) => {
-
+    //------------------ RESUME CUSTOMIZED ITEM -------------------------------------
+    const handleResume = async (orderId, itemId) => {
         try {
-
             const token = localStorage.getItem('token');
 
             const response = await fetch(
-                `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/complete`,
+                `${API_BASE_URL}/employee/tasks/${orderId}/customized/${itemId}/resume`,
                 {
                     method: 'PUT',
                     headers: {
@@ -315,64 +279,91 @@ export default function EcustomizedProducts() {
             const result = await response.text();
 
             if (!response.ok) {
-                throw new Error(result || 'Failed to complete item');
+                throw new Error(result || 'Failed to resume customized bouquet');
             }
 
-            // Update local item status to reflect the completed state
-            setOrderItems((previousItems) => {
-                const currentItems = previousItems[orderId] || [];
-                return {
-                    ...previousItems,
-                    [orderId]: currentItems.map(
-                        (item) =>
-                            String(item.itemId) === String(itemId)
-                                ? { ...item, status: 'COMPLETED' }
-                                : item
-                    )
-                };
-            });
+            setAssignedOrders((prev) =>
+                prev.map((order) => {
+                    if (order.orderId === orderId) {
+                        return {
+                            ...order,
+                            items: (order.items || []).map((item) =>
+                                String(item.itemId) === String(itemId)
+                                    ? { ...item, status: 'START' }
+                                    : item
+                            )
+                        };
+                    }
+                    return order;
+                })
+            );
 
             await fetchAssignedOrders();
             await fetchCompletedOrders();
 
             return true;
-
         } catch (error) {
+            alert(error.message || 'Unable to resume customized item.');
+            return false;
+        }
+    };
 
+    //------------------ COMPLETE CUSTOMIZED ITEM -----------------------------------
+    const handleComplete = async (orderId, itemId) => {
+        try {
+            const token = localStorage.getItem('token');
+
+            const response = await fetch(
+                `${API_BASE_URL}/employee/tasks/${orderId}/customized/${itemId}/complete`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    }
+                }
+            );
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                throw new Error(result || 'Failed to complete customized bouquet');
+            }
+
+            await fetchAssignedOrders();
+            await fetchCompletedOrders();
+
+            return true;
+        } catch (error) {
             alert(error.message || 'Unable to complete customized item.');
             return false;
         }
     };
 
-    // ---------------- ITEM CLICK ----------------
+    //------------------ ITEM CLICK -------------------------------------------------
     const handleItemClick = (item) => {
         setSelectedItem(item);
     };
 
-    // ---------------- CLOSE ITEM POPUP ----------------
+    //------------------ CLOSE ITEM POPUP -------------------------------------------
     const handleCloseItem = () => {
         setSelectedItem(null);
     };
 
-    // ---------------- RENDER ----------------
+    //------------------ RENDER -----------------------------------------------------
     return (
-
         <div className="EPage">
-
             <div className="Epart1">
                 <ESideNavigation />
             </div>
 
             <div className="Epart2">
-
                 {/* Assigned customized tasks section */}
                 <div className="dashboard-row">
-
                     <div
                         className="tabs-container"
                         style={{ padding: '24px', flex: 1 }}
                     >
-
                         <h3
                             style={{
                                 fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -426,12 +417,11 @@ export default function EcustomizedProducts() {
                                 onShowItems={handleShowItems}
                                 onStart={handleStart}
                                 onStop={handleStop}
+                                onResume={handleResume}
                                 onComplete={handleComplete}
                             />
                         )}
-
                     </div>
-
                 </div>
 
                 {/* Completed customized tasks section */}
@@ -439,12 +429,10 @@ export default function EcustomizedProducts() {
                     className="dashboard-row"
                     style={{ marginTop: '24px' }}
                 >
-
                     <div
                         className="tabs-container"
                         style={{ padding: '24px', flex: 1 }}
                     >
-
                         <h3
                             style={{
                                 fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -457,17 +445,14 @@ export default function EcustomizedProducts() {
                             Completed Tasks (Customized Items)
                         </h3>
 
-                        <ECustomizedOrderTable
+                        <ECustomizedCompletedTable
                             orders={completedOrders}
                             orderItems={orderItems}
                             onItemClick={handleItemClick}
                             onShowItems={handleShowItems}
                         />
-
                     </div>
-
                 </div>
-
             </div>
 
             {/* Customized item details popup */}
@@ -476,11 +461,7 @@ export default function EcustomizedProducts() {
                     className="item-modal-overlay"
                     onClick={handleCloseItem}
                 >
-                    <div
-                        onClick={(event) =>
-                            event.stopPropagation()
-                        }
-                    >
+                    <div onClick={(event) => event.stopPropagation()}>
                         <ECustomizedItemCard
                             ItemID={selectedItem.itemId}
                             FlowerType={selectedItem.flowerType || 'N/A'}
@@ -497,7 +478,6 @@ export default function EcustomizedProducts() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

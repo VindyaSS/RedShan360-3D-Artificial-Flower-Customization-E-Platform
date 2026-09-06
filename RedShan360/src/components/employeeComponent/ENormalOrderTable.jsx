@@ -18,10 +18,10 @@ import '../../css/employee.css';
 
 import daisyBunch from '../../assets/daisyFlowerBouquet.jpg';
 
-// ---------------- BACKEND BASE URL ----------------
+//------------------ BACKEND BASE URL -------------------------------------------
 const BACKEND_BASE_URL = 'http://localhost:8080';
 
-// ---------------- NORMAL ORDER TABLE ----------------
+//------------------ NORMAL ORDER TABLE -----------------------------------------
 export default function ENormalOrderTable({
   orders,
   orderItems,
@@ -33,186 +33,14 @@ export default function ENormalOrderTable({
   onItemClick,
   onShowItems
 }) {
-  console.log('[ENormalOrderTable] Props received:', { orders, orderItems, onStart, onStop, onResume, onComplete, onReadyToPacking, onItemClick, onShowItems });
-
-  // ---------------- BACKEND DATA ----------------
   const displayOrders = orders || [];
 
-  // ---------------- STATE ----------------
+  //------------------ STATE ------------------------------------------------------
   const [rowStatuses, setRowStatuses] = useState({});
   const [expandedOrders, setExpandedOrders] = useState({});
 
-  // ---------------- INITIALIZE ROW STATUSES ----------------
-  useEffect(() => {
-
-    const newStatuses = {};
-
-    displayOrders.forEach((order) => {
-
-      const orderId = order.orderId ?? order.OrderID;
-      const itemId = order.itemId ?? order.ItemID;
-      const rowKey = `${orderId}-${itemId}`;
-
-      newStatuses[rowKey] =
-        order.Status ||
-        order.status ||
-        order.initialStatus ||
-        'Pending';
-    });
-
-    setRowStatuses(newStatuses);
-
-  }, [orders]);
-
-  // ---------------- GROUP ORDERS ----------------
-  // Actual item details come from orderItems[orderId]
-  const groupedOrders = useMemo(() => {
-
-    return displayOrders.map((order) => {
-
-      const orderId = order.orderId ?? order.OrderID;
-
-      return {
-        OrderID: orderId,
-        numberOfItems: order.numberOfItems ?? 0,
-        totalQuantity: order.totalQuantity ?? 0,
-        items: orderItems?.[orderId] || []
-      };
-
-    });
-
-  }, [displayOrders, orderItems]);
-
-  // ---------------- IMAGE URL HELPER ----------------
-  // Backend returns relative paths (e.g. /uploads/products/C5.jpg).
-  // Prepend the backend base URL to make them absolute.
-  const getImageUrl = (imageUrl) => {
-
-    if (!imageUrl) {
-      return daisyBunch;
-    }
-
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      return imageUrl;
-    }
-
-    if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
-      return imageUrl;
-    }
-
-    if (imageUrl.startsWith('/')) {
-      return `${BACKEND_BASE_URL}${imageUrl}`;
-    }
-
-    return `${BACKEND_BASE_URL}/${imageUrl}`;
-  };
-
-  // ---------------- TOGGLE ORDER EXPAND / COLLAPSE ----------------
-  const toggleExpand = async (orderId) => {
-
-    const isCurrentlyExpanded = !!expandedOrders[orderId];
-
-    // Fetch item details when opening the order for the first time
-    if (!isCurrentlyExpanded && onShowItems) {
-      await onShowItems(orderId);
-    }
-
-    setExpandedOrders((prev) => ({
-      ...prev,
-      [orderId]: !prev[orderId]
-    }));
-
-  };
-
-  // ---------------- READY TO PACKING ----------------
-  const handleReadyToPackingClick = (rowKey, orderId, itemId) => {
-
-    setRowStatuses((prev) => ({
-      ...prev,
-      [rowKey]: 'Ready to Packing'
-    }));
-
-    if (onReadyToPacking) {
-      onReadyToPacking(orderId, itemId);
-    }
-
-  };
-
-  // ---------------- START ----------------
-  const handleStart = async (rowKey, orderId, itemId) => {
-
-    if (!onStart) {
-      return;
-    }
-
-    const success = await onStart(orderId, itemId);
-
-    if (success) {
-      setRowStatuses((prev) => ({
-        ...prev,
-        [rowKey]: 'In Progress'
-      }));
-    }
-
-  };
-
-  // ---------------- STOP ----------------
-  const handleStop = async (rowKey, orderId, itemId) => {
-
-    if (!onStop) {
-      return;
-    }
-
-    const success = await onStop(orderId, itemId);
-
-    if (success) {
-      setRowStatuses((prev) => ({
-        ...prev,
-        [rowKey]: 'Stopped'
-      }));
-    }
-
-  };
-
-  // ---------------- RESUME ----------------
-  const handleResume = async (rowKey, orderId, itemId) => {
-
-    if (!onResume) {
-      return;
-    }
-
-    const success = await onResume(orderId, itemId);
-
-    if (success) {
-      setRowStatuses((prev) => ({
-        ...prev,
-        [rowKey]: 'In Progress'
-      }));
-    }
-
-  };
-
-  // ---------------- COMPLETE ----------------
-  const handleComplete = async (rowKey, orderId, itemId) => {
-
-    if (!onComplete) {
-      return;
-    }
-
-    const success = await onComplete(orderId, itemId);
-
-    if (success) {
-      setRowStatuses((prev) => ({
-        ...prev,
-        [rowKey]: 'Completed'
-      }));
-    }
-
-  };
-
-  // ---------------- NORMALIZE STATUS ----------------
+  //------------------ NORMALIZE STATUS -------------------------------------------
   const normalizeStatus = (status) => {
-
     if (!status) {
       return 'Pending';
     }
@@ -223,7 +51,7 @@ export default function ENormalOrderTable({
       return 'Pending';
     }
 
-    if (lower === 'in progress' || lower === 'inprogress' || lower === 'started' || lower === 'processing') {
+    if (lower === 'in progress' || lower === 'inprogress' || lower === 'started' || lower === 'start' || lower === 'processing') {
       return 'In Progress';
     }
 
@@ -240,14 +68,128 @@ export default function ENormalOrderTable({
     }
 
     return 'Pending';
-
   };
 
-  // ---------------- STATUS BADGE ----------------
+  //------------------ INITIALIZE ROW STATUSES ------------------------------------
+  useEffect(() => {
+    const newStatuses = {};
+
+    displayOrders.forEach((order) => {
+      const orderId = order.orderId ?? order.OrderID;
+      const items = orderItems?.[orderId] || [];
+
+      items.forEach((item) => {
+        const rowKey = `${orderId}-${item.itemId}`;
+        newStatuses[rowKey] = normalizeStatus(item.status);
+      });
+    });
+
+    setRowStatuses((prev) => ({
+      ...prev,
+      ...newStatuses
+    }));
+  }, [orders, orderItems]);
+
+  //------------------ GROUP ORDERS -----------------------------------------------
+  const groupedOrders = useMemo(() => {
+    return displayOrders.map((order) => {
+      const orderId = order.orderId ?? order.OrderID;
+
+      return {
+        OrderID: orderId,
+        numberOfItems: order.numberOfItems ?? 0,
+        totalQuantity: order.totalQuantity ?? 0,
+        items: orderItems?.[orderId] || []
+      };
+    });
+  }, [displayOrders, orderItems]);
+
+  //------------------ IMAGE URL HELPER -------------------------------------------
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) {
+      return daisyBunch;
+    }
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
+      return imageUrl;
+    }
+    if (imageUrl.startsWith('/')) {
+      return `${BACKEND_BASE_URL}${imageUrl}`;
+    }
+    return `${BACKEND_BASE_URL}/${imageUrl}`;
+  };
+
+  //------------------ TOGGLE ORDER EXPAND / COLLAPSE (FIXED) ---------------------
+  const toggleExpand = async (orderId) => {
+    const isCurrentlyExpanded = Boolean(expandedOrders[orderId]);
+    const nextState = !isCurrentlyExpanded;
+
+    // Trigger item fetch on first open
+    if (nextState && onShowItems) {
+      await onShowItems(orderId);
+    }
+
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderId]: nextState
+    }));
+  };
+
+  //------------------ START ------------------------------------------------------
+  const handleStart = async (rowKey, orderId, itemId) => {
+    if (!onStart) return;
+    const success = await onStart(orderId, itemId);
+    if (success) {
+      setRowStatuses((prev) => ({
+        ...prev,
+        [rowKey]: 'In Progress'
+      }));
+    }
+  };
+
+  //------------------ STOP -------------------------------------------------------
+  const handleStop = async (rowKey, orderId, itemId) => {
+    if (!onStop) return;
+    const success = await onStop(orderId, itemId);
+    if (success) {
+      setRowStatuses((prev) => ({
+        ...prev,
+        [rowKey]: 'Stopped'
+      }));
+    }
+  };
+
+  //------------------ RESUME (FIXED) ---------------------------------------------
+  const handleResume = async (rowKey, orderId, itemId) => {
+    const resumeAction = onResume || onStart;
+    if (!resumeAction) return;
+
+    const success = await resumeAction(orderId, itemId);
+    if (success) {
+      setRowStatuses((prev) => ({
+        ...prev,
+        [rowKey]: 'In Progress'
+      }));
+    }
+  };
+
+  //------------------ COMPLETE ---------------------------------------------------
+  const handleComplete = async (rowKey, orderId, itemId) => {
+    if (!onComplete) return;
+    const success = await onComplete(orderId, itemId);
+    if (success) {
+      setRowStatuses((prev) => ({
+        ...prev,
+        [rowKey]: 'Completed'
+      }));
+    }
+  };
+
+  //------------------ STATUS BADGE -----------------------------------------------
   const renderStatusBadge = (status) => {
-
     switch (status) {
-
       case 'In Progress':
         return (
           <span
@@ -353,41 +295,27 @@ export default function ENormalOrderTable({
             Pending
           </span>
         );
-
     }
-
   };
 
-  // ---------------- EMPTY STATE ----------------
+  //------------------ EMPTY STATE ------------------------------------------------
   if (groupedOrders.length === 0) {
-
     return (
       <div className="employee-empty-state">
-
-        <Database
-          size={40}
-          className="employee-empty-icon"
-        />
-
+        <Database size={40} className="employee-empty-icon" />
         <div>
           <strong>No assigned works</strong>
           <br />
-          <span>
-            You currently have no normal orders assigned. Check back later!
-          </span>
+          <span>You currently have no normal orders assigned. Check back later!</span>
         </div>
       </div>
     );
-
   }
 
-  // ---------------- MAIN TABLE ----------------
+  //------------------ MAIN TABLE -------------------------------------------------
   return (
-
     <div className="employee-table-container">
-
       <table className="employee-main-table">
-
         <thead>
           <tr>
             <th>Order ID</th>
@@ -398,30 +326,17 @@ export default function ENormalOrderTable({
         </thead>
 
         <tbody>
-
           {groupedOrders.map((group) => {
-
-            const isExpanded = !!expandedOrders[group.OrderID];
+            const isExpanded = Boolean(expandedOrders[group.OrderID]);
 
             return (
-
               <React.Fragment key={group.OrderID}>
-
                 <tr>
-
-                  <td className="td-order-id">
-                    {group.OrderID}
-                  </td>
-
+                  <td className="td-order-id">{group.OrderID}</td>
                   <td className="td-semibold">
-                    {group.numberOfItems}{' '}
-                    {group.numberOfItems === 1 ? 'Item' : 'Items'}
+                    {group.numberOfItems} {group.numberOfItems === 1 ? 'Item' : 'Items'}
                   </td>
-
-                  <td className="td-semibold">
-                    {group.totalQuantity}
-                  </td>
-
+                  <td className="td-semibold">{group.totalQuantity}</td>
                   <td className="td-align-right">
                     <button
                       type="button"
@@ -441,30 +356,16 @@ export default function ENormalOrderTable({
                       )}
                     </button>
                   </td>
-
                 </tr>
 
                 {isExpanded && (
-
                   <tr>
-
-                    <td
-                      colSpan={4}
-                      className="td-expanded-outer"
-                    >
-
+                    <td colSpan={4} className="td-expanded-outer">
                       <div className="expanded-row-container">
-
                         {group.items.length === 0 ? (
-
-                          <div className="items-loading">
-                            Loading item details...
-                          </div>
-
+                          <div className="items-loading">Loading item details...</div>
                         ) : (
-
                           <table className="employee-sub-table">
-
                             <thead>
                               <tr>
                                 <th>Item ID</th>
@@ -477,164 +378,113 @@ export default function ENormalOrderTable({
                             </thead>
 
                             <tbody>
+                              {group.items.map((item) => {
+                                const itemId = item.itemId;
+                                const rowKey = `${group.OrderID}-${itemId}`;
+                                const rawStatus = rowStatuses[rowKey] || item.status || 'Pending';
+                                const status = normalizeStatus(rawStatus);
 
-                              {group.items.map(
-                                (item) => {
+                                const imageUrl = item.imageUrl || item.image || null;
+                                const displayImage = getImageUrl(imageUrl);
 
-                                  const itemId = item.itemId;
-                                  const rowKey = `${group.OrderID}-${itemId}`;
+                                return (
+                                  <tr key={rowKey}>
+                                    <td>
+                                      <span
+                                        className="item-id-clickable"
+                                        onClick={() => onItemClick && onItemClick(item)}
+                                      >
+                                        {item.itemId}
+                                      </span>
+                                    </td>
 
-                                  const rawStatus =
-                                    rowStatuses[rowKey] ||
-                                    item.status ||
-                                    'Pending';
+                                    <td>
+                                      <img
+                                        src={displayImage}
+                                        alt={item.itemName || 'Item'}
+                                        className="employee-table-thumbnail"
+                                        onError={(e) => {
+                                          e.currentTarget.onerror = null;
+                                          e.currentTarget.src = daisyBunch;
+                                        }}
+                                      />
+                                    </td>
 
-                                  const status = normalizeStatus(rawStatus);
+                                    <td className="td-semibold">
+                                      {item.itemName || 'Unknown Item'}
+                                    </td>
 
-                                  // Resolve image URL — backend returns relative path
-                                  const imageUrl = item.imageUrl || item.image || null;
-                                  const displayImage = getImageUrl(imageUrl);
+                                    <td className="td-semibold">
+                                      {item.quantity ?? 0}
+                                    </td>
 
-                                  return (
+                                    <td>{renderStatusBadge(status)}</td>
 
-                                    <tr key={rowKey}>
+                                    <td>
+                                      <div className="employee-table-actions-cell">
+                                        {status === 'Pending' && (
+                                          <EStartButton
+                                            onClick={() => handleStart(rowKey, group.OrderID, item.itemId)}
+                                            label="Start"
+                                          />
+                                        )}
 
-                                      <td>
-                                        <span
-                                          className="item-id-clickable"
-                                          onClick={() => {
-                                            if (onItemClick) {
-                                              onItemClick(item);
-                                            }
-                                          }}
-                                        >
-                                          {item.itemId}
-                                        </span>
-                                      </td>
-
-                                      <td>
-                                        <img
-                                          src={displayImage}
-                                          alt={item.itemName || 'Item'}
-                                          className="employee-table-thumbnail"
-                                          onError={(e) => {
-                                            // Prevent infinite error loop and fall back to default image
-                                            e.currentTarget.onerror = null;
-                                            e.currentTarget.src = daisyBunch;
-                                          }}
-                                        />
-                                      </td>
-
-                                      <td className="td-semibold">
-                                        {item.itemName || 'Unknown Item'}
-                                      </td>
-
-                                      <td className="td-semibold">
-                                        {item.quantity ?? 0}
-                                      </td>
-
-                                      <td>
-                                        {renderStatusBadge(status)}
-                                      </td>
-
-                                      <td>
-
-                                        <div className="employee-table-actions-cell">
-
-                                          {status === 'Pending' && (
-                                            <EStartButton
-                                              onClick={() =>
-                                                handleStart(rowKey, group.OrderID, item.itemId)
-                                              }
-                                              label="Start"
+                                        {status === 'In Progress' && (
+                                          <>
+                                            <EStopButton
+                                              onClick={() => handleStop(rowKey, group.OrderID, item.itemId)}
+                                              label="Stop"
                                             />
-                                          )}
+                                            <ECompletedButton
+                                              onClick={() => handleComplete(rowKey, group.OrderID, item.itemId)}
+                                              label="Complete"
+                                            />
+                                          </>
+                                        )}
 
-                                          {status === 'In Progress' && (
-                                            <>
-                                              <EStopButton
-                                                onClick={() =>
-                                                  handleStop(rowKey, group.OrderID, item.itemId)
-                                                }
-                                                label="Stop"
-                                              />
-                                              <ECompletedButton
-                                                onClick={() =>
-                                                  handleComplete(rowKey, group.OrderID, item.itemId)
-                                                }
-                                                label="Complete"
-                                              />
-                                            </>
-                                          )}
+                                        {status === 'Stopped' && (
+                                          <>
+                                            <EStartButton
+                                              onClick={() => handleResume(rowKey, group.OrderID, item.itemId)}
+                                              label="Resume"
+                                            />
+                                            <ECompletedButton
+                                              onClick={() => handleComplete(rowKey, group.OrderID, item.itemId)}
+                                              label="Complete"
+                                            />
+                                          </>
+                                        )}
 
-                                          {status === 'Stopped' && (
-                                            <>
-                                              <EStartButton
-                                                onClick={() =>
-                                                  handleResume(rowKey, group.OrderID, item.itemId)
-                                                }
-                                                label="Resume"
-                                              />
-                                              <ECompletedButton
-                                                onClick={() =>
-                                                  handleComplete(rowKey, group.OrderID, item.itemId)
-                                                }
-                                                label="Complete"
-                                              />
-                                            </>
-                                          )}
+                                        {status === 'Completed' && (
+                                          <span className="action-status-label action-status-completed">
+                                            <Check size={14} />
+                                            Completed
+                                          </span>
+                                        )}
 
-                                          {status === 'Completed' && (
-                                            <span className="action-status-label action-status-completed">
-                                              <Check size={14} />
-                                              Completed
-                                            </span>
-                                          )}
-
-                                          {status === 'Ready to Packing' && (
-                                            <span className="action-status-label action-status-packing">
-                                              <Inbox size={14} />
-                                              Ready to Packing
-                                            </span>
-                                          )}
-
-                                        </div>
-
-                                      </td>
-
-                                    </tr>
-
-                                  );
-
-                                }
-                              )}
-
+                                        {status === 'Ready to Packing' && (
+                                          <span className="action-status-label action-status-packing">
+                                            <Inbox size={14} />
+                                            Ready to Packing
+                                          </span>
+                                        )}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
                             </tbody>
-
                           </table>
-
                         )}
-
                       </div>
-
                     </td>
-
                   </tr>
-
                 )}
-
               </React.Fragment>
-
             );
-
           })}
-
         </tbody>
-
       </table>
-
     </div>
-
   );
-
 }

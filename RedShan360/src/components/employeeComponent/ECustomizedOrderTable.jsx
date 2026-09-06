@@ -15,25 +15,24 @@ import ECompletedButton from './ECompletedButton';
 
 import '../../css/employee.css';
 
-// ---------------- CUSTOMIZED ORDER TABLE ----------------
+//------------------ CUSTOMIZED ORDER TABLE -------------------------------------
 export default function ECustomizedOrderTable({
     orders,
     orderItems,
     onStart,
     onStop,
+    onResume,
     onComplete,
     onItemClick
 }) {
-    console.log('[ECustomizedOrderTable] Props received:', { orders, orderItems, onStart, onStop, onComplete, onItemClick });
-
-    // ---------------- BACKEND DATA ----------------
+    //------------------ BACKEND DATA -----------------------------------------------
     const displayOrders = Array.isArray(orders) ? orders : [];
 
-    // ---------------- STATE ----------------
+    //------------------ STATE ------------------------------------------------------
     const [rowStatuses, setRowStatuses] = useState({});
     const [expandedOrders, setExpandedOrders] = useState({});
 
-    // ---------------- NORMALIZE STATUS ----------------
+    //------------------ NORMALIZE STATUS -------------------------------------------
     const normalizeStatus = (status) => {
         if (!status) {
             return 'PENDING';
@@ -55,7 +54,7 @@ export default function ECustomizedOrderTable({
         }
     };
 
-    // ---------------- INITIALIZE STATUSES FROM BACKEND ----------------
+    //------------------ INITIALIZE STATUSES FROM BACKEND ---------------------------
     useEffect(() => {
         const newStatuses = {};
         displayOrders.forEach((order) => {
@@ -68,7 +67,7 @@ export default function ECustomizedOrderTable({
         setRowStatuses(newStatuses);
     }, [orders]);
 
-    // ---------------- GROUP ORDERS ----------------
+    //------------------ GROUP ORDERS -----------------------------------------------
     const groupedOrders = useMemo(() => {
         return displayOrders.map((order) => {
             return {
@@ -80,7 +79,7 @@ export default function ECustomizedOrderTable({
         });
     }, [displayOrders]);
 
-    // ---------------- TOGGLE ORDER EXPAND / COLLAPSE ----------------
+    //------------------ TOGGLE ORDER EXPAND / COLLAPSE -----------------------------
     const toggleExpand = (orderId) => {
         setExpandedOrders((previous) => ({
             ...previous,
@@ -88,11 +87,10 @@ export default function ECustomizedOrderTable({
         }));
     };
 
-    // ---------------- START / RESUME ITEM ----------------
+    //------------------ START ITEM -------------------------------------------------
     const handleStart = async (rowKey, orderId, itemId) => {
         try {
             const result = onStart ? await onStart(orderId, itemId) : true;
-
             if (result === false) {
                 return;
             }
@@ -102,15 +100,14 @@ export default function ECustomizedOrderTable({
                 [rowKey]: 'START'
             }));
         } catch (error) {
-            // Request failed silently
+            // Handled in parent
         }
     };
 
-    // ---------------- STOP ITEM ----------------
+    //------------------ STOP ITEM --------------------------------------------------
     const handleStop = async (rowKey, orderId, itemId) => {
         try {
             const result = onStop ? await onStop(orderId, itemId) : true;
-
             if (result === false) {
                 return;
             }
@@ -120,15 +117,32 @@ export default function ECustomizedOrderTable({
                 [rowKey]: 'STOP'
             }));
         } catch (error) {
-            // Request failed silently
+            // Handled in parent
         }
     };
 
-    // ---------------- COMPLETE ITEM ----------------
+    //------------------ RESUME ITEM ------------------------------------------------
+    const handleResume = async (rowKey, orderId, itemId) => {
+        try {
+            const action = onResume || onStart;
+            const result = action ? await action(orderId, itemId) : true;
+            if (result === false) {
+                return;
+            }
+
+            setRowStatuses((previous) => ({
+                ...previous,
+                [rowKey]: 'START'
+            }));
+        } catch (error) {
+            // Handled in parent
+        }
+    };
+
+    //------------------ COMPLETE ITEM ----------------------------------------------
     const handleComplete = async (rowKey, orderId, itemId) => {
         try {
             const result = onComplete ? await onComplete(orderId, itemId) : true;
-
             if (result === false) {
                 return;
             }
@@ -138,11 +152,11 @@ export default function ECustomizedOrderTable({
                 [rowKey]: 'COMPLETED'
             }));
         } catch (error) {
-            // Request failed silently
+            // Handled in parent
         }
     };
 
-    // ---------------- STATUS BADGE ----------------
+    //------------------ STATUS BADGE -----------------------------------------------
     const renderStatusBadge = (status) => {
         const normalizedStatus = normalizeStatus(status);
 
@@ -182,7 +196,7 @@ export default function ECustomizedOrderTable({
         }
     };
 
-    // ---------------- EMPTY STATE ----------------
+    //------------------ EMPTY STATE ------------------------------------------------
     if (groupedOrders.length === 0) {
         return (
             <div className="employee-empty-state">
@@ -199,7 +213,7 @@ export default function ECustomizedOrderTable({
         );
     }
 
-    // ---------------- MAIN TABLE ----------------
+    //------------------ MAIN TABLE -------------------------------------------------
     return (
         <div className="employee-table-container">
             <table className="employee-table">
@@ -207,7 +221,6 @@ export default function ECustomizedOrderTable({
                     <tr>
                         <th>Order ID</th>
                         <th>Number of Items</th>
-                        {/* <th>Total Quantity</th> */}
                         <th style={{ textAlign: 'right', paddingRight: '40px' }}>
                             Items Details
                         </th>
@@ -220,7 +233,6 @@ export default function ECustomizedOrderTable({
 
                         return (
                             <React.Fragment key={group.orderId}>
-
                                 <tr>
                                     <td style={{ fontWeight: '700', color: 'var(--color-primary, #744F51)' }}>
                                         {group.orderId}
@@ -230,10 +242,6 @@ export default function ECustomizedOrderTable({
                                         {group.numberOfItems}{' '}
                                         {group.numberOfItems === 1 ? 'Item' : 'Items'}
                                     </td>
-
-                                    {/* <td style={{ fontWeight: '600' }}>
-                                        {group.totalQuantity}
-                                    </td> */}
 
                                     <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                                         <button
@@ -268,7 +276,6 @@ export default function ECustomizedOrderTable({
                                                         <tr>
                                                             <th>Custom ID</th>
                                                             <th>Item Name</th>
-                                                            {/* <th>Quantity</th> */}
                                                             <th>Flower Type</th>
                                                             <th>Number of Flowers</th>
                                                             <th>Bouquet Style</th>
@@ -281,7 +288,7 @@ export default function ECustomizedOrderTable({
                                                         {group.items.length === 0 ? (
                                                             <tr>
                                                                 <td
-                                                                    colSpan={8}
+                                                                    colSpan={7}
                                                                     style={{ textAlign: 'center', padding: '20px' }}
                                                                 >
                                                                     No customized item details available.
@@ -291,14 +298,12 @@ export default function ECustomizedOrderTable({
                                                             group.items.map((item) => {
                                                                 const customId = item.itemId;
                                                                 const rowKey = `${group.orderId}-${customId}`;
-
                                                                 const status =
                                                                     rowStatuses[rowKey] ||
                                                                     normalizeStatus(item.status);
 
                                                                 return (
                                                                     <tr key={rowKey}>
-
                                                                         <td>
                                                                             <span
                                                                                 className="item-id-clickable"
@@ -319,10 +324,6 @@ export default function ECustomizedOrderTable({
                                                                             {item.itemName || 'Customized Bouquet'}
                                                                         </td>
 
-                                                                        {/* <td style={{ fontWeight: '600' }}>
-                                                                            {item.quantity ?? 0}
-                                                                        </td> */}
-
                                                                         <td>
                                                                             {item.flowerType || 'N/A'}
                                                                         </td>
@@ -341,7 +342,6 @@ export default function ECustomizedOrderTable({
 
                                                                         <td>
                                                                             <div className="employee-table-actions-cell">
-
                                                                                 {status === 'PENDING' && (
                                                                                     <EStartButton
                                                                                         onClick={() =>
@@ -372,7 +372,7 @@ export default function ECustomizedOrderTable({
                                                                                     <>
                                                                                         <EStartButton
                                                                                             onClick={() =>
-                                                                                                handleStart(rowKey, group.orderId, customId)
+                                                                                                handleResume(rowKey, group.orderId, customId)
                                                                                             }
                                                                                             label="Resume"
                                                                                         />
@@ -400,10 +400,8 @@ export default function ECustomizedOrderTable({
                                                                                         Completed
                                                                                     </span>
                                                                                 )}
-
                                                                             </div>
                                                                         </td>
-
                                                                     </tr>
                                                                 );
                                                             })
@@ -414,7 +412,6 @@ export default function ECustomizedOrderTable({
                                         </td>
                                     </tr>
                                 )}
-
                             </React.Fragment>
                         );
                     })}
