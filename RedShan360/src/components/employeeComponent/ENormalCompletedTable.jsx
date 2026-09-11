@@ -52,19 +52,62 @@ export default function ENormalCompletedTable({
   if (displayOrders.length === 0) {
     return (
       <div
-        className="employee-empty-icon-wrapper"
         style={{
-          color: '#0f766e',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '260px',
+          width: '100%',
           backgroundColor: '#f0fdfa',
-          padding: '30px',
-          textAlign: 'center'
+          borderRadius: '12px',
+          border: '1.5px dashed #99f6e4',
+          padding: '48px 24px',
+          boxSizing: 'border-box',
         }}
       >
-        <div>
-          <strong>No completed tasks yet</strong>
-          <br />
-          <span>Completed works will appear here once you finish them.</span>
+        {/* Icon circle */}
+        <div
+          style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            backgroundColor: '#ccfbf1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '16px',
+          }}
+        >
+          <Check size={28} color="#0f766e" strokeWidth={2.5} />
         </div>
+
+        {/* Title */}
+        <p
+          style={{
+            margin: '0 0 6px 0',
+            fontSize: '16px',
+            fontWeight: '700',
+            color: '#0f766e',
+            letterSpacing: '0.01em',
+          }}
+        >
+          No completed tasks yet
+        </p>
+
+        {/* Subtitle */}
+        <p
+          style={{
+            margin: 0,
+            fontSize: '13.5px',
+            color: '#5eaaa0',
+            textAlign: 'center',
+            maxWidth: '280px',
+            lineHeight: '1.6',
+          }}
+        >
+          Completed works will appear here once you finish them.
+        </p>
       </div>
     );
   }
