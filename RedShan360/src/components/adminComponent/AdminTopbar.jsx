@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import defaultProfileAvatar from "../../assets/default-profile.png";
 import elenaThorneAvatar from "../../assets/elena_thorne.png";
 
-function AdminTopbar({ searchPlaceholder = "Search premium catalog..." }) {
+function AdminTopbar({ searchPlaceholder = "Search premium catalog...", searchValue, onSearchChange }) {
   const [showProfile, setShowProfile] = useState(false);
   const [profile, setProfile] = useState({
     fullName: "Elena Thorne",
@@ -59,6 +59,8 @@ function AdminTopbar({ searchPlaceholder = "Search premium catalog..." }) {
         <input
           type="text"
           placeholder={searchPlaceholder}
+          value={searchValue !== undefined ? searchValue : ""}
+          onChange={onSearchChange}
         />
       </div>
 
