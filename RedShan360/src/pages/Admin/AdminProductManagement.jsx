@@ -13,7 +13,6 @@ import peonyImg from "../../assets/crimson_velvet_peony.png";
 
 function AdminProductManagement() {
   const [viewMode, setViewMode] = useState("list"); // "list" or "grid"
-  const [activeTab, setActiveTab] = useState("products"); // "products", "categories", "discounts"
   const [categoryFilter, setCategoryFilter] = useState("All"); // "All", "Bouquets", "Head Dresses", "Individual Flowers"
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -435,26 +434,40 @@ function AdminProductManagement() {
           </div>
         </div>
 
-        {/* Tabs Bar */}
-        <div className="product-tabs">
-          <button
-            className={`tab-item ${activeTab === "products" ? "active" : ""}`}
-            onClick={() => setActiveTab("products")}
-          >
-            PRODUCTS
-          </button>
-          <button
-            className={`tab-item ${activeTab === "categories" ? "active" : ""}`}
-            onClick={() => setActiveTab("categories")}
-          >
-            CATEGORIES
-          </button>
-          <button
-            className={`tab-item ${activeTab === "discounts" ? "active" : ""}`}
-            onClick={() => setActiveTab("discounts")}
-          >
-            DISCOUNTS
-          </button>
+        {/* Top KPI Summary Cards */}
+        <div className="product-kpi-row">
+          {/* Card 1: TOTAL SKU */}
+          <div className="kpi-card-custom sku-card">
+            <div className="kpi-info-block">
+              <h5>TOTAL SKU</h5>
+              <h3>{totalSku}</h3>
+            </div>
+            <div className="kpi-icon-block">
+              <Package size={24} strokeWidth={1.8} />
+            </div>
+          </div>
+
+          {/* Card 2: ACTIVE CATEGORIES */}
+          <div className="kpi-card-custom categories-card">
+            <div className="kpi-info-block">
+              <h5>ACTIVE CATEGORIES</h5>
+              <h3>{activeCategoriesCount}</h3>
+            </div>
+            <div className="kpi-icon-block">
+              <Shapes size={24} strokeWidth={1.8} />
+            </div>
+          </div>
+
+          {/* Card 3: INVENTORY VALUE */}
+          <div className="kpi-card-custom value-card">
+            <div className="kpi-info-block">
+              <h5>INVENTORY VALUE</h5>
+              <h3>{formattedInventoryValue}</h3>
+            </div>
+            <div className="kpi-icon-block">
+              <Wallet size={24} strokeWidth={1.8} />
+            </div>
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -468,7 +481,7 @@ function AdminProductManagement() {
                 setSuccessNotification("New product added successfully!");
               }}
             />
-          ) : activeTab === "products" ? (
+          ) : (
             <>
               {/* Category Sector Pills Filter */}
               <div className="category-filter-pills">
@@ -633,57 +646,7 @@ function AdminProductManagement() {
                 </div>
               )}
             </>
-          ) : null}
-
-          {activeTab === "categories" && (
-            <div className="placeholder-tab-content">
-              <h3>Categories Management</h3>
-              <p>Manage floral categories (Bouquets, Head Dresses, Individual Flowers), tags, and sub-collections.</p>
-            </div>
           )}
-
-          {activeTab === "discounts" && (
-            <div className="placeholder-tab-content">
-              <h3>Discounts & Promotions</h3>
-              <p>Create and configure luxury catalog promo codes, campaigns, and seasonal offers.</p>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom KPI Cards */}
-        <div className="product-kpi-row">
-          {/* Card 1: TOTAL SKU */}
-          <div className="kpi-card-custom sku-card">
-            <div className="kpi-info-block">
-              <h5>TOTAL SKU</h5>
-              <h3>{totalSku}</h3>
-            </div>
-            <div className="kpi-icon-block">
-              <Package size={24} strokeWidth={1.8} />
-            </div>
-          </div>
-
-          {/* Card 2: ACTIVE CATEGORIES */}
-          <div className="kpi-card-custom categories-card">
-            <div className="kpi-info-block">
-              <h5>ACTIVE CATEGORIES</h5>
-              <h3>{activeCategoriesCount}</h3>
-            </div>
-            <div className="kpi-icon-block">
-              <Shapes size={24} strokeWidth={1.8} />
-            </div>
-          </div>
-
-          {/* Card 3: INVENTORY VALUE */}
-          <div className="kpi-card-custom value-card">
-            <div className="kpi-info-block">
-              <h5>INVENTORY VALUE</h5>
-              <h3>{formattedInventoryValue}</h3>
-            </div>
-            <div className="kpi-icon-block">
-              <Wallet size={24} strokeWidth={1.8} />
-            </div>
-          </div>
         </div>
       </div>
     </div>
