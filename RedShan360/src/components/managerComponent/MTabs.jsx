@@ -47,16 +47,18 @@ export default function MTabs() {
             const dispatchedURL = `${API_BASE_URL}/orders/dispatched`;
 
             // Fetch all four order status lists in parallel
+            const token = localStorage.getItem('token');
+            const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
             const [
                 preOrdersResponse,
                 processingResponse,
                 completedResponse,
                 dispatchedResponse
             ] = await Promise.all([
-                fetch(preOrdersURL),
-                fetch(processingURL),
-                fetch(completedURL),
-                fetch(dispatchedURL)
+                fetch(preOrdersURL, authHeaders),
+                fetch(processingURL, authHeaders),
+                fetch(completedURL, authHeaders),
+                fetch(dispatchedURL, authHeaders)
             ]);
 
             // Validate HTTP responses
