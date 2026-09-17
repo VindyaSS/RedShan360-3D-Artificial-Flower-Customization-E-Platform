@@ -8,6 +8,7 @@ export default function MPendingOrderTable(props) {
 
     // ---------------- Render ----------------
     return (
+        <div className="table-scroll-wrapper">
         <table className="MPtable">
             <thead>
                 <tr>
@@ -39,5 +40,6 @@ export default function MPendingOrderTable(props) {
                 )}
             </tbody>
         </table>
+        </div>
     );
 }

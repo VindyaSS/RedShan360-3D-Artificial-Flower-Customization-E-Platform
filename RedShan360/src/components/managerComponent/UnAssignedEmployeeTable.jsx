@@ -5,6 +5,7 @@ export default function UnAssignedEmployeeTable(props) {
     console.log('[UnAssignedEmployeeTable] Props received:', props);
     return (
         <>
+            <div className="table-scroll-wrapper">
             <table className="MPtable">
                 <thead>
                     <tr>
@@ -28,6 +29,7 @@ export default function UnAssignedEmployeeTable(props) {
                     ))}
                 </tbody>
             </table>
+            </div>
         </>
     );
 }
