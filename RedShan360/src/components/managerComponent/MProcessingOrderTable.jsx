@@ -1,36 +1,43 @@
-import React, { useState } from "react";
-import '../../css/manager.css'
+import React from "react";
+import "../../css/manager.css";
 
 export default function MProcessingOrderTable(props) {
+    console.log('[MProcessingOrderTable] Props received:', props);
 
+    const processingorders = Array.isArray(props.processingorders)
+        ? props.processingorders
+        : [];
 
+    // ---------------- Render ----------------
     return (
         <>
             <table className="MPtable">
                 <thead>
-                    <tr >
+                    <tr>
                         <th>{props.t1}</th>
                         <th>{props.t2}</th>
                         <th>{props.t3}</th>
-                        <th>{props.t4}</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {props.processingorders?.map((processingorder) => (
-                        <tr key={processingorder.OrderID}>
-                            <td>{processingorder.OrderID}</td>
-                            <td>{processingorder.CustomerName}</td>
-                            <td>{processingorder.ItemName}</td>
-                            <td>{processingorder.Price}</td>
-                        </tr>
-                    ))}
 
+                <tbody>
+                    {processingorders.length > 0 ? (
+                        processingorders.map((processingorder) => (
+                            <tr key={processingorder.orderId}>
+                                <td>{processingorder.orderId}</td>
+                                <td>{processingorder.customerName}</td>
+                                <td>{processingorder.totalAmount}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="3" style={{ textAlign: "center", padding: "20px" }}>
+                                No Processing Orders Found
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
-
-
-
         </>
     );
 }
-

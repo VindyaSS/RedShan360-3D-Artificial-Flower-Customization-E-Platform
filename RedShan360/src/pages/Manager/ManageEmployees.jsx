@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from "react";
 import SideNavigation from '../../components/managerComponent/sideNavigation';
-import '../../css/manager.css'
+import '../../css/manager.css';
 import AssignedEmployeeTable from "../../components/managerComponent/AssignedEmployeeTable";
 import UnAssignedEmployeeTable from "../../components/managerComponent/UnAssignedEmployeeTable";
 import MPreOrderModal from "../../components/managerComponent/mPreOrderModal";
 import api from '../../services/api';
 
+// ---------------- MANAGE EMPLOYEES PAGE ----------------
 export default function MmanageEmployees() {
-    
 
+    // ---------------- STATE ----------------
     const [unAssignedEmployees, setUnAssignedEmployees] = useState([]);
-
     const [preOrders, setPreOrders] = useState([]);
     const [assignedEmployees, setAssignedEmployees] = useState([]);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
 
+    // ---------------- FETCH UNASSIGNED ORDERS ----------------
     const fetchPreOrders = async () => {
         try {
             const response = await api.get("http://localhost:8080/api/orders/unassigned");
+            console.log('[ManageEmployees] fetchPreOrders - Status:', response.status, '| Data:', response.data);
             const mappedData = response.data.map(item => ({
                 OrderID: item.OrderID !== undefined ? item.OrderID : item.orderId,
                 CustomerName: item.CustomerName !== undefined ? item.CustomerName : item.customerName,
@@ -33,35 +36,36 @@ export default function MmanageEmployees() {
                 ShippingMethod: item.ShippingMethod !== undefined ? item.ShippingMethod : (item.shippingMethod || ""),
             }));
             setPreOrders(mappedData);
-            console.log("Fetched and Mapped Pre Orders:", mappedData);
         } catch (error) {
-            console.error("Error fetching pre orders:", error);
+            // Failed to load pre orders
         }
     };
 
+    // ---------------- FETCH ASSIGNED EMPLOYEES ----------------
     const fetchAssignedEmployees = async () => {
-    try {
-        const response = await api.get("http://localhost:8080/api/employees/assigned");
+        try {
+            const response = await api.get("http://localhost:8080/api/employees/assigned");
+            console.log('[ManageEmployees] fetchAssignedEmployees - Status:', response.status, '| Data:', response.data);
 
-        const employees = response.data.map(emp => ({
-            employeeId: emp.employeeId,
-            EmployeeName: emp.employeeName,
-            OrderID: emp.orderId,
-            WorkingStatus: emp.workingStatus
-        }));
+            const employees = response.data.map(emp => ({
+                employeeId: emp.employeeId,
+                EmployeeName: emp.employeeName,
+                OrderID: emp.orderId,
+                WorkingStatus: emp.workingStatus
+            }));
 
-        setAssignedEmployees(employees);
+            setAssignedEmployees(employees);
 
-        console.log("Assigned Employees :", employees);
+        } catch (error) {
+            // Failed to load assigned employees
+        }
+    };
 
-    } catch (error) {
-        console.error("Error fetching assigned employees :", error);
-    }
-};
-
+    // ---------------- FETCH UNASSIGNED EMPLOYEES ----------------
     const fetchUnAssignedEmployees = async () => {
         try {
             const response = await api.get("http://localhost:8080/api/employees/not-assigned");
+            console.log('[ManageEmployees] fetchUnAssignedEmployees - Status:', response.status, '| Data:', response.data);
 
             const employees = response.data.map(emp => ({
                 employeeId: emp.employeeId,
@@ -71,30 +75,25 @@ export default function MmanageEmployees() {
 
             setUnAssignedEmployees(employees);
 
-            console.log("Unassigned Employees :", employees);
-
         } catch (error) {
-            console.error("Error fetching unassigned employees :", error);
+            // Failed to load unassigned employees
         }
     };
 
+    // ---------------- INITIAL LOAD ----------------
     useEffect(() => {
         fetchPreOrders();
         fetchUnAssignedEmployees();
         fetchAssignedEmployees();
-
     }, []);
 
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
-
+    // ---------------- ASSIGN CLICK HANDLER ----------------
     const handleAssignClick = (employee) => {
-        console.log("emp ", employee)
         setSelectedEmployee(employee);
     };
 
+    // ---------------- ASSIGN ORDER TO EMPLOYEE ----------------
     const handleAssignOrder = async (selectedEmployee, order) => {
-        console.log("Employee:", selectedEmployee.employeeId);
-        console.log("Order:", order.OrderID);
 
         try {
             await api.post("http://localhost:8080/api/employees/assign-order", {
@@ -102,10 +101,12 @@ export default function MmanageEmployees() {
                 orderId: order.OrderID
             });
 
+            // Remove the assigned employee from the unassigned list
             setUnAssignedEmployees(prev =>
                 prev.filter(emp => emp.employeeId !== selectedEmployee.employeeId)
             );
 
+            // Add the employee to the assigned list with their new order
             setAssignedEmployees(prev => [
                 ...prev,
                 {
@@ -115,6 +116,7 @@ export default function MmanageEmployees() {
                 }
             ]);
 
+            // Remove the order from the pending pre-orders list
             setPreOrders(prev =>
                 prev.filter(po => po.OrderID !== order.OrderID)
             );
@@ -124,7 +126,6 @@ export default function MmanageEmployees() {
             alert("Order assigned successfully!");
 
         } catch (error) {
-            console.error(error);
             alert("Failed to assign order.");
         }
     };

@@ -2,6 +2,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 
 export default function MAddProductButton({ onClick }) {
+    console.log('[MAddProductButton] Props received:', { onClick });
     return (
         <button
             onClick={onClick}

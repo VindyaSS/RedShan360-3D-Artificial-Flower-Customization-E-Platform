@@ -9,41 +9,97 @@ export default function BirthdayHeaddressCard({
     BoquetName,
     Price,
     onEdit,
-    onDelete
+    onQuantityChange
+
 }) {
+    // Resolve display name from available props
     const displayName = HeaddressName || FlowerName || BoquetName;
+
     const [isEditing, setIsEditing] = useState(false);
     const [newPrice, setNewPrice] = useState(Price);
 
+    const [isEditingQuantity, setIsEditingQuantity] = useState(false);
+    const [newQuantity, setNewQuantity] = useState(quantity);
+
+    // Sync price input when prop changes
     useEffect(() => {
         setNewPrice(Price);
     }, [Price]);
 
-    const handleChangePrice = () => {
-        if (!newPrice.trim()) return;
+    useEffect(() => {
+        setNewQuantity(quantity);
+    }, [quantity]);
 
-        let formatted = newPrice.trim();
-        const numericString = formatted.replace(/Rs\s*/gi, '').replace(/,/g, '').trim();
-        if (!isNaN(numericString) && numericString !== '') {
-            const num = parseFloat(numericString);
-            formatted = `Rs ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    // ---------------- Handle Quantity Change ----------------
+    const handleChangeQuantity = () => {
+        const numericQuantity = parseInt(newQuantity, 10);
+
+        // Validate quantity
+        if (
+            newQuantity === '' ||
+            isNaN(numericQuantity) ||
+            numericQuantity < 0
+        ) {
+            alert("Please enter a valid quantity.");
+            return;
         }
 
-        if (window.confirm("Are you sure you want to change the price?")) {
-            if (onEdit) {
-                onEdit(formatted);
+        if (window.confirm("Are you sure you want to change the quantity?")) {
+
+            if (onQuantityChange) {
+                // Send NUMBER to parent/backend
+                onQuantityChange(numericQuantity);
             }
-            setIsEditing(false);
+
+            setIsEditingQuantity(false);
         }
     };
 
-    // Check if item is low in stock (< 10) for custom badge colors
-    const isLowStock = quantity <= 5;
+    // ---------------- Handle Quantity Enter Key ----------------
+    const handleQuantityKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleChangeQuantity();
+        }
+
+        if (e.key === 'Escape') {
+            setNewQuantity(quantity);
+            setIsEditingQuantity(false);
+        }
+    };
+
+    // ---------------- Handle Price Change ----------------
+    const handleChangePrice = () => {
+        if (!newPrice.trim()) return;
+
+        const numericString = newPrice
+            .replace(/Rs\s*/gi, '')
+            .replace(/,/g, '')
+            .trim();
+
+        if (!isNaN(numericString) && numericString !== '') {
+
+            const num = parseFloat(numericString);
+
+            if (window.confirm("Are you sure you want to change the price?")) {
+
+                if (onEdit) {
+                    // Send NUMBER to backend
+                    onEdit(num);
+                }
+
+                setIsEditing(false);
+            }
+        }
+    };
+
+    // Stock level flags for badge color
+    const isLowStock = quantity <= 10;
     const isOutOfStock = quantity === 0;
 
     return (
         <div className="bg-[#faf8f6] rounded-2xl border border-[#e5e4e7] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group h-full">
-            {/* Image Container displaying full image without crop */}
+
+            {/* ---------------- Product Image ---------------- */}
             <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f4f0ed] border-b border-[#e5e4e7] flex items-center justify-center">
                 {image ? (
                     <img
@@ -59,7 +115,7 @@ export default function BirthdayHeaddressCard({
                 )}
             </div>
 
-            {/* Card Content */}
+            {/* ---------------- Card Content ---------------- */}
             <div className="p-4 flex flex-col flex-1 gap-3 justify-between">
                 <div>
                     <span className="text-[11px] font-semibold text-[#744F51]/75 uppercase tracking-widest font-sans">
@@ -70,7 +126,7 @@ export default function BirthdayHeaddressCard({
                     </h3>
                 </div>
 
-                {/* Price, Quantity and Actions Row */}
+                {/* ---------------- Price & Actions ---------------- */}
                 <div className="pt-3 border-t border-[#e5e4e7]/60 flex flex-col gap-3">
                     {isEditing ? (
                         <div className="flex flex-col gap-2">
@@ -118,13 +174,55 @@ export default function BirthdayHeaddressCard({
                                 </div>
                                 <div className="text-right">
                                     <span className="text-[10px] text-[#666] uppercase tracking-wider block font-semibold">Quantity</span>
-                                    <span className={`text-sm font-bold font-sans ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-amber-600' : 'text-[#1a1a1a]'}`}>
-                                        {quantity}
-                                    </span>
+                                    
+                                    {isEditingQuantity ? (
+                                        <input
+                                            type="number"
+                                            value={newQuantity}
+                                            min="0"
+                                            autoFocus
+                                            onChange={(e) => setNewQuantity(e.target.value)}
+                                            onKeyDown={handleQuantityKeyDown}
+                                            onBlur={handleChangeQuantity}
+                                            className="w-20 px-2 py-1 text-sm font-bold text-right bg-white border border-[#744F51] rounded-md focus:outline-none focus:ring-1 focus:ring-[#744F51]"
+                                        />
+                                    ) : (
+                                        <span
+                                            onClick={() => {
+                                                if (onQuantityChange) {
+                                                    setNewQuantity(quantity);
+                                                    setIsEditingQuantity(true);
+                                                }
+                                            }}
+                                            className={`
+                text-sm font-bold font-sans
+                ${isOutOfStock
+                                                    ? 'text-red-600'
+                                                    : isLowStock
+                                                        ? 'text-amber-600'
+                                                        : 'text-[#1a1a1a]'
+                                                }
+                ${onQuantityChange
+                                                    ? 'cursor-pointer hover:underline'
+                                                    : ''
+                                                }
+            `}
+                                            title={
+                                                onQuantityChange
+                                                    ? "Click to change quantity"
+                                                    : ""
+                                            }
+                                        >
+                                            {quantity}
+                                        </span>
+                                    )}
                                 </div>
+
                             </div>
 
-                            {/* Actions under the Price */}
+
+
+                            {/* ---------------- Action Buttons ---------------- */}
                             <div className="flex items-center gap-2">
                                 {onEdit && (
                                     <button
@@ -136,15 +234,7 @@ export default function BirthdayHeaddressCard({
                                         <span>Edit</span>
                                     </button>
                                 )}
-                                {onDelete && (
-                                    <button
-                                        onClick={onDelete}
-                                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg border border-[#e5e4e7] transition-all"
-                                        title="Delete Headdress"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
+
                             </div>
                         </>
                     )}

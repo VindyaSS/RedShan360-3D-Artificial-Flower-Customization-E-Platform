@@ -1,92 +1,19 @@
 import React from "react";
 import SideNavigation from '../../components/managerComponent/sideNavigation';
 import MTabs from "../../components/managerComponent/mTabs";
-import '../../css/manager.css'
-import Footer from '../GuestUser/components/Footer'
+import '../../css/manager.css';
 
-export default function MmanageOrders(){
+// ---------------- MANAGE ORDERS PAGE ----------------
+export default function MmanageOrders() {
 
-    return(
-            <>
-            <div className="MPage">
-                <div className="Mpart1">
-                <SideNavigation/>
-                </div>
-                <div className = "Mpart2">
-                    <MTabs/>
-                </div>
-                <div>
-                </div>
-                
+    return (
+        <div className="MPage">
+            <div className="Mpart1">
+                <SideNavigation />
             </div>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            </>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <div className="Mpart2">
+                <MTabs />
+            </div>
+        </div>
     );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

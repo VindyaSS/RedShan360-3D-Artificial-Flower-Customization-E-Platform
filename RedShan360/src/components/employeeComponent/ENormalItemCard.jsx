@@ -2,15 +2,15 @@ import React from "react";
 import { X } from "lucide-react";
 import "../../css/employee.css";
 
+// ---------------- NORMAL ITEM DETAILS CARD ----------------
 const ENormalItemCard = (props) => {
+  console.log('[ENormalItemCard] Props received:', props);
   return (
     <div className="blog-card">
-      {/* Close button */}
       <button className="item-modal-close" onClick={props.onClose} aria-label="Close">
         <X size={18} />
       </button>
 
-      {/* Image */}
       <figure className="blog-image-container">
         <img
           src={props.image || "https://picsum.photos/id/114/800/600"}
@@ -19,7 +19,6 @@ const ENormalItemCard = (props) => {
         />
       </figure>
 
-      {/* Body */}
       <div className="blog-content">
         <header className="blog-header">
           <div>

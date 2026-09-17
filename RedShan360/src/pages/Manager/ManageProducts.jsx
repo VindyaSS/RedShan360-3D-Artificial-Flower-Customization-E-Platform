@@ -5,7 +5,7 @@ import SearchBarM from '../../components/managerComponent/searchBarM';
 import SubNavbarM from '../../components/managerComponent/subNavbarM';
 import MAddNewProductForm from '../../components/managerComponent/MAddNewProductForm';
 import MAddProductButton from '../../components/managerComponent/MAddProductButton';
-import { Plus, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import AniversaryBFlowerCard from '../../components/managerComponent/AniversaryBFlowerCard';
 import AnniversaryIFlowerCard from '../../components/managerComponent/AnniversaryIFlowerCard';
 import BirthdayBFlowerCard from '../../components/managerComponent/BirthdayBFlowerCard';
@@ -15,108 +15,36 @@ import ConvocationBFlowerCard from '../../components/managerComponent/Convocatio
 import ConvocationIFlowerCard from '../../components/managerComponent/ConvocationIFlowerCard';
 import api from '../../services/api';
 
-// Import Images for Anniversary Boquets
-import A1 from '../../assets/A1.jpg';
-import A2 from '../../assets/A2.jpg';
-import A3 from '../../assets/A3.jpg';
-import A4 from '../../assets/A4.jpg';
-import A5 from '../../assets/A5.jpg';
-import A6 from '../../assets/A6.jpg';
+const API_BASE_URL = "http://localhost:8080/api";
 
-// Import Images for Anniversary Individual Flowers
-import AI1 from '../../assets/AI1.jpg';
-import AI2 from '../../assets/AI2.jpg';
-import AI3 from '../../assets/AI3.jpg';
-import AI4 from '../../assets/AI4.jpg';
-import AI5 from '../../assets/AI5.jpg';
-import AI6 from '../../assets/AI6.jpg';
-import AI7 from '../../assets/AI7.jpg';
-
-// Import Images for Birthday Boquets
-import ABB1 from '../../assets/ABB1.jpg';
-import ABB2 from '../../assets/ABB2.jpg';
-import ABB3 from '../../assets/ABB3.jpg';
-import ABB4 from '../../assets/ABB4.jpg';
-import ABB5 from '../../assets/ABB5.jpg';
-import ABB6 from '../../assets/ABB6.jpg';
-
-// Import Images for Birthday Individual Flowers
-import BI1 from '../../assets/BI1.jpg';
-import BI2 from '../../assets/BI2.jpg';
-import BI3 from '../../assets/BI3.jpg';
-import BI4 from '../../assets/BI4.jpg';
-import BI5 from '../../assets/BI5.jpg';
-
-// Import Images for Birthday Headdresses
-import BH1 from '../../assets/BH1.jpg';
-import BH2 from '../../assets/BH2.jpg';
-import BH3 from '../../assets/BH3.jpg';
-import BH4 from '../../assets/BH4.jpg';
-import BH5 from '../../assets/BH5.jpg';
-
-// Import Images for Convocation Boquets
-import C1 from '../../assets/C1.jpg';
-import C2 from '../../assets/C2.jpg';
-import C3 from '../../assets/C3.jpg';
-import C4 from '../../assets/C4.jpg';
-import C5 from '../../assets/C5.jpg';
-import C6 from '../../assets/C6.jpg';
-import C7 from '../../assets/C7.jpg';
-import C8 from '../../assets/C8.jpg';
-
-// Import Images for Convocation Individual Flowers
-import CI1 from '../../assets/CI1.jpg';
-import CI2 from '../../assets/CI2.jpg';
-import CI3 from '../../assets/CI3.jpg';
-import CI4 from '../../assets/CI4.jpg';
-import CI5 from '../../assets/CI5.jpg';
-import CI6 from '../../assets/CI6.jpg';
-import CI7 from '../../assets/CI7.jpg';
-
+// ---------------- MANAGE PRODUCTS PAGE ----------------
 export default function MmanageProducts() {
+
+    // ---------------- STATE ----------------
     const [searchQuery, setSearchQuery] = useState('');
     const [activeSector, setActiveSector] = useState('All');
-
-    // Toggle state for Add Product Form
     const [isAddingProduct, setIsAddingProduct] = useState(false);
-
-    // Success toast notification
     const [successNotification, setSuccessNotification] = useState(null);
-
-    // Products List state loaded from Backend REST API
     const [productsList, setProductsList] = useState([]);
 
+    // ---------------- FETCH PRODUCTS ----------------
     const fetchProducts = async () => {
         try {
             const response = await api.get('/api/products');
-
-            if (response.data.length > 0) {
-            console.log("First product image URL:", response.data[0].imageUrl);
-        }
+            console.log('[ManageProducts] fetchProducts - Status:', response.status, '| Data:', response.data);
             setProductsList(response.data);
-
-            console.log(response.data);
-
         } catch (error) {
-            console.error("Failed to fetch products:", error);
+            // Failed to load products
         }
     };
 
+    // ---------------- INITIAL LOAD ----------------
     useEffect(() => {
         fetchProducts();
     }, []);
 
-    // Image resolver helper to map products dynamically to either database images or fallback local assets
-    const getProductImage = (product) => {
-        if (product.imageUrl) {
-            return product.imageUrl;
-        }
-
-        
-        return '/images/placeholder.png';
-    };
-
-    // Auto-clear notification after 4 seconds
+    // ---------------- AUTO-CLEAR NOTIFICATION ----------------
+    // Automatically dismiss the success toast after 4 seconds
     useEffect(() => {
         if (successNotification) {
             const timer = setTimeout(() => {
@@ -126,9 +54,19 @@ export default function MmanageProducts() {
         }
     }, [successNotification]);
 
-    // Map database product fields to the format expected by the card components
+    // ---------------- IMAGE RESOLVER ----------------
+    // Returns backend image URL or placeholder if not available
+    const getProductImage = (product) => {
+        if (product.imageUrl) {
+            return product.imageUrl;
+        }
+        return '/images/placeholder.png';
+    };
+
+    // ---------------- MAP PRODUCT TO CARD FORMAT ----------------
+    // Maps database product fields to the format expected by card components
     const mapProduct = (p) => ({
-        id: p.id,
+        id: p.productId,
         BoquetName: p.productName,
         FlowerName: p.productName,
         HeaddressName: p.productName,
@@ -141,7 +79,7 @@ export default function MmanageProducts() {
 
     const allMappedProducts = productsList.map(mapProduct);
 
-    // Filter mapped products into separate category/subcategory lists
+    // ---------------- FILTER BY CATEGORY AND SUBCATEGORY ----------------
     const anniversaryBouquets = allMappedProducts.filter(p => p.categoryId === 1 && p.subCategoryId === 1);
     const birthdayBoquetFlowers = allMappedProducts.filter(p => p.categoryId === 1 && p.subCategoryId === 2);
     const convocationBouquets = allMappedProducts.filter(p => p.categoryId === 1 && p.subCategoryId === 3);
@@ -152,83 +90,112 @@ export default function MmanageProducts() {
 
     const birthdayHeaddresses = allMappedProducts.filter(p => p.categoryId === 2 && p.subCategoryId === 5);
 
-    // Filter bouquets based on search query
+    // ---------------- FILTER BY SEARCH QUERY ----------------
     const filteredBouquets = anniversaryBouquets.filter(bouquet =>
         (bouquet.BoquetName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Filter individual flowers based on search query
     const filteredIndividualFlowers = anniversaryIndividualFlowers.filter(flower =>
         (flower.FlowerName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Filter birthday bouquets based on search query
     const filteredBirthdayBouquets = birthdayBoquetFlowers.filter(bouquet =>
         (bouquet.FlowerName || bouquet.BoquetName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Filter birthday individual flowers based on search query
     const filteredBirthdayIndividualFlowers = birthdayIndividualFlowers.filter(flower =>
         (flower.FlowerName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Filter birthday headdresses based on search query
     const filteredBirthdayHeaddresses = birthdayHeaddresses.filter(headdress =>
         (headdress.HeaddressName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Filter convocation bouquets based on search query
     const filteredConvocationBouquets = convocationBouquets.filter(bouquet =>
         (bouquet.BoquetName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Filter convocation individual flowers based on search query
     const filteredConvocationIndividualFlowers = convocationIndividualFlowers.filter(flower =>
         (flower.FlowerName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleEdit = async (id, type, newPrice) => {
-        try {
-            const numericString = newPrice.replace(/Rs\s*/gi, '').replace(/,/g, '').trim();
-            const numericPrice = parseFloat(numericString) || 0;
 
-            // Fetch the existing product details first
-            const getResponse = await api.get(`/api/products/${id}`);
-            const existingProduct = getResponse.data;
-            console.log(existingProduct);
-            // Send PUT request to update only the price
-            await api.put(`/api/products/${id}`, {
-                ...existingProduct,
-                price: numericPrice
-            });
+    const handleQuantityChange = async (productId, type, newQuantity) => {
+    console.log("Updating quantity:", {
+        productId,
+        type,
+        newQuantity
+    });
 
-            // Update state dynamically
-            setProductsList(prev => prev.map(p => p.id === id ? { ...p, price: numericPrice } : p));
-            setSuccessNotification(`Price updated to ${newPrice} successfully.`);
-        } catch (error) {
-            console.error("Failed to update product price:", error);
-            alert("Failed to update product price in backend.");
-        }
-    };
-
-    const handleDelete = async (id, type) => {
-        if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
-            try {
-                await api.delete(`/api/products/${id}`);
-                // Update state dynamically
-                setProductsList(prev => prev.filter(p => p.id !== id));
-                setSuccessNotification(`${type} deleted successfully.`);
-            } catch (error) {
-                console.error("Failed to delete product:", error);
-                alert("Failed to delete product in backend.");
+    try {
+        const response = await api.put(
+            `/api/products/${productId}/quantity`,
+            {
+                quantity: Number(newQuantity)
             }
-        }
-    };
+        );
+
+        console.log("Quantity update response:", response.data);
+
+        // Update frontend list
+        setProductsList((prevProducts) =>
+            prevProducts.map((product) =>
+                product.productId === productId
+                    ? {
+                        ...product,
+                        stockQuantity: Number(newQuantity)
+                    }
+                    : product
+            )
+        );
+
+        alert("Quantity updated successfully!");
+
+    } catch (error) {
+        console.error("Error updating quantity:", error);
+        console.error("Backend response:", error.response?.data);
+        console.error("Backend status:", error.response?.status);
+
+        alert("Failed to update quantity.");
+    }
+};
+    // ---------------- EDIT PRODUCT PRICE ----------------
+    
+const handleEdit = async (productId, type, newPrice) => {
+    await updateProductPrice(productId, newPrice);
+};
+
+const updateProductPrice = async (productId, newPrice) => {
+    try {
+
+        console.log("Product ID:", productId);
+        console.log("New Price:", newPrice);
+        console.log("Price type:", typeof newPrice);
+
+        await api.put(
+            `/api/products/${productId}/price`,
+            {
+                price: newPrice
+            }
+        );
+
+        await fetchProducts();
+
+        alert("Price updated successfully!");
+
+    } catch (error) {
+
+        console.error("Error updating price:", error);
+        console.error("Backend response:", error.response?.data);
+
+        alert("Failed to update price");
+    }
+};
+
+    
 
     return (
         <>
-                 {console.log(filteredBouquets)}
-
             {successNotification && (
                 <div className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-[#eefaf4] border border-emerald-100 text-green-800 rounded-2xl shadow-xl animate-slideIn">
                     <span className="p-1.5 bg-emerald-500 text-white rounded-full flex items-center justify-center">
@@ -255,7 +222,6 @@ export default function MmanageProducts() {
                 </div>
                 <div className="Mpart2" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-                    {/* Top Bar with Search, SubNavbar and Add Product Button */}
                     <div className="flex flex-col gap-4 border-b border-[#e5e4e7] pb-6">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <SearchBarM
@@ -276,7 +242,6 @@ export default function MmanageProducts() {
                         </div>
                     </div>
 
-                    {/* Dashboard Content area */}
                     <div className="flex-1">
                         {isAddingProduct ? (
                             <MAddNewProductForm
@@ -288,7 +253,6 @@ export default function MmanageProducts() {
                             />
                         ) : activeSector === 'All' ? (
                             <div className="flex flex-col gap-12">
-                                {/* All - Boquets */}
                                 <div>
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
@@ -309,7 +273,8 @@ export default function MmanageProducts() {
                                                     BoquetName={bouquet.BoquetName}
                                                     Price={bouquet.Price}
                                                     onEdit={(newPrice) => handleEdit(bouquet.id, 'Bouquet', newPrice)}
-                                                    onDelete={() => handleDelete(bouquet.id, 'Bouquet')}
+                                                    onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, ' Bouquet', newQuantity)}
+
                                                 />
                                             ))}
                                             {filteredBirthdayBouquets.map((bouquet) => (
@@ -319,8 +284,10 @@ export default function MmanageProducts() {
                                                     quantity={bouquet.quantity}
                                                     BoquetName={bouquet.FlowerName || bouquet.BoquetName}
                                                     Price={bouquet.Price}
-                                                    onEdit={(newPrice) => handleEdit(bouquet.id, 'Birthday Bouquet', newPrice)}
-                                                    onDelete={() => handleDelete(bouquet.id, 'Birthday Bouquet')}
+ 
+                                                   onEdit={(newPrice) => handleEdit(bouquet.id, 'Birthday Bouquet', newPrice)}
+                                                    onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, ' Bouquet', newQuantity)}
+
                                                 />
                                             ))}
                                             {filteredConvocationBouquets.map((bouquet) => (
@@ -331,7 +298,8 @@ export default function MmanageProducts() {
                                                     BoquetName={bouquet.BoquetName}
                                                     Price={bouquet.Price}
                                                     onEdit={(newPrice) => handleEdit(bouquet.id, 'Convocation Bouquet', newPrice)}
-                                                    onDelete={() => handleDelete(bouquet.id, 'Convocation Bouquet')}
+                                                    onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, ' Bouquet', newQuantity)}
+
                                                 />
                                             ))}
                                         </div>
@@ -342,7 +310,6 @@ export default function MmanageProducts() {
                                     )}
                                 </div>
 
-                                {/* All - Individual Flowers */}
                                 <div>
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
@@ -363,7 +330,8 @@ export default function MmanageProducts() {
                                                     FlowerName={flower.FlowerName}
                                                     Price={flower.Price}
                                                     onEdit={(newPrice) => handleEdit(flower.id, 'Individual Flower', newPrice)}
-                                                    onDelete={() => handleDelete(flower.id, 'Individual Flower')}
+                                                    onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Individual Flower', newQuantity)}
+
                                                 />
                                             ))}
                                             {filteredBirthdayIndividualFlowers.map((flower) => (
@@ -374,7 +342,9 @@ export default function MmanageProducts() {
                                                     FlowerName={flower.FlowerName}
                                                     Price={flower.Price}
                                                     onEdit={(newPrice) => handleEdit(flower.id, 'Birthday Individual Flower', newPrice)}
-                                                    onDelete={() => handleDelete(flower.id, 'Birthday Individual Flower')}
+                                                    onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Birthday Individual Flower', newQuantity)}
+
+                                                    
                                                 />
                                             ))}
                                             {filteredConvocationIndividualFlowers.map((flower) => (
@@ -385,7 +355,9 @@ export default function MmanageProducts() {
                                                     BoquetName={flower.FlowerName}
                                                     Price={flower.Price}
                                                     onEdit={(newPrice) => handleEdit(flower.id, 'Convocation Individual Flower', newPrice)}
-                                                    onDelete={() => handleDelete(flower.id, 'Convocation Individual Flower')}
+                                                    onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Convocation Individual Flower', newQuantity)}
+
+                                                    
                                                 />
                                             ))}
                                         </div>
@@ -396,7 +368,6 @@ export default function MmanageProducts() {
                                     )}
                                 </div>
 
-                                {/* All - Head Dresses */}
                                 <div>
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#1a1a1a] font-sans">
@@ -417,7 +388,8 @@ export default function MmanageProducts() {
                                                     HeaddressName={headdress.HeaddressName}
                                                     Price={headdress.Price}
                                                     onEdit={(newPrice) => handleEdit(headdress.id, 'Birthday Headdress', newPrice)}
-                                                    onDelete={() => handleDelete(headdress.id, 'Birthday Headdress')}
+                                                    onQuantityChange={(newQuantity) =>handleQuantityChange(headdress.id, 'Birthday Headdress', newQuantity)}
+
                                                 />
                                             ))}
                                         </div>
@@ -449,7 +421,8 @@ export default function MmanageProducts() {
                                                 BoquetName={bouquet.BoquetName}
                                                 Price={bouquet.Price}
                                                 onEdit={(newPrice) => handleEdit(bouquet.id, 'Bouquet', newPrice)}
-                                                onDelete={() => handleDelete(bouquet.id, 'Bouquet')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, ' Bouquet', newQuantity)}
+
                                             />
                                         ))}
                                         {filteredBirthdayBouquets.map((bouquet) => (
@@ -460,7 +433,8 @@ export default function MmanageProducts() {
                                                 BoquetName={bouquet.FlowerName || bouquet.BoquetName}
                                                 Price={bouquet.Price}
                                                 onEdit={(newPrice) => handleEdit(bouquet.id, 'Birthday Bouquet', newPrice)}
-                                                onDelete={() => handleDelete(bouquet.id, 'Birthday Bouquet')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, ' Birthday Bouquet', newQuantity)}
+
                                             />
                                         ))}
                                         {filteredConvocationBouquets.map((bouquet) => (
@@ -471,7 +445,8 @@ export default function MmanageProducts() {
                                                 BoquetName={bouquet.BoquetName}
                                                 Price={bouquet.Price}
                                                 onEdit={(newPrice) => handleEdit(bouquet.id, 'Convocation Bouquet', newPrice)}
-                                                onDelete={() => handleDelete(bouquet.id, 'Convocation Bouquet')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, ' Convocation Bouquet', newQuantity)}
+
                                             />
                                         ))}
                                     </div>
@@ -502,7 +477,8 @@ export default function MmanageProducts() {
                                                 FlowerName={flower.FlowerName}
                                                 Price={flower.Price}
                                                 onEdit={(newPrice) => handleEdit(flower.id, 'Individual Flower', newPrice)}
-                                                onDelete={() => handleDelete(flower.id, 'Individual Flower')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Individual Flower', newQuantity)}
+
                                             />
                                         ))}
                                         {filteredBirthdayIndividualFlowers.map((flower) => (
@@ -513,7 +489,8 @@ export default function MmanageProducts() {
                                                 FlowerName={flower.FlowerName}
                                                 Price={flower.Price}
                                                 onEdit={(newPrice) => handleEdit(flower.id, 'Birthday Individual Flower', newPrice)}
-                                                onDelete={() => handleDelete(flower.id, 'Birthday Individual Flower')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Birthday Individual Flower', newQuantity)}
+
                                             />
                                         ))}
                                         {filteredConvocationIndividualFlowers.map((flower) => (
@@ -524,7 +501,8 @@ export default function MmanageProducts() {
                                                 BoquetName={flower.FlowerName}
                                                 Price={flower.Price}
                                                 onEdit={(newPrice) => handleEdit(flower.id, 'Convocation Individual Flower', newPrice)}
-                                                onDelete={() => handleDelete(flower.id, 'Convocation Individual Flower')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Convocation Individual Flower', newQuantity)}
+
                                             />
                                         ))}
                                     </div>
@@ -555,7 +533,8 @@ export default function MmanageProducts() {
                                                 HeaddressName={headdress.HeaddressName}
                                                 Price={headdress.Price}
                                                 onEdit={(newPrice) => handleEdit(headdress.id, 'Birthday Headdress', newPrice)}
-                                                onDelete={() => handleDelete(headdress.id, 'Birthday Headdress')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(headdress.id, 'Birthday Headdress', newQuantity)}
+
                                             />
                                         ))}
                                     </div>
@@ -586,7 +565,8 @@ export default function MmanageProducts() {
                                                 BoquetName={bouquet.BoquetName}
                                                 Price={bouquet.Price}
                                                 onEdit={(newPrice) => handleEdit(bouquet.id, 'Bouquet', newPrice)}
-                                                onDelete={() => handleDelete(bouquet.id, 'Bouquet')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, ' Bouquet', newQuantity)}
+
                                             />
                                         ))}
                                     </div>
@@ -617,7 +597,8 @@ export default function MmanageProducts() {
                                                 FlowerName={flower.FlowerName}
                                                 Price={flower.Price}
                                                 onEdit={(newPrice) => handleEdit(flower.id, 'Individual Flower', newPrice)}
-                                                onDelete={() => handleDelete(flower.id, 'Individual Flower')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Individual Flower', newQuantity)}
+
                                             />
                                         ))}
                                     </div>
@@ -648,7 +629,9 @@ export default function MmanageProducts() {
                                                 BoquetName={bouquet.FlowerName || bouquet.BoquetName}
                                                 Price={bouquet.Price}
                                                 onEdit={(newPrice) => handleEdit(bouquet.id, 'Birthday Bouquet', newPrice)}
-                                                onDelete={() => handleDelete(bouquet.id, 'Birthday Bouquet')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, 'Birthday Bouquet', newQuantity)}
+    
+
                                             />
                                         ))}
                                     </div>
@@ -679,7 +662,8 @@ export default function MmanageProducts() {
                                                 FlowerName={flower.FlowerName}
                                                 Price={flower.Price}
                                                 onEdit={(newPrice) => handleEdit(flower.id, 'Birthday Individual Flower', newPrice)}
-                                                onDelete={() => handleDelete(flower.id, 'Birthday Individual Flower')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Birthday Individual Flower', newQuantity)}
+
                                             />
                                         ))}
                                     </div>
@@ -710,7 +694,8 @@ export default function MmanageProducts() {
                                                 HeaddressName={headdress.HeaddressName}
                                                 Price={headdress.Price}
                                                 onEdit={(newPrice) => handleEdit(headdress.id, 'Birthday Headdress', newPrice)}
-                                                onDelete={() => handleDelete(headdress.id, 'Birthday Headdress')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(headdress.id, 'Birthday Headdress', newQuantity)}
+
                                             />
                                         ))}
                                     </div>
@@ -741,7 +726,8 @@ export default function MmanageProducts() {
                                                 BoquetName={bouquet.BoquetName}
                                                 Price={bouquet.Price}
                                                 onEdit={(newPrice) => handleEdit(bouquet.id, 'Convocation Bouquet', newPrice)}
-                                                onDelete={() => handleDelete(bouquet.id, 'Convocation Bouquet')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(bouquet.id, 'Convocation Bouquet', newQuantity)}
+
                                             />
                                         ))}
                                     </div>
@@ -772,7 +758,8 @@ export default function MmanageProducts() {
                                                 BoquetName={flower.FlowerName}
                                                 Price={flower.Price}
                                                 onEdit={(newPrice) => handleEdit(flower.id, 'Convocation Individual Flower', newPrice)}
-                                                onDelete={() => handleDelete(flower.id, 'Convocation Individual Flower')}
+                                                onQuantityChange={(newQuantity) =>handleQuantityChange(flower.id, 'Convocation Individual Flower', newQuantity)}
+
                                             />
                                         ))}
                                     </div>

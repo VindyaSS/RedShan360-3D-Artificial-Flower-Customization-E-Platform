@@ -7,41 +7,27 @@ import ENormalItemCard from '../../components/employeeComponent/ENormalItemCard'
 
 import '../../css/employee.css';
 
+//------------------ API BASE URL -----------------------------------------------
 const API_BASE_URL = 'http://localhost:8080/api';
 
+//------------------ EMPLOYEE DASHBOARD PAGE ------------------------------------
 export default function EmployeeDashboard() {
 
-  /* Get logged-in employee information */
+  //------------------ LOGGED-IN EMPLOYEE -----------------------------------------
   const loggedInUser = JSON.parse(localStorage.getItem('user'));
-
-  /* Employee ID comes from login response */
   const employeeId = loggedInUser?.employeeId;
 
+  //------------------ STATE ------------------------------------------------------
   const [assignedOrders, setAssignedOrders] = useState([]);
   const [completedOrders, setCompletedOrders] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /*
-   * Store item details for each order
-   * Example:
-   * {
-   *   25: [
-   *     {
-   *       itemId: 1,
-   *       imageUrl: "...",
-   *       itemName: "...",
-   *       quantity: 3,
-   *       stockQuantity: 10,
-   *       status: "Pending"
-   *     }
-   *   ]
-   * }
-   */
+  //------------------ ORDER ITEMS MAP --------------------------------------------
   const [orderItems, setOrderItems] = useState({});
 
-  /* Check employee login */
+  //------------------ CHECK EMPLOYEE LOGIN ---------------------------------------
   useEffect(() => {
     if (!employeeId) {
       setError('Employee information not found. Please login again.');
@@ -49,25 +35,23 @@ export default function EmployeeDashboard() {
       return;
     }
     fetchAssignedOrders();
-      fetchCompletedOrders();
-
+    fetchCompletedOrders();
   }, [employeeId]);
 
-  /* Fetch assigned orders */
+  //------------------ FETCH ASSIGNED ORDERS --------------------------------------
   const fetchAssignedOrders = async () => {
     try {
       setLoading(true);
       setError(null);
 
       const token = localStorage.getItem('token');
-
       const response = await fetch(
         `${API_BASE_URL}/employee/tasks/assigned/normal/${employeeId}`,
         {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           }
         }
       );
@@ -77,372 +61,236 @@ export default function EmployeeDashboard() {
       }
 
       const data = await response.json();
-
-      console.log("LOGGED-IN EMPLOYEE ID:", employeeId);
-      console.log("ASSIGNED ORDERS RESPONSE:", data);
-
-      data.forEach((order) => {
-        console.log(
-          "Employee ID:", employeeId,
-          "| Order ID:", order.orderId,
-          "| Number of Items:", order.numberOfItems,
-          "| Total Quantity:", order.totalQuantity
-        );
-      });
-
-      setAssignedOrders(data);
-
-    } catch (error) {
-      console.error('Error fetching assigned orders:', error);
+      setAssignedOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
       setError('Unable to load assigned tasks');
     } finally {
       setLoading(false);
     }
   };
 
-  /*
-   * Fetch item details for one order
-   * Backend URL: GET /api/employee/tasks/order/{orderId}
-   * Example: /api/employee/tasks/order/25
-   */
+  //------------------ FETCH ORDER ITEM DETAILS -----------------------------------
   const fetchOrderItems = async (orderId) => {
     try {
       const token = localStorage.getItem('token');
-
-      console.log("====================================");
-      console.log("FETCHING ORDER ITEM DETAILS");
-      console.log("ORDER ID:", orderId);
-      console.log("REQUEST URL:", `${API_BASE_URL}/employee/tasks/order/${orderId}`);
-
       const response = await fetch(
         `${API_BASE_URL}/employee/tasks/order/${orderId}`,
         {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           }
         }
       );
-
-      console.log("ORDER ITEMS RESPONSE STATUS:", response.status);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch items for order ${orderId}`);
       }
 
       const data = await response.json();
-
-      console.log("ORDER ITEMS RESPONSE:", data);
-
-      /* Print every item separately */
-      if (Array.isArray(data)) {
-        data.forEach((item) => {
-          console.log("ITEM DETAILS:", {
-            itemId: item.itemId,
-            imageUrl: item.imageUrl,
-            itemName: item.itemName,
-            quantity: item.quantity,
-            stockQuantity: item.stockQuantity,
-            status: item.status
-          });
-        });
-      }
-
-      return data;
-
-    } catch (error) {
-      console.error("ERROR FETCHING ORDER ITEMS:", error);
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
       return [];
     }
   };
 
-  /* Start Task */
+  //------------------ START TASK -------------------------------------------------
   const handleStartTask = async (orderId, itemId) => {
     try {
-      const token = localStorage.getItem("token");
-
-      console.log("====================================");
-      console.log("START TASK");
-      console.log("ORDER ID:", orderId);
-      console.log("ITEM ID:", itemId);
-
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/start`,
         {
-          method: "PUT", // Change to PUT if your backend uses PUT
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         }
       );
 
+      const result = await response.text();
       if (!response.ok) {
-        throw new Error("Failed to start task");
+        throw new Error(result || 'Failed to start task');
       }
 
-      // If your backend returns JSON
-      // const result = await response.json();
-      // console.log(result);
-
-      console.log("Task started successfully.");
-
-      // Update local item status
+      // 1. Update local item state safely comparing IDs as strings
       setOrderItems((prev) => ({
         ...prev,
-        [orderId]: prev[orderId].map((item) =>
-          item.itemId === itemId
-            ? { ...item, status: "In Progress" }
-            : item
-        ),
+        [orderId]: (prev[orderId] || []).map((item) =>
+          String(item.itemId) === String(itemId) ? { ...item, status: 'START' } : item
+        )
       }));
 
+      // 2. Refresh assigned orders list
+      await fetchAssignedOrders();
       return true;
-    } catch (error) {
-      console.error("START TASK ERROR:", error);
-      alert("Unable to start task.");
+    } catch (err) {
+      alert(err.message || 'Unable to start task.');
       return false;
     }
   };
 
-  /* Stop Task */
+  //------------------ STOP TASK --------------------------------------------------
   const handleStopTask = async (orderId, itemId) => {
     try {
-      const token = localStorage.getItem("token");
-
-      console.log("====================================");
-      console.log("STOP TASK");
-      console.log("ORDER ID:", orderId);
-      console.log("ITEM ID:", itemId);
-
+      const token = localStorage.getItem('token');
       const response = await fetch(
-       `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/stop`,
+        `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/stop`,
         {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         }
       );
 
+      const result = await response.text();
       if (!response.ok) {
-        throw new Error("Failed to stop task");
+        throw new Error(result || 'Failed to stop task');
       }
 
-      console.log("Task stopped successfully.");
-
-      // Update local item status
       setOrderItems((prev) => ({
         ...prev,
-        [orderId]: prev[orderId].map((item) =>
-          item.itemId === itemId
-            ? { ...item, status: "Stopped" }
-            : item
-        ),
+        [orderId]: (prev[orderId] || []).map((item) =>
+          item.itemId === itemId ? { ...item, status: 'STOP' } : item
+        )
       }));
 
+      await fetchAssignedOrders();
       return true;
-    } catch (error) {
-      console.error("STOP TASK ERROR:", error);
-      alert("Unable to stop task.");
+    } catch (err) {
+      alert(err.message || 'Unable to stop task.');
       return false;
     }
   };
 
-  /* Resume Task */
+  //------------------ RESUME TASK (FIXED) ----------------------------------------
   const handleResumeTask = async (orderId, itemId) => {
     try {
-      const token = localStorage.getItem("token");
-
-      console.log("====================================");
-      console.log("RESUME TASK");
-      console.log("ORDER ID:", orderId);
-      console.log("ITEM ID:", itemId);
-
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/resume`,
         {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         }
       );
 
+      const result = await response.text();
       if (!response.ok) {
-        throw new Error("Failed to resume task");
+        throw new Error(result || 'Failed to resume task');
       }
 
-      console.log("Task resumed successfully.");
-
-      // Update local state
       setOrderItems((prev) => ({
         ...prev,
-        [orderId]: prev[orderId].map((item) =>
-          item.itemId === itemId
-            ? { ...item, status: "In Progress" }
-            : item
-        ),
+        [orderId]: (prev[orderId] || []).map((item) =>
+          item.itemId === itemId ? { ...item, status: 'START' } : item
+        )
       }));
 
+      await fetchAssignedOrders();
       return true;
-    } catch (error) {
-      console.error("RESUME TASK ERROR:", error);
-      alert("Unable to resume task.");
+    } catch (err) {
+      alert(err.message || 'Unable to resume task.');
       return false;
     }
   };
 
-  /* Complete Task */
+  //------------------ COMPLETE TASK ----------------------------------------------
   const handleCompleteTask = async (orderId, itemId) => {
     try {
-      const token = localStorage.getItem("token");
-
-      console.log("====================================");
-      console.log("COMPLETE TASK");
-      console.log("ORDER ID:", orderId);
-      console.log("ITEM ID:", itemId);
-
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${API_BASE_URL}/employee/tasks/${orderId}/items/${itemId}/complete`,
         {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         }
       );
 
+      const result = await response.text();
       if (!response.ok) {
-        throw new Error("Failed to complete task");
+        throw new Error(result || 'Failed to complete task');
       }
 
-      console.log("Task completed successfully.");
-
-      // Update local state
       setOrderItems((prev) => ({
         ...prev,
-        [orderId]: prev[orderId].map((item) =>
-          item.itemId === itemId
-            ? { ...item, status: "Completed" }
-            : item
-        ),
+        [orderId]: (prev[orderId] || []).map((item) =>
+          item.itemId === itemId ? { ...item, status: 'COMPLETED' } : item
+        )
       }));
 
+      await fetchAssignedOrders();
+      await fetchCompletedOrders();
       return true;
-    } catch (error) {
-      console.error("COMPLETE TASK ERROR:", error);
-      alert("Unable to complete task.");
+    } catch (err) {
+      alert(err.message || 'Unable to complete task.');
       return false;
     }
   };
 
+  //------------------ FETCH COMPLETED ORDERS -------------------------------------
   const fetchCompletedOrders = async () => {
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${API_BASE_URL}/employee/tasks/completed/normal/${employeeId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
+        }
+      );
 
-    console.log("====================================");
-    console.log("FETCHING COMPLETED ORDERS");
-    console.log("EMPLOYEE ID:", employeeId);
-
-    const response = await fetch(
-      `${API_BASE_URL}/employee/tasks/completed/normal/${employeeId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+      if (!response.ok) {
+        throw new Error('Failed to fetch completed orders');
       }
-    );
 
-    console.log(
-      "COMPLETED ORDERS RESPONSE STATUS:",
-      response.status
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch completed orders");
+      const data = await response.json();
+      setCompletedOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setCompletedOrders([]);
     }
+  };
 
-    const data = await response.json();
-
-    console.log("COMPLETED ORDERS:", data);
-
-    setCompletedOrders(data);
-
-  } catch (error) {
-
-    console.error(
-      "ERROR FETCHING COMPLETED ORDERS:",
-      error
-    );
-
-    setCompletedOrders([]);
-  }
-};
-
-
+  //------------------ SHOW ORDER ITEMS -------------------------------------------
   const handleShowItems = async (orderId) => {
-    console.log("SHOW ITEMS CLICKED");
-    console.log("ORDER ID:", orderId);
-
-    /* If this order's items are already loaded, do not call the backend again. */
-    if (orderItems[orderId]) {
-      console.log("ITEMS ALREADY LOADED FOR ORDER:", orderId);
+    if (orderItems[orderId] && orderItems[orderId].length > 0) {
       return;
     }
 
     const items = await fetchOrderItems(orderId);
-
-    console.log("ITEMS RECEIVED FOR ORDER:", orderId, items);
-
-    /* Store items using order ID */
-    setOrderItems((previousItems) => ({
-      ...previousItems,
+    setOrderItems((prev) => ({
+      ...prev,
       [orderId]: items
     }));
   };
 
-  /* When an item is clicked */
-  const handleItemClick = (item) => {
-    console.log("ITEM CLICKED:", item);
-    console.log("ITEM ID:", item.itemId);
-    console.log("IMAGE URL:", item.imageUrl);
-    console.log("ITEM NAME:", item.itemName);
-    console.log("QUANTITY:", item.quantity);
-    console.log("STOCK QUANTITY:", item.stockQuantity);
-    console.log("STATUS:", item.status);
-
-    setSelectedItem(item);
-  };
-
-  /* Close popup */
-  const handleCloseItem = () => {
-    setSelectedItem(null);
-  };
+  //------------------ ITEM MODAL -------------------------------------------------
+  const handleItemClick = (item) => setSelectedItem(item);
+  const handleCloseItem = () => setSelectedItem(null);
 
   return (
     <div className="EPage">
-
-      {/* Sidebar */}
       <div className="Epart1">
         <ESideNavigation />
       </div>
 
-      {/* Main content */}
       <div className="Epart2">
-
-        {/* Assigned Tasks */}
+        {/* Assigned Tasks Section */}
         <div className="dashboard-row">
-          <div
-            className="tabs-container"
-            style={{ padding: '24px', flex: 1 }}
-          >
+          <div className="tabs-container" style={{ padding: '24px', flex: 1 }}>
             <h3
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -455,43 +303,27 @@ export default function EmployeeDashboard() {
               Assigned Tasks
             </h3>
 
-            {/* Loading */}
-            {loading && (
-              <div className="employee-loading">
-                Loading assigned tasks...
-              </div>
-            )}
+            {loading && <div className="employee-loading">Loading assigned tasks...</div>}
+            {error && <div className="employee-error">{error}</div>}
 
-            {/* Error */}
-            {error && (
-              <div className="employee-error">
-                {error}
-              </div>
-            )}
-
-            {/* Assigned Orders */}
             {!loading && !error && (
               <ENormalOrderTable
-    orders={assignedOrders}
-    orderItems={orderItems}
-    onItemClick={handleItemClick}
-    onShowItems={handleShowItems}
-    onStart={handleStartTask}
-    onStop={handleStopTask}
-    onResume={handleResumeTask}
-    onComplete={handleCompleteTask}
-/>
+                orders={assignedOrders}
+                orderItems={orderItems}
+                onItemClick={handleItemClick}
+                onShowItems={handleShowItems}
+                onStart={handleStartTask}
+                onStop={handleStopTask}
+                onResume={handleResumeTask}
+                onComplete={handleCompleteTask}
+              />
             )}
-
           </div>
         </div>
 
-        {/* Completed Tasks */}
+        {/* Completed Tasks Section */}
         <div className="dashboard-row" style={{ marginTop: '24px' }}>
-          <div
-            className="tabs-container"
-            style={{ padding: '24px', flex: 1 }}
-          >
+          <div className="tabs-container" style={{ padding: '24px', flex: 1 }}>
             <h3
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -505,23 +337,18 @@ export default function EmployeeDashboard() {
             </h3>
 
             <ENormalCompletedTable
-  orders={completedOrders}
-  orderItems={orderItems}
-  onItemClick={handleItemClick}
-  onShowItems={handleShowItems}
-/>
-
+              orders={completedOrders}
+              orderItems={orderItems}
+              onItemClick={handleItemClick}
+              onShowItems={handleShowItems}
+            />
           </div>
         </div>
-
       </div>
 
-      {/* Item details popup */}
+      {/* Item Details Modal */}
       {selectedItem && (
-        <div
-          className="item-modal-overlay"
-          onClick={handleCloseItem}
-        >
+        <div className="item-modal-overlay" onClick={handleCloseItem}>
           <div onClick={(event) => event.stopPropagation()}>
             <ENormalItemCard
               ItemID={selectedItem.itemId}
@@ -535,7 +362,6 @@ export default function EmployeeDashboard() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
