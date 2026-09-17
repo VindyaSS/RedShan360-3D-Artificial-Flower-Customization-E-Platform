@@ -68,17 +68,23 @@ export default function LoginPage() {
         localStorage.setItem('user', JSON.stringify(userData));
       }
 
-      // Redirect based on user role
-      let redirectPath = from;
-      const role = response.data?.role;
-      if (role === 'CUSTOMER') {
-        redirectPath = (from && from !== '/' && from !== '/login') ? from : '/guestUserDashboard';
-      } else if (role === 'EMPLOYEE') {
-        redirectPath = '/employeeDashboard';
-      } else if (role === 'MANAGER') {
-        redirectPath = '/managerOverview';
-      } else if (role === 'ADMIN') {
-        redirectPath = '/adminDashboard';
+      // Redirect based on user role and target destination
+      let redirectPath = '/';
+      const role = response.data?.role ? String(response.data.role).toUpperCase() : '';
+      const hasIntendedDestination = from && from !== '/' && from !== '/login' && from !== '/unauthorized';
+
+      if (hasIntendedDestination) {
+        redirectPath = from;
+      } else {
+        if (role === 'CUSTOMER') {
+          redirectPath = '/guestUserDashboard';
+        } else if (role === 'EMPLOYEE') {
+          redirectPath = '/employeeDashboard';
+        } else if (role === 'MANAGER') {
+          redirectPath = '/managerOverview';
+        } else if (role === 'ADMIN') {
+          redirectPath = '/adminDashboard';
+        }
       }
 
       setTimeout(() => {

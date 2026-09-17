@@ -29,11 +29,11 @@ const Footer = () => {
           <div>
             <h4 className="text-2xl font-medium mb-5" style={{ fontFamily: 'Playfair Display, serif' }}>Redshan Flora</h4>
             <p className="text-[#1a1a1a]/70 font-medium leading-relaxed">Pioneering the future of botanical décor with hyper-realistic art and immersive digital visualization.</p>
-            <div className="flex items-center gap-3 mt-6">
+            {/*<div className="flex items-center gap-3 mt-6">
               <a href="#" className="w-9 h-9 rounded-full bg-white shadow-sm inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"><Trophy size={16} /></a>
               <a href="#" className="w-9 h-9 rounded-full bg-white shadow-sm inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"><Camera size={16} /></a>
               <a href="#" className="w-9 h-9 rounded-full bg-white shadow-sm inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"><Share2 size={16} /></a>
-            </div>
+            </div>*/}
           </div>
 
           <div>
