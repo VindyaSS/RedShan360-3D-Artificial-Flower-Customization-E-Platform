@@ -9,6 +9,7 @@ export default function MrecentOrderTable({
 }) {
 
     return (
+        <div className="table-scroll-wrapper">
         <table className="MPtable">
 
             <thead>
@@ -62,5 +63,6 @@ export default function MrecentOrderTable({
             </tbody>
 
         </table>
+        </div>
     );
 }

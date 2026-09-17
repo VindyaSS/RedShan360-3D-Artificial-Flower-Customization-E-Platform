@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
+/* ============================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================ */
 :root {
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
@@ -15,15 +18,50 @@
   --shadow-md: 0 8px 30px rgba(116, 79, 81, 0.06);
   --shadow-lg: 0 12px 40px rgba(116, 79, 81, 0.1);
   --transition-normal: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-width: 280px;
 }
 
-/* ---------------------------------------------------sideNavigation------------------------------------------------------------------ */
+/* ============================================================
+   RESET
+   ============================================================ */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* ============================================================
+   SIDEBAR / SIDE NAVIGATION
+   ============================================================ */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: calc(-1 * var(--sidebar-width));
+  width: var(--sidebar-width);
+  height: 100%;
+  background: var(--color-bg-card);
+  border-right: 1px solid var(--color-border);
+  transition: var(--transition-normal);
+  z-index: 1000;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Slide-in on mobile when .open is toggled */
+.sidebar.open {
+  left: 0;
+}
+
+/* Always visible on desktop */
+@media (min-width: 992px) {
+  .sidebar {
+    left: 0;
+  }
+}
+
+/* ---- Profile block ---- */
 .profile {
   text-align: center;
   padding: 32px 24px;
@@ -54,22 +92,7 @@
   margin-top: 4px;
 }
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -280px;
-  width: 280px;
-  height: 100%;
-  background: var(--color-bg-card);
-  border-right: 1px solid var(--color-border);
-  transition: var(--transition-normal);
-  z-index: 1000;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-sm);
-}
-
+/* ---- Nav links ---- */
 nav {
   flex: 1;
   padding: 24px 16px;
@@ -114,6 +137,7 @@ nav ul li a:hover {
   transform: translateX(4px);
 }
 
+/* ---- Logout ---- */
 .logout {
   padding: 24px 16px;
   border-top: 1px solid var(--color-border);
@@ -144,23 +168,248 @@ nav ul li a:hover {
   transform: translateX(4px);
 }
 
+/* ============================================================
+   HAMBURGER BUTTON  (visible only on < 992px)
+   ============================================================ */
+.menu-btn {
+  position: fixed;
+  top: 14px;
+  left: 16px;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  color: var(--color-primary);
+}
+
+.menu-btn:hover {
+  background: rgba(116, 79, 81, 0.06);
+  transform: scale(1.05);
+}
+
 @media (min-width: 992px) {
-  .sidebar {
-    left: 0;
-  }
-
   .menu-btn {
-    display: none;
-  }
-
-  .overlay {
     display: none;
   }
 }
 
-/* ----------------------------------------------------------------------------------mOrderTable--------------------------------------------------------------------------- */
+/* ============================================================
+   DARK OVERLAY  (visible only when sidebar is open on mobile)
+   ============================================================ */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.overlay.visible {
+  display: block;
+}
+
+@media (min-width: 992px) {
+  .overlay {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   PAGE SHELL  (MPage / Mpart1 / Mpart2)
+   ============================================================ */
+.MPage {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-bg-page);
+  font-family: var(--font-body);
+}
+
+/* Space-holder that pushes Mpart2 right of the fixed sidebar on desktop */
+.Mpart1 {
+  width: 0;
+  flex-shrink: 0;
+  transition: var(--transition-normal);
+}
+
+@media (min-width: 992px) {
+  .Mpart1 {
+    width: var(--sidebar-width);
+  }
+}
+
+/* Main content area */
+.Mpart2 {
+  flex: 1;
+  min-width: 0;             /* prevent flex overflow */
+  overflow-x: hidden;
+  padding: 72px 16px 24px; /* top padding gives room for hamburger on mobile */
+  background-color: var(--color-bg-page);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 576px) {
+  .Mpart2 {
+    padding: 72px 20px 24px;
+    gap: 28px;
+  }
+}
+
+@media (min-width: 992px) {
+  .Mpart2 {
+    padding: 40px;
+    gap: 32px;
+  }
+}
+
+/* ============================================================
+   STAT CARDS  (MOrderCard)
+   ============================================================ */
+.MOrderCard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .MOrderCard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .MOrderCard {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Card inner styling */
+.MOrderCard > div {
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: var(--transition-normal);
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  gap: 16px !important;
+  max-width: none !important;
+  flex: none !important;
+}
+
+.MOrderCard > div:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md) !important;
+  border-color: rgba(116, 79, 81, 0.2) !important;
+}
+
+.MOrderCard > div figure {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--color-primary);
+  background: rgba(116, 79, 81, 0.05);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.MOrderCard > div figure svg {
+  color: var(--color-primary) !important;
+  width: 24px !important;
+  height: 24px !important;
+  margin: 0 !important;
+}
+
+.MOrderCard > div figure svg[fill="none"] {
+  stroke: var(--color-primary) !important;
+}
+
+.MOrderCard > div figure svg:not([fill="none"]) {
+  fill: var(--color-primary) !important;
+}
+
+.MOrderCard > div > div {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+}
+
+.MOrderCard > div h3 {
+  font-family: var(--font-body);
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--color-text-muted) !important;
+  margin: 0 0 2px 0 !important;
+  text-align: left !important;
+}
+
+.MOrderCard > div p {
+  font-family: var(--font-body);
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: var(--color-text-title) !important;
+  margin: 0 !important;
+  text-align: left !important;
+}
+
+.MOrderCard > * {
+  flex: unset;
+  max-width: unset;
+}
+
+/* ============================================================
+   DASHBOARD ROW  (side-by-side on desktop, stacked on mobile)
+   ============================================================ */
+.dashboard-row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .dashboard-row {
+    flex-direction: row;
+    gap: 24px;
+  }
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+/* Responsive scroll wrapper — wrap every <table> in this */
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+}
+
 .MPtable {
   width: 100%;
+  min-width: 480px;       /* prevents columns from crushing on mobile */
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--color-border);
@@ -172,20 +421,35 @@ nav ul li a:hover {
 
 .MPtable th,
 .MPtable td {
-  padding: 16px 24px;
-  font-size: 14px;
+  padding: 12px 16px;
+  font-size: 13px;
   text-align: left;
   transition: var(--transition-normal);
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .MPtable th,
+  .MPtable td {
+    padding: 16px 24px;
+    font-size: 14px;
+  }
 }
 
 .MPtable th {
   background-color: var(--color-primary);
   color: #ffffff;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   border-bottom: 1px solid var(--color-border);
+}
+
+@media (min-width: 768px) {
+  .MPtable th {
+    font-size: 13px;
+  }
 }
 
 .MPtable td {
@@ -226,28 +490,14 @@ nav ul li a:hover {
   text-decoration: underline;
 }
 
-/* Special class for red links */
 .AAtable .link-red {
   color: #ba2d32;
   font-weight: 600;
 }
 
-/* ---------------------------------------- AManageProfiles,AdminStore ---------------------------------------- */
-.AMPBody {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 0;
-}
-
-.AMPTopic {
-  color: var(--color-text-title);
-  font-family: var(--font-body);
-  font-weight: 700;
-  margin-bottom: 16px;
-}
-
-/* ------------------------------------------------------------------------------mTabs--------------------------------------------------------------- */
+/* ============================================================
+   TABS  (MTabs – ManageOrders)
+   ============================================================ */
 .tabs-container {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -262,22 +512,43 @@ nav ul li a:hover {
   background: rgba(116, 79, 81, 0.02);
   border-bottom: 1px solid var(--color-border);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;     /* Firefox */
+}
+
+.tabs-header::-webkit-scrollbar {
+  display: none;             /* Chrome / Safari */
 }
 
 .tab-btn {
-  flex: 1;
-  padding: 16px 20px;
+  flex-shrink: 0;            /* never compress below natural width */
+  padding: 12px 14px;
   border: none;
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   text-align: center;
   white-space: nowrap;
   transition: var(--transition-normal);
   border-bottom: 3px solid transparent;
+}
+
+@media (min-width: 576px) {
+  .tab-btn {
+    padding: 14px 18px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) {
+  .tab-btn {
+    flex: 1;
+    padding: 16px 20px;
+    font-size: 14px;
+  }
 }
 
 .tab-btn:hover {
@@ -292,171 +563,36 @@ nav ul li a:hover {
 }
 
 .tab-content {
-  padding: 32px;
+  padding: 16px;
   background: var(--color-bg-card);
   display: flex;
   justify-content: center;
-}
-
-/* --------------------------------------------------------------------MmanageOrders---------------------------------------------------------- */
-.MPage {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  background-color: var(--color-bg-page);
-  font-family: var(--font-body);
-}
-
-.Mpart1 {
-  width: 0;
-  flex-shrink: 0;
-  transition: var(--transition-normal);
-}
-
-.Mpart2 {
-  flex: 1;
   overflow-x: auto;
-  padding: 24px;
-  background-color: var(--color-bg-page);
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
 }
 
-@media (min-width: 992px) {
-  .Mpart1 {
-    width: 280px;
-    /* Reserves space for fixed sidebar on desktop */
-  }
-
-  .Mpart2 {
-    padding: 40px;
-    /* Normal padding, no double offset */
+@media (min-width: 576px) {
+  .tab-content {
+    padding: 24px;
   }
 }
 
-.MOrderCard {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  width: 100%;
-}
-
-/* If Mpart2 has multiple cards directly inside it (ManagerOverview) */
-.Mpart2:has(> .overflow-hidden) {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  align-content: start;
-}
-
-/* Custom styling for compact, horizontal Order Card widgets */
-.Mpart2>div.overflow-hidden,
-.MOrderCard>div {
-  background: var(--color-bg-card) !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: 12px !important;
-  padding: 16px 20px !important;
-  box-shadow: var(--shadow-sm) !important;
-  transition: var(--transition-normal);
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  text-align: left !important;
-  gap: 16px !important;
-  max-width: none !important;
-  flex: none !important;
-}
-
-.Mpart2>div.overflow-hidden:hover,
-.MOrderCard>div:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md) !important;
-  border-color: rgba(116, 79, 81, 0.2) !important;
-}
-
-.Mpart2>div.overflow-hidden figure,
-.MOrderCard>div figure {
-  margin: 0 !important;
-  padding: 0 !important;
-  color: var(--color-primary);
-  background: rgba(116, 79, 81, 0.05);
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.Mpart2>div.overflow-hidden figure svg,
-.MOrderCard>div figure svg {
-  color: var(--color-primary) !important;
-  width: 24px !important;
-  height: 24px !important;
-  margin: 0 !important;
-}
-
-.Mpart2>div.overflow-hidden figure svg[fill="none"],
-.MOrderCard>div figure svg[fill="none"] {
-  stroke: var(--color-primary) !important;
-}
-
-.Mpart2>div.overflow-hidden figure svg:not([fill="none"]),
-.MOrderCard>div figure svg:not([fill="none"]) {
-  fill: var(--color-primary) !important;
-}
-
-.Mpart2>div.overflow-hidden>div,
-.MOrderCard>div>div {
-  display: flex;
-  flex-direction: column;
-  padding: 0 !important;
-}
-
-.Mpart2>div.overflow-hidden h3,
-.MOrderCard>div h3 {
-  font-family: var(--font-body);
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  color: var(--color-text-muted) !important;
-  margin: 0 0 2px 0 !important;
-  text-align: left !important;
-}
-
-.Mpart2>div.overflow-hidden p,
-.MOrderCard>div p {
-  font-family: var(--font-body);
-  font-size: 24px !important;
-  font-weight: 700 !important;
-  color: var(--color-text-title) !important;
-  margin: 0 !important;
-  text-align: left !important;
-}
-
-/* Responsive card grid settings override */
-.MOrderCard>* {
-  flex: unset;
-  max-width: unset;
-}
-
-@media (max-width: 1024px) {
-  .MOrderCard {
-    width: 100%;
+@media (min-width: 768px) {
+  .tab-content {
+    padding: 32px;
   }
 }
 
-/* Dispatch Button */
+/* ============================================================
+   DISPATCH BUTTONS
+   ============================================================ */
 .btn-dispatch {
   background-color: var(--color-primary);
   color: #ffffff;
   border: none;
   border-radius: 6px;
-  padding: 8px 16px;
+  padding: 7px 12px;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(116, 79, 81, 0.15);
@@ -466,6 +602,14 @@ nav ul li a:hover {
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .btn-dispatch {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
 }
 
 .btn-dispatch:hover {
@@ -508,22 +652,9 @@ nav ul li a:hover {
   box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
 }
 
-
-/* Dashboard Side-by-Side Row Layout */
-.dashboard-row {
-  display: flex;
-  gap: 24px;
-  width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .dashboard-row {
-    flex-direction: column;
-    gap: 24px;
-  }
-}
-
-/* ---------------------------------------------------- mPreOrderModal ---------------------------------------------------- */
+/* ============================================================
+   MODAL  (MPreOrderModal)
+   ============================================================ */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -534,10 +665,11 @@ nav ul li a:hover {
   align-items: center;
   z-index: 2000;
   animation: fadeIn 0.25s ease-out;
+  padding: 12px;
 }
 
 .modal-container {
-  width: 90%;
+  width: 100%;
   max-width: 680px;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -547,21 +679,36 @@ nav ul li a:hover {
   flex-direction: column;
   overflow: hidden;
   animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 95vh;
+}
+
+@media (max-width: 480px) {
+  .modal-container {
+    border-radius: 12px;
+    max-height: 100vh;
+  }
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
+  padding: 16px 18px;
   border-bottom: 1px solid var(--color-border);
   background: rgba(116, 79, 81, 0.02);
+}
+
+@media (min-width: 576px) {
+  .modal-header {
+    padding: 20px 24px;
+  }
 }
 
 .modal-title-area {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .modal-badge {
@@ -577,10 +724,16 @@ nav ul li a:hover {
 
 .modal-title-area h3 {
   font-family: var(--font-heading);
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--color-text-title);
   margin: 0;
+}
+
+@media (min-width: 576px) {
+  .modal-title-area h3 {
+    font-size: 20px;
+  }
 }
 
 .modal-close-btn {
@@ -594,6 +747,7 @@ nav ul li a:hover {
   align-items: center;
   justify-content: center;
   transition: var(--transition-normal);
+  flex-shrink: 0;
 }
 
 .modal-close-btn:hover {
@@ -602,17 +756,26 @@ nav ul li a:hover {
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-height: 70vh;
+  gap: 16px;
+  max-height: 65vh;
   overflow-y: auto;
+}
+
+@media (min-width: 576px) {
+  .modal-body {
+    padding: 24px;
+    gap: 20px;
+    max-height: 70vh;
+  }
 }
 
 /* Compact Modal Table Styles */
 .modal-table {
   width: 100%;
+  min-width: 360px;
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--color-border);
@@ -623,20 +786,35 @@ nav ul li a:hover {
 
 .modal-table th,
 .modal-table td {
-  padding: 8px 12px;
-  font-size: 13px;
+  padding: 8px 10px;
+  font-size: 12px;
   text-align: left;
   transition: var(--transition-normal);
+  white-space: nowrap;
+}
+
+@media (min-width: 576px) {
+  .modal-table th,
+  .modal-table td {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 }
 
 .modal-table th {
   background-color: var(--color-primary);
   color: #ffffff;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--color-border);
+}
+
+@media (min-width: 576px) {
+  .modal-table th {
+    font-size: 12px;
+  }
 }
 
 .modal-table td {
@@ -659,13 +837,14 @@ nav ul li a:hover {
 
 .modal-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
-@media (max-width: 600px) {
+@media (min-width: 500px) {
   .modal-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
   }
 }
 
@@ -673,10 +852,16 @@ nav ul li a:hover {
   background: var(--color-bg-page);
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  padding: 18px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+@media (min-width: 576px) {
+  .modal-card-info {
+    padding: 18px;
+  }
 }
 
 .modal-card-info .card-header {
@@ -692,10 +877,16 @@ nav ul li a:hover {
 }
 
 .modal-card-info h4 {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-text-title);
   margin: 0;
+}
+
+@media (min-width: 576px) {
+  .modal-card-info h4 {
+    font-size: 14px;
+  }
 }
 
 .card-content {
@@ -707,19 +898,30 @@ nav ul li a:hover {
 .info-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
+  align-items: flex-start;
+  font-size: 12px;
   line-height: 1.4;
+  gap: 8px;
+}
+
+@media (min-width: 576px) {
+  .info-row {
+    font-size: 13px;
+    align-items: center;
+  }
 }
 
 .info-label {
   color: var(--color-text-muted);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .info-val {
   color: var(--color-text-title);
   font-weight: 600;
+  text-align: right;
+  word-break: break-word;
 }
 
 .highlight-val {
@@ -749,17 +951,19 @@ nav ul li a:hover {
   background: linear-gradient(135deg, rgba(116, 79, 81, 0.08) 0%, rgba(116, 79, 81, 0.02) 100%);
   border: 1px solid rgba(116, 79, 81, 0.15);
   border-radius: 12px;
-  padding: 16px 24px;
+  padding: 14px 16px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-@media (max-width: 480px) {
+@media (min-width: 480px) {
   .modal-summary-banner {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
   }
 }
 
@@ -788,9 +992,15 @@ nav ul li a:hover {
 }
 
 .banner-val {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-primary);
+}
+
+@media (min-width: 576px) {
+  .banner-val {
+    font-size: 18px;
+  }
 }
 
 .banner-val.status-badge {
@@ -804,11 +1014,19 @@ nav ul li a:hover {
 
 .modal-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 20px 24px;
+  gap: 10px;
+  padding: 14px 16px;
   border-top: 1px solid var(--color-border);
   background: rgba(116, 79, 81, 0.02);
+}
+
+@media (min-width: 576px) {
+  .modal-footer {
+    gap: 12px;
+    padding: 20px 24px;
+  }
 }
 
 .btn-cancel {
@@ -816,12 +1034,19 @@ nav ul li a:hover {
   color: var(--color-text-muted);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 10px 20px;
+  padding: 9px 18px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-normal);
+}
+
+@media (min-width: 576px) {
+  .btn-cancel {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
 }
 
 .btn-cancel:hover {
@@ -835,13 +1060,20 @@ nav ul li a:hover {
   color: #ffffff;
   border: none;
   border-radius: 8px;
-  padding: 10px 20px;
+  padding: 9px 18px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-normal);
   box-shadow: 0 4px 12px rgba(116, 79, 81, 0.15);
+}
+
+@media (min-width: 576px) {
+  .btn-approve-action {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
 }
 
 .btn-approve-action:hover {
@@ -854,29 +1086,29 @@ nav ul li a:hover {
   transform: translateY(0);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-/* ---------------------------------------------------- subNavbarM ---------------------------------------------------- */
+/* ============================================================
+   SUB NAVBAR  (ManageProducts filter bar)
+   ============================================================ */
 .sub-navbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 4px;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 6px 8px;
   box-shadow: var(--shadow-sm);
-  width: fit-content;
-  overflow: visible;
+  width: 100%;
   font-family: var(--font-body);
+}
+
+@media (min-width: 640px) {
+  .sub-navbar {
+    flex-wrap: nowrap;
+    width: fit-content;
+    overflow: visible;
+  }
 }
 
 .sub-navbar-btn {
@@ -884,16 +1116,24 @@ nav ul li a:hover {
   border: none;
   color: var(--color-text-muted);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 8px 16px;
-  min-width: 110px;
+  padding: 7px 12px;
+  min-width: 80px;
   width: auto;
   text-align: center;
   border-radius: 8px;
   cursor: pointer;
   transition: var(--transition-normal);
   white-space: nowrap;
+}
+
+@media (min-width: 576px) {
+  .sub-navbar-btn {
+    font-size: 14px;
+    padding: 8px 16px;
+    min-width: 110px;
+  }
 }
 
 .sub-navbar-btn:hover {
@@ -907,10 +1147,16 @@ nav ul li a:hover {
 }
 
 .sub-navbar-head-dresses {
-  margin-left: 16px;
+  margin-left: 8px;
 }
 
-/* Dropdown Menu Styles */
+@media (min-width: 640px) {
+  .sub-navbar-head-dresses {
+    margin-left: 16px;
+  }
+}
+
+/* ---- Dropdown Menu ---- */
 .dropdown-menu {
   position: absolute;
   top: 100%;
@@ -925,7 +1171,7 @@ nav ul li a:hover {
   flex-direction: column;
   padding: 4px;
   margin-top: 6px;
-  min-width: 160px;
+  min-width: 150px;
 }
 
 .dropdown-item {
@@ -954,6 +1200,41 @@ nav ul li a:hover {
   font-weight: 600;
 }
 
+/* ============================================================
+   MISC
+   ============================================================ */
+.AMPBody {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
 
+.AMPTopic {
+  color: var(--color-text-title);
+  font-family: var(--font-body);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
 
-
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
+}

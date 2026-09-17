@@ -81,6 +81,7 @@ export default function MCompletedOrderTable(props) {
 
     // ---------------- Render ----------------
     return (
+        <div className="table-scroll-wrapper">
         <table className="MPtable">
             <thead>
                 <tr>
@@ -120,5 +121,6 @@ export default function MCompletedOrderTable(props) {
                 )}
             </tbody>
         </table>
+        </div>
     );
 }

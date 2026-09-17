@@ -220,10 +220,10 @@ const updateProductPrice = async (productId, newPrice) => {
                 <div className="Mpart1">
                     <SideNavigation />
                 </div>
-                <div className="Mpart2" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div className="Mpart2">
 
                     <div className="flex flex-col gap-4 border-b border-[#e5e4e7] pb-6">
-                        <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-3">
                             <SearchBarM
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
