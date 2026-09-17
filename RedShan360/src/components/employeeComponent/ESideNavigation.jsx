@@ -1,23 +1,20 @@
-import React from 'react';
-import { ClipboardList, LogOut } from 'lucide-react';
+import React, { useState } from 'react';
+import { ClipboardList, LogOut, Menu, X } from 'lucide-react';
 import '../../css/employee.css';
 
 // ---------------- EMPLOYEE SIDE NAVIGATION ----------------
 export default function ESideNavigation() {
-    console.log('[ESideNavigation] Component rendered (no props)');
     const currentPath = window.location.pathname;
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // ---------------- LOGGED-IN EMPLOYEE ----------------
     let loggedInUser = {};
-
     try {
         loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
     } catch (error) {
         loggedInUser = {};
     }
 
-    // ---------------- EMPLOYEE NAME ----------------
-    // Supports common field names that may exist in the login response
     const employeeName =
         loggedInUser?.employeeName ||
         loggedInUser?.name ||
@@ -26,56 +23,83 @@ export default function ESideNavigation() {
         'Employee';
 
     return (
-        <aside className="employee-sidebar">
+        <>
+            {/* Hamburger button — visible only on mobile/tablet */}
+            <button
+                className="e-hamburger-btn"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open menu"
+            >
+                <Menu size={24} />
+            </button>
 
-            <div className="profile">
-                <h3>Employee Dashboard</h3>
-                <h3>Welcome , {employeeName}</h3>
-            </div>
+            {/* Overlay backdrop — closes sidebar when clicked */}
+            {sidebarOpen && (
+                <div
+                    className="e-sidebar-overlay"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
 
-            <nav>
-                <ul>
+            <aside className={`employee-sidebar${sidebarOpen ? ' e-sidebar-open' : ''}`}>
 
-                    <li>
-                        <a
-                            href="/employeeDashboard"
-                            className={
-                                currentPath === '/employeeDashboard' ||
-                                currentPath === '/employeeDashboard/'
-                                    ? 'active'
-                                    : ''
-                            }
-                        >
-                            <ClipboardList size={22} color="rgb(68, 43, 45)" />
-                            My Normal Order Task
-                        </a>
-                    </li>
+                {/* Close button inside sidebar — mobile only */}
+                <button
+                    className="e-sidebar-close-btn"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label="Close menu"
+                >
+                    <X size={20} />
+                </button>
 
-                    <li>
-                        <a
-                            href="/eCustomizedProducts"
-                            className={
-                                currentPath === '/eCustomizedProducts' ||
-                                currentPath === '/eCustomizedProducts/'
-                                    ? 'active'
-                                    : ''
-                            }
-                        >
-                            <ClipboardList size={22} color="rgb(68, 43, 45)" />
-                            My Customized Order Task
-                        </a>
-                    </li>
+                <div className="profile">
+                    <h3>Employee Dashboard</h3>
+                    <h3>Welcome, {employeeName}</h3>
+                </div>
 
-                </ul>
-            </nav>
+                <nav>
+                    <ul>
+                        <li>
+                            <a
+                                href="/employeeDashboard"
+                                className={
+                                    currentPath === '/employeeDashboard' ||
+                                    currentPath === '/employeeDashboard/'
+                                        ? 'active'
+                                        : ''
+                                }
+                                onClick={() => setSidebarOpen(false)}
+                            >
+                                <ClipboardList size={22} color="rgb(68, 43, 45)" />
+                                My Normal Order Task
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/eCustomizedProducts"
+                                className={
+                                    currentPath === '/eCustomizedProducts' ||
+                                    currentPath === '/eCustomizedProducts/'
+                                        ? 'active'
+                                        : ''
+                                }
+                                onClick={() => setSidebarOpen(false)}
+                            >
+                                <ClipboardList size={22} color="rgb(68, 43, 45)" />
+                                My Customized Order Task
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
 
-            <div className="logout">
-                <a href="/login">
-                    <LogOut size={22} color="rgb(68, 43, 45)" />
-                    Logout
-                </a>
-            </div>
+                <div className="logout">
+                    <a href="/login">
+                        <LogOut size={22} color="rgb(68, 43, 45)" />
+                        Logout
+                    </a>
+                </div>
 
-        </aside>
+            </aside>
+        </>
     );
 }

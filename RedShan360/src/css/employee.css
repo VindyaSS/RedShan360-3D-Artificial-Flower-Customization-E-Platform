@@ -860,3 +860,244 @@
   color: #991b1b;
   border: 1px solid #fca5a5;
 }
+
+/* ==============================================
+   RESPONSIVE — Hamburger & Sidebar Overlay
+   ============================================== */
+
+/* Hamburger button — only shown on mobile/tablet */
+.e-hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1100;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-normal);
+}
+
+.e-hamburger-btn:hover {
+  background: rgba(116, 79, 81, 0.06);
+  border-color: var(--color-primary);
+}
+
+@media (max-width: 991px) {
+  .e-hamburger-btn {
+    display: flex;
+  }
+}
+
+/* Sidebar overlay backdrop */
+.e-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+  animation: fadeIn 0.2s ease;
+}
+
+@media (max-width: 991px) {
+  .e-sidebar-overlay {
+    display: block;
+  }
+}
+
+/* Open state for mobile sidebar */
+.employee-sidebar.e-sidebar-open {
+  left: 0 !important;
+}
+
+/* Close button inside sidebar */
+.e-sidebar-close-btn {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(116, 79, 81, 0.06);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--color-primary);
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-normal);
+}
+
+.e-sidebar-close-btn:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+@media (max-width: 991px) {
+  .e-sidebar-close-btn {
+    display: flex;
+  }
+}
+
+/* ==============================================
+   RESPONSIVE — Page Layout
+   ============================================== */
+
+/* Mobile: no sidebar width, add top padding for hamburger */
+@media (max-width: 991px) {
+  .Epart1 {
+    width: 0 !important;
+  }
+
+  .Epart2 {
+    padding: 70px 16px 24px 16px;
+    gap: 20px;
+    overflow-x: hidden;
+  }
+
+  .dashboard-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Tablet */
+@media (min-width: 600px) and (max-width: 991px) {
+  .Epart2 {
+    padding: 70px 24px 32px 24px;
+  }
+}
+
+/* ==============================================
+   RESPONSIVE — Tables
+   ============================================== */
+
+/* Always allow horizontal scroll on table containers */
+.employee-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  .employee-main-table th,
+  .employee-table th {
+    padding: 10px 12px;
+    font-size: 11.5px;
+  }
+
+  .employee-main-table td,
+  .employee-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .employee-sub-table th,
+  .employee-sub-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .employee-table-actions-cell {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .employee-table-actions-cell .btn-employee {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .employee-table-thumbnail {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* ==============================================
+   RESPONSIVE — tabs-container card padding
+   ============================================== */
+
+@media (max-width: 640px) {
+  .tabs-container {
+    border-radius: 10px;
+  }
+
+  /* Section headers inside pages */
+  .Epart2 h3 {
+    font-size: 15px !important;
+  }
+}
+
+/* ==============================================
+   RESPONSIVE — Item modal
+   ============================================== */
+
+@media (max-width: 480px) {
+  .blog-card {
+    width: 95%;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .blog-image-container {
+    height: 180px;
+  }
+
+  .blog-content {
+    padding: 16px;
+  }
+
+  .blog-title {
+    font-size: 17px;
+  }
+
+  .blog-author-row {
+    grid-template-columns: 120px 1fr;
+    font-size: 12.5px;
+  }
+}
+
+/* ==============================================
+   RESPONSIVE — Employee card grid
+   ============================================== */
+
+@media (max-width: 768px) {
+  .employee-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .employee-card-image-container {
+    height: 200px;
+  }
+
+  .employee-card-title {
+    font-size: 17px;
+  }
+
+  .employee-card-actions {
+    flex-wrap: wrap;
+  }
+
+  .btn-employee {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .employee-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-card-image-container {
+    height: 180px;
+  }
+}
