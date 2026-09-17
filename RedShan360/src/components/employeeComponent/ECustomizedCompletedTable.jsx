@@ -165,7 +165,6 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                               <th>Item Name</th>
                               <th>Flower Type</th>
                               <th>Number of Flowers</th>
-                              <th>Bouquet Style</th>
                               <th>Status</th>
                             </tr>
                           </thead>
@@ -235,13 +234,6 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                                     {item.numberOfFlowers ??
                                       item.quantity ??
                                       0}
-                                  </td>
-
-
-                                  {/* BOUQUET STYLE */}
-                                  <td>
-                                    {item.bouquetStyle ||
-                                      'N/A'}
                                   </td>
 
 
