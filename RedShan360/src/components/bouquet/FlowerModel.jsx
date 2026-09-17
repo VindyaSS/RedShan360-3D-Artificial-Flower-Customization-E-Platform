@@ -215,14 +215,14 @@ export default function FlowerModel({
     return new THREE.Euler(0, 0, 0);
   }, [stemId]);
 
-  // Adjust model scale depending on natural flower size
+  // Adjust model scale depending on natural flower size (~12-14% fuller bloom scale)
   const modelScale = useMemo(() => {
-    const defaultScale = 0.35;
-    if (stemId === '8') return 0.4;  // Red Rose
-    if (stemId === '10') return 0.22; // Pink Lily (heavy geometry, make compact)
-    if (stemId === '7') return 0.28;  // Lily Headdress
-    if (stemId === '2' || stemId === '5') return 0.35; // Chrysanthemums
-    if (stemId === '3') return 0.35;  // Carnation
+    const defaultScale = 0.50;
+    if (stemId === '8') return 0.56;  // Red Rose (+12%)
+    if (stemId === '10') return 0.32; // Pink Lily (+14%)
+    if (stemId === '7') return 0.40;  // Lily Headdress (+14%)
+    if (stemId === '2' || stemId === '5') return 0.50; // Chrysanthemums (+14%)
+    if (stemId === '3') return 0.50;  // Carnation (+14%)
     return defaultScale;
   }, [stemId]);
 
@@ -256,9 +256,9 @@ export default function FlowerModel({
         groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, targetRot.z, delta * 6.5);
       }
 
-      // 2. Dynamic stem scaling to connect throat [0, 2.4, 0] to the sliding flower head position
+      // 2. Dynamic stem scaling to connect central throat [0, 2.35, 0] to the flower head position
       if (stemRef.current) {
-        const pStart = new THREE.Vector3(0, 2.4, 0);
+        const pStart = new THREE.Vector3(0, 2.35, 0);
         const pEnd = groupRef.current.position;
         const direction = new THREE.Vector3().subVectors(pEnd, pStart);
         const len = direction.length();
@@ -270,7 +270,7 @@ export default function FlowerModel({
 
         stemRef.current.position.copy(mid);
         stemRef.current.quaternion.copy(quat);
-        stemRef.current.scale.set(1, len, 1); // Scale cylinder Y-axis to match len
+        stemRef.current.scale.set(1, Math.max(0.1, len), 1);
       }
     }
   });
@@ -290,10 +290,10 @@ export default function FlowerModel({
 
   return (
     <group>
-      {/* 1. Dynamic Stem Cylinder (scaled in useFrame) */}
+      {/* 1. Dynamic Stem Cylinder (converging to narrow central throat) */}
       <mesh ref={stemRef}>
-        <cylinderGeometry args={[0.035, 0.035 * 1.3, 1.0, 8]} />
-        <meshStandardMaterial color="#57695a" roughness={0.9} />
+        <cylinderGeometry args={[0.025, 0.032, 1.0, 8]} />
+        <meshStandardMaterial color="#465a4a" roughness={0.85} />
       </mesh>
 
       {/* 2. Flower Head / Foliage Group */}
@@ -308,16 +308,16 @@ export default function FlowerModel({
         {isProcedural ? (
           // Render procedural elements
           isEucalyptus ? (
-            <EucalyptusModel scale={0.7} />
+            <EucalyptusModel scale={0.95} />
           ) : isFern ? (
-            <FernModel scale={0.8} />
+            <FernModel scale={1.05} />
           ) : (
             // Fallback lightweight daisy shape if model doesn't exist
-            <FallbackFlowerMesh color={colorHex} scale={1.2} />
+            <FallbackFlowerMesh color={colorHex} scale={1.7} />
           )
         ) : (
           // Render cached GLB clone wrapped in ErrorBoundary with unique url key
-          <GLBErrorBoundary key={glbUrl} url={glbUrl} fallback={<FallbackFlowerMesh color={colorHex} scale={1.2} />}>
+          <GLBErrorBoundary key={glbUrl} url={glbUrl} fallback={<FallbackFlowerMesh color={colorHex} scale={1.7} />}>
             <DynamicGLBFlower url={glbUrl} scale={modelScale} rotationOffset={rotationOffset} />
           </GLBErrorBoundary>
         )}
