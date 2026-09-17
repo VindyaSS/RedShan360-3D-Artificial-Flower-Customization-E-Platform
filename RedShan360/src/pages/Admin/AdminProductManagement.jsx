@@ -98,7 +98,7 @@ function AdminProductManagement() {
     if (prodId === 1) return roseImg;
     if (prodId === 2) return orchidImg;
     if (prodId === 3) return peonyImg;
-    return '/images/placeholder.png';
+    return roseImg;
   };
 
   // Helper for category name mapping
@@ -558,6 +558,10 @@ function AdminProductManagement() {
                         src={editForm.imagePreview || getProductImage(editingProduct)}
                         alt={editingProduct.productName}
                         className="edit-image-preview"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = roseImg;
+                        }}
                       />
                       <div>
                         <label htmlFor="edit-image-input" className="upload-btn-label">
@@ -1007,6 +1011,10 @@ function AdminProductManagement() {
                                 src={getProductImage(prod)}
                                 alt={prod.productName}
                                 className="product-thumb"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = roseImg;
+                                }}
                               />
                             </td>
                             <td className="name-cell">
@@ -1062,6 +1070,10 @@ function AdminProductManagement() {
                             src={getProductImage(prod)}
                             alt={prod.productName}
                             className="card-thumb"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = roseImg;
+                            }}
                           />
                           <span className={`status-pill-absolute ${status.key}`}>
                             {status.label}
