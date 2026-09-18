@@ -145,6 +145,63 @@
   animation: spin 1s infinite linear;
 }
 
+.notification-number-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: #faf7f5;
+  border-radius: 8px;
+  margin: 8px 0 16px 0;
+  border-left: 3px solid #8a6365;
+}
+
+.threshold-number-input {
+  width: 72px;
+  padding: 8px 12px;
+  border: 1px solid #dcd4d0;
+  border-radius: 6px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d2d2d;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.threshold-number-input:focus {
+  border-color: #8a6365;
+  box-shadow: 0 0 0 2px rgba(138, 99, 101, 0.15);
+}
+
+.notification-alert-box {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.notification-alert-box.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.notification-alert-box.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 480px) {
   .notification-switch-row {
     align-items: flex-start;
@@ -153,3 +210,4 @@
     width: 100%;
   }
 }
+
