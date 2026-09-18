@@ -904,8 +904,701 @@
   margin: 10px 0 6px 0;
 }
 
-.empty-products-view p {
+/* ===== EXPORT PRODUCT REPORT BUTTON ===== */
+.export-report-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #744f51 0%, #5c3b3e 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(116, 79, 81, 0.25);
+}
+
+.export-report-btn:hover {
+  background: linear-gradient(135deg, #5c3b3e 0%, #462b2d 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(116, 79, 81, 0.35);
+}
+
+.export-report-btn:active {
+  transform: translateY(0);
+}
+
+/* ===== EXECUTIVE BUSINESS REPORT MODAL ===== */
+.report-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: rgba(15, 10, 11, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.report-modal-container {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 1240px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e5e4e7;
+  overflow: hidden;
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.report-modal-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid #eae6e5;
+  background: linear-gradient(to right, #faf8f8, #f5f0ef);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.report-header-titles h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.report-header-titles p {
   font-size: 13px;
+  color: #666;
   margin: 0;
 }
+
+.report-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-report-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #dcd5d4;
+  background: #ffffff;
+  color: #444;
+}
+
+.btn-report-action:hover {
+  background: #f4efee;
+  color: #111;
+}
+
+.btn-report-action.primary {
+  background: #744f51;
+  color: #ffffff;
+  border-color: #744f51;
+}
+
+.btn-report-action.primary:hover {
+  background: #5c3b3e;
+}
+
+.report-modal-body {
+  padding: 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Report Summary Grid */
+.report-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.report-summary-card {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background-color: #fdfaf9;
+  border: 1px solid #f0e8e7;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-summary-card h6 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.report-summary-card h4 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2d2d2d;
+}
+
+.report-summary-card p {
+  margin: 0;
+  font-size: 11px;
+  color: #666;
+}
+
+/* Executive Insights Grid */
+.report-insights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.insight-box {
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid #eee8e7;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.insight-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.insight-box-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d2d2d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.insight-box-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+.insight-box-badge.high {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.insight-box-badge.low {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.insight-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background-color: #faf7f7;
+  font-size: 13px;
+  transition: background-color 0.2s;
+}
+
+.insight-item-row:hover {
+  background-color: #f3eceb;
+}
+
+.insight-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rank-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.rank-badge.rank-top {
+  background-color: #744f51;
+  color: #ffffff;
+}
+
+.rank-badge.rank-low {
+  background-color: #e0d5d4;
+  color: #555555;
+}
+
+.insight-product-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.insight-item-name {
+  font-weight: 600;
+  color: #2d2d2d;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.insight-item-cat {
+  font-size: 11px;
+  color: #888;
+}
+
+.insight-item-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 13px;
+  color: #2e7d32;
+}
+
+.insight-item-stat.low {
+  color: #c62828;
+}
+
+.stat-revenue {
+  font-size: 11px;
+  color: #777;
+  font-weight: 500;
+}
+
+/* Report Table Heading Block */
+.report-table-heading-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #faf7f7 0%, #f4efee 100%);
+  border: 1px solid #eae6e5;
+  border-radius: 14px;
+  margin-top: 10px;
+}
+
+.report-table-heading-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-table-heading-icon {
+  color: #744f51;
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(116, 79, 81, 0.15);
+  width: 36px;
+  height: 36px;
+}
+
+.report-table-title {
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0 0 2px 0;
+}
+
+.report-table-subtitle {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+.report-table-heading-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #744f51;
+  background-color: rgba(116, 79, 81, 0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(116, 79, 81, 0.2);
+}
+
+/* Report Main Table */
+.report-table-wrapper {
+  border: 1px solid #eae6e5;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.report-table-custom {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report-table-custom th {
+  background: #f7f3f2;
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #666;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #eae6e5;
+  text-transform: uppercase;
+}
+
+.report-table-custom td {
+  padding: 14px;
+  font-size: 13px;
+  color: #333;
+  border-bottom: 1px solid #f3eeed;
+  vertical-align: middle;
+}
+
+.report-table-custom tr:hover td {
+  background-color: #fdfaf9;
+}
+
+/* Category Section Header Rows */
+.category-group-header-row td {
+  background: #f5f0ef !important;
+  padding: 10px 16px !important;
+  border-bottom: 1px solid #e0d8d7 !important;
+  border-top: 2px solid #dfd5d4 !important;
+}
+
+.category-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cat-header-title {
+  font-family: "Playfair Display", serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #744f51;
+  letter-spacing: 0.5px;
+}
+
+.cat-header-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #555;
+  background-color: #ffffff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  border: 1px solid #dcd5d4;
+}
+
+/* Badges & Pills */
+.report-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+
+.report-badge.high-demand {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.report-badge.mod-demand {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.report-badge.low-demand {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
+.report-badge.alert-lowstock {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.report-badge.alert-overstock {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.report-badge.rec-increase {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+.report-badge.rec-halt {
+  background-color: #ffebee;
+  color: #b71c1c;
+}
+
+.report-badge.rec-steady {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+/* Printable PDF Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 10mm 10mm 10mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #printable-business-report,
+  #printable-business-report * {
+    visibility: visible !important;
+  }
+
+  .report-modal-overlay {
+    position: static !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    inset: auto !important;
+    backdrop-filter: none !important;
+  }
+
+  .report-modal-container {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  .report-modal-header {
+    background: #744f51 !important;
+    color: #ffffff !important;
+    padding: 16px 20px !important;
+    border-radius: 8px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .report-header-titles h2 {
+    color: #ffffff !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .report-header-titles p {
+    color: #f0e6e6 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+  }
+
+  .report-header-actions {
+    display: none !important;
+  }
+
+  .report-modal-body {
+    padding: 0 !important;
+    overflow: visible !important;
+    max-height: none !important;
+    display: block !important;
+  }
+
+  .report-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px !important;
+    margin-bottom: 18px !important;
+    page-break-inside: avoid !important;
+  }
+
+  .report-summary-card {
+    background-color: #fdfaf9 !important;
+    border: 1px solid #e2d7d6 !important;
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+  }
+
+  .report-summary-card h6 {
+    color: #666666 !important;
+    font-size: 10px !important;
+  }
+
+  .report-summary-card h4 {
+    color: #2d2d2d !important;
+    font-size: 18px !important;
+  }
+
+  /* Top 5 Max & Min Selling Products Cards in PDF */
+  .report-insights-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+    margin-bottom: 20px !important;
+    page-break-inside: avoid !important;
+  }
+
+  .insight-box {
+    border: 1.5px solid #dcd0cf !important;
+    background-color: #ffffff !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+
+  .insight-box-header h4 {
+    font-size: 14px !important;
+    color: #1a1a1a !important;
+  }
+
+  .insight-item-row {
+    background-color: #f9f5f5 !important;
+    border: 1px solid #ebdada !important;
+    margin-bottom: 4px !important;
+    padding: 6px 10px !important;
+  }
+
+  .rank-badge.rank-top {
+    background-color: #744f51 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+  }
+
+  .rank-badge.rank-low {
+    background-color: #cca4a6 !important;
+    color: #333333 !important;
+    font-weight: 800 !important;
+  }
+
+  .insight-item-name {
+    color: #1a1a1a !important;
+    font-weight: 700 !important;
+  }
+
+  .report-table-heading-container {
+    background: #f4efee !important;
+    border: 1.5px solid #dcd0cf !important;
+    margin-bottom: 12px !important;
+    padding: 12px 16px !important;
+    page-break-after: avoid !important;
+  }
+
+  .report-table-title {
+    color: #2d2d2d !important;
+    font-size: 16px !important;
+  }
+
+  .report-table-subtitle {
+    color: #555555 !important;
+    font-size: 11px !important;
+  }
+
+  .report-table-heading-badge {
+    background-color: #744f51 !important;
+    color: #ffffff !important;
+    border: none !important;
+  }
+
+  /* Main Report Table in PDF */
+  .report-table-wrapper {
+    overflow: visible !important;
+    border: 1px solid #dcd0cf !important;
+    border-radius: 8px !important;
+  }
+
+  .report-table-custom th {
+    background-color: #5c3b3e !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    padding: 8px 10px !important;
+  }
+
+  .report-table-custom td {
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+    color: #222222 !important;
+    border-bottom: 1px solid #ede4e3 !important;
+  }
+
+  .category-group-header-row td {
+    background-color: #e8dedd !important;
+    color: #5c3b3e !important;
+    font-weight: bold !important;
+    page-break-after: avoid !important;
+  }
+
+  .cat-header-title {
+    color: #5c3b3e !important;
+    font-size: 13px !important;
+  }
+
+  .cat-header-count {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #bbb0af !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .report-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .report-insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .report-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 

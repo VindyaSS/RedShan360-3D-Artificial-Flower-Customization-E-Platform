@@ -8,4 +8,3 @@ export const BOUQUET_STYLE_CONFIG = {
 };
 
 export const BOUQUET_STYLE_OPTIONS = Object.values(BOUQUET_STYLE_CONFIG);
-

@@ -1,8 +1,4 @@
-/**
- * AdminSettingsService.js
- * Responsible for managing the administrator settings (Profile, Password, Notifications).
- * Simulates backend queries using localStorage.
- */
+import api from "./api";
 
 const STORAGE_KEYS = {
   PROFILE: "redshan360_admin_profile",
@@ -24,6 +20,7 @@ const DEFAULT_NOTIFICATIONS = {
   newOrderAlerts: true,
   lowStockAlerts: true,
   monthlyReportEmails: false,
+  lowStockThreshold: 5,
 };
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -94,20 +91,37 @@ export const AdminSettingsService = {
   },
 
   /**
-   * Retrieves notification settings.
+   * Retrieves notification settings from backend database.
    */
   getNotifications: async () => {
-    await delay(250);
+    try {
+      const response = await api.get("/api/admin/settings/notifications");
+      if (response.data) {
+        localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(response.data));
+        return response.data;
+      }
+    } catch (err) {
+      console.warn("Backend notification fetch failed, falling back to local storage:", err);
+    }
     const data = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
     return data ? JSON.parse(data) : { ...DEFAULT_NOTIFICATIONS };
   },
 
   /**
-   * Updates notification settings.
+   * Updates notification settings in backend database.
    */
   updateNotifications: async (notificationPrefs) => {
-    await delay(400);
+    try {
+      const response = await api.put("/api/admin/settings/notifications", notificationPrefs);
+      if (response.data && response.data.success) {
+        localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(response.data.data || notificationPrefs));
+        return response.data;
+      }
+    } catch (err) {
+      console.warn("Backend notification update failed, falling back to local storage:", err);
+    }
     localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notificationPrefs));
     return { success: true, message: "Notification preferences saved." };
   }
 };
+

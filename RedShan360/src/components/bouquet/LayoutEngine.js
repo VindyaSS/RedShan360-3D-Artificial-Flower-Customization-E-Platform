@@ -390,5 +390,3 @@ export function arrangeBouquet(flowers, styleOrOptions = 'classic-dome', stemsDa
     bouquetStyle: bStyle
   }, 4);
 }
-
-
