@@ -163,8 +163,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                             <tr>
                               <th>Custom ID</th>
                               <th>Item Name</th>
-                              <th>Flower Type</th>
-                              <th>Number of Flowers</th>
+                              <th>Flowers & Quantities</th>
                               <th>Status</th>
                             </tr>
                           </thead>
@@ -218,22 +217,19 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                                   </td>
 
 
-                                  {/* FLOWER TYPE */}
+                                  {/* FLOWERS & QUANTITIES LINE BY LINE */}
                                   <td>
-                                    {item.flowerType ||
-                                      'N/A'}
-                                  </td>
-
-
-                                  {/* NUMBER OF FLOWERS */}
-                                  <td
-                                    style={{
-                                      fontWeight: '600',
-                                    }}
-                                  >
-                                    {item.numberOfFlowers ??
-                                      item.quantity ??
-                                      0}
+                                    {item.flowerQuantities && Object.keys(item.flowerQuantities).length > 0 ? (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        {Object.entries(item.flowerQuantities).map(([flowerName, qty]) => (
+                                          <span key={flowerName} style={{ fontSize: '13px', lineHeight: '1.4' }}>
+                                            <span style={{ fontWeight: '600' }}>{flowerName}</span> : {qty}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <span style={{ color: '#888' }}>-</span>
+                                    )}
                                   </td>
 
 
