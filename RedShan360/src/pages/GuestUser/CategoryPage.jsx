@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import { Star, Heart } from 'lucide-react';
 import { products } from '../../data/products';
 import api, { cartApi } from '../../services/api';
+import { getProductImageUrl } from '../../utils/imageHelper';
 
 const CategoryPage = () => {
   const navigate = useNavigate();
@@ -139,101 +140,69 @@ const CategoryPage = () => {
 
   const categoryDetails = getCategoryDetails(slug);
 
-  // Reusable function to load images dynamically using import.meta.glob
-  const loadImages = (folderPath) => {
-    // Eager load all images in the bouquets subdirectories
-    const globPattern = import.meta.glob('../../assets/images/bouquets/**/*.{png,jpg,jpeg,PNG,JPG,JPEG}', { eager: true });
-    const matchingImages = [];
-    const normalizedFolder = folderPath.toLowerCase().replace(/\\/g, '/');
+  const [dbProducts, setDbProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
-    let idx = 1000;
-    for (const path in globPattern) {
-      const normalizedPath = path.toLowerCase();
-      if (normalizedPath.includes(normalizedFolder)) {
-        const url = globPattern[path].default || globPattern[path];
-        const filename = path.split('/').pop();
-        const nameWithoutExt = filename.replace(/\.[^/.]+$/, "");
+  // Fetch real category products from backend API
+  useEffect(() => {
+    const fetchCategoryProducts = async () => {
+      setLoadingProducts(true);
+      const categoryIdMap = {
+        'bouquets': 1,
+        'head-dresses': 2,
+        'individual-flowers': 3
+      };
+      const catId = categoryIdMap[slug];
 
-        // Clean name (e.g. lilyBoquet.jpg -> Lily Boquet)
-        const cleanName = nameWithoutExt
-          .replace(/[-_]/g, " ")
-          .replace(/([A-Z])/g, " $1")
-          .trim();
-        const displayName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+      try {
+        let endpoint = '/api/products';
+        if (catId) {
+          endpoint = `/api/products/category/${catId}`;
+        }
+        const response = await api.get(endpoint);
+        let fetchedItems = response.data || [];
 
-        // Try to find a matching product in static products to retain description/pricing
-        const staticMatch = products.find(p => {
-          const pTitle = p.title.toLowerCase().replace(/[-_]/g, " ");
-          const pNameLower = displayName.toLowerCase();
-          return pTitle.includes(pNameLower) || pNameLower.includes(pTitle);
-        });
-
-        if (staticMatch) {
-          matchingImages.push({
-            ...staticMatch,
-            id: staticMatch.id,
-            image: url,
-            title: displayName,
+        // Filter by active subcategory if selected
+        if (activeSubcategory) {
+          fetchedItems = fetchedItems.filter((p) => {
+            const subName = (p.subCategoryName || '').toLowerCase();
+            return subName.includes(activeSubcategory.toLowerCase());
           });
-        } else {
-          matchingImages.push({
-            id: idx++,
-            title: displayName,
-            subtitle: 'Premium Bouquet Collection',
-            price: 'Rs 12000.00',
-            numericPrice: 12000,
+        }
+
+        const mapped = fetchedItems.map((p) => {
+          const numPrice = Number(p.price) || 0;
+          return {
+            productId: p.productId,
+            id: p.productId,
+            title: p.productName || 'Unnamed Arrangement',
+            productName: p.productName || 'Unnamed Arrangement',
+            subtitle: p.subCategoryName ? `${p.categoryName || ''} • ${p.subCategoryName}` : (p.categoryName || ''),
+            price: `Rs ${numPrice.toFixed(2)}`,
+            numericPrice: numPrice,
             rating: 4.8,
             reviewCount: 15,
-            image: url,
-            colors: [{ name: 'Pastel Pink', hex: '#f5ccd4' }],
-            isDynamic: true
-          });
-        }
+            imageUrl: p.imageUrl,
+            image: getProductImageUrl(p.imageUrl),
+            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 10,
+            categoryName: p.categoryName || '',
+            subCategoryName: p.subCategoryName || ''
+          };
+        });
+
+        setDbProducts(mapped);
+      } catch (err) {
+        console.error('Error fetching category products from backend:', err);
+        setDbProducts([]);
+      } finally {
+        setLoadingProducts(false);
       }
-    }
-    return matchingImages;
-  };
+    };
 
-  // Filter products belonging to selected category and subcategory
-  const filteredProducts = products.filter((product) => {
-    switch (slug) {
-      case 'bouquets':
-        if (product.type !== 'bouquet') return false;
-        if (activeSubcategory) {
-          return product.subcategory === activeSubcategory;
-        }
-        return true;
-      case 'head-dresses':
-        if (product.type !== 'head-dress') return false;
-        if (activeSubcategory) {
-          return product.subcategory === activeSubcategory;
-        }
-        return true;
-      case 'wedding-collections':
-        return (product.category === 'velvet' || product.type === 'centerpiece') && product.type !== 'single-stem';
-      case 'individual-flowers':
-        if (product.type !== 'single-stem') return false;
-        if (activeSubcategory) {
-          return product.subcategory === activeSubcategory;
-        }
-        return true;
-      default:
-        return false;
-    }
-  });
+    fetchCategoryProducts();
+  }, [slug, activeSubcategory]);
 
-  const getDisplayProducts = () => {
-    if (slug === 'bouquets') {
-      if (activeSubcategory) {
-        return loadImages(`bouquets/${activeSubcategory}`);
-      } else {
-        return loadImages('bouquets');
-      }
-    }
-    return filteredProducts;
-  };
-
-  const displayProducts = getDisplayProducts();
+  const displayProducts = dbProducts;
 
   const handleAddToCart = async (product) => {
     const savedUser = localStorage.getItem('user');
@@ -250,9 +219,9 @@ const CategoryPage = () => {
       return;
     }
 
-    const defaultColor = product.colors?.[0]?.name || 'Default';
+    const defaultColor = 'Default';
     try {
-      await cartApi.addToCart(product.id, 1, defaultColor);
+      await cartApi.addToCart(product.productId, 1, defaultColor);
       window.dispatchEvent(new Event('cart-updated'));
       window.dispatchEvent(new Event('open-cart'));
     } catch (error) {
@@ -404,7 +373,12 @@ const CategoryPage = () => {
         )}
 
         {/* Filtered Product Grid */}
-        {displayProducts.length === 0 ? (
+        {loadingProducts ? (
+          <div className="text-center py-24 flex flex-col items-center justify-center">
+            <div className="w-8 h-8 border-4 border-[#8c5e5e]/30 border-t-[#8c5e5e] rounded-full animate-spin mb-3"></div>
+            <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Loading Arrangements...</p>
+          </div>
+        ) : displayProducts.length === 0 ? (
           <div className="text-center py-20 bg-[#faf8f6] rounded-sm border border-[#d9d2d0]/10 mt-8">
             <Heart size={40} className="mx-auto text-[#1a1a1a]/20 mb-3" />
             <p className="text-sm font-medium text-[#1a1a1a]/55">
@@ -420,10 +394,10 @@ const CategoryPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {displayProducts.map((product) => (
-              <div key={product.id} className="group flex flex-col font-sans relative">
+              <div key={product.productId} className="group flex flex-col font-sans relative">
                 {/* Product Image Container */}
                 <div className="relative overflow-hidden bg-[#f4f0ed] rounded-sm aspect-[3/4] mb-4 border border-[#d9d2d0]/15 shadow-sm">
-                  <Link to={`/product/${product.id}`} className="block w-full h-full">
+                  <Link to={`/product/${product.productId}`} className="block w-full h-full">
                     <img
                       src={product.image}
                       alt={product.title}
@@ -437,14 +411,14 @@ const CategoryPage = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      toggleWishlist(product.id);
+                      toggleWishlist(product.productId);
                     }}
                     className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white flex items-center justify-center transition-colors duration-300 z-10"
                     aria-label="Add to Wishlist"
                   >
                     <Heart
                       size={16}
-                      className={`transition-colors duration-300 ${wishlist[product.id]
+                      className={`transition-colors duration-300 ${wishlist[product.productId]
                         ? 'fill-[#8c5e5e] text-[#8c5e5e]'
                         : 'text-[#1a1a1a]/75 hover:text-[#8c5e5e]'
                         }`}
@@ -454,7 +428,7 @@ const CategoryPage = () => {
 
                 {/* Product Info */}
                 <div className="flex justify-between items-start gap-2 mb-1">
-                  <Link to={`/product/${product.id}`} className="hover:text-[#8c5e5e] transition-colors min-w-0">
+                  <Link to={`/product/${product.productId}`} className="hover:text-[#8c5e5e] transition-colors min-w-0">
                     <h3 className="font-semibold text-[15px] text-[#1a1a1a] tracking-tight leading-snug truncate group-hover:text-[#8c5e5e] transition-colors">
                       {product.title}
                     </h3>
