@@ -1,5 +1,6 @@
 import "./AdminTopbar.css";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import defaultProfileAvatar from "../../assets/default-profile.png";
 import elenaThorneAvatar from "../../assets/elena_thorne.png";
 import api from "../../services/api";
@@ -56,11 +57,19 @@ function getNotificationIcon(type) {
 }
 
 function AdminTopbar({ searchPlaceholder = "Search premium catalog...", searchValue, onSearchChange }) {
+  const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.dispatchEvent(new Event("auth-updated"));
+    navigate("/login");
+  };
 
   const [profile, setProfile] = useState({
     fullName: "Elena Thorne",
@@ -326,8 +335,15 @@ function AdminTopbar({ searchPlaceholder = "Search premium catalog...", searchVa
                 <input type="text" readOnly value={profile.role} />
               </label>
             </div>
-            <div className="modal-actions">
+            <div className="modal-actions" style={{ display: "flex", gap: "10px" }}>
               <button className="close-btn" style={{ flex: 1 }} onClick={() => setShowProfile(false)}>Close</button>
+              <button
+                className="close-btn"
+                style={{ flex: 1, backgroundColor: "#c0392b", color: "#fff", border: "none" }}
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
