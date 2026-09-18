@@ -4,21 +4,41 @@
  * golden spiral dome coordinates, heart shapes, spirals, and collision relaxation.
  */
 
-// Core Dome Constants
-export const R_MAX_CLASSIC = 2.8;
-export const R_MAX_SPIRAL = 3.1;
-export const R_DOME = 3.6;
-export const Y_MAX = 4.6;
-export const Y_BASE = Y_MAX - R_DOME; // 1.0
+// Core Dome Constants (Tighter Florist Bouquet Bounds)
+export const R_MAX_CLASSIC = 1.45;
+export const R_MAX_SPIRAL = 1.55;
+export const R_DOME = 2.8;
+export const Y_MAX = 4.2;
+export const Y_BASE = Y_MAX - R_DOME; // 1.4
 
-// Configurable density parameter (smaller = tighter packing, default: 0.75)
-const bouquetDensity = 0.75;
+// Configurable density parameter (smaller = tighter packing, default: 0.70)
+const bouquetDensity = 0.70;
+
+/**
+ * Deterministic pseudo-random helper function (seed-based)
+ * Returns a consistent float in range [0, 1) to prevent React re-render jitter.
+ */
+function pseudoRandom(seed) {
+  const x = Math.sin(Number(seed) * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+/**
+ * Calculates the dynamic maximum radius based on current flower count
+ * Ensures small and medium bouquets sit in a compact, dense florist cluster.
+ */
+export function getMaxRadius(totalCount, bindingStyle = 'classic-dome', sizeConfig = {}) {
+  const radiusMultiplier = Number(sizeConfig?.radiusMultiplier) || 1.0;
+  const baseRMax = (bindingStyle === 'spiral-handtied' ? R_MAX_SPIRAL : R_MAX_CLASSIC) * bouquetDensity;
+  const countScale = Math.min(1.0, Math.pow(Math.max(1, totalCount) / 16.0, 0.45));
+  return Math.max(0.35, baseRMax * countScale * radiusMultiplier);
+}
 
 /**
  * Calculates the exact height Y on the unified hemisphere dome surface
  * based on the radial distance r from the center of the bouquet.
  */
-export function getDomeHeight(r, bindingStyle = 'classic-dome', sizeConfig = {}) {
+export function getDomeHeight(r, bindingStyle = 'classic-dome', sizeConfig = {}, totalCount = 10) {
   const radiusMultiplier = Number(sizeConfig?.radiusMultiplier) || 1.0;
   const heightMultiplier = Number(sizeConfig?.heightMultiplier) || 1.0;
 
@@ -26,7 +46,7 @@ export function getDomeHeight(r, bindingStyle = 'classic-dome', sizeConfig = {})
   const scaledYMax = Y_MAX * heightMultiplier;
   const scaledYBase = scaledYMax - scaledRDome;
 
-  const R_max = (bindingStyle === 'spiral-handtied' ? R_MAX_SPIRAL : R_MAX_CLASSIC) * bouquetDensity * radiusMultiplier;
+  const R_max = getMaxRadius(totalCount, bindingStyle, sizeConfig);
   const safeR = Math.min(
     Math.max(0, Number(r) || 0),
     R_max,
@@ -51,135 +71,150 @@ export function getFlowerLayer(stemId, category) {
 }
 
 /**
- * ROUND layout generator (traditional symmetric dome).
+ * ROUND layout generator (ultra-dense florist rounded dome).
  */
 export function generateRoundLayout(index, totalCount, bindingStyle = 'classic-dome', sizeConfig = {}) {
-  const radiusMultiplier = Number(sizeConfig?.radiusMultiplier) || 1.0;
-  const heightMultiplier = Number(sizeConfig?.heightMultiplier) || 1.0;
-
-  const R_max = (bindingStyle === 'spiral-handtied' ? R_MAX_SPIRAL : R_MAX_CLASSIC) * bouquetDensity * radiusMultiplier;
+  const R_max = getMaxRadius(totalCount, bindingStyle, sizeConfig);
   const goldenAngle = 2.39996322978;
 
-  const t = totalCount > 1 ? index / (totalCount - 1) : 0.0;
-  const r = R_max * Math.pow(t, 0.65);
-  const theta = index * goldenAngle;
+  let x = 0;
+  let z = 0;
+  let r = 0;
 
-  const x = r * Math.cos(theta);
-  const z = r * Math.sin(theta);
-  const y = getDomeHeight(r, bindingStyle, sizeConfig);
+  if (totalCount === 1) {
+    x = 0;
+    z = 0;
+    r = 0;
+  } else if (index === 0) {
+    // Focal central bloom
+    x = 0;
+    z = 0;
+    r = 0;
+  } else {
+    // Area-weighted radial distribution prevents empty central voids
+    const t = index / Math.max(1, totalCount - 0.5);
+    r = R_max * Math.sqrt(t);
+    const theta = index * goldenAngle;
+    x = r * Math.cos(theta);
+    z = r * Math.sin(theta);
+  }
 
-  const scaledRDome = Math.max(0.001, R_DOME * radiusMultiplier);
-  const scaledYMax = Y_MAX * heightMultiplier;
-  const scaledYBase = scaledYMax - scaledRDome;
+  // Base dome height + deterministic natural height micro-variation
+  const baseHeight = getDomeHeight(r, bindingStyle, sizeConfig, totalCount);
+  const heightJitter = (pseudoRandom(index * 17 + 3) - 0.5) * 0.14;
+  const y = baseHeight + heightJitter;
 
-  const dx = x;
-  const dy = y - scaledYBase;
-  const dz = z;
-  const rotY = Math.atan2(dx, dz);
-  const rotX = -Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)) + Math.PI / 2;
+  // Gentle upright divergence (8 to 15 degrees max tilt)
+  const tiltFactor = Math.min(1.0, r / Math.max(0.1, R_max));
+  const rotY = Math.atan2(x, z || 0.0001);
+  const rotX = (tiltFactor * 0.20) + ((pseudoRandom(index * 23 + 5) - 0.5) * 0.08); // ~8 to 15 deg max tilt
+  const rotZ = (pseudoRandom(index * 31 + 7) - 0.5) * 0.22;
 
   return {
     position: [x, y, z],
-    rotation: [rotX * 0.4, rotY, 0]
+    rotation: [rotX, rotY, rotZ]
   };
 }
 
 /**
- * HEART layout generator (filled heart projection facing front).
+ * HEART layout generator (compact filled 3D heart shape).
  */
 export function generateHeartLayout(index, totalCount, bindingStyle = 'classic-dome', sizeConfig = {}) {
-  const radiusMultiplier = Number(sizeConfig?.radiusMultiplier) || 1.0;
   const heightMultiplier = Number(sizeConfig?.heightMultiplier) || 1.0;
-
-  const R_max = (bindingStyle === 'spiral-handtied' ? R_MAX_SPIRAL : R_MAX_CLASSIC) * bouquetDensity * radiusMultiplier;
-  const yCenter = Y_BASE + (Y_MAX - Y_BASE) * heightMultiplier * 0.65;
-  const zCenter = 0.0;
+  const R_max = getMaxRadius(totalCount, bindingStyle, sizeConfig);
+  const yCenter = Y_BASE + (Y_MAX - Y_BASE) * heightMultiplier * 0.62;
 
   if (totalCount <= 3) {
-    // 1-3 flowers: compact center layout
+    // 1-3 flowers: ultra-compact center cluster
     const offsetAngle = (2 * Math.PI / Math.max(1, totalCount)) * index;
-    const rOffset = totalCount > 1 ? 0.35 : 0.0;
+    const rOffset = totalCount > 1 ? 0.20 : 0.0;
     const x = rOffset * Math.cos(offsetAngle);
     const y = yCenter + rOffset * Math.sin(offsetAngle);
-    const z = zCenter;
+    const z = 0.0;
+    const rotZ = (pseudoRandom(index * 11) - 0.5) * 0.18;
     return {
       position: [x, y, z],
-      rotation: [0, 0, 0]
+      rotation: [0, 0, rotZ]
     };
   } else if (totalCount <= 8) {
-    // 4-8 flowers: simplified heart outline
+    // 4-8 flowers: tight heart contour
     const theta = (2 * Math.PI / totalCount) * index + Math.PI / 2;
     const heartX = Math.pow(Math.sin(theta), 3);
     const heartY = (13 * Math.cos(theta) - 5 * Math.cos(2 * theta) - 2 * Math.cos(3 * theta) - Math.cos(4 * theta)) / 16.0;
 
-    const x = R_max * 0.95 * heartX;
-    const y = yCenter + R_max * 0.95 * heartY + R_max * 0.15;
-    const z = -0.2 * R_max;
+    const scale = R_max * 0.70;
+    const x = scale * heartX;
+    const y = yCenter + scale * heartY + scale * 0.08;
+    const z = -0.12 * scale;
 
-    const rotY = Math.atan2(x, 6.0);
-    const rotX = -Math.atan2(y - yCenter, 6.0) + Math.PI / 2;
+    const rotY = Math.atan2(x, 5.0);
+    const rotX = -Math.atan2(y - yCenter, 5.0) + Math.PI / 2;
+    const rotZ = (pseudoRandom(index * 19) - 0.5) * 0.18;
 
     return {
       position: [x, y, z],
-      rotation: [rotX * 0.2, rotY, 0]
+      rotation: [rotX * 0.15, rotY, rotZ]
     };
   } else {
-    // 9+ flowers: filled heart distribution
+    // 9+ flowers: filled multi-layered heart
     const t = index / (totalCount - 1);
-    const r = R_max * Math.pow(t, 0.65);
+    const r = R_max * Math.sqrt(t);
     const goldenAngle = 2.39996322978;
     const theta = index * goldenAngle;
 
     const heartX = Math.pow(Math.sin(theta), 3);
     const heartY = (13 * Math.cos(theta) - 5 * Math.cos(2 * theta) - 2 * Math.cos(3 * theta) - Math.cos(4 * theta)) / 16.0;
 
-    const x = r * heartX;
-    const y = yCenter + r * heartY + r * 0.15;
-    const z = - (r * r) / (2.5 * R_max); // Controlled parabolic depth
+    const scale = 0.70;
+    const x = r * scale * heartX;
+    const y = yCenter + r * scale * heartY + r * 0.08;
+    const z = - (r * r) / (3.5 * Math.max(0.1, R_max));
 
-    const rotY = Math.atan2(x, z + 6.0);
-    const rotX = -Math.atan2(y - yCenter, 6.0) + Math.PI / 2;
+    const rotY = Math.atan2(x, z + 5.0);
+    const rotX = -Math.atan2(y - yCenter, 5.0) + Math.PI / 2;
+    const rotZ = (pseudoRandom(index * 29) - 0.5) * 0.20;
 
     return {
       position: [x, y, z],
-      rotation: [rotX * 0.3, rotY, 0]
+      rotation: [rotX * 0.15, rotY, rotZ]
     };
   }
 }
 
 /**
- * SPIRAL layout generator (winding spiral winding outwards and downwards).
+ * SPIRAL layout generator (compact winding florist spiral).
  */
 export function generateSpiralLayout(index, totalCount, bindingStyle = 'classic-dome', sizeConfig = {}) {
-  const radiusMultiplier = Number(sizeConfig?.radiusMultiplier) || 1.0;
   const heightMultiplier = Number(sizeConfig?.heightMultiplier) || 1.0;
-
-  const R_max = (bindingStyle === 'spiral-handtied' ? R_MAX_SPIRAL : R_MAX_CLASSIC) * bouquetDensity * radiusMultiplier;
+  const R_max = getMaxRadius(totalCount, bindingStyle, sizeConfig);
 
   const t = totalCount > 1 ? index / (totalCount - 1) : 0.0;
-  const r = R_max * t;
-  const theta = index * 0.95; // Distinct slow winding progression
+  const r = R_max * Math.pow(t, 0.55);
+  const theta = index * 0.85; // Winding progression
 
   const x = r * Math.cos(theta);
   const z = r * Math.sin(theta);
 
   // Height progresses downwards as spiral moves outwards
-  const yStart = Y_BASE + (Y_MAX - Y_BASE) * heightMultiplier;
-  const y = yStart - (yStart - Y_BASE) * 0.4 * t;
+  const yStart = Y_BASE + (Y_MAX - Y_BASE) * heightMultiplier * 0.95;
+  const heightJitter = (pseudoRandom(index * 13 + 2) - 0.5) * 0.14;
+  const y = yStart - (yStart - Y_BASE) * 0.30 * t + heightJitter;
 
-  const rotY = Math.atan2(x, z);
-  const rotX = Math.PI / 5 * t;
+  const rotY = Math.atan2(x, z || 0.0001);
+  const rotX = (Math.PI / 8.0) * t;
+  const rotZ = (pseudoRandom(index * 37 + 4) - 0.5) * 0.18;
 
   return {
     position: [x, y, z],
-    rotation: [rotX, rotY, 0]
+    rotation: [rotX, rotY, rotZ]
   };
 }
 
 /**
- * Runs a relaxation pass to resolve overlapping flower heads.
+ * Runs a gentle relaxation pass to allow soft bloom touch & prevent severe clipping
+ * without pushing flowers apart into wide gaps.
  */
-export function relaxOverlaps(flowers, stemsDatabaseOrOptions, iterations = 8, sizeConfig = {}) {
+export function relaxOverlaps(flowers, stemsDatabaseOrOptions, iterations = 4, sizeConfig = {}) {
   let bindingStyle = 'classic-dome';
   let stemsDatabase = [];
   let sc = sizeConfig;
@@ -203,25 +238,18 @@ export function relaxOverlaps(flowers, stemsDatabaseOrOptions, iterations = 8, s
     targetPosition: f.targetPosition ? [...f.targetPosition] : [...f.position]
   }));
 
-  const radiusMultiplier = Number(sc?.radiusMultiplier) || 1.0;
-  const heightMultiplier = Number(sc?.heightMultiplier) || 1.0;
-  const spacingMultiplier = Number(sc?.spacingMultiplier) || 1.0;
-
-  const scaledRDome = Math.max(0.001, R_DOME * radiusMultiplier);
-  const scaledYMax = Y_MAX * heightMultiplier;
-  const scaledYBase = scaledYMax - scaledRDome;
-
-  const R_max = (bindingStyle === 'spiral-handtied' ? R_MAX_SPIRAL : R_MAX_CLASSIC) * bouquetDensity * radiusMultiplier;
-  const pushForce = 0.18;
+  const R_max = getMaxRadius(result.length, bindingStyle, sc);
+  // Low push force so flowers stay close together and do not push apart into wide gaps
+  const pushForce = 0.02;
 
   const getRadius = (stemId) => {
     const dbItem = stemsDatabase.find(s => String(s.id) === String(stemId));
-    let baseRadius = 0.95;
-    if (!dbItem) baseRadius = 0.85;
-    else if (dbItem.category === 'decorative-foliage') baseRadius = 0.65;
-    else if (dbItem.id === 'blushing-peony' || dbItem.name?.toLowerCase().includes('lily')) baseRadius = 1.25;
+    let baseRadius = 0.45;
+    if (!dbItem) baseRadius = 0.40;
+    else if (dbItem.category === 'decorative-foliage') baseRadius = 0.35;
+    else if (dbItem.id === 'blushing-peony' || dbItem.name?.toLowerCase().includes('lily')) baseRadius = 0.55;
     
-    return baseRadius * spacingMultiplier;
+    return baseRadius;
   };
 
   for (let step = 0; step < iterations; step++) {
@@ -237,7 +265,8 @@ export function relaxOverlaps(flowers, stemsDatabaseOrOptions, iterations = 8, s
         const dx = f2.position[0] - f1.position[0];
         const dz = f2.position[2] - f1.position[2];
         const dist = Math.sqrt(dx * dx + dz * dz);
-        const minDist = (r1 + r2) * 0.82;
+        // Allow close bloom nestling (0.35 threshold)
+        const minDist = (r1 + r2) * 0.35;
 
         if (dist < minDist && dist > 0.001) {
           const overlap = minDist - dist;
@@ -278,15 +307,15 @@ export function relaxOverlaps(flowers, stemsDatabaseOrOptions, iterations = 8, s
         }
 
         const currentR = Math.sqrt(x * x + z * z);
-        const y = getDomeHeight(currentR, bindingStyle, sc);
-        f.position[1] = y;
+        const y = getDomeHeight(currentR, bindingStyle, sc, result.length);
+        const heightJitter = (pseudoRandom(i * 17 + 3) - 0.5) * 0.14;
+        f.position[1] = y + heightJitter;
 
-        const targetDx = x;
-        const targetDy = y - scaledYBase;
-        const targetDz = z;
-        const rotY = Math.atan2(targetDx, targetDz);
-        const rotX = -Math.atan2(targetDy, Math.sqrt(targetDx * targetDx + targetDz * targetDz)) + Math.PI / 2;
-        f.rotation = [rotX * 0.4, rotY, 0];
+        const tiltFactor = Math.min(1.0, currentR / Math.max(0.1, R_max));
+        const rotY = Math.atan2(x, z || 0.0001);
+        const rotX = (tiltFactor * 0.20) + ((pseudoRandom(i * 23 + 5) - 0.5) * 0.08);
+        const rotZ = (pseudoRandom(i * 31 + 7) - 0.5) * 0.22;
+        f.rotation = [rotX, rotY, rotZ];
       } else {
         // HEART or SPIRAL: pull towards generated layout targets to prevent shape degradation
         if (f.targetPosition) {
@@ -359,5 +388,5 @@ export function arrangeBouquet(flowers, styleOrOptions = 'classic-dome', stemsDa
     stemsDatabase: db,
     sizeConfig: sc,
     bouquetStyle: bStyle
-  }, 8);
+  }, 4);
 }
