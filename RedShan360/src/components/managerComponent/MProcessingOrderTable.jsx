@@ -11,6 +11,7 @@ export default function MProcessingOrderTable(props) {
     // ---------------- Render ----------------
     return (
         <>
+            <div className="table-scroll-wrapper">
             <table className="MPtable">
                 <thead>
                     <tr>
@@ -38,6 +39,7 @@ export default function MProcessingOrderTable(props) {
                     )}
                 </tbody>
             </table>
+            </div>
         </>
     );
 }

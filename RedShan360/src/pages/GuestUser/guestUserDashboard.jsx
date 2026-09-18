@@ -5,7 +5,7 @@ import Hero from './components/Hero';
 import CategoryGrid from './components/CategoryGrid';
 import ExperienceBanner from './components/ExperienceBanner';
 import FeaturedProducts from './components/FeaturedProducts';
-import Newsletter from './components/Newsletter';
+//import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import api from '../../services/api';
 
@@ -195,7 +195,7 @@ const GuestUserDashboard = () => {
       <CategoryGrid categories={categories} />
       <ExperienceBanner />
       <FeaturedProducts products={productsState} wishlist={wishlist} toggleWishlist={toggleWishlist} />
-      <Newsletter />
+
       <Footer />
     </div>
   );
