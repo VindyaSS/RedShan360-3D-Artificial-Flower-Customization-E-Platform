@@ -3,6 +3,7 @@ import { X, Plus, Minus, Trash2, ShoppingBag, ArrowLeft, CreditCard, ShieldCheck
 import { products } from '../../../data/products';
 import { triggerPayHereCheckout } from '../../../utils/payhere';
 import api, { cartApi } from '../../../services/api';
+import { getBouquetImage, deleteBouquetImage } from '../../../utils/indexedDB';
 
 const CartDrawer = ({ isOpen, onClose }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -15,7 +16,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
   // Minimum Delivery Date (2 days in advance)
   const getMinDeliveryDate = () => {
     const target = new Date();
-    target.setDate(target.getDate() + 2);
+    target.setDate(target.getDate() + 5);
     const year = target.getFullYear();
     const month = String(target.getMonth() + 1).padStart(2, '0');
     const day = String(target.getDate()).padStart(2, '0');
@@ -231,6 +232,12 @@ const CartDrawer = ({ isOpen, onClose }) => {
     if (!item) return;
 
     if (item.isCustom) {
+      const customId = item.customizationId || item.id;
+      if (customId) {
+        deleteBouquetImage(customId).catch((e) =>
+          console.error('Error deleting IndexedDB image on item removal:', e)
+        );
+      }
       const updatedCart = cartItems.filter(
         (i) => !(i.id === id && i.selectedColor === selectedColor)
       );
@@ -294,7 +301,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
     }
 
     if (customerDetails.deliveryDate < minDeliveryDate) {
-      alert(`Please select a delivery date starting from ${minDeliveryDate} (at least 2 days in advance).`);
+      alert(`Please select a delivery date starting from ${minDeliveryDate} (at least 5 days in advance).`);
       return;
     }
 
@@ -312,6 +319,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
         currentUser = JSON.parse(savedUser);
       }
       const currentUserId = currentUser ? (currentUser.id || currentUser.userId) : null;
+      const cartSnapshot = [...cartItems];
 
       // Initialize Online Payment session (PayHere) on the backend
       const response = await api.post('/api/checkout', {
@@ -359,8 +367,9 @@ const CartDrawer = ({ isOpen, onClose }) => {
             };
           }
 
+          const prodId = item.productId !== undefined && item.productId !== null ? item.productId : item.id;
           return {
-            id: Number(item.productId),
+            id: Number(prodId),
             title: item.title,
             quantity: item.quantity,
             isCustom: false,
@@ -379,7 +388,9 @@ const CartDrawer = ({ isOpen, onClose }) => {
           phone: customerDetails.phone,
           email: customerDetails.email,
           deliveryDate: customerDetails.deliveryDate || minDeliveryDate
-        }
+        },
+        address: `${customerDetails.address}${customerDetails.city ? ', ' + customerDetails.city : ''}`,
+        phone: customerDetails.phone
       });
 
       const checkoutData = response.data;
@@ -393,9 +404,70 @@ const CartDrawer = ({ isOpen, onClose }) => {
         itemsName: checkoutData.itemsName,
         callbacks: {
           onCompleted: async (completedOrderId) => {
+            console.log('[DEBUG UPLOAD] 1. callbacks.onCompleted() called. completedOrderId:', completedOrderId);
             try {
               const statusResponse = await api.get(`/api/checkout/status/${completedOrderId}`);
-              if (statusResponse.data.status === "SUCCESS") {
+              console.log('[DEBUG UPLOAD] 2. Checkout status response:', statusResponse.data, 'Is SUCCESS?:', statusResponse.data?.status === "SUCCESS");
+
+              if (statusResponse.data?.status === "SUCCESS") {
+                console.log('[DEBUG UPLOAD] 3. Current cart snapshot at moment of success:', cartSnapshot);
+                const customItems = cartSnapshot.filter((i) => i.isCustom);
+                console.log('[DEBUG UPLOAD] 4. Detected custom bouquet items:', customItems);
+
+                const resolvedCustomerId = currentUser ? (currentUser.customerId || currentUser.id || currentUser.userId) : null;
+                const numericOrderId = parseInt(String(completedOrderId).replace(/[^0-9]/g, ''), 10) || completedOrderId;
+                console.log('[DEBUG UPLOAD] 5. Resolved customerId:', resolvedCustomerId, '| Numeric orderId:', numericOrderId);
+
+                if (!resolvedCustomerId) {
+                  console.error('[DEBUG UPLOAD] 5a. Error: No valid customer ID found in user session data. Skipping bouquet image upload.');
+                } else {
+                  for (const customItem of customItems) {
+                    const targetCustomId = customItem.customizationId || customItem.id;
+                    console.log('[DEBUG UPLOAD] 6. Each item customizationId or id:', targetCustomId);
+
+                    if (!targetCustomId) {
+                      console.warn('[DEBUG UPLOAD] 6a. Item skipped because targetCustomId is missing');
+                      continue;
+                    }
+
+                    try {
+                      const blob = await getBouquetImage(targetCustomId);
+                      console.log('[DEBUG UPLOAD] 7. getBouquetImage returned Blob:', blob ? `Blob size: ${blob.size} bytes, type: ${blob.type}` : 'NULL/UNDEFINED');
+
+                      if (blob) {
+                        const formData = new FormData();
+                        formData.append('image', blob, `custom_bouquet_${targetCustomId}.png`);
+                        formData.append('customerId', String(resolvedCustomerId));
+                        formData.append('orderId', String(numericOrderId));
+
+                        console.log('[DEBUG UPLOAD] 8. Immediately before POST /api/customized-bouquets/upload-image', {
+                          customerId: resolvedCustomerId,
+                          orderId: numericOrderId,
+                          fileName: `custom_bouquet_${targetCustomId}.png`
+                        });
+
+                        const uploadRes = await api.post('/api/customized-bouquets/upload-image', formData, {
+                          headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+
+                        console.log('[DEBUG UPLOAD] 9. Upload success response:', uploadRes.status, uploadRes.data);
+
+                        if (uploadRes.status === 200 || uploadRes.status === 201) {
+                          await deleteBouquetImage(targetCustomId);
+                          console.log('[DEBUG UPLOAD] 10. Successfully deleted bouquet image from IndexedDB for targetCustomId:', targetCustomId);
+                        }
+                      } else {
+                        console.warn(`[DEBUG UPLOAD] 7a. No Blob found in IndexedDB for customizationId ${targetCustomId}`);
+                      }
+                    } catch (uploadErr) {
+                      console.error(`[DEBUG UPLOAD] 9. Upload error for customizationId ${targetCustomId}:`, uploadErr);
+                      console.error(`[DEBUG UPLOAD] 9a. Upload HTTP error status:`, uploadErr.response?.status, `Response data:`, uploadErr.response?.data);
+                    }
+
+                  }
+                }
+
+
                 if (applyRedeemPoints && loyaltyCheckout && loyaltyCheckout.redeemablePoints > 0 && currentUserId) {
                   try {
                     await api.post('/api/loyalty/redeem', {
@@ -429,6 +501,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
         }
       });
     } catch (error) {
+
       console.error("Failed to initialize checkout session:", error);
       const errMsg = error.response?.data?.message;
       if (errMsg === "Insufficient stock.") {
@@ -805,7 +878,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                   />
                   <p className="text-[10px] text-gray-500 mt-1 flex items-center gap-1 font-medium">
                     <Calendar size={12} className="text-[#8c5e5e]" />
-                    Available from 2 days from today ({minDeliveryDate}).
+                    Available from 5 days from today ({minDeliveryDate}).
                   </p>
                 </div>
 
@@ -865,8 +938,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
                   onClick={handleFinalCheckout}
                   disabled={isProcessing}
                   className={`w-full py-3.5 text-white text-xs font-bold uppercase tracking-wider rounded-sm shadow-md transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.99] ${isProcessing
-                      ? 'bg-[#8c5e5e]/75 cursor-not-allowed'
-                      : 'bg-[#8c5e5e] hover:bg-[#7d4d50]'
+                    ? 'bg-[#8c5e5e]/75 cursor-not-allowed'
+                    : 'bg-[#8c5e5e] hover:bg-[#7d4d50]'
                     }`}
                 >
                   {isProcessing ? (

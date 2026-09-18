@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Star, Heart, ShoppingBag, ArrowLeft, ArrowRight, RotateCw, Check, ShieldCheck, HelpCircle, Truck, Leaf, X } from 'lucide-react';
 import Navbar from './components/Navbar';
-import Newsletter from './components/Newsletter';
+//import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import Product3DViewer from '../../components/Product3DViewer';
 import api, { cartApi } from '../../services/api';
-import { getProductImageUrl } from '../../utils/imageHelper';
+import { getProductImageUrl, getProductImage } from '../../utils/imageHelper';
 
 const ProductDetails = () => {
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ const ProductDetails = () => {
             discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
             discountNumericPrice: discPriceVal,
             stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 100,
-            imageUrl: p.imageUrl || '/images/placeholder.png',
+            imageUrl: getProductImage(p),
             modelUrl: p.modelUrl || '',
             categoryName: p.categoryName || '',
             subCategoryName: p.subCategoryName || '',
@@ -84,7 +84,7 @@ const ProductDetails = () => {
               { name: 'Soft White', hex: '#ffffff' }
             ],
             thumbnails: [
-              p.imageUrl || '/images/placeholder.png'
+              getProductImage(p)
             ]
           };
 
@@ -124,7 +124,7 @@ const ProductDetails = () => {
                   id: item.productId,
                   title: item.productName,
                   price: `Rs ${rPrice.toFixed(2)}`,
-                  imageUrl: item.imageUrl || '/images/placeholder.png',
+                  imageUrl: getProductImage(item),
                   categoryName: item.categoryName,
                   subCategoryName: item.subCategoryName
                 };
@@ -637,22 +637,22 @@ const ProductDetails = () => {
               <div key={review.id} className="p-8 rounded-sm bg-[#faf8f6] border border-[#d9d2d0]/20 flex flex-col justify-between shadow-sm relative animate-fade-in hover:shadow-md transition-shadow duration-300">
                 <div>
                   <div className="flex justify-between items-start gap-4 mb-4">
-                     <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-full bg-[#f4f0ed] border border-[#d9d2d0]/30 flex items-center justify-center font-bold text-[#8c5e5e] text-xs">
-                         {review.name.split(' ').map(n => n[0]).join('')}
-                       </div>
-                       <div>
-                         <div className="flex items-center gap-1.5">
-                           <h4 className="font-semibold text-sm text-[#1a1a1a]">{review.name}</h4>
-                           {review.verified && (
-                             <span className="inline-flex items-center gap-0.5 bg-[#f5e6e8] text-[#8c5e5e] text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-sm">
-                               <ShieldCheck size={8} /> Verified Buyer
-                             </span>
-                           )}
-                         </div>
-                         <p className="text-[9px] text-[#1a1a1a]/40 font-semibold uppercase tracking-wider mt-0.5">{review.date}</p>
-                       </div>
-                     </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#f4f0ed] border border-[#d9d2d0]/30 flex items-center justify-center font-bold text-[#8c5e5e] text-xs">
+                        {review.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="font-semibold text-sm text-[#1a1a1a]">{review.name}</h4>
+                          {review.verified && (
+                            <span className="inline-flex items-center gap-0.5 bg-[#f5e6e8] text-[#8c5e5e] text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-sm">
+                              <ShieldCheck size={8} /> Verified Buyer
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[9px] text-[#1a1a1a]/40 font-semibold uppercase tracking-wider mt-0.5">{review.date}</p>
+                      </div>
+                    </div>
 
                     <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
                       {[...Array(5)].map((_, i) => (
@@ -981,7 +981,7 @@ const ProductDetails = () => {
       )}
 
       {/* Newsletter */}
-      <Newsletter />
+      {/*<Newsletter />*/}
 
       {/* Footer */}
       <Footer />
