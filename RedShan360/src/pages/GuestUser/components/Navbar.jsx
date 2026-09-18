@@ -249,26 +249,26 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   return (
     <>
       <nav
-        className={`fixed top-0 w-full z-50 h-[80px] transition-all duration-300 ${isScrolled ? 'bg-[#faf8f6]/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
+        className={`fixed top-0 w-full z-50 h-[80px] flex items-center transition-all duration-300 ${isScrolled ? 'bg-[#faf8f6]/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
           }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
-          <div className="flex justify-between items-center h-[80px] gap-4">
-            <Link to="/guestUserDashboard" className="flex-shrink-0">
-              <h1 className="text-[26px] md:text-[28px] font-bold tracking-tight text-[#1a1a1a] font-playfair">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 w-full h-full flex items-center">
+          <div className="flex justify-between items-center w-full h-full gap-4">
+            <Link to="/guestUserDashboard" className="flex-shrink-0 flex items-center">
+              <h1 className="text-[24px] md:text-[26px] font-bold tracking-tight text-[#1a1a1a] font-playfair leading-none">
                 Redshan Flora
               </h1>
             </Link>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-8 h-full">
               {navItems.map((item) => (
                 <Link
                   key={item}
                   to={getRoute(item)}
                   onClick={(e) => handleNavClick(item, e)}
-                  className={`text-xs uppercase tracking-widest font-semibold transition-colors duration-300 relative py-1.5 ${isActive(item)
-                    ? 'text-[#8c5e5e] after:content-[\'\'] after:absolute after:left-0 after:-bottom-0.5 after:w-full after:h-[1.5px] after:bg-[#8c5e5e]'
+                  className={`text-xs uppercase tracking-widest font-semibold transition-colors duration-300 relative py-1 flex items-center leading-none ${isActive(item)
+                    ? 'text-[#8c5e5e] after:content-[\'\'] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[1.5px] after:bg-[#8c5e5e]'
                     : 'text-[#1a1a1a]/75 hover:text-[#8c5e5e]'
                     }`}
                 >
@@ -278,7 +278,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             </div>
 
             {/* Desktop Search & Icons */}
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3 h-full">
 
               {/* Desktop Search Icon Button */}
               <button

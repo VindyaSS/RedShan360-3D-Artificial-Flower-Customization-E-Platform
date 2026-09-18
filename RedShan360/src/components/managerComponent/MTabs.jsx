@@ -47,16 +47,18 @@ export default function MTabs() {
             const dispatchedURL = `${API_BASE_URL}/orders/dispatched`;
 
             // Fetch all four order status lists in parallel
+            const token = localStorage.getItem('token');
+            const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
             const [
                 preOrdersResponse,
                 processingResponse,
                 completedResponse,
                 dispatchedResponse
             ] = await Promise.all([
-                fetch(preOrdersURL),
-                fetch(processingURL),
-                fetch(completedURL),
-                fetch(dispatchedURL)
+                fetch(preOrdersURL, authHeaders),
+                fetch(processingURL, authHeaders),
+                fetch(completedURL, authHeaders),
+                fetch(dispatchedURL, authHeaders)
             ]);
 
             // Validate HTTP responses
@@ -132,7 +134,7 @@ export default function MTabs() {
                     <button className="tab-btn">Completed Orders</button>
                     <button className="tab-btn">Dispatched Orders To Courier</button>
                 </div>
-                <div className="tab-content">
+                <div className="tab-content" style={{ display: 'block', width: '100%' }}>
                     <div style={{ padding: "40px", textAlign: "center" }}>
                         Loading orders...
                     </div>
@@ -152,7 +154,7 @@ export default function MTabs() {
                     <button className="tab-btn">Completed Orders</button>
                     <button className="tab-btn">Dispatched Orders To Courier</button>
                 </div>
-                <div className="tab-content">
+                <div className="tab-content" style={{ display: 'block', width: '100%' }}>
                     <div style={{ padding: "40px", textAlign: "center" }}>
                         <h3>Failed to load orders</h3>
                         <p>{error}</p>
@@ -201,7 +203,7 @@ export default function MTabs() {
 
 
             {/* ---------------- Tab Content ---------------- */}
-            <div className="tab-content">
+            <div className="tab-content" style={{ display: 'block', width: '100%' }}>
 
                 {/* ---------------- Pre Orders Tab ---------------- */}
                 {currentTab === 1 && (

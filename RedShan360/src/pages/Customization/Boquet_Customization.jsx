@@ -21,7 +21,6 @@ import {
   ZoomOut,
   RefreshCw,
   Camera,
-  Calendar,
   Truck,
   ArrowRight,
   Sparkles,
@@ -647,9 +646,9 @@ export default function BoquetCustomization() {
 
   // Map category tags for rendering
   const categoriesList = [
-    { key: 'premium-blooms', label: 'PREMIUM BLOOMS' },
-    { key: 'wrapping-accents', label: 'WRAPPING' }
+    { key: 'premium-blooms', label: 'PREMIUM BLOOMS' }
   ];
+
 
   return (
     <div className="min-h-screen bg-[#fdfbf9] text-[#563c37] flex flex-col relative" style={{ fontFamily: 'Plus Jakarta Sans, Inter, sans-serif' }}>
@@ -721,35 +720,6 @@ export default function BoquetCustomization() {
             </div>
           </div>
 
-          {/* Bouquet Style Selector */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-[#563c37]/60">
-              Bouquet Style
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              {BOUQUET_STYLE_OPTIONS.map((styleOpt) => {
-                const isActive = bouquetStyle === styleOpt.key;
-                return (
-                  <button
-                    key={styleOpt.key}
-                    type="button"
-                    onClick={() => {
-                      setBouquetStyle(styleOpt.key);
-                      triggerToast(`Style updated to ${styleOpt.label}`);
-                    }}
-                    className={`py-2 px-1 rounded-xl border text-[10.5px] font-bold uppercase tracking-wider text-center transition-all duration-300 ${
-                      isActive
-                        ? 'bg-[#563c37] text-white border-[#563c37] shadow-sm'
-                        : 'bg-[#fdfbf9]/40 border-[#ece7e2] text-[#563c37] hover:border-[#8c5e5e]/30'
-                    }`}
-                  >
-                    {styleOpt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Occasion Selection Buttons */}
           <div className="flex gap-2 p-1 bg-[#fdfbf9] border border-[#ece7e2] rounded-xl">
             {OCCASION_OPTIONS.map((option) => {
@@ -811,95 +781,54 @@ export default function BoquetCustomization() {
                   {isExpanded && (
                     <div className="mt-2 flex flex-col gap-4 animate-fadeIn">
                       {categoryStems.length === 0 ? (
-                        category.key === 'premium-blooms' ? (
-                          !hasOccasionFlowers ? (
-                            <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers are available for this occasion.</p>
-                          ) : (
-                            <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers match your search.</p>
-                          )
+                        !hasOccasionFlowers ? (
+                          <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers are available for this occasion.</p>
                         ) : (
-                          <p className="text-[11px] text-[#563c37]/60 italic py-1">No stems match your search.</p>
+                          <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers match your search.</p>
                         )
                       ) : (
                         <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1.5 scroll-smooth custom-scrollbar">
-                          {/* Special check for wrapping-accents category */}
-                          {category.key === 'wrapping-accents' && (
-                            <div className="mb-2">
-                              <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-[#563c37]/60 block mb-2">
-                                Select Wrapping Paper
-                              </span>
-                              <div className="grid grid-cols-2 gap-3">
-                                {categoryStems
-                                  .filter(s => s.id === 'luxury-mesh')
-                                  .map((stem) => {
-                                    const isSelected = selectedStems.some(s => s.stemId === stem.id);
-                                    return (
-                                      <button
-                                        key={stem.id}
-                                        onClick={() => handleSelectWrapping(stem.id)}
-                                        className={`flex flex-col text-left p-2 rounded-xl transition-all duration-300 ${isSelected
-                                          ? 'bg-[#fdfbf9]/90 border-2 border-[#8c5e5e] shadow-sm font-semibold'
-                                          : 'bg-[#fdfbf9]/40 border border-[#f5efeb] hover:border-[#8c5e5e]/20'
-                                          }`}
-                                      >
-                                        <img
-                                          src={stem.image}
-                                          alt={stem.name}
-                                          className="w-full h-16 rounded-lg object-cover bg-gray-100 mb-1.5 border border-[#ece7e2]"
-                                        />
-                                        <span className="text-[10px] font-bold text-[#563c37] truncate w-full">{stem.name}</span>
-                                        <span className="text-[9px] font-semibold text-[#8c5e5e] mt-0.5">+Rs {stem.price.toFixed(2)}</span>
-                                      </button>
-                                    );
-                                  })}
-                              </div>
-                            </div>
-                          )}
+                          {categoryStems.map((stem) => {
+                            const quantitySelected = selectedStems.find(s => s.stemId === stem.id)?.quantity || 0;
 
-                          {/* Normal List Rendering (accents/ribbons or standard categories) */}
-                          {categoryStems
-                            .filter(() => category.key !== 'wrapping-accents')
-                            .map((stem) => {
-                              const quantitySelected = selectedStems.find(s => s.stemId === stem.id)?.quantity || 0;
-
-                              return (
-                                <div key={stem.id} className="flex items-center gap-3 bg-[#fdfbf9]/70 p-2 rounded-xl border border-[#f5efeb] hover:border-[#8c5e5e]/25 transition-all">
-                                  <img
-                                    src={stem.image}
-                                    alt={stem.name}
-                                    className="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm border border-[#ece7e2]"
-                                  />
-                                  <div className="flex-grow min-w-0">
-                                    <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
-                                    <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
-                                    <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
-                                      +Rs {stem.price.toFixed(2)}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    {quantitySelected > 0 && (
-                                      <>
-                                        <button
-                                          onClick={() => handleRemoveStem(stem.id)}
-                                          className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
-                                          aria-label="Decrease quantity"
-                                        >
-                                          <Minus size={12} />
-                                        </button>
-                                        <span className="text-xs font-bold text-[#563c37] w-4 text-center">{quantitySelected}</span>
-                                      </>
-                                    )}
-                                    <button
-                                      onClick={() => handleAddStem(stem.id)}
-                                      className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
-                                      aria-label="Add stem"
-                                    >
-                                      <Plus size={12} />
-                                    </button>
-                                  </div>
+                            return (
+                              <div key={stem.id} className="flex items-center gap-3 bg-[#fdfbf9]/70 p-2 rounded-xl border border-[#f5efeb] hover:border-[#8c5e5e]/25 transition-all">
+                                <img
+                                  src={stem.image}
+                                  alt={stem.name}
+                                  className="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm border border-[#ece7e2]"
+                                />
+                                <div className="flex-grow min-w-0">
+                                  <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
+                                  <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
+                                  <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
+                                    +Rs {stem.price.toFixed(2)}
+                                  </span>
                                 </div>
-                              );
-                            })}
+                                <div className="flex items-center gap-2">
+                                  {quantitySelected > 0 && (
+                                    <>
+                                      <button
+                                        onClick={() => handleRemoveStem(stem.id)}
+                                        className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
+                                        aria-label="Decrease quantity"
+                                      >
+                                        <Minus size={12} />
+                                      </button>
+                                      <span className="text-xs font-bold text-[#563c37] w-4 text-center">{quantitySelected}</span>
+                                    </>
+                                  )}
+                                  <button
+                                    onClick={() => handleAddStem(stem.id)}
+                                    className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
+                                    aria-label="Add stem"
+                                  >
+                                    <Plus size={12} />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -1131,21 +1060,6 @@ export default function BoquetCustomization() {
               </span>
             </div>
 
-          </div>
-
-          {/* Delivery timeline card */}
-          <div className="bg-white rounded-2xl border border-[#f0ebe4] p-4 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[#fdfbf9] border border-[#f5efeb] flex items-center justify-center flex-shrink-0 text-[#8c5e5e]">
-              <Calendar size={18} />
-            </div>
-            <div>
-              <h4 className="text-[9px] font-extrabold tracking-wider uppercase text-[#563c37]/50">
-                Earliest Delivery
-              </h4>
-              <p className="text-xs text-[#563c37] leading-normal font-medium mt-0.5">
-                Order in <strong className="text-[#563c37] font-bold">4h 20m</strong> for Friday delivery
-              </p>
-            </div>
           </div>
 
         </section>

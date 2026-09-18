@@ -267,7 +267,7 @@ export default function ECustomizedOrderTable({
                                 {isExpanded && (
                                     <tr>
                                         <td
-                                            colSpan={4}
+                                            colSpan={3}
                                             style={{ padding: 0, backgroundColor: 'var(--color-bg-page)' }}
                                         >
                                             <div className="expanded-row-container">
@@ -276,9 +276,7 @@ export default function ECustomizedOrderTable({
                                                         <tr>
                                                             <th>Custom ID</th>
                                                             <th>Item Name</th>
-                                                            <th>Flower Type</th>
-                                                            <th>Number of Flowers</th>
-                                                            <th>Bouquet Style</th>
+                                                            <th>Flowers & Quantities</th>
                                                             <th>Status</th>
                                                             <th>Actions</th>
                                                         </tr>
@@ -288,7 +286,7 @@ export default function ECustomizedOrderTable({
                                                         {group.items.length === 0 ? (
                                                             <tr>
                                                                 <td
-                                                                    colSpan={7}
+                                                                    colSpan={5}
                                                                     style={{ textAlign: 'center', padding: '20px' }}
                                                                 >
                                                                     No customized item details available.
@@ -324,16 +322,19 @@ export default function ECustomizedOrderTable({
                                                                             {item.itemName || 'Customized Bouquet'}
                                                                         </td>
 
+                                                                        {/* Flower Type and Quantity displayed line by line */}
                                                                         <td>
-                                                                            {item.flowerType || 'N/A'}
-                                                                        </td>
-
-                                                                        <td style={{ fontWeight: '600' }}>
-                                                                            {item.numberOfFlowers ?? item.quantity ?? 0}
-                                                                        </td>
-
-                                                                        <td>
-                                                                            {item.bouquetStyle || 'N/A'}
+                                                                            {item.flowerQuantities && Object.keys(item.flowerQuantities).length > 0 ? (
+                                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                                    {Object.entries(item.flowerQuantities).map(([flowerName, qty]) => (
+                                                                                        <span key={flowerName} style={{ fontSize: '13px', lineHeight: '1.4' }}>
+                                                                                            <span style={{ fontWeight: '600' }}>{flowerName}</span> : {qty}
+                                                                                        </span>
+                                                                                    ))}
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span style={{ color: '#888' }}>-</span>
+                                                                            )}
                                                                         </td>
 
                                                                         <td>

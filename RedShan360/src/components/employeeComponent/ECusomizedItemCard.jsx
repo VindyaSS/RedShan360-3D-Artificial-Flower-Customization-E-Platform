@@ -36,18 +36,7 @@ const ECustomizedItemCard = (props) => {
                                 <span className="blog-author-label">Number Of Flowers:</span>
                                 <span className="blog-author-val">{props.numberOfFlower || "N/A"}</span>
                             </div>
-                            <div className="blog-author-row">
-                                <span className="blog-author-label">Boquet Style:</span>
-                                <span className="blog-author-val">{props.BoquetStyle || "N/A"}</span>
-                            </div>
-                            <div className="blog-author-row">
-                                <span className="blog-author-label">Decorative Foliage:</span>
-                                <span className="blog-author-val">{props.DecorativeFoliage || "N/A"}</span>
-                            </div>
-                            <div className="blog-author-row">
-                                <span className="blog-author-label">Wrapping & Accents:</span>
-                                <span className="blog-author-val">{props.WrappingAndAccents || "N/A"}</span>
-                            </div>
+
                         </div>
                     </div>
                 </header>

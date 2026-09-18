@@ -296,7 +296,7 @@ const CategoryPage = () => {
       />
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-[120px] pb-20">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-6 sm:pt-8 md:pt-10 pb-20">
 
         {/* Breadcrumb */}
         {slug === 'bouquets' ? (

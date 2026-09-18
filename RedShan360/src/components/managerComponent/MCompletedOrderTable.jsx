@@ -81,44 +81,46 @@ export default function MCompletedOrderTable(props) {
 
     // ---------------- Render ----------------
     return (
-        <table className="MPtable">
-            <thead>
-                <tr>
-                    <th>{props.t1}</th>
-                    <th>{props.t2}</th>
-                    <th>{props.t3}</th>
-                    <th colSpan="2">Action</th>
-                </tr>
-            </thead>
+        <div className="table-scroll-wrapper">
+            <table className="MPtable">
+                <thead>
+                    <tr>
+                        <th>{props.t1}</th>
+                        <th>{props.t2}</th>
+                        <th>{props.t3}</th>
+                        <th colSpan="2">Action</th>
+                    </tr>
+                </thead>
 
-            <tbody>
-                {completedorders.length > 0 ? (
-                    completedorders.map((completedorder, index) => (
-                        <tr key={completedorder?.orderId ?? `completed-order-${index}`}>
-                            <td>{completedorder?.orderId ?? "-"}</td>
-                            <td>{completedorder?.customerName ?? "-"}</td>
-                            <td>{completedorder?.totalAmount ?? "-"}</td>
-                            <td colSpan="2">
-                                <button
-                                    className="btn-dispatch"
-                                    disabled={dispatchingOrderId === completedorder?.orderId}
-                                    onClick={() => handleDispatch(completedorder)}
-                                >
-                                    {dispatchingOrderId === completedorder?.orderId
-                                        ? "Dispatching..."
-                                        : "Dispatching to Courier"}
-                                </button>
+                <tbody>
+                    {completedorders.length > 0 ? (
+                        completedorders.map((completedorder, index) => (
+                            <tr key={completedorder?.orderId ?? `completed-order-${index}`}>
+                                <td>{completedorder?.orderId ?? "-"}</td>
+                                <td>{completedorder?.customerName ?? "-"}</td>
+                                <td>{completedorder?.totalAmount ?? "-"}</td>
+                                <td colSpan="2">
+                                    <button
+                                        className="btn-dispatch"
+                                        disabled={dispatchingOrderId === completedorder?.orderId}
+                                        onClick={() => handleDispatch(completedorder)}
+                                    >
+                                        {dispatchingOrderId === completedorder?.orderId
+                                            ? "Dispatching..."
+                                            : "Dispatching to Courier"}
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
+                                No Completed Orders Found
                             </td>
                         </tr>
-                    ))
-                ) : (
-                    <tr>
-                        <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
-                            No Completed Orders Found
-                        </td>
-                    </tr>
-                )}
-            </tbody>
-        </table>
+                    )}
+                </tbody>
+            </table>
+        </div>
     );
 }

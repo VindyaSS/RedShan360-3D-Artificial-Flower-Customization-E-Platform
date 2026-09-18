@@ -38,8 +38,14 @@ export default function ManagerOverview() {
             setLoadingOrders(true);
             setOrderError(null);
 
+            const token = localStorage.getItem('token');
             const response = await fetch(
-                `${API_BASE_URL}/dashboard/recent-orders`
+                `${API_BASE_URL}/dashboard/recent-orders`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
             );
 
             if (!response.ok) {
@@ -76,7 +82,12 @@ export default function ManagerOverview() {
             setLoadingStats(true);
             setStatsError(null);
 
-            const response = await fetch(`${API_BASE_URL}/dashboard/stats`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
             if (!response.ok) {
                 throw new Error(`Failed to fetch dashboard stats: ${response.status}`);
@@ -107,8 +118,14 @@ export default function ManagerOverview() {
             setLoadingLowStock(true);
             setLowStockError(null);
 
+            const token = localStorage.getItem('token');
             const response = await fetch(
-                `${API_BASE_URL}/dashboard/low-stock-products`
+                `${API_BASE_URL}/dashboard/low-stock-products`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
             );
 
             if (!response.ok) {

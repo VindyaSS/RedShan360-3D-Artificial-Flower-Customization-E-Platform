@@ -44,11 +44,11 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen bg-[#fcf9f8] text-[#1a1a1a] flex flex-col font-sans selection:bg-[#8c5e5e]/20 selection:text-[#8c5e5e]">
       {/* Navbar */}
-      <Navbar 
-        isScrolled={isScrolled} 
-        mobileMenuOpen={mobileMenuOpen} 
-        setMobileMenuOpen={setMobileMenuOpen} 
-        navItems={navItems} 
+      <Navbar
+        isScrolled={isScrolled}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        navItems={navItems}
       />
 
       {/* Hero Section */}
@@ -80,11 +80,11 @@ const AboutPage = () => {
             <p className="text-lg md:text-2xl italic text-[#1a1a1a]/70 font-playfair font-medium mt-4 leading-relaxed">
               Crafting Beauty Through Artificial Floral Excellence
             </p>
-            <button 
+            <button
               onClick={scrollToHeritage}
               className="mt-8 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-xs font-semibold tracking-[0.2em] uppercase py-4 px-8 rounded-sm shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 group"
             >
-              Discover Our Heritage 
+              Discover Our Heritage
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />
             </button>
           </div>
@@ -98,9 +98,9 @@ const AboutPage = () => {
             {/* Left Column - Image */}
             <div className="md:col-span-5 lg:col-span-5">
               <div className="relative aspect-[4/5] rounded-sm overflow-hidden shadow-xl border border-[#d9d2d0]/30 bg-luxury-beige">
-                <img 
-                  src="/images/about_craft.png" 
-                  alt="Artisan hand-crafting rose" 
+                <img
+                  src="/images/about_craft.png"
+                  alt="Artisan hand-crafting rose"
                   className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700 ease-out"
                 />
               </div>
@@ -114,14 +114,14 @@ const AboutPage = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] tracking-tight font-playfair mb-6">
                 Our Legacy of Craft
               </h2>
-              
+
               <div className="space-y-6 text-sm md:text-base leading-relaxed text-[#1a1a1a]/75">
                 <p className="font-semibold text-[#1a1a1a] text-[15px] md:text-[17px] leading-relaxed border-l-2 border-[#8c5e5e] pl-4">
-                  Huajay International Multi Flora LTD was founded in 1983 by the visionary Madam Jayanthy. 
+                  Huajay International Multi Flora LTD was founded in 1983 by the visionary Madam Jayanthy.
                   What began as a passionate endeavor to replicate the transient beauty of nature has evolved into a global benchmark for artificial floral artistry.
                 </p>
                 <p>
-                  For four decades, RedShan360 has curated collections that grace the world's most prestigious interiors, 
+                  For four decades, RedShan360 has curated collections that grace the world's most prestigious interiors,
                   merging traditional artisanal techniques with modern design sensibilities to create blooms that never fade.
                 </p>
               </div>
@@ -208,16 +208,16 @@ const AboutPage = () => {
             <div className="lg:col-span-7">
               <div className="grid grid-cols-2 gap-4 md:gap-6">
                 <div className="aspect-[3/4] rounded-sm overflow-hidden shadow-lg border border-[#d9d2d0]/25 bg-luxury-beige">
-                  <img 
-                    src="/images/about_artisan.png" 
-                    alt="Artisan working on flower" 
+                  <img
+                    src="/images/about_artisan.png"
+                    alt="Artisan working on flower"
                     className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700 ease-out"
                   />
                 </div>
                 <div className="aspect-[3/4] rounded-sm overflow-hidden shadow-lg border border-[#d9d2d0]/25 bg-luxury-beige mt-6 lg:mt-12">
-                  <img 
-                    src="/images/about_bouquet.png" 
-                    alt="Finished flower arrangement" 
+                  <img
+                    src="/images/about_bouquet.png"
+                    alt="Finished flower arrangement"
                     className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700 ease-out"
                   />
                 </div>
@@ -352,58 +352,23 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* CTA Section (Ready to Elevate Your Space?) */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
-          <div className="relative rounded-sm overflow-hidden bg-[#503535] text-white py-16 px-8 md:px-16 text-center shadow-xl border border-black/5">
-            {/* Subtle organic floral watermark decoration inside */}
-            <div className="absolute inset-0 opacity-10 bg-cover bg-center pointer-events-none" style={{ backgroundImage: "url('/images/cat_roses.png')", filter: "grayscale(100%)" }} />
-            
-            <div className="relative z-10 max-w-2xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold font-playfair tracking-tight mb-4 text-white">
-                Ready to Elevate Your Space?
-              </h2>
-              <p className="text-xs md:text-sm text-white/80 font-medium leading-relaxed mb-8 max-w-lg mx-auto">
-                Discover how our bespoke artificial floral designs can transform your environment into a sanctuary of everlasting beauty.
-              </p>
 
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a 
-                  href="/shop"
-                  className="w-full sm:w-auto text-center border border-white hover:bg-white hover:text-[#503535] text-white text-xs uppercase tracking-[0.2em] font-semibold py-3.5 px-8 rounded-sm transition-all duration-300"
-                >
-                  Explore Collection
-                </a>
-                <a 
-                  href="#contact"
-                  className="w-full sm:w-auto text-center border border-white hover:bg-white hover:text-[#503535] text-white text-xs uppercase tracking-[0.2em] font-semibold py-3.5 px-8 rounded-sm transition-all duration-300"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  Consult a Designer
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Join The Inner Circle / Newsletter */}
-      <section className="py-16 bg-[#faf8f6] border-t border-[#d9d2d0]/20">
+      {/*<section className="py-16 bg-[#faf8f6] border-t border-[#d9d2d0]/20">
         <div className="max-w-md mx-auto px-6 text-center">
           <span className="text-[10px] tracking-[0.25em] font-bold text-[#1a1a1a]/50 uppercase mb-3 block">
             Join the Inner Circle
           </span>
           <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
-            <input 
-              type="email" 
-              placeholder="Enter your email address" 
+            <input
+              type="email"
+              placeholder="Enter your email address"
               className="w-full bg-white border border-[#d9d2d0] rounded-sm px-4 py-3 text-xs text-[#1a1a1a] placeholder:text-[#1a1a1a]/40 focus:outline-none focus:border-[#8c5e5e] focus:ring-1 focus:ring-[#8c5e5e]/25 transition-all"
               required
             />
-            <button 
+            <button
               type="button"
               className="w-full sm:w-auto bg-[#e8b4b8] hover:bg-[#8c5e5e] text-white font-semibold text-xs tracking-widest uppercase py-3 px-6 rounded-sm whitespace-nowrap transition-colors duration-300"
             >
@@ -411,7 +376,7 @@ const AboutPage = () => {
             </button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer */}
       <Footer />
