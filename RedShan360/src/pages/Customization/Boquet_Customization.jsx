@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import api from '../../services/api';
+import { saveBouquetImage, deleteBouquetImage } from '../../utils/indexedDB';
 import { arrangeBouquet, relaxOverlaps } from '../../components/bouquet/LayoutEngine';
 import { BOUQUET_SIZE_CONFIG } from '../../components/bouquet/sizeConfig';
 import { getPriceBreakdown } from '../../components/bouquet/PriceEngine';
@@ -17,9 +18,6 @@ import {
   Minus,
   Trash2,
   RotateCcw,
-  ZoomIn,
-  ZoomOut,
-  RefreshCw,
   Camera,
   Truck,
   ArrowRight,
@@ -226,6 +224,10 @@ export default function BoquetCustomization() {
   });
 
   // 3D Canvas states
+  const canvasElementRef = useRef(null);
+  const [customizationId, setCustomizationId] = useState(() => generateCustomBouquetId());
+  const [isCustomizationFinished, setIsCustomizationFinished] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [zoomLevel, setZoomLevel] = useState('normal'); // 'normal' or 'zoomed'
   const [rotationDegree, setRotationDegree] = useState(0);
   const [showFlash, setShowFlash] = useState(false);
@@ -234,6 +236,45 @@ export default function BoquetCustomization() {
   const [selectedFlowerId, setSelectedFlowerId] = useState(null);
   const [isSwapMode, setIsSwapMode] = useState(false);
   const [selectedSwapFlowerId, setSelectedSwapFlowerId] = useState(null);
+
+  // Finish Customization handler: captures canvas & saves WebGL Blob to IndexedDB
+  const handleFinishCustomization = () => {
+    if (isFinalizing || isCustomizationFinished) return;
+    if (!canvasElementRef.current) {
+      triggerToast('3D Canvas not initialized yet.');
+      return;
+    }
+
+    setIsFinalizing(true);
+    try {
+      const canvas = canvasElementRef.current;
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          triggerToast('Canvas image capture returned null. Customization was not locked.');
+          setIsFinalizing(false);
+          return;
+        }
+
+        const saved = await saveBouquetImage(customizationId, blob);
+        if (!saved) {
+          triggerToast('Failed to save image to IndexedDB. Customization was not locked.');
+          setIsFinalizing(false);
+          return;
+        }
+
+        setIsCustomizationFinished(true);
+        setIsFinalizing(false);
+        setSelectedFlowerId(null);
+        setSelectedSwapFlowerId(null);
+        setIsSwapMode(false);
+        triggerToast('✨ Customization finalized & arrangement locked!');
+      }, 'image/png');
+    } catch (err) {
+      console.error('Error in handleFinishCustomization:', err);
+      triggerToast('Error during canvas capture. Customization was not locked.');
+      setIsFinalizing(false);
+    }
+  };
 
   // Swap locations of two flowers
   const swapFlowers = (id1, id2) => {
@@ -455,6 +496,10 @@ export default function BoquetCustomization() {
   };
 
   const handleSizeChange = (newSizeKey) => {
+    if (isCustomizationFinished) {
+      triggerToast('Customization is finalized and locked.');
+      return;
+    }
     if (newSizeKey === bouquetSize) return;
 
     const targetConfig = BOUQUET_SIZE_CONFIG[newSizeKey];
@@ -472,6 +517,10 @@ export default function BoquetCustomization() {
 
   // Add a stem to the customizer selection
   const handleAddStem = (stemId) => {
+    if (isCustomizationFinished) {
+      triggerToast('Customization is finalized and locked.');
+      return;
+    }
     const dbItem = stemsDatabase.find(s => String(s.id) === String(stemId));
     const isFlower = dbItem && dbItem.category === 'premium-blooms';
 
@@ -497,6 +546,10 @@ export default function BoquetCustomization() {
 
   // Remove or decrement a stem from the selection
   const handleRemoveStem = (stemId) => {
+    if (isCustomizationFinished) {
+      triggerToast('Customization is finalized and locked.');
+      return;
+    }
     setSelectedStems(prev => {
       const existing = prev.find(item => String(item.stemId) === String(stemId));
       if (!existing) return prev;
@@ -512,10 +565,18 @@ export default function BoquetCustomization() {
 
   // Complete removal of a stem category
   const handleClearStem = (stemId) => {
+    if (isCustomizationFinished) {
+      triggerToast('Customization is finalized and locked.');
+      return;
+    }
     setSelectedStems(prev => prev.filter(item => String(item.stemId) !== String(stemId)));
   };
 
   const handleSelectWrapping = (id) => {
+    if (isCustomizationFinished) {
+      triggerToast('Customization is finalized and locked.');
+      return;
+    }
     setSelectedStems(prev => {
       const wrappingIds = ['kraft-paper', 'luxury-mesh'];
       const filtered = prev.filter(item => !wrappingIds.includes(item.stemId));
@@ -529,7 +590,13 @@ export default function BoquetCustomization() {
   };
 
   // Canvas Toolbar operations
-  const handleReset = () => {
+  const handleReset = async () => {
+    if (customizationId) {
+      await deleteBouquetImage(customizationId);
+    }
+    const newId = generateCustomBouquetId();
+    setCustomizationId(newId);
+    setIsCustomizationFinished(false);
     setSelectedStems([]);
     setFlowers([]);
     setSelectedFlowerId(null);
@@ -568,8 +635,8 @@ export default function BoquetCustomization() {
     const savedCart = localStorage.getItem('redshan360_cart');
     const cartList = savedCart ? JSON.parse(savedCart) : [];
 
-    // Generate a unique ID for this specific curation
-    const customBouquetId = generateCustomBouquetId();
+    // Ensure active customizationId is used
+    const activeId = customizationId || generateCustomBouquetId();
 
     // Map selected stems to descriptive names
     const selectedStemsDetails = selectedStems
@@ -581,8 +648,10 @@ export default function BoquetCustomization() {
       .join(', ');
 
     const customBouquetItem = {
-      id: customBouquetId,
+      id: activeId,
+      customizationId: activeId,
       isCustom: true,
+      isFinalized: isCustomizationFinished,
       title: 'Custom Bouquet Arrangement',
       price: 'Rs. ' + priceBreakdown.grandTotal.toFixed(2),
       numericPrice: priceBreakdown.grandTotal,
@@ -624,6 +693,10 @@ export default function BoquetCustomization() {
     cartList.push(customBouquetItem);
 
     localStorage.setItem('redshan360_cart', JSON.stringify(cartList));
+
+    // Prepare fresh customization session for next creation
+    setCustomizationId(generateCustomBouquetId());
+    setIsCustomizationFinished(false);
 
     // Dispatch events to trigger UI reactivity
     window.dispatchEvent(new Event('cart-updated'));
@@ -861,11 +934,14 @@ export default function BoquetCustomization() {
                 wrappingId={wrappingId}
                 ribbonId={ribbonId}
                 stemsDatabase={stemsDatabase}
-                selectedFlowerId={selectedFlowerId}
+                selectedFlowerId={isCustomizationFinished ? null : selectedFlowerId}
                 selectedSwapFlowerId={selectedSwapFlowerId}
                 isSwapMode={isSwapMode}
                 onSelectFlower={handleSelectFlower}
                 onUpdateFlowerTransform={handleUpdateFlowerTransform}
+                onCanvasCreated={(domElement) => {
+                  canvasElementRef.current = domElement;
+                }}
               />
             </div>
 
@@ -881,16 +957,11 @@ export default function BoquetCustomization() {
               </button>
 
               <button
-                onClick={handleZoom}
-                className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9] transition-all"
-                title="Toggle zoom"
-                aria-label="Toggle zoom"
-              >
-                {zoomLevel === 'zoomed' ? <ZoomOut size={16} /> : <ZoomIn size={16} />}
-              </button>
-
-              <button
                 onClick={() => {
+                  if (isCustomizationFinished) {
+                    triggerToast('Customization is finalized and locked.');
+                    return;
+                  }
                   setIsSwapMode(prev => {
                     const next = !prev;
                     if (next) {
@@ -904,23 +975,17 @@ export default function BoquetCustomization() {
                     return next;
                   });
                 }}
+                disabled={isCustomizationFinished}
                 className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isSwapMode
                   ? 'bg-[#563c37] text-white shadow-md'
+                  : isCustomizationFinished
+                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                   : 'bg-transparent text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9]'
                   }`}
                 title="Swap flower positions"
                 aria-label="Swap flower positions"
               >
                 <Shuffle size={16} />
-              </button>
-
-              <button
-                onClick={handleRotate}
-                className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center text-[#563c37]/65 hover:text-[#563c37] hover:bg-[#fdfbf9] transition-all"
-                title="Rotate bouquet"
-                aria-label="Rotate bouquet"
-              >
-                <RefreshCw size={16} className={rotationDegree > 0 ? "transition-transform" : ""} />
               </button>
 
               <div className="h-6 w-[1px] bg-[#ece7e2]" />
@@ -936,13 +1001,54 @@ export default function BoquetCustomization() {
             </div>
 
           </div>
+
+          {/* FINISH CUSTOMIZATION BUTTON */}
+          <div className="w-full flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={handleFinishCustomization}
+              disabled={isFinalizing || isCustomizationFinished || flowers.length === 0}
+              className={`w-full py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md flex items-center justify-center gap-2 ${
+                isCustomizationFinished
+                  ? 'bg-emerald-700 text-white cursor-not-allowed opacity-90'
+                  : isFinalizing
+                  ? 'bg-[#563c37]/70 text-white cursor-wait'
+                  : flowers.length === 0
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                  : 'bg-[#563c37] hover:bg-[#8c5e5e] text-white cursor-pointer active:scale-[0.99]'
+              }`}
+            >
+              {isFinalizing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Capturing & Finalizing...</span>
+                </>
+              ) : isCustomizationFinished ? (
+                <>
+                  <Sparkles size={16} className="text-emerald-300" />
+                  <span>Customization Finalized & Locked</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
+                  <span>Finish Customization</span>
+                </>
+              )}
+            </button>
+
+            {isCustomizationFinished && (
+              <p className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 flex items-center gap-1.5 text-center">
+                <span>✓ 3D Bouquet captured. Editing is locked. Proceed to add to cart or checkout.</span>
+              </p>
+            )}
+          </div>
         </section>
 
         {/* RIGHT PANEL: ARRANGEMENT SUMMARY */}
-        <section className="lg:col-span-3 order-3 lg:order-3 flex flex-col gap-6 self-stretch">
+        <section className="lg:col-span-3 order-3 lg:order-3 flex flex-col gap-6 self-start">
 
           {/* Main summary card */}
-          <div className="bg-white rounded-[24px] border border-[#f0ebe4] p-4 sm:p-6 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-6 flex-grow">
+          <div className="bg-white rounded-[24px] border border-[#f0ebe4] p-4 sm:p-6 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-6">
             <div>
               <h2 className="text-2xl sm:text-[26px] font-bold text-[#563c37] mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Arrangement
@@ -953,7 +1059,7 @@ export default function BoquetCustomization() {
             </div>
 
             {/* Checklist / Selection items */}
-            <div className="flex-grow flex flex-col justify-start min-h-[160px]">
+            <div className="flex flex-col justify-start">
               {selectedStems.length === 0 ? (
                 // Empty state
                 <div className="flex flex-col items-center justify-center py-8 px-4 border border-dashed border-[#e8dfd8] rounded-2xl bg-[#fdfbf9]/60 my-auto text-center">

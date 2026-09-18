@@ -1,12 +1,48 @@
-/**
- * BouquetCanvas.jsx
- * The React Three Fiber Canvas container with studio lighting, camera setup,
- * and background scene settings. (Step 2: No interactions).
- */
-import React, { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import BouquetScene from './BouquetScene';
+
+/**
+ * Inner component to handle WebGL diagnostics and store the R3F invalidate function.
+ */
+function CanvasDiagnostics({ onCanvasCreated, invalidateRef }) {
+  const { gl, invalidate } = useThree();
+
+  useEffect(() => {
+    invalidateRef.current = invalidate;
+
+    if (onCanvasCreated) {
+      onCanvasCreated(gl.domElement);
+    }
+
+    const domElement = gl.domElement;
+
+    const handleContextLost = (e) => {
+      e.preventDefault();
+      console.warn('[DEBUG WEBGL] webglcontextlost event fired!');
+      console.log('[DEBUG WEBGL] Renderer memory at context loss:', {
+        memory: gl.info?.memory,
+        render: gl.info?.render
+      });
+    };
+
+    const handleContextRestored = () => {
+      console.log('[DEBUG WEBGL] webglcontextrestored event fired! Redrawing scene...');
+      invalidate();
+    };
+
+    domElement.addEventListener('webglcontextlost', handleContextLost, false);
+    domElement.addEventListener('webglcontextrestored', handleContextRestored, false);
+
+    return () => {
+      domElement.removeEventListener('webglcontextlost', handleContextLost);
+      domElement.removeEventListener('webglcontextrestored', handleContextRestored);
+    };
+  }, [gl, invalidate, onCanvasCreated, invalidateRef]);
+
+  return null;
+}
 
 export default function BouquetCanvas({
   flowers = [],
@@ -17,16 +53,48 @@ export default function BouquetCanvas({
   selectedSwapFlowerId = null,
   isSwapMode = false,
   onSelectFlower = null,
-  onUpdateFlowerTransform = null
+  onUpdateFlowerTransform = null,
+  onCanvasCreated = null
 }) {
+  const containerRef = useRef(null);
+  const invalidateRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(true);
+
+  // IntersectionObserver to pause R3F frameloop when canvas is off-screen
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const visible = entry.isIntersecting;
+        console.log(`[DEBUG WEBGL] Canvas visibility: ${visible ? 'VISIBLE (frameloop=always)' : 'OFF-SCREEN (frameloop=demand)'}`);
+        setIsVisible(visible);
+
+        if (visible && invalidateRef.current) {
+          console.log('[DEBUG WEBGL] Canvas resumed: calling invalidate() to force redraw');
+          invalidateRef.current();
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}>
+    <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}>
       <Canvas
         shadows
+        frameloop={isVisible ? 'always' : 'demand'}
+        dpr={[1, 1.5]}
         camera={{ position: [0, 2, 7], fov: 45 }}
         gl={{ antialias: true, preserveDrawingBuffer: true }}
         onPointerMissed={() => onSelectFlower && onSelectFlower(null)}
       >
+        <CanvasDiagnostics onCanvasCreated={onCanvasCreated} invalidateRef={invalidateRef} />
+
         {/* Soft natural ambient lighting */}
         <ambientLight intensity={0.85} color="#fffaee" />
 
@@ -91,4 +159,9 @@ export default function BouquetCanvas({
       </Canvas>
     </div>
   );
+<<<<<<< Updated upstream
 }
+=======
+}
+
+>>>>>>> Stashed changes
