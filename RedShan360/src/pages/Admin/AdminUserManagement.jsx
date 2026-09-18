@@ -44,6 +44,15 @@ const defaultFormState = {
   permissions: [],
 };
 
+// Helper to attach Auth headers if available
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {})
+  };
+};
+
 // Helper to map backend status to frontend capitalized display status
 const mapStatusToFrontend = (backendStatus) => {
   if (!backendStatus) return "Active";
@@ -61,8 +70,21 @@ const mapToFrontendFormat = (user) => ({
   type: user.role === "MANAGER" ? "Manager" : user.role === "EMPLOYEE" ? "Executive" : "Standard",
   contact: `${user.email} | ${user.phone || ""}`,
   status: mapStatusToFrontend(user.status),
-  employeeId: user.employeeId || user.managerId || "",
-  joiningDate: user.registeredDate ? user.registeredDate.split("T")[0] : ""
+  employeeId: user.employeeId 
+    ? `EMP-${String(user.employeeId).padStart(3, "0")}` 
+    : user.managerId 
+    ? `MGR-${String(user.managerId).padStart(3, "0")}` 
+    : user.customerId 
+    ? `CUST-${String(user.customerId).padStart(3, "0")}` 
+    : `USR-${String(user.id).padStart(3, "0")}`,
+  joiningDate: user.promoteDate 
+    ? user.promoteDate.split("T")[0] 
+    : user.registeredDate 
+    ? user.registeredDate.split("T")[0] 
+    : "",
+  role: user.role,
+  managerId: user.managerId,
+  customerId: user.customerId
 });
 
 function AdminUserManagement() {
@@ -89,7 +111,7 @@ function AdminUserManagement() {
   const [editingUserId, setEditingUserId] = useState(null);
 
   const fetchStats = () => {
-    fetch("http://localhost:8080/api/admin/users/stats")
+    fetch("http://localhost:8080/api/admin/users/stats", { headers: getAuthHeaders() })
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error("Error fetching stats:", err));
@@ -98,17 +120,17 @@ function AdminUserManagement() {
   const fetchUsers = () => {
     fetchStats();
     // Fetch Customers
-    fetch("http://localhost:8080/api/admin/users?role=CUSTOMER")
+    fetch("http://localhost:8080/api/admin/users?role=CUSTOMER", { headers: getAuthHeaders() })
       .then(res => res.json())
       .then(data => setCustomers(data.map(mapToFrontendFormat)))
       .catch(err => console.error("Error fetching customers:", err));
     // Fetch Managers
-    fetch("http://localhost:8080/api/admin/users?role=MANAGER")
+    fetch("http://localhost:8080/api/admin/users?role=MANAGER", { headers: getAuthHeaders() })
       .then(res => res.json())
       .then(data => setManagers(data.map(mapToFrontendFormat)))
       .catch(err => console.error("Error fetching managers:", err));
     // Fetch Employees
-    fetch("http://localhost:8080/api/admin/users?role=EMPLOYEE")
+    fetch("http://localhost:8080/api/admin/users?role=EMPLOYEE", { headers: getAuthHeaders() })
       .then(res => res.json())
       .then(data => setEmployees(data.map(mapToFrontendFormat)))
       .catch(err => console.error("Error fetching employees:", err));
@@ -119,7 +141,7 @@ function AdminUserManagement() {
   }, []);
 
   const triggerSearch = (role, query) => {
-    fetch(`http://localhost:8080/api/admin/users?role=${role}&search=${query}`)
+    fetch(`http://localhost:8080/api/admin/users?role=${role}&search=${encodeURIComponent(query)}`, { headers: getAuthHeaders() })
       .then(res => res.json())
       .then(data => {
         const list = data.map(mapToFrontendFormat);
@@ -242,44 +264,25 @@ function AdminUserManagement() {
       return;
     }
 
-    // Create user object
-    const contactString = `${formData.email} | ${formData.phone}`;
-    const jobTitleLabel = formData.jobTitle || (formData.role === "Manager" ? "Manager" : "Executive");
-
-    const newUserObj = {
-      id: modalMode === "edit" ? editingUserId : Date.now(),
-      name: formData.fullName,
-      type: jobTitleLabel,
-      contact: contactString,
-      status: formData.status,
-      employeeId: formData.employeeId,
-      department: formData.department,
-      gender: formData.gender,
-      dob: formData.dob,
-      joiningDate: formData.joiningDate,
-      addressLine: formData.addressLine,
-      city: formData.city,
-      province: formData.province,
-      permissions: formData.role === "Manager" ? formData.permissions : [],
-      username: formData.username || formData.email,
-    };
+    const joiningDateIso = formData.joiningDate ? new Date(formData.joiningDate).toISOString() : null;
 
     if (modalMode === "add") {
       const isManager = formData.role === "Manager";
       const apiUrl = isManager 
         ? "http://localhost:8080/api/admin/users/register-manager"
         : "http://localhost:8080/api/admin/users/register-employee";
+
       fetch(apiUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          name: formData.fullName,
-          email: formData.email,
+          name: formData.fullName.trim(),
+          email: formData.email.trim(),
           password: formData.password,
-          phone: formData.phone,
-          status: formData.status
+          phone: formData.phone.trim(),
+          status: formData.status.toUpperCase(),
+          registeredDate: joiningDateIso,
+          promoteDate: joiningDateIso
         })
       })
       .then(async (response) => {
@@ -295,31 +298,9 @@ function AdminUserManagement() {
         }
         return data;
       })
-      .then((data) => {
-        const savedUserObj = {
-          id: data.id,
-          name: data.name,
-          type: isManager ? "Manager" : "Executive",
-          contact: `${data.email} | ${data.phone || ""}`,
-          status: mapStatusToFrontend(data.status),
-          employeeId: formData.employeeId,
-          department: formData.department,
-          gender: formData.gender,
-          dob: formData.dob,
-          joiningDate: formData.joiningDate,
-          addressLine: formData.addressLine,
-          city: formData.city,
-          province: formData.province,
-          permissions: isManager ? formData.permissions : [],
-          username: data.email
-        };
-        if (isManager) {
-          setManagers((prev) => [...prev, savedUserObj]);
-        } else {
-          setEmployees((prev) => [...prev, savedUserObj]);
-        }
-        fetchStats();
-        alert(`${formData.role} registered successfully on backend!`);
+      .then(() => {
+        fetchUsers();
+        alert(`${formData.role} registered successfully!`);
         setIsModalOpen(false);
       })
       .catch((error) => {
@@ -329,14 +310,16 @@ function AdminUserManagement() {
       // Edit mode
       fetch(`http://localhost:8080/api/admin/users/${editingUserId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password || "",
+          name: formData.fullName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          password: formData.password || undefined,
           role: formData.role.toUpperCase(),
-          status: formData.status
+          status: formData.status.toUpperCase(),
+          registeredDate: joiningDateIso,
+          promoteDate: joiningDateIso
         })
       })
       .then(async (response) => {
@@ -352,10 +335,10 @@ function AdminUserManagement() {
         }
         return data;
       })
-      .then(data => {
+      .then(() => {
         alert("User details updated successfully!");
         setIsModalOpen(false);
-        fetchUsers(); // Reload/refresh local lists
+        fetchUsers();
       })
       .catch((error) => {
         alert("Update Error: " + error.message);
@@ -434,19 +417,13 @@ function AdminUserManagement() {
     if (!confirmDelete) return;
 
     fetch(`http://localhost:8080/api/admin/users/${user.id}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: getAuthHeaders()
     })
     .then(res => {
       if (res.ok) {
         alert("User deleted successfully!");
-        if (type === "customers") {
-          setCustomers((prev) => prev.filter((c) => c.id !== user.id));
-        } else if (type === "managers") {
-          setManagers((prev) => prev.filter((m) => m.id !== user.id));
-        } else {
-          setEmployees((prev) => prev.filter((emp) => emp.id !== user.id));
-        }
-        fetchStats();
+        fetchUsers();
       } else {
         alert("Failed to delete user.");
       }
