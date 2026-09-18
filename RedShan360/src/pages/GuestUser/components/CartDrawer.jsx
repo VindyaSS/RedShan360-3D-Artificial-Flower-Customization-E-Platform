@@ -15,7 +15,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
   // Minimum Delivery Date (2 days in advance)
   const getMinDeliveryDate = () => {
     const target = new Date();
-    target.setDate(target.getDate() + 2);
+    target.setDate(target.getDate() + 5);
     const year = target.getFullYear();
     const month = String(target.getMonth() + 1).padStart(2, '0');
     const day = String(target.getDate()).padStart(2, '0');
@@ -294,7 +294,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
     }
 
     if (customerDetails.deliveryDate < minDeliveryDate) {
-      alert(`Please select a delivery date starting from ${minDeliveryDate} (at least 2 days in advance).`);
+      alert(`Please select a delivery date starting from ${minDeliveryDate} (at least 5 days in advance).`);
       return;
     }
 
@@ -359,8 +359,9 @@ const CartDrawer = ({ isOpen, onClose }) => {
             };
           }
 
+          const prodId = item.productId !== undefined && item.productId !== null ? item.productId : item.id;
           return {
-            id: Number(item.productId),
+            id: Number(prodId),
             title: item.title,
             quantity: item.quantity,
             isCustom: false,
@@ -379,7 +380,9 @@ const CartDrawer = ({ isOpen, onClose }) => {
           phone: customerDetails.phone,
           email: customerDetails.email,
           deliveryDate: customerDetails.deliveryDate || minDeliveryDate
-        }
+        },
+        address: `${customerDetails.address}${customerDetails.city ? ', ' + customerDetails.city : ''}`,
+        phone: customerDetails.phone
       });
 
       const checkoutData = response.data;
@@ -805,7 +808,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                   />
                   <p className="text-[10px] text-gray-500 mt-1 flex items-center gap-1 font-medium">
                     <Calendar size={12} className="text-[#8c5e5e]" />
-                    Available from 2 days from today ({minDeliveryDate}).
+                    Available from 5 days from today ({minDeliveryDate}).
                   </p>
                 </div>
 
@@ -865,8 +868,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
                   onClick={handleFinalCheckout}
                   disabled={isProcessing}
                   className={`w-full py-3.5 text-white text-xs font-bold uppercase tracking-wider rounded-sm shadow-md transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.99] ${isProcessing
-                      ? 'bg-[#8c5e5e]/75 cursor-not-allowed'
-                      : 'bg-[#8c5e5e] hover:bg-[#7d4d50]'
+                    ? 'bg-[#8c5e5e]/75 cursor-not-allowed'
+                    : 'bg-[#8c5e5e] hover:bg-[#7d4d50]'
                     }`}
                 >
                   {isProcessing ? (
