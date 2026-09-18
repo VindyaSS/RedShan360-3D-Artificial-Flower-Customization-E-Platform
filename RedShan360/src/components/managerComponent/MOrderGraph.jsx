@@ -43,8 +43,14 @@ export default function MOrderGraph() {
             setLoading(true);
             setError(null);
 
+            const token = localStorage.getItem('token');
             const response = await fetch(
-                `${API_BASE_URL}/dashboard/order-analytics`
+                `${API_BASE_URL}/dashboard/order-analytics`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
             );
 
             if (!response.ok) {

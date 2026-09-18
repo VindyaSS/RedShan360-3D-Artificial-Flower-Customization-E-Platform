@@ -278,7 +278,6 @@ export default function ECustomizedOrderTable({
                                                             <th>Item Name</th>
                                                             <th>Flower Type</th>
                                                             <th>Number of Flowers</th>
-                                                            <th>Bouquet Style</th>
                                                             <th>Status</th>
                                                             <th>Actions</th>
                                                         </tr>
@@ -288,7 +287,7 @@ export default function ECustomizedOrderTable({
                                                         {group.items.length === 0 ? (
                                                             <tr>
                                                                 <td
-                                                                    colSpan={7}
+                                                                    colSpan={6}
                                                                     style={{ textAlign: 'center', padding: '20px' }}
                                                                 >
                                                                     No customized item details available.
@@ -332,9 +331,6 @@ export default function ECustomizedOrderTable({
                                                                             {item.numberOfFlowers ?? item.quantity ?? 0}
                                                                         </td>
 
-                                                                        <td>
-                                                                            {item.bouquetStyle || 'N/A'}
-                                                                        </td>
 
                                                                         <td>
                                                                             {renderStatusBadge(status)}

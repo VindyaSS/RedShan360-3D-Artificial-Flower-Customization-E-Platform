@@ -137,8 +137,8 @@ export default function MmanageEmployees() {
                     <SideNavigation />
                 </div>
                 <div className="Mpart2">
-                    <div className="dashboard-row">
-                        <div className="tabs-container" style={{ padding: "24px", flex: 1 }}>
+                <div className="dashboard-row">
+                        <div className="tabs-container" style={{ padding: "20px", flex: 1 }}>
                             <h3 style={{
                                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                                 fontSize: "16px",
@@ -158,7 +158,7 @@ export default function MmanageEmployees() {
                     </div>
 
                     <div className="dashboard-row">
-                        <div className="tabs-container" style={{ padding: "24px", flex: 1 }}>
+                        <div className="tabs-container" style={{ padding: "20px", flex: 1 }}>
                             <h3 style={{
                                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                                 fontSize: "16px",
