@@ -36,7 +36,13 @@ function AdminTopSellingProducts({ products }) {
           </thead>
           <tbody>
             {products.map((product) => {
-              const imageSrc = imageMap[product.imageName] || serenityWhite;
+              const imageSrc =
+                imageMap[product.imageName] ||
+                (product.imageName && (product.imageName.startsWith("http://") || product.imageName.startsWith("https://"))
+                  ? product.imageName
+                  : product.imageName && product.imageName.startsWith("/")
+                  ? `http://localhost:8080${product.imageName}`
+                  : serenityWhite);
               const isPositive = product.trend >= 0;
 
               return (
