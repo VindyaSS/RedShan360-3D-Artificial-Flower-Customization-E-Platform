@@ -552,7 +552,7 @@ const Shop = () => {
         navItems={navItems}
       />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-[120px] pb-20">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-6 sm:pt-8 md:pt-10 pb-6 sm:pb-8">
         <div className="flex flex-col lg:flex-row gap-10">
 
           {/* Filters Sidebar - Desktop view */}
@@ -913,7 +913,7 @@ const Shop = () => {
 
             {/* Pagination Controls */}
             {!loading && totalPages > 1 && (
-              <nav className="flex items-center justify-center gap-2 mt-16 font-sans">
+              <nav className="flex items-center justify-center gap-2 mt-8 sm:mt-10 font-sans">
                 {/* Previous */}
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
