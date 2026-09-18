@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
+import api from '../../services/api';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import contactHeroBg from '../../assets/images/contact_hero.jpg';
@@ -142,6 +143,13 @@ const ContactPage = () => {
     setNotification(null);
 
     try {
+      // Call backend API to persist notification for admins
+      try {
+        await api.post('/api/contact', formData);
+      } catch (backendErr) {
+        console.warn('Backend contact notification sync failed:', backendErr);
+      }
+
       await emailjs.sendForm(
         SERVICE_ID,
         TEMPLATE_ID,
