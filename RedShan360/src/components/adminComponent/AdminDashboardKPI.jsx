@@ -26,48 +26,46 @@ function AdminDashboardKPI({ data, loading }) {
 
   const kpis = [
     {
-      title: "Total Customers",
-      value: formatNumber(data?.totalCustomers ?? 12840),
-      change: formatPercentage(data?.totalCustomersChange ?? 12),
-      status: getStatus(data?.totalCustomersChange ?? 12, "Total Customers")
+      title: "Total Managers",
+      value: formatNumber(data?.totalManagers),
+      change: formatPercentage(data?.totalManagersChange),
+      status: getStatus(data?.totalManagersChange, "Total Managers")
     },
     {
-      title: "Total Managers",
-      value: formatNumber(data?.totalManagers ?? 24),
-      change: formatPercentage(data?.totalManagersChange ?? 5),
-      status: getStatus(data?.totalManagersChange ?? 5, "Total Managers")
+      title: "Total Customers",
+      value: formatNumber(data?.totalCustomers),
+      change: formatPercentage(data?.totalCustomersChange),
+      status: getStatus(data?.totalCustomersChange, "Total Customers")
     },
     {
       title: "Total Employees",
-      value: formatNumber(data?.totalEmployees ?? 156),
-      change: formatPercentage(data?.totalEmployeesChange ?? 12),
-      status: getStatus(data?.totalEmployeesChange ?? 12, "Total Employees")
+      value: formatNumber(data?.totalEmployees),
+      change: formatPercentage(data?.totalEmployeesChange),
+      status: getStatus(data?.totalEmployeesChange, "Total Employees")
     },
     {
       title: "Total Products",
-      value: formatNumber(data?.totalProducts ?? 2450),
-      change: formatPercentage(data?.totalProductsChange ?? 0),
-      status: getStatus(data?.totalProductsChange ?? 0, "Total Products")
+      value: formatNumber(data?.totalProducts),
+      change: formatPercentage(data?.totalProductsChange),
+      status: getStatus(data?.totalProductsChange, "Total Products")
     },
     {
       title: "Pending Orders",
-      value: formatNumber(data?.pendingOrders ?? 48),
-      change: formatPercentage(data?.pendingOrdersChange ?? 15),
-      status: getStatus(data?.pendingOrdersChange ?? 15, "Pending Orders")
+      value: formatNumber(data?.pendingOrders),
+      change: formatPercentage(data?.pendingOrdersChange),
+      status: getStatus(data?.pendingOrdersChange, "Pending Orders")
     },
     {
       title: "Completed Orders",
-      value: formatNumber(data?.completedOrders ?? 2142),
-      change: formatPercentage(data?.completedOrdersChange ?? 18),
-      status: getStatus(data?.completedOrdersChange ?? 18, "Completed Orders")
+      value: formatNumber(data?.completedOrders),
+      change: formatPercentage(data?.completedOrdersChange),
+      status: getStatus(data?.completedOrdersChange, "Completed Orders")
     },
     {
       title: "Monthly Revenue",
-      value: data?.monthlyRevenue !== undefined && data?.monthlyRevenue !== null
-        ? `Rs. ${Number(data.monthlyRevenue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-        : "Rs. 84,200.00",
-      change: formatPercentage(data?.monthlyChange ?? 8.4),
-      status: getStatus(data?.monthlyChange ?? 8.4, "Monthly Revenue")
+      value: `Rs. ${Number(data?.monthlyRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      change: formatPercentage(data?.monthlyChange),
+      status: getStatus(data?.monthlyChange, "Monthly Revenue")
     },
   ];
 
