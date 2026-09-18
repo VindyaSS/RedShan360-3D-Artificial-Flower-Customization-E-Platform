@@ -163,7 +163,7 @@ function AdminSidebar() {
     <div className="admin-sidebar">
       {/* Logo Section */}
       <div className="sidebar-logo">
-        <h1>RedShan360</h1>
+        <h1>RedShan Flora</h1>
         <p>Luxury Admin</p>
       </div>
 
