@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Product3DViewer from '../../components/Product3DViewer';
 import api, { cartApi } from '../../services/api';
-import { getProductImageUrl } from '../../utils/imageHelper';
+import { getProductImageUrl, getProductImage } from '../../utils/imageHelper';
 
 const ProductDetails = () => {
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ const ProductDetails = () => {
             discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
             discountNumericPrice: discPriceVal,
             stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 100,
-            imageUrl: p.imageUrl || '/images/placeholder.png',
+            imageUrl: getProductImage(p),
             modelUrl: p.modelUrl || '',
             categoryName: p.categoryName || '',
             subCategoryName: p.subCategoryName || '',
@@ -83,7 +83,7 @@ const ProductDetails = () => {
               { name: 'Soft White', hex: '#ffffff' }
             ],
             thumbnails: [
-              p.imageUrl || '/images/placeholder.png'
+              getProductImage(p)
             ]
           };
 
@@ -122,7 +122,7 @@ const ProductDetails = () => {
                   id: item.productId,
                   title: item.productName,
                   price: `Rs ${rPrice.toFixed(2)}`,
-                  imageUrl: item.imageUrl || '/images/placeholder.png',
+                  imageUrl: getProductImage(item),
                   categoryName: item.categoryName,
                   subCategoryName: item.subCategoryName
                 };

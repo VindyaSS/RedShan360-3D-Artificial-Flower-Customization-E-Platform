@@ -8,6 +8,7 @@ import { getPriceBreakdown } from '../../components/bouquet/PriceEngine';
 import BouquetCanvas from '../../components/bouquet/BouquetCanvas';
 import CartDrawer from '../GuestUser/components/CartDrawer';
 import Navbar from '../GuestUser/components/Navbar';
+import Footer from '../GuestUser/components/Footer';
 import { BOUQUET_STYLE_OPTIONS, BOUQUET_STYLE_CONFIG } from '../../components/bouquet/bouquetStyleConfig';
 
 import {
@@ -154,7 +155,7 @@ export default function BoquetCustomization() {
       try {
         const response = await api.get('/api/products', { signal: controller.signal });
         const data = response.data || [];
-        
+
         // Filter by category_id === 3
         const filtered = data.filter(p => {
           const categoryId = p.categoryId !== undefined ? p.categoryId : p.category_id;
@@ -450,7 +451,7 @@ export default function BoquetCustomization() {
   // Check if selected occasion has any database flowers
   const hasOccasionFlowers = useMemo(() => {
     const selectedSubCategoryId = OCCASION_SUBCATEGORY_MAP[selectedOccasion];
-    return stemsDatabase.some(flower => 
+    return stemsDatabase.some(flower =>
       flower.category === 'premium-blooms' &&
       flower.subCategoryId !== null &&
       flower.subCategoryId !== undefined &&
@@ -739,11 +740,11 @@ export default function BoquetCustomization() {
         </div>
       )}
 
-      <Navbar 
-        isScrolled={isScrolled} 
-        mobileMenuOpen={mobileMenuOpen} 
-        setMobileMenuOpen={setMobileMenuOpen} 
-        navItems={navItems} 
+      <Navbar
+        isScrolled={isScrolled}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        navItems={navItems}
       />
 
       {/* MAIN CONTAINER */}
@@ -774,11 +775,10 @@ export default function BoquetCustomization() {
                     key={sizeKey}
                     type="button"
                     onClick={() => handleSizeChange(sizeKey)}
-                    className={`flex flex-col text-left p-2.5 rounded-xl border transition-all duration-300 ${
-                      isActive
-                        ? 'bg-[#563c37] text-white border-[#563c37] shadow-sm'
-                        : 'bg-[#fdfbf9]/40 border-[#ece7e2] text-[#563c37] hover:border-[#8c5e5e]/30'
-                    }`}
+                    className={`flex flex-col text-left p-2.5 rounded-xl border transition-all duration-300 ${isActive
+                      ? 'bg-[#563c37] text-white border-[#563c37] shadow-sm'
+                      : 'bg-[#fdfbf9]/40 border-[#ece7e2] text-[#563c37] hover:border-[#8c5e5e]/30'
+                      }`}
                   >
                     <span className="text-xs font-bold">{config.label}</span>
                     <span className={`text-[9px] mt-0.5 ${isActive ? 'text-white/70' : 'text-[#563c37]/50'}`}>
@@ -801,11 +801,10 @@ export default function BoquetCustomization() {
                 <button
                   key={option.key}
                   onClick={() => setSelectedOccasion(option.key)}
-                  className={`flex-1 text-[10px] font-bold py-2 px-1 rounded-lg transition-all duration-300 ${
-                    isActive
-                      ? 'bg-[#563c37] text-white shadow-sm'
-                      : 'text-[#563c37]/60 hover:text-[#563c37] hover:bg-[#f5efeb]/40'
-                  }`}
+                  className={`flex-1 text-[10px] font-bold py-2 px-1 rounded-lg transition-all duration-300 ${isActive
+                    ? 'bg-[#563c37] text-white shadow-sm'
+                    : 'text-[#563c37]/60 hover:text-[#563c37] hover:bg-[#f5efeb]/40'
+                    }`}
                 >
                   {option.label}
                 </button>
@@ -836,80 +835,80 @@ export default function BoquetCustomization() {
             </div>
           ) : (
             /* Categories list accordion */
-          <div className="flex flex-col gap-2">
-            {categoriesList.map((category) => {
-              const categoryStems = filteredStems.filter(s => s.category === category.key);
-              const isExpanded = activeCategory[category.key];
+            <div className="flex flex-col gap-2">
+              {categoriesList.map((category) => {
+                const categoryStems = filteredStems.filter(s => s.category === category.key);
+                const isExpanded = activeCategory[category.key];
 
-              return (
-                <div key={category.key} className="border-b border-[#fdfbf9] pb-3 last:border-0 last:pb-0">
-                  <button
-                    onClick={() => toggleCategory(category.key)}
-                    className="flex justify-between items-center w-full text-left font-bold text-xs tracking-wider uppercase text-[#563c37] py-3 hover:text-[#8c5e5e] transition-colors duration-300"
-                  >
-                    <span>{category.label}</span>
-                    {isExpanded ? <ChevronUp size={14} className="text-[#563c37]/60" /> : <ChevronDown size={14} className="text-[#563c37]/60" />}
-                  </button>
+                return (
+                  <div key={category.key} className="border-b border-[#fdfbf9] pb-3 last:border-0 last:pb-0">
+                    <button
+                      onClick={() => toggleCategory(category.key)}
+                      className="flex justify-between items-center w-full text-left font-bold text-xs tracking-wider uppercase text-[#563c37] py-3 hover:text-[#8c5e5e] transition-colors duration-300"
+                    >
+                      <span>{category.label}</span>
+                      {isExpanded ? <ChevronUp size={14} className="text-[#563c37]/60" /> : <ChevronDown size={14} className="text-[#563c37]/60" />}
+                    </button>
 
-                  {isExpanded && (
-                    <div className="mt-2 flex flex-col gap-4 animate-fadeIn">
-                      {categoryStems.length === 0 ? (
-                        !hasOccasionFlowers ? (
-                          <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers are available for this occasion.</p>
+                    {isExpanded && (
+                      <div className="mt-2 flex flex-col gap-4 animate-fadeIn">
+                        {categoryStems.length === 0 ? (
+                          !hasOccasionFlowers ? (
+                            <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers are available for this occasion.</p>
+                          ) : (
+                            <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers match your search.</p>
+                          )
                         ) : (
-                          <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers match your search.</p>
-                        )
-                      ) : (
-                        <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1.5 scroll-smooth custom-scrollbar">
-                          {categoryStems.map((stem) => {
-                            const quantitySelected = selectedStems.find(s => s.stemId === stem.id)?.quantity || 0;
+                          <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1.5 scroll-smooth custom-scrollbar">
+                            {categoryStems.map((stem) => {
+                              const quantitySelected = selectedStems.find(s => s.stemId === stem.id)?.quantity || 0;
 
-                            return (
-                              <div key={stem.id} className="flex items-center gap-3 bg-[#fdfbf9]/70 p-2 rounded-xl border border-[#f5efeb] hover:border-[#8c5e5e]/25 transition-all">
-                                <img
-                                  src={stem.image}
-                                  alt={stem.name}
-                                  className="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm border border-[#ece7e2]"
-                                />
-                                <div className="flex-grow min-w-0">
-                                  <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
-                                  <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
-                                  <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
-                                    +Rs {stem.price.toFixed(2)}
-                                  </span>
+                              return (
+                                <div key={stem.id} className="flex items-center gap-3 bg-[#fdfbf9]/70 p-2 rounded-xl border border-[#f5efeb] hover:border-[#8c5e5e]/25 transition-all">
+                                  <img
+                                    src={stem.image}
+                                    alt={stem.name}
+                                    className="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm border border-[#ece7e2]"
+                                  />
+                                  <div className="flex-grow min-w-0">
+                                    <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
+                                    <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
+                                    <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
+                                      +Rs {stem.price.toFixed(2)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {quantitySelected > 0 && (
+                                      <>
+                                        <button
+                                          onClick={() => handleRemoveStem(stem.id)}
+                                          className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
+                                          aria-label="Decrease quantity"
+                                        >
+                                          <Minus size={12} />
+                                        </button>
+                                        <span className="text-xs font-bold text-[#563c37] w-4 text-center">{quantitySelected}</span>
+                                      </>
+                                    )}
+                                    <button
+                                      onClick={() => handleAddStem(stem.id)}
+                                      className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
+                                      aria-label="Add stem"
+                                    >
+                                      <Plus size={12} />
+                                    </button>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  {quantitySelected > 0 && (
-                                    <>
-                                      <button
-                                        onClick={() => handleRemoveStem(stem.id)}
-                                        className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
-                                        aria-label="Decrease quantity"
-                                      >
-                                        <Minus size={12} />
-                                      </button>
-                                      <span className="text-xs font-bold text-[#563c37] w-4 text-center">{quantitySelected}</span>
-                                    </>
-                                  )}
-                                  <button
-                                    onClick={() => handleAddStem(stem.id)}
-                                    className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
-                                    aria-label="Add stem"
-                                  >
-                                    <Plus size={12} />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </section>
 
@@ -1172,82 +1171,8 @@ export default function BoquetCustomization() {
 
       </main>
 
-      {/* FOOTER */}
-      <footer className="bg-[#fcf9f6] text-[#563c37] border-t border-[#f0ebe4] pt-16 pb-10 px-6 md:px-12 lg:px-16 mt-16">
-        <div className="max-w-7xl mx-auto">
 
-          {/* Main Footer Links */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
-
-            {/* Column 1: Brand details */}
-            <div className="md:col-span-5 flex flex-col gap-4">
-              <h3 className="text-2xl font-bold tracking-tight text-[#563c37]" style={{ fontFamily: 'Playfair Display, serif' }}>
-                RedShan360
-              </h3>
-              <p className="text-xs text-[#563c37]/60 leading-relaxed max-w-sm font-medium">
-                Dedicated to the preservation of botanical beauty through high-fidelity silk artistry and architectural floral design.
-              </p>
-            </div>
-
-            {/* Column 2: Collections navigation */}
-            <div className="md:col-span-2 md:col-start-7 flex flex-col gap-4">
-              <h4 className="text-[9px] font-extrabold tracking-widest text-[#563c37]/45 uppercase">
-                Collections
-              </h4>
-              <ul className="flex flex-col gap-2.5 text-xs font-semibold text-[#563c37]/85">
-                <li><a href="/shop" className="hover:text-[#8c5e5e] transition-colors">The Rose Vault</a></li>
-                <li><a href="/shop" className="hover:text-[#8c5e5e] transition-colors">Ethereal Orchids</a></li>
-                <li><a href="/shop" className="hover:text-[#8c5e5e] transition-colors">Verdant Greenery</a></li>
-                <li><a href="/shop" className="hover:text-[#8c5e5e] transition-colors">Seasonal Curations</a></li>
-              </ul>
-            </div>
-
-            {/* Column 3: Support links */}
-            <div className="md:col-span-2 flex flex-col gap-4">
-              <h4 className="text-[9px] font-extrabold tracking-widest text-[#563c37]/45 uppercase">
-                Support
-              </h4>
-              <ul className="flex flex-col gap-2.5 text-xs font-semibold text-[#563c37]/85">
-                <li><a href="/about" className="hover:text-[#8c5e5e] transition-colors">Sustainability</a></li>
-                <li><a href="/shipping" className="hover:text-[#8c5e5e] transition-colors">Shipping & Returns</a></li>
-                <li><a href="/care" className="hover:text-[#8c5e5e] transition-colors">Care Instructions</a></li>
-                <li><a href="/terms" className="hover:text-[#8c5e5e] transition-colors">Terms of Service</a></li>
-              </ul>
-            </div>
-
-            {/* Column 4: Newsletter */}
-            <div className="md:col-span-2 flex flex-col gap-4">
-              <h4 className="text-[9px] font-extrabold tracking-widest text-[#563c37]/45 uppercase">
-                Stay Inspired
-              </h4>
-              <div className="relative flex items-center border-b border-[#563c37]/20 pb-1.5 focus-within:border-[#563c37] transition-colors">
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  className="bg-transparent border-none outline-none text-xs text-[#563c37] placeholder:text-[#563c37]/30 w-full pr-6"
-                />
-                <button
-                  onClick={() => triggerToast('Subscribed to newsletter!')}
-                  className="absolute right-0 hover:text-[#8c5e5e] transition-colors text-[#563c37]/80"
-                  aria-label="Subscribe to newsletter"
-                >
-                  <ArrowRight size={14} />
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-[#f0ebe4] pt-8 flex items-center justify-center">
-            <span className="text-[9px] font-bold tracking-widest text-[#563c37]/40 uppercase text-center">
-              © 2024 REDSHAN360. ALL RIGHTS RESERVED.
-            </span>
-          </div>
-
-        </div>
-      </footer>
-
+      <Footer />
       {/* Shared Cart Drawer Overlay */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 

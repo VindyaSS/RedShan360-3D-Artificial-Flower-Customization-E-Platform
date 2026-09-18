@@ -131,7 +131,7 @@
 
 
 import "./AdminSidebar.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import dashboardIcon from "../../assets/adminDashboard.png";
 import usersIcon from "../../assets/adminUsers.png";
 import productsIcon from "../../assets/adminProducts.png";
@@ -141,6 +141,8 @@ import settingsIcon from "../../assets/adminSetting.png"; // ✅ correct filenam
 import logoutIcon from "../../assets/adminLogout.png";
 
 function AdminSidebar() {
+  const navigate = useNavigate();
+
   const menuItems = [
     { name: "Dashboard", icon: dashboardIcon, path: "/adminDashboard" },
     { name: "User Management", icon: usersIcon, path: "/adminUserManagement" },
@@ -149,6 +151,13 @@ function AdminSidebar() {
     { name: "Reports & Analytics", icon: reportsIcon, path: "/adminReports" },
     { name: "Settings", icon: settingsIcon, path: "/adminSettings" },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.dispatchEvent(new Event("auth-updated"));
+    navigate("/login");
+  };
 
   return (
     <div className="admin-sidebar">
@@ -178,7 +187,7 @@ function AdminSidebar() {
 
       {/* Logout at bottom */}
       <div className="sidebar-logout">
-        <div className="menu-item logout">
+        <div className="menu-item logout" onClick={handleLogout} style={{ cursor: "pointer" }}>
           <div className="menu-icon">
             <img src={logoutIcon} alt="Logout" />
           </div>

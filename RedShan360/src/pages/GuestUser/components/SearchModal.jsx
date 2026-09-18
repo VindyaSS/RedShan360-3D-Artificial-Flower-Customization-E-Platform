@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Sparkles, AlertCircle } from 'lucide-react';
-import { products } from '../../../data/products';
+import api from '../../../services/api';
+import { getProductImage } from '../../../utils/imageHelper';
 
 const SearchModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -14,6 +15,37 @@ const SearchModal = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
+  const [productsList, setProductsList] = useState([]);
+
+  // Fetch real database products whenever modal opens
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/api/products');
+        const dbProducts = response.data || [];
+        const mapped = dbProducts.map((p) => {
+          const numPrice = Number(p.price) || 0;
+          return {
+            id: p.productId,
+            productId: p.productId,
+            title: p.productName || 'Unnamed Arrangement',
+            subtitle: p.categoryName || '',
+            category: p.categoryName || 'Bouquet',
+            price: `Rs ${numPrice.toFixed(2)}`,
+            numericPrice: numPrice,
+            image: getProductImage(p),
+            description: p.description || ''
+          };
+        });
+        setProductsList(mapped);
+      } catch (err) {
+        console.error('Failed to fetch products for search modal:', err);
+      }
+    };
+    if (isOpen) {
+      fetchProducts();
+    }
+  }, [isOpen]);
 
   // 300ms Search Debounce
   useEffect(() => {
@@ -87,14 +119,15 @@ const SearchModal = ({ isOpen, onClose }) => {
   }, [isOpen, onClose]);
 
   // Popular searches (first 9 products for clean 3x3 layout)
-  const popularProducts = products.slice(0, 9);
+  const popularProducts = productsList.slice(0, 9);
 
   // Search filter logic
-  const filteredResults = products.filter((product) => {
+  const filteredResults = productsList.filter((product) => {
     const titleMatch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
     const subtitleMatch = product.subtitle.toLowerCase().includes(searchTerm.toLowerCase());
     const categoryMatch = product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase());
-    return titleMatch || subtitleMatch || categoryMatch;
+    const descMatch = product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    return titleMatch || subtitleMatch || categoryMatch || descMatch;
   });
 
   // Handle click on overlay outside popup container
