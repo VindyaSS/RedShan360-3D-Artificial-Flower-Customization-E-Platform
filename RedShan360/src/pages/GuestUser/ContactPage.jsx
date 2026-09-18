@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import contactHeroBg from '../../assets/images/contact_hero.jpg';
 import {
   MapPin,
   Phone,
@@ -203,18 +204,34 @@ const ContactPage = () => {
         navItems={navItems}
       />
 
-      {/* Page Header */}
-      <div className="pt-32 pb-12 text-center bg-[#f4f0ed]/40 border-b border-[#d9d2d0]/20">
-        <div className="max-w-7xl mx-auto px-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#C2185B] font-bold mb-3">Get in touch</p>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Contact Us
-          </h1>
-          <p className="text-sm md:text-base text-[#1a1a1a]/70 max-w-2xl mx-auto leading-relaxed">
-            Have questions about our hyper-realistic floral designs or need support? Reach out to our design consultants.
-          </p>
+      {/* Top Hero Section with Floral Background */}
+      <section className="relative min-h-[420px] md:min-h-[480px] pt-36 pb-16 flex items-center justify-start overflow-hidden border-b border-[#d9d2d0]/30">
+        {/* Hero Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={contactHeroBg}
+            alt="Redshan Flora Contact Background"
+            className="w-full h-full object-cover object-[80%_center] md:object-right transition-opacity duration-700"
+          />
+          {/* Subtle soft gradient overlay for text readability on left side */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#fcf9f8]/95 via-[#fcf9f8]/85 to-transparent md:from-[#fcf9f8]/95 md:via-[#fcf9f8]/75 md:to-transparent" />
         </div>
-      </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-16 text-left">
+          <div className="max-w-xl animate-slide-up-card">
+            <span className="text-xs uppercase tracking-[0.25em] text-[#C2185B] font-bold mb-3 block">
+              Get in touch
+            </span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Contact Us
+            </h1>
+            <p className="text-sm md:text-base text-[#1a1a1a]/80 leading-relaxed font-normal">
+              Have questions about our hyper-realistic floral designs or need support? Reach out to our design consultants.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Toast Notification Popups */}
       {notification && (
