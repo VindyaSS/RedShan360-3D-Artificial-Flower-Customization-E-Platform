@@ -27,14 +27,15 @@ export default function BouquetCanvas({
         gl={{ antialias: true, preserveDrawingBuffer: true }}
         onPointerMissed={() => onSelectFlower && onSelectFlower(null)}
       >
-        {/* Soft background light */}
-        <ambientLight intensity={0.7} />
+        {/* Soft natural ambient lighting */}
+        <ambientLight intensity={0.85} color="#fffaee" />
 
         {/* Dynamic Studio Key Light */}
         <directionalLight
-          position={[5, 8, 5]}
-          intensity={1.5}
+          position={[4, 7, 5]}
+          intensity={1.6}
           castShadow
+          shadow-bias={-0.0001}
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
           shadow-camera-far={20}
@@ -44,11 +45,11 @@ export default function BouquetCanvas({
           shadow-camera-bottom={-6}
         />
 
-        {/* Soft fill light */}
-        <directionalLight position={[-5, 5, -5]} intensity={0.5} />
+        {/* Soft cool rim fill light */}
+        <directionalLight position={[-4, 4, -4]} intensity={0.6} color="#e8f0fe" />
 
-        {/* Warm highlighting back light */}
-        <pointLight position={[0, 5, -2]} intensity={0.8} color="#fbf4eb" />
+        {/* Warm top highlighting light */}
+        <pointLight position={[0, 6, 2]} intensity={1.0} color="#fff5ea" />
 
         <Suspense fallback={null}>
           {/* Studio HDRI Environment */}
@@ -70,9 +71,9 @@ export default function BouquetCanvas({
           {/* Soft ground shadows */}
           <ContactShadows
             position={[0, -1.8, 0]}
-            opacity={0.6}
-            scale={8}
-            blur={1.5}
+            opacity={0.65}
+            scale={9}
+            blur={1.8}
             far={4}
           />
         </Suspense>
