@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Heart, ShoppingCart, User, Menu, X } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { products } from '../../../data/products';
 import CartDrawer from './CartDrawer';
 import SearchModal from './SearchModal';
 import LoginModal from './LoginModal';
 import LoginRequiredModal from './LoginRequiredModal';
-import api from '../../../services/api';
-import { cartApi } from '../../../services/api';
+import api, { cartApi } from '../../../services/api';
+import { getProductImage } from '../../../utils/imageHelper';
 import MyOrdersModal from './MyOrdersModal';
+
 const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWishlistClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +19,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
   const [wishlistCount, setWishlistCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [dbProductsList, setDbProductsList] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -135,6 +136,29 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
     };
   }, []);
 
+  // Load products list from backend for search autocomplete
+  useEffect(() => {
+    const loadSearchProducts = async () => {
+      try {
+        const response = await api.get('/api/products');
+        const dbProducts = response.data || [];
+        const mapped = dbProducts.map((p) => ({
+          id: p.productId,
+          productId: p.productId,
+          title: p.productName || 'Unnamed Arrangement',
+          subtitle: p.categoryName || '',
+          description: p.description || '',
+          image: getProductImage(p),
+          price: `Rs ${(Number(p.price) || 0).toFixed(2)}`
+        }));
+        setDbProductsList(mapped);
+      } catch (err) {
+        console.error('Failed to fetch products for Navbar search:', err);
+      }
+    };
+    loadSearchProducts();
+  }, []);
+
   // Handle autocomplete search
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -142,7 +166,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
       return;
     }
 
-    const filtered = products.filter(
+    const filtered = dbProductsList.filter(
       (product) =>
         product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -150,7 +174,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
     ).slice(0, 5); // Limit results to 5 items
 
     setSearchResults(filtered);
-  }, [searchQuery]);
+  }, [searchQuery, dbProductsList]);
 
   // Click outside listener for search results
   useEffect(() => {
