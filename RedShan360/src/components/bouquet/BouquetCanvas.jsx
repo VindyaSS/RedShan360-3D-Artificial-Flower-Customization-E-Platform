@@ -159,9 +159,7 @@ export default function BouquetCanvas({
       </Canvas>
     </div>
   );
-<<<<<<< Updated upstream
-}
-=======
+
 }
 
->>>>>>> Stashed changes
+
