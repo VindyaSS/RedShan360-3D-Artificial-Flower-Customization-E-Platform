@@ -23,16 +23,16 @@ const Footer = () => {
   };
 
   return (
-    <footer id="contact" className="scroll-mt-[80px] bg-[#f4f0ed] text-[#1a1a1a] py-5 sm:py-6 px-6 md:px-12 lg:px-16 border-t border-[#d9d2d0]/20">
+    <footer id="contact" className="scroll-mt-[80px] bg-[#e9ecef] text-[#212529] py-4 sm:py-5 px-6 md:px-12 lg:px-16 border-t border-[#ced4da]">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6 mb-4 md:mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-3 md:mb-4">
           <div>
-            <h4 className="text-lg font-medium mb-1.5" style={{ fontFamily: 'Playfair Display, serif' }}>Redshan Flora</h4>
-            <p className="text-[#1a1a1a]/70 text-xs font-medium leading-normal">Pioneering the future of botanical décor with hyper-realistic art and immersive digital visualization.</p>
+            <h4 className="text-lg font-bold mb-1 text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>Redshan Flora</h4>
+            <p className="text-[#495057] text-xs font-medium leading-normal">Pioneering the future of botanical décor with hyper-realistic art and immersive digital visualization.</p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-[11px] tracking-[0.14em] uppercase mb-1.5 text-[#1a1a1a]/60">Collections</h4>
+            <h4 className="font-semibold text-[11px] tracking-[0.14em] uppercase mb-1.5 text-[#8c5e5e]">Collections</h4>
             <ul className="space-y-1">
               {collectionLinks.map((item) => {
                 const params = new URLSearchParams();
@@ -45,7 +45,7 @@ const Footer = () => {
                         e.preventDefault();
                         handleCollectionNavigation(item.category);
                       }}
-                      className="font-medium text-xs text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300"
+                      className="font-medium text-xs text-[#212529] hover:text-[#8c5e5e] transition-colors duration-300"
                     >
                       {item.label}
                     </a>
@@ -56,25 +56,25 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-[11px] tracking-[0.14em] uppercase mb-1.5 text-[#1a1a1a]/60">Company</h4>
+            <h4 className="font-semibold text-[11px] tracking-[0.14em] uppercase mb-1.5 text-[#8c5e5e]">Company</h4>
             <ul className="space-y-1">
               <li>
-                <Link to="/about#our-story" className="font-medium text-xs text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">
+                <Link to="/about#our-story" className="font-medium text-xs text-[#212529] hover:text-[#8c5e5e] transition-colors duration-300">
                   Our Story
                 </Link>
               </li>
               <li>
-                <Link to="/about#sustainable-practices" className="font-medium text-xs text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">
+                <Link to="/about#sustainable-practices" className="font-medium text-xs text-[#212529] hover:text-[#8c5e5e] transition-colors duration-300">
                   Sustainability
                 </Link>
               </li>
               <li>
-                <Link to="/about#quality-promise" className="font-medium text-xs text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">
+                <Link to="/about#quality-promise" className="font-medium text-xs text-[#212529] hover:text-[#8c5e5e] transition-colors duration-300">
                   Journal
                 </Link>
               </li>
               <li>
-                <Link to="/about#social-impact" className="font-medium text-xs text-[#1a1a1a] hover:text-[#8c5e5e] transition-colors duration-300">
+                <Link to="/about#social-impact" className="font-medium text-xs text-[#212529] hover:text-[#8c5e5e] transition-colors duration-300">
                   Careers
                 </Link>
               </li>
@@ -82,8 +82,8 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-[11px] tracking-[0.14em] uppercase mb-1.5 text-[#1a1a1a]/60">Contact Us</h4>
-            <ul className="space-y-1.5 text-xs font-medium text-[#1a1a1a]/70">
+            <h4 className="font-semibold text-[11px] tracking-[0.14em] uppercase mb-1.5 text-[#8c5e5e]">Contact Us</h4>
+            <ul className="space-y-1 text-xs font-medium text-[#495057]">
               <li className="flex items-start gap-2">
                 <MapPin size={13} className="text-[#8c5e5e] shrink-0 mt-0.5" />
                 <span className="leading-snug">
@@ -106,18 +106,18 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-[#d9d2d0]/30 pt-3 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-          <p className="text-[11px] text-[#1a1a1a]/60 font-medium">© 2026 Redshan Flora. Everlasting Elegance.</p>
+        <div className="border-t border-[#ced4da] pt-2.5 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+          <p className="text-[11px] text-[#6c757d] font-medium">© 2026 Redshan Flora. Everlasting Elegance.</p>
           <div className="flex items-center gap-4 md:gap-6">
             <button
               onClick={() => setIsTermsOpen(true)}
-              className="text-[11px] text-[#1a1a1a]/60 font-medium hover:text-[#8c5e5e] transition-colors duration-300 bg-transparent border-0 p-0 cursor-pointer"
+              className="text-[11px] text-[#6c757d] font-medium hover:text-[#8c5e5e] transition-colors duration-300 bg-transparent border-0 p-0 cursor-pointer"
             >
               Terms of Service
             </button>
             <button
               onClick={() => setIsPrivacyOpen(true)}
-              className="text-[11px] text-[#1a1a1a]/60 font-medium hover:text-[#8c5e5e] transition-colors duration-300 bg-transparent border-0 p-0 cursor-pointer"
+              className="text-[11px] text-[#6c757d] font-medium hover:text-[#8c5e5e] transition-colors duration-300 bg-transparent border-0 p-0 cursor-pointer"
             >
               Privacy Policy
             </button>
