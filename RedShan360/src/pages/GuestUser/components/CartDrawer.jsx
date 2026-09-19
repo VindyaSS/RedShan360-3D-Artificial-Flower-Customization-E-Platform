@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowLeft, CreditCard, ShieldCheck, Calendar } from 'lucide-react';
-import { products } from '../../../data/products';
 import { triggerPayHereCheckout } from '../../../utils/payhere';
 import api, { cartApi } from '../../../services/api';
+import { getProductImage } from '../../../utils/imageHelper';
 import { getBouquetImage, deleteBouquetImage } from '../../../utils/indexedDB';
 
 const CartDrawer = ({ isOpen, onClose }) => {
@@ -121,20 +121,25 @@ const CartDrawer = ({ isOpen, onClose }) => {
     if (currentUser) {
       const currentUserId = currentUser.id || currentUser.userId;
       try {
-        const [cartResponse, loyaltyResponse] = await Promise.all([
+        const [cartResponse, dbProductsResponse, loyaltyResponse] = await Promise.all([
           cartApi.getCart(),
+          api.get('/api/products').catch(() => ({ data: [] })),
           api.get(`/api/loyalty/redeem/${currentUserId}`).catch((err) => {
             console.error('Failed to load loyalty checkout details:', err);
             return { data: null };
           })
         ]);
 
+        const dbProducts = dbProductsResponse.data || [];
         const items = cartResponse.data.items || [];
         standardItems = items.map((item) => {
-          const productDetail = products.find((p) => p.id === item.productId);
+          const dbProduct = dbProducts.find(
+            (p) => Number(p.productId ?? p.id) === Number(item.productId ?? item.id)
+          );
+          const resolvedImg = getProductImage(dbProduct || item) || '/images/product-placeholder.png';
           return {
             ...item,
-            image: productDetail ? productDetail.image : '/images/peonies_vase.png'
+            image: resolvedImg
           };
         });
 

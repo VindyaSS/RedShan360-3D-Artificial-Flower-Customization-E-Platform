@@ -442,13 +442,41 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             </div>
 
             {/* Mobile/Tablet Triggers (<1024px) */}
-            <div className="lg:hidden flex items-center gap-1.5">
+            <div className="lg:hidden flex items-center gap-1">
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className="p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300 text-[#1a1a1a]"
                 aria-label="Search"
               >
                 <Search size={20} className="hover:scale-110 transition-transform duration-200" />
+              </button>
+
+              <button
+                onClick={() => {
+                  const savedUser = localStorage.getItem('user');
+                  let currentUser = null;
+                  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                    try {
+                      currentUser = JSON.parse(savedUser);
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }
+                  if (currentUser) {
+                    navigate('/wishlist');
+                  } else {
+                    setIsLoginRequiredOpen(true);
+                  }
+                }}
+                className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300 text-[#1a1a1a]"
+                aria-label="Wishlist"
+              >
+                <Heart size={20} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#8c5e5e] text-[9px] text-white font-semibold flex items-center justify-center px-1 animate-scale-up">
+                    {wishlistCount}
+                  </span>
+                )}
               </button>
 
               <button
