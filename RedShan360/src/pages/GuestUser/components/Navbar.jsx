@@ -187,6 +187,17 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Body scroll lock effect for mobile menu (preserves and restores original overflow)
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const originalOverflow = window.getComputedStyle(document.body).overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [mobileMenuOpen]);
+
   // Click outside listener for profile dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -284,8 +295,8 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
               </h1>
             </Link>
 
-            {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center gap-8 h-full">
+            {/* Desktop Nav Links (lg breakpoint: >=1024px) */}
+            <div className="hidden lg:flex items-center gap-8 h-full">
               {navItems.map((item) => (
                 <Link
                   key={item}
@@ -301,7 +312,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
               ))}
             </div>
 
-            {/* Desktop Search & Icons */}
+            {/* Desktop Search & Icons (lg breakpoint: >=1024px) */}
             <div className="hidden lg:flex items-center gap-3 h-full">
 
               {/* Desktop Search Icon Button */}
@@ -398,7 +409,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 </button>
 
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-xs font-semibold uppercase tracking-wider text-[#1a1a1a]/85 font-sans" style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
+                  <div className="absolute right-0 mt-2 w-48 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-xs font-semibold uppercase tracking-wider text-[#1a1a1a]/85 font-sans" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
                     <button
                       onClick={() => {
                         setIsProfileOpen(false);
@@ -430,14 +441,14 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
               </div>
             </div>
 
-            {/* Mobile Search, Cart and Menu Triggers */}
-            <div className="md:hidden flex items-center gap-1.5">
+            {/* Mobile/Tablet Triggers (<1024px) */}
+            <div className="lg:hidden flex items-center gap-1.5">
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300"
+                className="p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300 text-[#1a1a1a]"
                 aria-label="Search"
               >
-                <Search size={20} className="text-[#1a1a1a] hover:scale-110 transition-transform duration-200" />
+                <Search size={20} className="hover:scale-110 transition-transform duration-200" />
               </button>
 
               <button
@@ -457,10 +468,10 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                     setIsLoginRequiredOpen(true);
                   }
                 }}
-                className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300"
+                className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300 text-[#1a1a1a]"
                 aria-label="Cart"
               >
-                <ShoppingCart size={20} className="text-[#1a1a1a]" />
+                <ShoppingCart size={20} />
                 {cartCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#8c5e5e] text-[9px] text-white font-semibold flex items-center justify-center px-1">
                     {cartCount}
@@ -468,159 +479,44 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                 )}
               </button>
 
-              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-full transition-colors duration-300 text-[#1a1a1a]" aria-label="Toggle menu">
-                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-full transition-colors duration-300 text-[#1a1a1a] hover:bg-[#f4f0ed]"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Mobile Navigation Dropdown */}
-          {mobileMenuOpen && (
-            <div className="md:hidden pb-6 pt-2 space-y-4 bg-[#faf8f6] border-t border-gray-100 px-4 text-left">
+        {/* Mobile Backdrop Overlay (<1024px) */}
+        {mobileMenuOpen && (
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            className="lg:hidden fixed inset-0 top-[80px] bg-black/40 backdrop-blur-[2px] z-40 transition-opacity duration-300"
+          />
+        )}
+
+        {/* Mobile Navigation Drawer Panel (<1024px) */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden fixed top-[80px] left-0 w-full bg-[#faf8f6] border-t border-[#d9d2d0]/40 shadow-2xl z-50 max-h-[calc(100vh-80px)] overflow-y-auto py-5 px-6 animate-slide-down text-left">
+            {/* Nav Items */}
+            <div className="flex flex-col space-y-3">
               {navItems.map((item) => (
                 <Link
                   key={item}
                   to={getRoute(item)}
                   onClick={(e) => handleNavClick(item, e)}
-                  className={`block text-sm uppercase tracking-widest font-semibold ${isActive(item) ? 'text-[#8c5e5e]' : 'text-[#1a1a1a] hover:text-[#8c5e5e]'
+                  className={`block text-sm uppercase tracking-widest font-semibold py-1 transition-colors ${isActive(item) ? 'text-[#8c5e5e]' : 'text-[#1a1a1a] hover:text-[#8c5e5e]'
                     }`}
                 >
                   {item}
                 </Link>
               ))}
-              <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setIsSearchOpen(true);
-                  }}
-                  className="p-2 rounded-full bg-[#f4f0ed]"
-                  aria-label="Search"
-                >
-                  <Search size={18} />
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    const savedUser = localStorage.getItem('user');
-                    let currentUser = null;
-                    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
-                      try {
-                        currentUser = JSON.parse(savedUser);
-                      } catch (e) {
-                        console.error(e);
-                      }
-                    }
-                    if (currentUser) {
-                      navigate('/wishlist');
-                    } else {
-                      setIsLoginRequiredOpen(true);
-                    }
-                  }}
-                  className="p-2 rounded-full bg-[#f4f0ed] relative"
-                  aria-label="Wishlist"
-                >
-                  <Heart size={18} />
-                  {wishlistCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[#8c5e5e] text-[9px] text-white font-semibold flex items-center justify-center">
-                      {wishlistCount}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    const savedUser = localStorage.getItem('user');
-                    let currentUser = null;
-                    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
-                      try {
-                        currentUser = JSON.parse(savedUser);
-                      } catch (e) {
-                        console.error(e);
-                      }
-                    }
-                    if (currentUser) {
-                      setIsCartOpen(true);
-                    } else {
-                      setIsLoginRequiredOpen(true);
-                    }
-                  }}
-                  className="relative p-2 rounded-full bg-[#f4f0ed]"
-                  aria-label="Cart"
-                >
-                  <ShoppingCart size={18} />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[#8c5e5e] text-[9px] text-white font-semibold flex items-center justify-center">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
-
-                <div ref={mobileProfileDropdownRef} className="relative">
-                  <button
-                    onClick={() => {
-                      const savedUser = localStorage.getItem('user');
-                      let currentUser = null;
-                      if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
-                        try {
-                          currentUser = JSON.parse(savedUser);
-                        } catch (e) {
-                          console.error(e);
-                        }
-                      }
-                      if (currentUser) {
-                        setIsMobileProfileOpen(!isMobileProfileOpen);
-                      } else {
-                        setMobileMenuOpen(false);
-                        setIsLoginOpen(true);
-                      }
-                    }}
-                    className={`p-2 rounded-full bg-[#f4f0ed] transition-colors duration-300 ${isMobileProfileOpen ? 'bg-[#eadeda]' : ''
-                      }`}
-                    aria-label="Profile"
-                  >
-                    <User size={18} className="hover:scale-110 transition-transform duration-200" />
-                  </button>
-
-                  {isMobileProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-44 rounded-sm shadow-xl z-50 py-1.5 text-left animate-fade-in text-[10px] font-bold uppercase tracking-wider text-[#1a1a1a]/80" style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
-                      <button
-                        onClick={() => {
-                          setIsMobileProfileOpen(false);
-                          setMobileMenuOpen(false);
-                          setIsMyOrdersOpen(true);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
-                      >
-                        My Orders
-                      </button>
-                      <div className="border-t border-[#d9d2d0]/30 my-1"></div>
-                      <button
-                        onClick={() => {
-                          setIsMobileProfileOpen(false);
-                          setMobileMenuOpen(false);
-                          navigate('/loyalty-points');
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
-                      >
-                        Loyalty Points
-                      </button>
-                      <div className="border-t border-[#d9d2d0]/30 my-1"></div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] text-red-500 hover:text-red-600 transition-colors duration-200"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Cart side drawer overlay */}
         <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
