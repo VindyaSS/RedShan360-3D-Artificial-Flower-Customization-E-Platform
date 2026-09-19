@@ -161,10 +161,10 @@ export const AdminReportService = {
     const data = await fetchDashboardData(period, startDate, endDate);
     
     return data.categoryPerformance || [
-      { category: "Silk Peonies", percentage: 85 },
-      { category: "Velvet Roses", percentage: 72 },
-      { category: "Ceramic Vases", percentage: 45 },
-      { category: "Orchids", percentage: 92 }
+      { category: "Bouquets", percentage: 45 },
+      { category: "Head Dresses", percentage: 25 },
+      { category: "Individual Flowers", percentage: 15 },
+      { category: "Customization Product", percentage: 15 }
     ];
   },
 
@@ -376,10 +376,10 @@ function getMockDashboardPayload(period) {
     },
 
     categoryPerformance: [
-      { category: "Silk Peonies", percentage: 85 },
-      { category: "Velvet Roses", percentage: 72 },
-      { category: "Ceramic Vases", percentage: 45 },
-      { category: "Orchids", percentage: 92 }
+      { category: "Bouquets", percentage: 45 },
+      { category: "Head Dresses", percentage: 25 },
+      { category: "Individual Flowers", percentage: 15 },
+      { category: "Customization Product", percentage: 15 }
     ]
   };
 }

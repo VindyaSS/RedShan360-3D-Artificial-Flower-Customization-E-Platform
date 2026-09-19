@@ -109,19 +109,41 @@ function AdminTopbar({ searchPlaceholder = "Search premium catalog...", searchVa
     const interval = setInterval(fetchUnreadCount, 30000);
 
     const loadProfile = () => {
-      const stored = localStorage.getItem("redshan360_admin_profile");
-      if (stored) {
+      let name = "Admin";
+      let role = "Owner Admin";
+      let pic = elenaThorneAvatar;
+
+      // 1. Read logged in admin details from DB user table
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
         try {
-          const parsed = JSON.parse(stored);
-          setProfile({
-            fullName: parsed.fullName || "Elena Thorne",
-            role: parsed.role || "Curator & Admin",
-            profilePicture: parsed.profilePicture || elenaThorneAvatar,
-          });
+          const u = JSON.parse(userStr);
+          if (u.name) name = u.name;
+          else if (u.fullName) name = u.fullName;
+          if (u.role) role = u.role;
         } catch (e) {
           console.error(e);
         }
       }
+
+      // 2. Read custom admin profile overrides if present
+      const stored = localStorage.getItem("redshan360_admin_profile");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.fullName) name = parsed.fullName;
+          if (parsed.role) role = parsed.role;
+          if (parsed.profilePicture) pic = parsed.profilePicture;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      setProfile({
+        fullName: name,
+        role: role,
+        profilePicture: pic,
+      });
     };
 
     loadProfile();
