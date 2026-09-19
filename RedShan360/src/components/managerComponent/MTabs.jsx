@@ -231,6 +231,8 @@ export default function MTabs() {
                         t1="Order ID"
                         t2="Customer Name"
                         t3="Price"
+                        t4="Address"
+                        t5="Phone"
                         completedorders={completedorders}
                         onOrderDispatched={handleOrderDispatched}
                     />
