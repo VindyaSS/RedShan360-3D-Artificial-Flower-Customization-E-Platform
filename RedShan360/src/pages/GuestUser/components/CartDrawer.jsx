@@ -415,8 +415,12 @@ const CartDrawer = ({ isOpen, onClose }) => {
                 console.log('[DEBUG UPLOAD] 4. Detected custom bouquet items:', customItems);
 
                 const resolvedCustomerId = currentUser ? (currentUser.customerId || currentUser.id || currentUser.userId) : null;
-                const numericOrderId = parseInt(String(completedOrderId).replace(/[^0-9]/g, ''), 10) || completedOrderId;
-                console.log('[DEBUG UPLOAD] 5. Resolved customerId:', resolvedCustomerId, '| Numeric orderId:', numericOrderId);
+                // FIX: Do NOT use completedOrderId from PayHere — that is PayHere's own
+                // internal payment reference (e.g. 104), NOT your DB order ID.
+                // checkoutData.orderId is "ORDER-100" (set by the backend), which reliably
+                // contains the real order primary key. Extract the number from that instead.
+                const numericOrderId = parseInt(String(checkoutData.orderId).replace(/[^0-9]/g, ''), 10);
+                console.log('[DEBUG UPLOAD] 5. Resolved customerId:', resolvedCustomerId, '| Numeric orderId (from checkoutData):', numericOrderId, '| PayHere completedOrderId (ignored for upload):', completedOrderId);
 
                 if (!resolvedCustomerId) {
                   console.error('[DEBUG UPLOAD] 5a. Error: No valid customer ID found in user session data. Skipping bouquet image upload.');
