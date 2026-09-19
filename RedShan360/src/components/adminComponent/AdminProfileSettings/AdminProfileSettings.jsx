@@ -20,7 +20,14 @@ function AdminProfileSettings() {
       setLoading(true);
       try {
         const data = await AdminSettingsService.getProfile();
-        setProfile(data);
+        setProfile({
+          name: data.name || "",
+          fullName: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          role: data.role || "ADMIN",
+          profilePicture: data.profilePicture || null,
+        });
       } catch (err) {
         console.error("Failed to load settings profile:", err);
       } finally {
@@ -32,7 +39,11 @@ function AdminProfileSettings() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProfile((prev) => ({ ...prev, [name]: value }));
+    setProfile((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "fullName" || name === "name" ? { name: value, fullName: value } : {}),
+    }));
   };
 
   const handlePictureUpload = async (base64DataUrl) => {
@@ -63,28 +74,38 @@ function AdminProfileSettings() {
     e.preventDefault();
     if (saving) return;
 
-    if (!profile.fullName.trim()) {
+    const currentName = profile.fullName || profile.name || "";
+    if (!currentName.trim()) {
       alert("Full name is required.");
       return;
     }
-    if (!profile.email.trim()) {
+    if (!profile.email || !profile.email.trim()) {
       alert("Email address is required.");
       return;
     }
 
     setSaving(true);
     try {
-      const res = await AdminSettingsService.updateProfile({
-        fullName: profile.fullName,
-        email: profile.email,
-        phone: profile.phone,
+      const updatedData = await AdminSettingsService.updateProfile({
+        name: currentName.trim(),
+        email: profile.email.trim(),
+        phone: profile.phone ? profile.phone.trim() : "",
       });
-      if (res.success) {
-        alert("Changes saved successfully!");
-      }
+
+      setProfile((prev) => ({
+        ...prev,
+        name: updatedData.name,
+        fullName: updatedData.name,
+        email: updatedData.email,
+        phone: updatedData.phone || "",
+        role: updatedData.role || prev.role,
+      }));
+
+      alert("Profile updated successfully");
     } catch (err) {
-      console.error(err);
-      alert("Failed to save changes.");
+      console.error("Failed to update profile:", err);
+      const errorMsg = err.response?.data?.message || err.response?.data || err.message || "Failed to update profile.";
+      alert("Failed to update profile: " + (typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg)));
     } finally {
       setSaving(false);
     }

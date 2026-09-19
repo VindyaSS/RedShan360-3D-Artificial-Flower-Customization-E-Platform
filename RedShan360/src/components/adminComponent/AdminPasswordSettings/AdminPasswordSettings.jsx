@@ -30,16 +30,17 @@ function AdminPasswordSettings() {
     try {
       const res = await AdminSettingsService.changePassword(
         currentPassword,
-        newPassword
+        newPassword,
+        confirmPassword
       );
-      if (res.success) {
-        alert(res.message);
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      }
+      alert(res?.message || "Password updated successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (err) {
-      alert(err.message || "Failed to update password.");
+      console.error("Failed to update password:", err);
+      const errorMsg = err.response?.data?.message || err.response?.data || err.message || "Failed to update password.";
+      alert("Failed to update password: " + (typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg)));
     } finally {
       setSaving(false);
     }
