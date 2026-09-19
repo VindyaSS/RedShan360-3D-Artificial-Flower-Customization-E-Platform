@@ -499,39 +499,8 @@ const ContactPage = () => {
 
               </div>
 
-              {/* Social Media Icons */}
-              <div className="border-t border-[#d9d2d0]/30 pt-6">
-                <h4 className="font-bold text-xs text-[#1a1a1a]/60 uppercase tracking-wider mb-4">Follow Us</h4>
-                <div className="flex items-center gap-4">
-                  <a
-                    href="https://facebook.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-10 h-10 rounded-full bg-[#f4f0ed] hover:bg-[#C2185B] text-[#1a1a1a]/70 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
-                    aria-label="Facebook"
-                  >
-                    <Facebook size={18} />
-                  </a>
-                  <a
-                    href="https://instagram.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-10 h-10 rounded-full bg-[#f4f0ed] hover:bg-[#C2185B] text-[#1a1a1a]/70 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
-                    aria-label="Instagram"
-                  >
-                    <Instagram size={18} />
-                  </a>
-                  <a
-                    href="https://wa.me/94112345678"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-10 h-10 rounded-full bg-[#f4f0ed] hover:bg-[#C2185B] text-[#1a1a1a]/70 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
-                    aria-label="WhatsApp"
-                  >
-                    <MessageCircle size={18} />
-                  </a>
-                </div>
-              </div>
+
+
 
             </div>
 
