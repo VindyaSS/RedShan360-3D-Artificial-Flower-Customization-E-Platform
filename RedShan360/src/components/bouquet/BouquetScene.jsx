@@ -10,6 +10,8 @@ export default function BouquetScene({
   flowers = [],
   wrappingId = null,
   ribbonId = null,
+  bouquetSize = 'MEDIUM',
+  sizeConfig = null,
   selectedFlowerId = null,
   selectedSwapFlowerId = null,
   isSwapMode = false,
@@ -20,7 +22,7 @@ export default function BouquetScene({
   return (
     <group position={[0, -1.8, 0]}>
       {/* 1. Base Vase Model */}
-      <VaseModel wrappingId={wrappingId} ribbonId={ribbonId} />
+      <VaseModel wrappingId={wrappingId} ribbonId={ribbonId} bouquetSize={bouquetSize} sizeConfig={sizeConfig} />
 
       {/* 2. Placed Flowers List */}
       {flowers.map((flower) => {

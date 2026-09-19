@@ -73,6 +73,15 @@ export function getPriceBreakdown(selectedStems = [], stemsDatabase = [], bouque
     return dbItem && dbItem.category === 'premium-blooms' && (Number(item.quantity) || 0) > 0;
   });
 
+  // Calculate wrapping paper price from selectedStems
+  let wrappingPrice = 0;
+  selectedStems.forEach(item => {
+    const dbItem = stemsDatabase.find(s => String(s.id) === String(item.stemId));
+    if (dbItem && dbItem.category === 'wrapping-accents') {
+      wrappingPrice += (Number(dbItem.price) || 0) * (Number(item.quantity) || 1);
+    }
+  });
+
   if (!hasFlowers) {
     return {
       flowerSubtotal: 0,
@@ -82,6 +91,7 @@ export function getPriceBreakdown(selectedStems = [], stemsDatabase = [], bouque
       sizeAdjustment: 0,
       scaledFlowerTotal: 0,
       serviceCharge: 0,
+      wrappingPrice: roundCurrency(wrappingPrice),
       grandTotal: 0
     };
   }
@@ -91,7 +101,7 @@ export function getPriceBreakdown(selectedStems = [], stemsDatabase = [], bouque
   const scaledFlowerTotal = calculateScaledFlowerTotal(flowerSubtotal, sizeMultiplier);
   const sizeAdjustment = roundCurrency(scaledFlowerTotal - flowerSubtotal);
   const serviceCharge = BASE_SERVICE_CHARGE;
-  const grandTotal = calculateGrandTotal(scaledFlowerTotal, serviceCharge);
+  const grandTotal = roundCurrency(scaledFlowerTotal + serviceCharge + wrappingPrice);
 
   return {
     flowerSubtotal,
@@ -101,6 +111,7 @@ export function getPriceBreakdown(selectedStems = [], stemsDatabase = [], bouque
     sizeAdjustment,
     scaledFlowerTotal,
     serviceCharge,
+    wrappingPrice: roundCurrency(wrappingPrice),
     grandTotal
   };
 }
