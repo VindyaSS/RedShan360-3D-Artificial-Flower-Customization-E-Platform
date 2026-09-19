@@ -179,48 +179,82 @@
 
 
           /* Responsive Breakpoints */
+          @media (max-width: 1400px) {
+            .kpi-grid {
+              grid-template-columns: repeat(4, 1fr);
+            }
+          }
+
           @media (max-width: 1024px) {
+            .admin-content {
+              margin-left: 0;
+              padding: 16px;
+              width: 100%;
+              box-sizing: border-box;
+            }
+
             .dashboard-grid {
               grid-template-columns: 1fr;
-              /* stack left + right vertically */
+              gap: 16px;
             }
 
             .dashboard-left,
             .dashboard-right {
-              grid-template-rows: auto auto;
+              grid-template-rows: auto;
+              gap: 16px;
             }
 
             .kpi-grid {
               grid-template-columns: repeat(3, 1fr);
+              gap: 12px;
             }
           }
 
           @media (max-width: 768px) {
-            .admin-content {
-              margin-left: 0;
-              /* collapse sidebar */
-            }
-
             .dashboard-header h1 {
-              font-size: 28px;
-            }
-
-            .kpi-grid {
-              grid-template-columns: repeat(2, 1fr);
-            }
-          }
-
-          @media (max-width: 480px) {
-            .dashboard-header h1 {
-              font-size: 22px;
+              font-size: 26px;
             }
 
             .dashboard-header p {
               font-size: 14px;
             }
 
+            .kpi-grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chart-card,
+            .order-segmentation-card,
+            .live-activity,
+            .recent-orders {
+              padding: 16px;
+            }
+
+            .donut-wrapper {
+              width: 180px;
+              height: 180px;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .admin-content {
+              padding: 12px;
+            }
+
+            .dashboard-header h1 {
+              font-size: 22px;
+            }
+
+            .dashboard-header p {
+              font-size: 13px;
+            }
+
             .kpi-card h2 {
-              font-size: 20px;
+              font-size: 18px;
+            }
+
+            .kpi-card h4 {
+              font-size: 11px;
             }
 
             .kpi-grid {
