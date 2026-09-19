@@ -71,7 +71,7 @@ const GuestUserDashboard = () => {
         const response = await api.get('/api/products');
         const dbProducts = response.data;
         const merged = initialProducts.map((localProd) => {
-          const dbProd = dbProducts.find((p) => p.id === localProd.id);
+          const dbProd = dbProducts.find((p) => p.productId === localProd.id || p.id === localProd.id);
           const numPrice = dbProd ? (Number(dbProd.price) || 0) : (localProd.numericPrice || 15000);
           const discountPct = dbProd ? (Number(dbProd.discountPercentage) || 0) : (localProd.discountPercent || 0);
           let discPriceVal = null;
@@ -82,9 +82,12 @@ const GuestUserDashboard = () => {
           // Resolve image
           const finalImg = localProd.image || (dbProd && dbProd.imageUrl ? `http://localhost:8080/images/${dbProd.imageUrl}` : '/images/placeholder.png');
 
+          const realId = dbProd ? dbProd.productId : localProd.id;
+
           return {
             ...localProd,
-            id: localProd.id,
+            id: realId,
+            productId: realId,
             title: dbProd && dbProd.productName ? dbProd.productName : localProd.title,
             description: dbProd && dbProd.description ? dbProd.description : localProd.description,
             price: `Rs ${numPrice.toFixed(2)}`,
