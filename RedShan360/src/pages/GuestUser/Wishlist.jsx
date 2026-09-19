@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag, Eye, Trash2, ArrowRight } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { products } from '../../data/products';
 import api, { cartApi } from '../../services/api';
+import { getProductImage } from '../../utils/imageHelper';
 
 const Wishlist = () => {
   const navigate = useNavigate();
@@ -32,16 +32,42 @@ const Wishlist = () => {
 
     try {
       setLoading(true);
-      const response = await api.get(`/api/wishlist/user/${userId}`);
-      
-      // Map API items to product catalog details
-      const mappedItems = response.data
+      const [wishlistResponse, dbProductsResponse] = await Promise.all([
+        api.get(`/api/wishlist/user/${userId}`),
+        api.get('/api/products').catch(() => ({ data: [] }))
+      ]);
+
+      const dbProducts = dbProductsResponse.data || [];
+      const items = wishlistResponse.data || [];
+
+      const mappedItems = items
         .map((item) => {
-          const productDetail = products.find((p) => p.id === item.productId);
-          if (productDetail) {
+          const dbProduct = dbProducts.find(
+            (p) => Number(p.productId ?? p.id) === Number(item.productId ?? item.id)
+          );
+          const resolvedImg = getProductImage(dbProduct || item) || '/images/product-placeholder.png';
+
+          if (dbProduct) {
+            const numPrice = Number(dbProduct.price) || 0;
             return {
-              ...productDetail,
-              wishlistId: item.wishlistId,
+              ...dbProduct,
+              id: dbProduct.productId || dbProduct.id,
+              productId: dbProduct.productId || dbProduct.id,
+              title: dbProduct.productName || 'Unnamed Arrangement',
+              productName: dbProduct.productName || 'Unnamed Arrangement',
+              subtitle: dbProduct.subCategoryName ? `${dbProduct.categoryName || ''} • ${dbProduct.subCategoryName}` : (dbProduct.categoryName || ''),
+              price: `Rs ${numPrice.toFixed(2)}`,
+              numericPrice: numPrice,
+              image: resolvedImg,
+              wishlistId: item.wishlistId
+            };
+          } else if (item.productName || item.title || item.productId) {
+            return {
+              ...item,
+              id: item.productId || item.id,
+              title: item.productName || item.title || 'Arrangement',
+              image: resolvedImg,
+              wishlistId: item.wishlistId
             };
           }
           return null;
