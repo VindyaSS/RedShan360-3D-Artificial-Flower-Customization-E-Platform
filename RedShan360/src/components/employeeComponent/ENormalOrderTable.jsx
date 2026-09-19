@@ -332,7 +332,7 @@ export default function ENormalOrderTable({
             return (
               <React.Fragment key={group.OrderID}>
                 <tr>
-                  <td className="td-order-id">{group.OrderID}</td>
+                  <td className="td-order-id">{group.OrderID ? `#RS-000${group.OrderID}` : "-"}</td>
                   <td className="td-semibold">
                     {group.numberOfItems} {group.numberOfItems === 1 ? 'Item' : 'Items'}
                   </td>

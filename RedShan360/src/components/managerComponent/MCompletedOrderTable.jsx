@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { Inbox, Truck, CheckCircle2, Loader2 } from "lucide-react";
 import "../../css/manager.css";
 
 // ---------------- API Base URL ----------------
 const API_BASE_URL = "http://localhost:8080/api";
 
 export default function MCompletedOrderTable(props) {
-    console.log('[MCompletedOrderTable] Props received:', props);
-
     const completedorders = Array.isArray(props.completedorders)
         ? props.completedorders
         : [];
+    const searchQuery = props.searchQuery || "";
 
     // ---------------- State ----------------
     const [dispatchingOrderId, setDispatchingOrderId] = useState(null);
@@ -25,7 +25,7 @@ export default function MCompletedOrderTable(props) {
         }
 
         const confirmed = window.confirm(
-            `Are you sure you want to dispatch Order #${orderId} to the courier?`
+            `Are you sure you want to dispatch Order #RS-000${orderId} to the courier?`
         );
 
         if (!confirmed) return;
@@ -62,7 +62,6 @@ export default function MCompletedOrderTable(props) {
 
             // ---------------- Handle Success Response ----------------
             const updatedOrder = await response.json();
-            console.log('[MCompletedOrderTable] handleDispatch - Status:', response.status, '| Data:', updatedOrder);
 
             // Verify backend returned the expected status
             if (updatedOrder?.orderStatus !== "DISPATCHED_TO_COURIER") {
@@ -74,7 +73,7 @@ export default function MCompletedOrderTable(props) {
                 await props.onOrderDispatched(updatedOrder);
             }
 
-            alert(`Order #${updatedOrder.orderId} has been dispatched to the courier.`);
+            alert(`Order #RS-000${updatedOrder.orderId} has been dispatched to the courier.`);
 
         } catch (error) {
             alert(error?.message || "Failed to dispatch order.");
@@ -89,12 +88,13 @@ export default function MCompletedOrderTable(props) {
             <table className="MPtable">
                 <thead>
                     <tr>
-                        <th>{props.t1}</th>
-                        <th>{props.t2}</th>
-                        <th>{props.t3}</th>
-                        <th>{props.t4}</th>
-                        <th>{props.t5}</th>
-                        <th colSpan="2">Action</th>
+                        <th>{props.t1 || "Order ID"}</th>
+                        <th>{props.t2 || "Customer Name"}</th>
+                        <th>{props.t3 || "Price"}</th>
+                        <th>{props.t4 || "Address"}</th>
+                        <th>{props.t5 || "Phone"}</th>
+                        <th>{props.t6 || "Status"}</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
 
@@ -102,28 +102,59 @@ export default function MCompletedOrderTable(props) {
                     {completedorders.length > 0 ? (
                         completedorders.map((completedorder, index) => (
                             <tr key={completedorder?.orderId ?? `completed-order-${index}`}>
-                                <td>{completedorder?.orderId ?? "-"}</td>
+                                <td style={{ fontWeight: "600", color: "#744F51" }}>
+                                    {completedorder?.orderId ? `#RS-000${completedorder.orderId}` : "-"}
+                                </td>
                                 <td>{completedorder?.customerName ?? "-"}</td>
-                                <td>{completedorder?.totalAmount ?? "-"}</td>
-                                <td>{completedorder?.address ?? "-"}</td>
+                                <td style={{ fontWeight: "700" }}>
+                                    {completedorder?.totalAmount != null
+                                        ? `Rs. ${Number(completedorder.totalAmount).toFixed(2)}`
+                                        : "-"}
+                                </td>
+                                <td style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {completedorder?.address ?? "-"}
+                                </td>
                                 <td>{completedorder?.phone ?? "-"}</td>
-                                <td colSpan="2">
+                                <td>
+                                    <span className="order-status-badge badge-completed">
+                                        <CheckCircle2 size={12} />
+                                        {completedorder?.orderStatus || "COMPLETED"}
+                                    </span>
+                                </td>
+                                <td>
                                     <button
                                         className="btn-dispatch"
                                         disabled={dispatchingOrderId === completedorder?.orderId}
                                         onClick={() => handleDispatch(completedorder)}
+                                        style={{ gap: "6px" }}
                                     >
-                                        {dispatchingOrderId === completedorder?.orderId
-                                            ? "Dispatching..."
-                                            : "Dispatching to Courier"}
+                                        {dispatchingOrderId === completedorder?.orderId ? (
+                                            <>
+                                                <Loader2 size={14} className="animate-spin" />
+                                                <span>Dispatching...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Truck size={14} />
+                                                <span>Dispatch to Courier</span>
+                                            </>
+                                        )}
                                     </button>
                                 </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="7" style={{ textAlign: "center", padding: "20px" }}>
-                                No Completed Orders Found
+                            <td colSpan="7">
+                                <div className="empty-state-box">
+                                    <Inbox size={32} />
+                                    <h4>No Completed Orders Found</h4>
+                                    <p>
+                                        {searchQuery
+                                            ? `No orders match "${searchQuery}"`
+                                            : "There are currently no completed orders ready for dispatch."}
+                                    </p>
+                                </div>
                             </td>
                         </tr>
                     )}

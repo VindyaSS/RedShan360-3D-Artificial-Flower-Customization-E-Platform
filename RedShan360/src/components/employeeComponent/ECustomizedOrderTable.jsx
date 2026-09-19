@@ -50,7 +50,7 @@ export default function ECustomizedOrderTable({
             pdf.text('Customized Bouquet Reference', 15, 12);
             pdf.setFontSize(10);
             pdf.setFont('helvetica', 'normal');
-            pdf.text(`Order #${orderId}  |  Custom Item ID: ${item.itemId}`, 15, 20);
+            pdf.text(`Order #RS-000${orderId}  |  Custom Item ID: ${item.itemId}`, 15, 20);
 
             // --- Bouquet image ---
             const canvas = document.createElement('canvas');
@@ -77,7 +77,7 @@ export default function ECustomizedOrderTable({
             pdf.setTextColor(40, 40, 40);
             pdf.setFontSize(11);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('Bouquet Details', 15, detailsY + 8);
+            pdf.text('Bouquet Order ID: #RS-000' + (orderId || 'N/A'), 15, detailsY + 8);
 
             pdf.setFont('helvetica', 'normal');
             pdf.setFontSize(10);
@@ -322,7 +322,7 @@ export default function ECustomizedOrderTable({
                             <React.Fragment key={group.orderId}>
                                 <tr>
                                     <td style={{ fontWeight: '700', color: 'var(--color-primary, #744F51)' }}>
-                                        {group.orderId}
+                                        {group.orderId ? `#RS-000${group.orderId}` : "-"}
                                     </td>
 
                                     <td style={{ fontWeight: '600' }}>
