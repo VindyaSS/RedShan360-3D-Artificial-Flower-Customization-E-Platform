@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getProductImage } from '../../../utils/imageHelper';
 
 import roseCrownHeadDress from '../../../assets/images/head-dresses/rose-crown-head-dress.png';
 import pearlBlossomFloralCrown from '../../../assets/images/head-dresses/pearl-blossom-floral-crown.png';
@@ -120,8 +121,12 @@ const FeaturedProducts = ({ products, wishlist, toggleWishlist }) => {
                 <div className="relative aspect-[3/4] max-h-[360px] lg:max-h-[380px] rounded-sm overflow-hidden bg-[#f4f0ed] shadow-sm mb-3 border border-[#d9d2d0]/15 w-full">
                   <Link to={`/product/${product.id}`} className="block w-full h-full">
                     <img
-                      src={product.image}
+                      src={getProductImage(product) || '/images/product-placeholder.png'}
                       alt={product.title}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/images/product-placeholder.png";
+                      }}
                       className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                     />
                   </Link>

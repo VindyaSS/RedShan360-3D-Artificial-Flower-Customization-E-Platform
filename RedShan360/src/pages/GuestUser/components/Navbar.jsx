@@ -289,8 +289,13 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 w-full h-full flex items-center">
           <div className="flex justify-between items-center w-full h-full gap-4">
-            <Link to="/guestUserDashboard" className="flex-shrink-0 flex items-center">
-              <h1 className="text-[24px] md:text-[26px] font-bold tracking-tight text-[#1a1a1a] font-playfair leading-none">
+            <Link to="/guestUserDashboard" className="flex-shrink-0 flex items-center gap-3 group">
+              <img
+                src="/images/logo-icon-square.jpeg"
+                alt="Redshan Flora Logo"
+                className="h-11 w-11 md:h-12 md:w-12 object-contain rounded-full shadow-md group-hover:scale-105 transition-transform duration-300"
+              />
+              <h1 className="text-[22px] md:text-[25px] font-bold tracking-tight text-[#1a1a1a] font-playfair leading-none">
                 Redshan Flora
               </h1>
             </Link>
@@ -442,13 +447,41 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
             </div>
 
             {/* Mobile/Tablet Triggers (<1024px) */}
-            <div className="lg:hidden flex items-center gap-1.5">
+            <div className="lg:hidden flex items-center gap-1">
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className="p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300 text-[#1a1a1a]"
                 aria-label="Search"
               >
                 <Search size={20} className="hover:scale-110 transition-transform duration-200" />
+              </button>
+
+              <button
+                onClick={() => {
+                  const savedUser = localStorage.getItem('user');
+                  let currentUser = null;
+                  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                    try {
+                      currentUser = JSON.parse(savedUser);
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }
+                  if (currentUser) {
+                    navigate('/wishlist');
+                  } else {
+                    setIsLoginRequiredOpen(true);
+                  }
+                }}
+                className="relative p-2 rounded-full hover:bg-[#f4f0ed] transition-colors duration-300 text-[#1a1a1a]"
+                aria-label="Wishlist"
+              >
+                <Heart size={20} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#8c5e5e] text-[9px] text-white font-semibold flex items-center justify-center px-1 animate-scale-up">
+                    {wishlistCount}
+                  </span>
+                )}
               </button>
 
               <button
