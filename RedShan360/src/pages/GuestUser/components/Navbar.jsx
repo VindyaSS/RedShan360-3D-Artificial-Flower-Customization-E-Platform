@@ -541,12 +541,55 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                   key={item}
                   to={getRoute(item)}
                   onClick={(e) => handleNavClick(item, e)}
-                  className={`block text-sm uppercase tracking-widest font-semibold py-1 transition-colors ${isActive(item) ? 'text-[#8c5e5e]' : 'text-[#1a1a1a] hover:text-[#8c5e5e]'
+                  className={`block text-sm uppercase tracking-widest font-semibold py-1.5 transition-colors ${isActive(item) ? 'text-[#8c5e5e]' : 'text-[#1a1a1a] hover:text-[#8c5e5e]'
                     }`}
                 >
                   {item}
                 </Link>
               ))}
+
+              <div className="border-t border-[#d9d2d0]/40 my-2 pt-2">
+                {(() => {
+                  const savedUser = localStorage.getItem('user');
+                  let currentUser = null;
+                  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                    try { currentUser = JSON.parse(savedUser); } catch (e) { console.error(e); }
+                  }
+                  if (currentUser) {
+                    return (
+                      <div className="flex flex-col space-y-2">
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); setIsMyOrdersOpen(true); }}
+                          className="text-left text-xs uppercase tracking-wider font-semibold text-[#1a1a1a]/85 py-1.5 hover:text-[#8c5e5e]"
+                        >
+                          My Orders
+                        </button>
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); navigate('/loyalty-points'); }}
+                          className="text-left text-xs uppercase tracking-wider font-semibold text-[#1a1a1a]/85 py-1.5 hover:text-[#8c5e5e]"
+                        >
+                          Loyalty Points
+                        </button>
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                          className="text-left text-xs uppercase tracking-wider font-semibold text-red-500 py-1.5 hover:text-red-600"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <button
+                        onClick={() => { setMobileMenuOpen(false); setIsLoginOpen(true); }}
+                        className="w-full text-center py-2.5 rounded-sm bg-[#8c5e5e] text-white font-semibold text-xs tracking-wider uppercase shadow-sm"
+                      >
+                        Login / Sign Up
+                      </button>
+                    );
+                  }
+                })()}
+              </div>
             </div>
           </div>
         )}
