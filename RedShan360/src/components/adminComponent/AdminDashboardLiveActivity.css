@@ -7,12 +7,28 @@
   box-sizing: border-box;
 }
 
-.live-activity h3 {
+.live-activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 25px;
+}
+
+.live-activity-header h3 {
+  margin: 0;
   font-size: 20px;
   font-weight: 700;
   color: #2d2d2d;
   font-family: "Playfair Display", serif;
+}
+
+.activity-count-badge {
+  font-size: 12px;
+  font-weight: 600;
+  background: #f4edea;
+  color: #8a6365;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
 .timeline {
@@ -23,7 +39,7 @@
 .timeline-item {
   display: flex;
   position: relative;
-  padding-bottom: 28px;
+  padding-bottom: 24px;
 }
 
 .timeline-item:last-child {
@@ -52,7 +68,7 @@
 .timeline-line {
   position: absolute;
   top: 32px;
-  bottom: -28px;
+  bottom: -24px;
   width: 2px;
   background-color: #f3f4f6; /* light grey line */
   z-index: 1;
@@ -88,3 +104,46 @@
   font-weight: 600;
 }
 
+/* See More / Show Less Button Styling */
+.see-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px stroke #f3f4f6;
+  border-top: 1px solid #f9fafb;
+}
+
+.see-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fdf8f7;
+  color: #8a6365;
+  border: 1px solid #ebdcd9;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.see-more-btn:hover {
+  background: #8a6365;
+  color: #ffffff;
+  border-color: #8a6365;
+  box-shadow: 0 3px 8px rgba(138, 99, 101, 0.2);
+}
+
+.see-more-btn.show-less {
+  background: #f4f4f5;
+  color: #616161;
+  border-color: #e4e4e7;
+}
+
+.see-more-btn.show-less:hover {
+  background: #52525b;
+  color: #ffffff;
+  border-color: #52525b;
+}

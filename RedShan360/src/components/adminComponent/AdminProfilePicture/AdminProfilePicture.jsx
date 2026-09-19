@@ -80,7 +80,7 @@ function AdminProfilePicture({ currentPicture, onPictureUpload, onPictureDelete 
           >
             Upload New
           </button>
-          
+
           {currentPicture && (
             <button
               type="button"

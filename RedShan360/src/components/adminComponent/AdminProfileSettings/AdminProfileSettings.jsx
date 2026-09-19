@@ -11,7 +11,7 @@ function AdminProfileSettings() {
     role: "",
     profilePicture: null,
   });
-  
+
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
