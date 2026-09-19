@@ -1,11 +1,11 @@
+import api from "./api";
+
 /**
  * AdminReportService.js
  * Responsible for communicating with the backend (Spring Boot REST APIs / PostgreSQL).
  * Fetches analytics, reports, revenue data, and customer insights based on selected date ranges.
  * Automatically deduplicates concurrent dashboard requests and falls back to mock data if backend is offline.
  */
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 // Simulated delay helper for mock fallbacks
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -37,15 +37,12 @@ const fetchDashboardData = async (period, startDate, endDate) => {
   currentFetchPeriod = cacheKey;
   currentFetchPromise = (async () => {
     try {
-      let url = `${API_BASE_URL}/reports/dashboard?period=${normPeriod}`;
+      let url = `/api/reports/dashboard?period=${normPeriod}`;
       if (normPeriod === "customdaterange" && startDate && endDate) {
         url += `&startDate=${startDate}&endDate=${endDate}`;
       }
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch report dashboard from Spring Boot: ${response.statusText}`);
-      }
-      const data = await response.json();
+      const response = await api.get(url);
+      const data = response.data;
       console.log(`Successfully fetched live report data from PostgreSQL for period: ${period}`, data);
       return data;
     } catch (err) {
@@ -82,11 +79,8 @@ export const AdminReportService = {
    */
   getMonthlySalesOverview: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/reports/monthly-sales`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch monthly sales: ${response.statusText}`);
-      }
-      return await response.json();
+      const response = await api.get('/api/reports/monthly-sales');
+      return response.data;
     } catch (err) {
       console.warn("Backend monthly-sales offline, falling back to mock");
       return [
@@ -280,17 +274,11 @@ export const AdminReportService = {
    * and initiates browser file download.
    */
   exportPDFReport: async (period) => {
-
-   
     const normPeriod = normalizePeriod(period);
     try {
       console.log(`Attempting to export PDF report from Spring Boot backend for period: ${period}`);
-      const response = await fetch(`${API_BASE_URL}/reports/export?period=${normPeriod}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch exported PDF blob: ${response.statusText}`);
-      }
-
-      const blob = await response.blob();
+      const response = await api.get(`/api/reports/export?period=${normPeriod}`, { responseType: "blob" });
+      const blob = response.data;
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;

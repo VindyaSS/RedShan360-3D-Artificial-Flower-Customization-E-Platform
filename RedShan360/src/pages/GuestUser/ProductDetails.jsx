@@ -17,7 +17,6 @@ const ProductDetails = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
 
   // Gallery states
-  const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistId, setWishlistId] = useState(null);
@@ -89,7 +88,6 @@ const ProductDetails = () => {
           };
 
           setProduct(mappedProduct);
-          setSelectedColor(mappedProduct.colors[0]?.name || '');
           setQuantity(1);
 
           // Set 3D model path dynamically from backend modelUrl
@@ -244,7 +242,7 @@ const ProductDetails = () => {
     setIsAddingToCart(true);
 
     try {
-      await cartApi.addToCart(product.id, quantity, selectedColor || 'Default');
+      await cartApi.addToCart(product.id, quantity, 'Default');
       setIsAddingToCart(false);
       setAddedToCart(true);
       window.dispatchEvent(new Event('cart-updated'));
@@ -310,7 +308,7 @@ const ProductDetails = () => {
     return (
       <div className="min-h-screen bg-[#fcf9f8] flex flex-col font-sans">
         <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
-        <div className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-6">
+        <div className="flex-1 flex flex-col items-center justify-center pt-5 pb-12 px-6">
           <div className="w-8 h-8 border-4 border-[#8c5e5e]/30 border-t-[#8c5e5e] rounded-full animate-spin mb-3"></div>
           <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Loading Arrangement...</p>
         </div>
@@ -324,7 +322,7 @@ const ProductDetails = () => {
     return (
       <div className="min-h-screen bg-[#fcf9f8] flex flex-col font-sans">
         <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
-        <div className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-6 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center pt-5 pb-12 px-6 text-center">
           <h2 className="text-3xl font-bold font-playfair text-[#1a1a1a] mb-4">Arrangement Not Found</h2>
           <p className="text-sm text-[#1a1a1a]/60 mb-8">{error || 'The botanical piece you are looking for does not exist.'}</p>
           <Link to="/shop" className="px-6 py-3 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white rounded-sm text-xs font-semibold uppercase tracking-wider transition-all duration-300">
@@ -347,10 +345,10 @@ const ProductDetails = () => {
       <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
 
       {/* Main product area */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-[120px] pb-24">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-5 pb-24">
 
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-10 uppercase">
+        <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-5 uppercase">
           <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
           <span>/</span>
           <Link to="/shop" className="hover:text-[#8c5e5e] transition-colors">Shop</Link>
@@ -358,12 +356,12 @@ const ProductDetails = () => {
           <span className="text-[#8c5e5e] truncate max-w-[200px]">{product.title}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
 
           {/* Left Column: Product Image */}
-          <div className="lg:col-span-7 flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
             {/* Main Interactive Product Image */}
-            <div className="w-full aspect-[3/4] bg-[#f4f0ed] rounded-sm overflow-hidden relative group shadow-sm border border-[#d9d2d0]/25">
+            <div className="w-full h-[380px] sm:h-[420px] md:h-[460px] bg-[#f4f0ed] rounded-sm overflow-hidden relative group shadow-sm border border-[#d9d2d0]/25 flex items-center justify-center">
               <img
                 src={getProductImageUrl(product.imageUrl)}
                 alt={product.productName}
@@ -371,13 +369,13 @@ const ProductDetails = () => {
                   event.currentTarget.onerror = null;
                   event.currentTarget.src = "/images/product-placeholder.png";
                 }}
-                className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.03] animate-fade-in"
+                className="w-full h-full object-contain p-4 transition-transform duration-700 ease-out group-hover:scale-[1.03] animate-fade-in"
               />
 
               {/* Favorite toggle overlay */}
               <button
                 onClick={toggleWishlist}
-                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm shadow-md hover:bg-white w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105"
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm shadow-md hover:bg-white w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 z-10"
                 aria-label="Add to Wishlist"
               >
                 <Heart
@@ -395,23 +393,23 @@ const ProductDetails = () => {
                   setShow360Modal(true);
                   setViewMode3D(true);
                 }}
-                className="flex items-center justify-center gap-2.5 mx-auto mt-2 px-6 py-2.5 rounded-full border border-[#d9d2d0] hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-xs font-bold tracking-widest text-[#1a1a1a]/70 hover:text-[#8c5e5e] transition-all duration-300 shadow-sm"
+                className="flex items-center justify-center gap-2 mx-auto mt-1 px-5 py-2 rounded-full border border-[#d9d2d0] hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-[11px] font-bold tracking-widest text-[#1a1a1a]/70 hover:text-[#8c5e5e] transition-all duration-300 shadow-sm"
               >
                 <RotateCw size={14} className="animate-spin-slow" />
                 <span>INTERACTIVE 3D VIEW</span>
               </button>
             ) : (
-              <p className="text-center text-xs text-[#1a1a1a]/40 font-semibold mt-2">
+              <p className="text-center text-[11px] text-[#1a1a1a]/40 font-semibold mt-1">
                 3D model not available.
               </p>
             )}
           </div>
 
           {/* Right Column: Product Detail Panel */}
-          <div className="lg:col-span-5 flex flex-col justify-start text-left">
+          <div className="flex flex-col justify-start text-left">
 
             {/* Category / Subcategory tags */}
-            <div className="flex flex-wrap items-center gap-2 mb-4 text-[10px] uppercase tracking-wider font-bold text-[#1a1a1a]/50">
+            <div className="flex flex-wrap items-center gap-2 mb-3 text-[10px] uppercase tracking-wider font-bold text-[#1a1a1a]/50">
               <span className="bg-[#f4f0ed] px-2.5 py-1 rounded-sm border border-[#d9d2d0]/20">Category: <span className="text-[#8c5e5e]">{product.categoryName}</span></span>
               {product.subCategoryName && (
                 <span className="bg-[#f4f0ed] px-2.5 py-1 rounded-sm border border-[#d9d2d0]/20">Subcategory: <span className="text-[#8c5e5e]">{product.subCategoryName}</span></span>
@@ -419,7 +417,7 @@ const ProductDetails = () => {
             </div>
 
             {/* Reviews Summary */}
-            <div className="flex items-center gap-1.5 mb-3">
+            <div className="flex items-center gap-1.5 mb-2">
               <div className="flex items-center gap-0.5 text-xs text-[#8c5e5e]">
                 {[...Array(5)].map((_, i) => (
                   <Star
@@ -438,33 +436,33 @@ const ProductDetails = () => {
             </div>
 
             {/* Product Title */}
-            <h1 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] tracking-tight leading-tight mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#1a1a1a] tracking-tight leading-tight mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
               {product.title}
             </h1>
 
             {/* Pricing Info */}
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-3 mb-3">
               {product.discountPercentage > 0 ? (
                 <>
-                  <span className="text-2xl md:text-3xl font-semibold text-[#8c5e5e]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <span className="text-xl md:text-2xl font-semibold text-[#8c5e5e]" style={{ fontFamily: 'Playfair Display, serif' }}>
                     {product.discountPrice}
                   </span>
-                  <span className="text-sm line-through text-[#1a1a1a]/40">
+                  <span className="text-xs line-through text-[#1a1a1a]/40">
                     {product.price}
                   </span>
-                  <span className="bg-red-500 text-white text-[9px] font-bold tracking-widest px-2.5 py-1 rounded-full uppercase shadow-sm">
+                  <span className="bg-red-500 text-white text-[9px] font-bold tracking-widest px-2.5 py-0.5 rounded-full uppercase shadow-sm">
                     {product.discountPercentage}% OFF
                   </span>
                 </>
               ) : (
-                <span className="text-2xl md:text-3xl font-semibold text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <span className="text-xl md:text-2xl font-semibold text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
                   {product.price}
                 </span>
               )}
             </div>
 
             {/* Stock Quantity */}
-            <div className="mb-4 flex items-center gap-2 text-xs text-[#1a1a1a]/70">
+            <div className="mb-3 flex items-center gap-2 text-xs text-[#1a1a1a]/70">
               <span className="font-bold">Availability:</span>
               {product.stockQuantity > 0 ? (
                 <span className="text-emerald-600 font-semibold">{product.stockQuantity} in stock</span>
@@ -474,57 +472,32 @@ const ProductDetails = () => {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-[#d9d2d0]/50 my-2"></div>
+            <div className="border-t border-[#d9d2d0]/50 my-1"></div>
 
             {/* Description */}
-            <p className="text-sm leading-relaxed text-[#1a1a1a]/75 my-6 font-normal">
+            <p className="text-xs md:text-sm leading-relaxed text-[#1a1a1a]/75 my-4 font-normal">
               {product.description}
             </p>
 
-            {/* Color selection options */}
-            <div className="mb-6">
-              <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-3">
-                COLOR: <span className="text-[#1a1a1a] font-black">{selectedColor}</span>
-              </span>
-              <div className="flex items-center gap-3">
-                {product.colors.map((color) => (
-                  <button
-                    key={color.name}
-                    onClick={() => setSelectedColor(color.name)}
-                    className={`w-8 h-8 rounded-full border transition-all duration-300 relative flex items-center justify-center ${selectedColor === color.name
-                      ? 'border-[#8c5e5e] scale-110 ring-2 ring-[#8c5e5e]/20 ring-offset-2'
-                      : 'border-[#d9d2d0] hover:scale-105'
-                      }`}
-                    style={{ backgroundColor: color.hex }}
-                    title={color.name}
-                  >
-                    {selectedColor === color.name && (
-                      <span className="absolute w-1.5 h-1.5 rounded-full bg-[#1a1a1a]" style={{ backgroundColor: color.hex === '#ffffff' ? '#1a1a1a' : '#ffffff' }} />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Quantity Selector */}
-            <div className="mb-8">
-              <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-3">
+            <div className="mb-5">
+              <span className="text-[11px] uppercase tracking-widest font-bold text-[#1a1a1a]/60 block mb-2">
                 QUANTITY
               </span>
               <div className="inline-flex items-center border border-[#d9d2d0] bg-white rounded-sm">
                 <button
                   onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="px-3.5 py-2 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
+                  className="px-3 py-1.5 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
                   aria-label="Decrease quantity"
                 >
                   &mdash;
                 </button>
-                <span className="w-12 text-center text-xs font-bold font-mono select-none">
+                <span className="w-10 text-center text-xs font-bold font-mono select-none">
                   {quantity}
                 </span>
                 <button
                   onClick={() => setQuantity((prev) => prev + 1)}
-                  className="px-3.5 py-2 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
+                  className="px-3 py-1.5 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
                   aria-label="Increase quantity"
                 >
                   +
@@ -533,11 +506,11 @@ const ProductDetails = () => {
             </div>
 
             {/* Actions: Add to Cart and Wishlist */}
-            <div className="flex gap-3 mb-8 w-full">
+            <div className="flex gap-3 mb-5 w-full">
               <button
                 onClick={handleAddToCart}
                 disabled={isAddingToCart}
-                className={`flex-1 flex items-center justify-center gap-2.5 py-4 px-6 rounded-sm bg-[#8c5e5e] text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${isAddingToCart ? 'bg-[#7d4d50]/70 cursor-not-allowed' : 'hover:bg-[#7d4d50] active:scale-[0.98]'
+                className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-sm bg-[#8c5e5e] text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${isAddingToCart ? 'bg-[#7d4d50]/70 cursor-not-allowed' : 'hover:bg-[#7d4d50] active:scale-[0.98]'
                   }`}
               >
                 {isAddingToCart ? (
@@ -557,7 +530,7 @@ const ProductDetails = () => {
 
               <button
                 onClick={toggleWishlist}
-                className={`w-14 h-14 border border-[#d9d2d0] rounded-sm flex items-center justify-center transition-all duration-300 shadow-sm ${isWishlisted
+                className={`w-12 h-12 border border-[#d9d2d0] rounded-sm flex items-center justify-center transition-all duration-300 shadow-sm ${isWishlisted
                   ? 'border-[#8c5e5e] bg-[#8c5e5e]/5 text-[#8c5e5e]'
                   : 'hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-[#1a1a1a]/70'
                   }`}
@@ -568,7 +541,7 @@ const ProductDetails = () => {
             </div>
 
             {/* Product Meta Flags */}
-            <div className="flex flex-row flex-wrap gap-x-6 gap-y-2.5 pt-5 border-t border-[#d9d2d0]/40 font-sans text-xs text-[#1a1a1a]/60">
+            <div className="flex flex-row flex-wrap gap-x-6 gap-y-2.5 pt-4 border-t border-[#d9d2d0]/40 font-sans text-xs text-[#1a1a1a]/60">
               <div className="flex items-center gap-2">
                 <Truck size={14} className="text-[#8c5e5e]" />
                 <span>Global Shipping</span>
@@ -583,7 +556,7 @@ const ProductDetails = () => {
         </div>
 
         {/* Customer Stories Section */}
-        <section id="reviews" className="mt-32 pt-20 border-t border-[#d9d2d0]/50 scroll-mt-24">
+        <section id="reviews" className="mt-16 pt-12 border-t border-[#d9d2d0]/50 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 mb-12">
             <div className="text-left">
               <h2 className="text-3xl font-bold tracking-tight text-[#1a1a1a] mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -689,7 +662,7 @@ const ProductDetails = () => {
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (
-          <section className="mt-32 pt-20 border-t border-[#d9d2d0]/50 relative">
+          <section className="mt-16 pt-12 border-t border-[#d9d2d0]/50 relative">
             <div className="flex justify-between items-end gap-6 mb-12">
               <div className="text-left">
                 <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-3">Harmonious Pairings</p>
@@ -699,22 +672,7 @@ const ProductDetails = () => {
               </div>
 
               {/* Nav arrows */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => scrollCarousel('left')}
-                  className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
-                  aria-label="Scroll left"
-                >
-                  <ArrowLeft size={14} className="text-[#1a1a1a]/70" />
-                </button>
-                <button
-                  onClick={() => scrollCarousel('right')}
-                  className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
-                  aria-label="Scroll right"
-                >
-                  <ArrowRight size={14} className="text-[#1a1a1a]/70" />
-                </button>
-              </div>
+
             </div>
 
             {/* Related Products Slider list */}
