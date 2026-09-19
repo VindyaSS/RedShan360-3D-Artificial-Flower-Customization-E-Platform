@@ -289,8 +289,13 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 w-full h-full flex items-center">
           <div className="flex justify-between items-center w-full h-full gap-4">
-            <Link to="/guestUserDashboard" className="flex-shrink-0 flex items-center">
-              <h1 className="text-[24px] md:text-[26px] font-bold tracking-tight text-[#1a1a1a] font-playfair leading-none">
+            <Link to="/guestUserDashboard" className="flex-shrink-0 flex items-center gap-3 group">
+              <img
+                src="/images/logo-icon-square.jpeg"
+                alt="Redshan Flora Logo"
+                className="h-11 w-11 md:h-12 md:w-12 object-contain rounded-full shadow-md group-hover:scale-105 transition-transform duration-300"
+              />
+              <h1 className="text-[22px] md:text-[25px] font-bold tracking-tight text-[#1a1a1a] font-playfair leading-none">
                 Redshan Flora
               </h1>
             </Link>
@@ -536,12 +541,55 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                   key={item}
                   to={getRoute(item)}
                   onClick={(e) => handleNavClick(item, e)}
-                  className={`block text-sm uppercase tracking-widest font-semibold py-1 transition-colors ${isActive(item) ? 'text-[#8c5e5e]' : 'text-[#1a1a1a] hover:text-[#8c5e5e]'
+                  className={`block text-sm uppercase tracking-widest font-semibold py-1.5 transition-colors ${isActive(item) ? 'text-[#8c5e5e]' : 'text-[#1a1a1a] hover:text-[#8c5e5e]'
                     }`}
                 >
                   {item}
                 </Link>
               ))}
+
+              <div className="border-t border-[#d9d2d0]/40 my-2 pt-2">
+                {(() => {
+                  const savedUser = localStorage.getItem('user');
+                  let currentUser = null;
+                  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+                    try { currentUser = JSON.parse(savedUser); } catch (e) { console.error(e); }
+                  }
+                  if (currentUser) {
+                    return (
+                      <div className="flex flex-col space-y-2">
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); setIsMyOrdersOpen(true); }}
+                          className="text-left text-xs uppercase tracking-wider font-semibold text-[#1a1a1a]/85 py-1.5 hover:text-[#8c5e5e]"
+                        >
+                          My Orders
+                        </button>
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); navigate('/loyalty-points'); }}
+                          className="text-left text-xs uppercase tracking-wider font-semibold text-[#1a1a1a]/85 py-1.5 hover:text-[#8c5e5e]"
+                        >
+                          Loyalty Points
+                        </button>
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                          className="text-left text-xs uppercase tracking-wider font-semibold text-red-500 py-1.5 hover:text-red-600"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <button
+                        onClick={() => { setMobileMenuOpen(false); setIsLoginOpen(true); }}
+                        className="w-full text-center py-2.5 rounded-sm bg-[#8c5e5e] text-white font-semibold text-xs tracking-wider uppercase shadow-sm"
+                      >
+                        Login / Sign Up
+                      </button>
+                    );
+                  }
+                })()}
+              </div>
             </div>
           </div>
         )}

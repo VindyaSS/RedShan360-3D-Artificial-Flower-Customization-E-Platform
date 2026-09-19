@@ -631,22 +631,7 @@ const Shop = () => {
               </div>
             </div>
 
-            {/* Availability Filter */}
-            <div className="mb-6">
-              <h3 className="text-xs uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-3">Availability</h3>
-              <label className="flex items-center gap-2.5 cursor-pointer text-sm font-medium text-[#1a1a1a]/85">
-                <input
-                  type="checkbox"
-                  checked={inStockOnly}
-                  onChange={(e) => {
-                    setInStockOnly(e.target.checked);
-                    setCurrentPage(1);
-                  }}
-                  className="w-4 h-4 rounded-sm border-[#d9d2d0] text-[#8c5e5e] focus:ring-[#8c5e5e] accent-[#8c5e5e]"
-                />
-                <span>In Stock Only</span>
-              </label>
-            </div>
+
 
             {/* Rating Filter */}
             <div className="mb-6">
@@ -690,22 +675,7 @@ const Shop = () => {
               </div>
             </div>
 
-            {/* Discount Filter */}
-            <div className="mb-6">
-              <h3 className="text-xs uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-3">Discount</h3>
-              <label className="flex items-center gap-2.5 cursor-pointer text-sm font-medium text-[#1a1a1a]/85">
-                <input
-                  type="checkbox"
-                  checked={onSaleOnly}
-                  onChange={(e) => {
-                    setOnSaleOnly(e.target.checked);
-                    setCurrentPage(1);
-                  }}
-                  className="w-4 h-4 rounded-sm border-[#d9d2d0] text-[#8c5e5e] focus:ring-[#8c5e5e] accent-[#8c5e5e]"
-                />
-                <span>On Sale Only</span>
-              </label>
-            </div>
+
           </aside>
 
           {/* Products Column */}
@@ -1232,7 +1202,7 @@ const Shop = () => {
 
               {/* Discount */}
               <div className="mb-6">
-                <h3 className="text-xs uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-3">Discount</h3>
+                <h3 className="text-xs uppercase tracking-wider font-bold text-[#1a1a1a]/60 mb-3"></h3>
                 <label className="flex items-center gap-2.5 cursor-pointer text-sm font-medium text-[#1a1a1a]/85">
                   <input
                     type="checkbox"
