@@ -4,6 +4,7 @@ import React, {
     useRef,
     useCallback
 } from "react";
+import { Search } from "lucide-react";
 
 import "../../css/manager.css";
 
@@ -20,6 +21,9 @@ export default function MTabs() {
 
     // ---------------- Tab State ----------------
     const [currentTab, setCurrentTab] = useState(1);
+
+    // ---------------- Search Filter State ----------------
+    const [searchQuery, setSearchQuery] = useState("");
 
     // ---------------- Order States ----------------
     const [orders, setOrders] = useState([]);
@@ -72,11 +76,6 @@ export default function MTabs() {
             const completedData = await completedResponse.json();
             const dispatchedData = await dispatchedResponse.json();
 
-            console.log('[MTabs] fetchOrders preOrders - Status:', preOrdersResponse.status, '| Data:', preOrdersData);
-            console.log('[MTabs] fetchOrders processing - Status:', processingResponse.status, '| Data:', processingData);
-            console.log('[MTabs] fetchOrders completed - Status:', completedResponse.status, '| Data:', completedData);
-            console.log('[MTabs] fetchOrders dispatched - Status:', dispatchedResponse.status, '| Data:', dispatchedData);
-
             // Save fetched data to state
             setOrders(Array.isArray(preOrdersData) ? preOrdersData : []);
             setProcessingOrders(Array.isArray(processingData) ? processingData : []);
@@ -123,20 +122,46 @@ export default function MTabs() {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
+    // ---------------- Search Filter Helper ----------------
+    const filterOrders = (list) => {
+        if (!searchQuery.trim()) return list;
+        const q = searchQuery.toLowerCase().trim();
+        return list.filter((order) =>
+            String(order?.orderId ?? "").toLowerCase().includes(q) ||
+            String(order?.customerName ?? "").toLowerCase().includes(q) ||
+            String(order?.phone ?? "").toLowerCase().includes(q) ||
+            String(order?.address ?? "").toLowerCase().includes(q)
+        );
+    };
+
+    const filteredPreOrders = filterOrders(orders);
+    const filteredProcessingOrders = filterOrders(processingorders);
+    const filteredCompletedOrders = filterOrders(completedorders);
+    const filteredDispatchedOrders = filterOrders(dispatchedorders);
+
 
     // ---------------- Loading State ----------------
     if (loading) {
         return (
-            <div className="tabs-container" ref={wrapperRef}>
-                <div className="tabs-header">
-                    <button className="tab-btn active">Pre Orders</button>
-                    <button className="tab-btn">Processing Orders</button>
-                    <button className="tab-btn">Completed Orders</button>
-                    <button className="tab-btn">Dispatched Orders To Courier</button>
+            <div className="w-full flex flex-col gap-6" ref={wrapperRef}>
+                <div className="manage-orders-header">
+                    <div className="manage-orders-title-group">
+                        <h1>Manage Orders</h1>
+                        <p>Track, filter, and dispatch customer orders through each fulfillment stage.</p>
+                    </div>
                 </div>
-                <div className="tab-content" style={{ display: 'block', width: '100%' }}>
-                    <div style={{ padding: "40px", textAlign: "center" }}>
-                        Loading orders...
+
+                <div className="tabs-container">
+                    <div className="tabs-header">
+                        <button className="tab-btn active">Pre Orders</button>
+                        <button className="tab-btn">Processing Orders</button>
+                        <button className="tab-btn">Completed Orders</button>
+                        <button className="tab-btn">Dispatched Orders</button>
+                    </div>
+                    <div className="tab-content">
+                        <div style={{ padding: "40px", textAlign: "center", color: "#666" }}>
+                            Loading orders...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -147,18 +172,33 @@ export default function MTabs() {
     // ---------------- Error State ----------------
     if (error) {
         return (
-            <div className="tabs-container" ref={wrapperRef}>
-                <div className="tabs-header">
-                    <button className="tab-btn active">Pre Orders</button>
-                    <button className="tab-btn">Processing Orders</button>
-                    <button className="tab-btn">Completed Orders</button>
-                    <button className="tab-btn">Dispatched Orders To Courier</button>
+            <div className="w-full flex flex-col gap-6" ref={wrapperRef}>
+                <div className="manage-orders-header">
+                    <div className="manage-orders-title-group">
+                        <h1>Manage Orders</h1>
+                        <p>Track, filter, and dispatch customer orders through each fulfillment stage.</p>
+                    </div>
                 </div>
-                <div className="tab-content" style={{ display: 'block', width: '100%' }}>
-                    <div style={{ padding: "40px", textAlign: "center" }}>
-                        <h3>Failed to load orders</h3>
-                        <p>{error}</p>
-                        <button onClick={fetchOrders}>Retry</button>
+
+                <div className="tabs-container">
+                    <div className="tabs-header">
+                        <button className="tab-btn active">Pre Orders</button>
+                        <button className="tab-btn">Processing Orders</button>
+                        <button className="tab-btn">Completed Orders</button>
+                        <button className="tab-btn">Dispatched Orders</button>
+                    </div>
+                    <div className="tab-content">
+                        <div className="empty-state-box">
+                            <h4>Failed to load orders</h4>
+                            <p>{error}</p>
+                            <button
+                                className="btn-dispatch"
+                                style={{ marginTop: "16px" }}
+                                onClick={fetchOrders}
+                            >
+                                Retry
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -168,86 +208,120 @@ export default function MTabs() {
 
     // ---------------- Main UI ----------------
     return (
-        <div className="tabs-container" ref={wrapperRef}>
+        <div className="w-full flex flex-col gap-6" ref={wrapperRef}>
 
-            {/* ---------------- Tab Buttons ---------------- */}
-            <div className="tabs-header">
-                <button
-                    className={`tab-btn ${currentTab === 1 ? "active" : ""}`}
-                    onClick={() => setCurrentTab(1)}
-                >
-                    Pre Orders
-                </button>
+            {/* ---------------- Page Header & Controls ---------------- */}
+            <div className="manage-orders-header">
+                <div className="manage-orders-title-group">
+                    <h1>Manage Orders</h1>
+                    <p>Track, filter, and dispatch customer orders through each fulfillment stage.</p>
+                </div>
 
-                <button
-                    className={`tab-btn ${currentTab === 2 ? "active" : ""}`}
-                    onClick={() => setCurrentTab(2)}
-                >
-                    Processing Orders
-                </button>
-
-                <button
-                    className={`tab-btn ${currentTab === 3 ? "active" : ""}`}
-                    onClick={() => setCurrentTab(3)}
-                >
-                    Completed Orders
-                </button>
-
-                <button
-                    className={`tab-btn ${currentTab === 4 ? "active" : ""}`}
-                    onClick={() => setCurrentTab(4)}
-                >
-                    Dispatched Orders To Courier
-                </button>
+                <div className="order-search-box">
+                    <Search size={16} className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Search by Order ID or Customer..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
             </div>
 
+            {/* ---------------- Tabs Container ---------------- */}
+            <div className="tabs-container">
 
-            {/* ---------------- Tab Content ---------------- */}
-            <div className="tab-content" style={{ display: 'block', width: '100%' }}>
+                {/* ---------------- Tab Header ---------------- */}
+                <div className="tabs-header">
+                    <button
+                        className={`tab-btn ${currentTab === 1 ? "active" : ""}`}
+                        onClick={() => setCurrentTab(1)}
+                    >
+                        <span>Pre Orders</span>
+                        <span className="tab-badge">{orders.length}</span>
+                    </button>
 
-                {/* ---------------- Pre Orders Tab ---------------- */}
-                {currentTab === 1 && (
-                    <MPOrderTable
-                        t1="Order ID"
-                        t2="Customer Name"
-                        t3="Price"
-                        orders={orders}
-                    />
-                )}
+                    <button
+                        className={`tab-btn ${currentTab === 2 ? "active" : ""}`}
+                        onClick={() => setCurrentTab(2)}
+                    >
+                        <span>Processing Orders</span>
+                        <span className="tab-badge">{processingorders.length}</span>
+                    </button>
 
-                {/* ---------------- Processing Orders Tab ---------------- */}
-                {currentTab === 2 && (
-                    <MProcessingOrderTable
-                        t1="Order ID"
-                        t2="Customer Name"
-                        t3="Price"
-                        processingorders={processingorders}
-                    />
-                )}
+                    <button
+                        className={`tab-btn ${currentTab === 3 ? "active" : ""}`}
+                        onClick={() => setCurrentTab(3)}
+                    >
+                        <span>Completed Orders</span>
+                        <span className="tab-badge">{completedorders.length}</span>
+                    </button>
 
-                {/* ---------------- Completed Orders Tab ---------------- */}
-                {currentTab === 3 && (
-                    <MCompletedOrderTable
-                        t1="Order ID"
-                        t2="Customer Name"
-                        t3="Price"
-                        t4="Address"
-                        t5="Phone"
-                        completedorders={completedorders}
-                        onOrderDispatched={handleOrderDispatched}
-                    />
-                )}
+                    <button
+                        className={`tab-btn ${currentTab === 4 ? "active" : ""}`}
+                        onClick={() => setCurrentTab(4)}
+                    >
+                        <span>Dispatched Orders</span>
+                        <span className="tab-badge">{dispatchedorders.length}</span>
+                    </button>
+                </div>
 
-                {/* ---------------- Dispatched Orders Tab ---------------- */}
-                {currentTab === 4 && (
-                    <MDispatchOrderTable
-                        t1="Order ID"
-                        t2="Customer Name"
-                        t3="Price"
-                        dispatchedorders={dispatchedorders}
-                    />
-                )}
 
+                {/* ---------------- Tab Content ---------------- */}
+                <div className="tab-content">
+
+                    {/* ---------------- Pre Orders Tab ---------------- */}
+                    {currentTab === 1 && (
+                        <MPOrderTable
+                            t1="Order ID"
+                            t2="Customer Name"
+                            t3="Price"
+                            t4="Status"
+                            orders={filteredPreOrders}
+                            searchQuery={searchQuery}
+                        />
+                    )}
+
+                    {/* ---------------- Processing Orders Tab ---------------- */}
+                    {currentTab === 2 && (
+                        <MProcessingOrderTable
+                            t1="Order ID"
+                            t2="Customer Name"
+                            t3="Price"
+                            t4="Status"
+                            processingorders={filteredProcessingOrders}
+                            searchQuery={searchQuery}
+                        />
+                    )}
+
+                    {/* ---------------- Completed Orders Tab ---------------- */}
+                    {currentTab === 3 && (
+                        <MCompletedOrderTable
+                            t1="Order ID"
+                            t2="Customer Name"
+                            t3="Price"
+                            t4="Address"
+                            t5="Phone"
+                            t6="Status"
+                            completedorders={filteredCompletedOrders}
+                            onOrderDispatched={handleOrderDispatched}
+                            searchQuery={searchQuery}
+                        />
+                    )}
+
+                    {/* ---------------- Dispatched Orders Tab ---------------- */}
+                    {currentTab === 4 && (
+                        <MDispatchOrderTable
+                            t1="Order ID"
+                            t2="Customer Name"
+                            t3="Price"
+                            t4="Status"
+                            dispatchedorders={filteredDispatchedOrders}
+                            searchQuery={searchQuery}
+                        />
+                    )}
+
+                </div>
             </div>
         </div>
     );

@@ -35,7 +35,7 @@ export default function MPreOrderModal({
                         <h3>
                             {isAssignmentMode
                                 ? `Assign Order to ${employee?.EmployeeName}`
-                                : `Order Details: ${order?.OrderID}`}
+                                : `Order Details: #RS-000${order?.OrderID}`}
                         </h3>
                     </div>
                     <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
@@ -93,7 +93,7 @@ export default function MPreOrderModal({
                                                             <td>
                                                                 <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: "600" }}>
                                                                     {isCustom && (isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-                                                                    {po.OrderID}
+                                                                    {po.OrderID ? `#RS-000${po.OrderID}` : "-"}
                                                                 </div>
                                                             </td>
                                                             <td>{po.CustomerName}</td>
