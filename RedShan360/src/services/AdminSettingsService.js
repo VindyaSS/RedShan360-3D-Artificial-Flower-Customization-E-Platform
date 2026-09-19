@@ -30,9 +30,32 @@ export const AdminSettingsService = {
    * Retrieves profile details.
    */
   getProfile: async () => {
-    await delay(300);
+    await delay(100);
     const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
-    return data ? JSON.parse(data) : { ...DEFAULT_PROFILE };
+    if (data) {
+      return JSON.parse(data);
+    }
+
+    // Default fallback reads directly from logged-in admin user object returned by database on login
+    let dbName = DEFAULT_PROFILE.fullName;
+    let dbEmail = DEFAULT_PROFILE.email;
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        if (u.name) dbName = u.name;
+        else if (u.fullName) dbName = u.fullName;
+        if (u.email) dbEmail = u.email;
+      }
+    } catch (e) {
+      console.error("Failed to parse user from localStorage:", e);
+    }
+
+    return {
+      ...DEFAULT_PROFILE,
+      fullName: dbName,
+      email: dbEmail,
+    };
   },
 
   /**

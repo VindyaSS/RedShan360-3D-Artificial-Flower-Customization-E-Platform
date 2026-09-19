@@ -109,6 +109,7 @@ function AdminUserManagement() {
   const [modalMode, setModalMode] = useState("add"); // "add", "edit", "view"
   const [formData, setFormData] = useState({ ...defaultFormState });
   const [editingUserId, setEditingUserId] = useState(null);
+  const [selectedUserOrders, setSelectedUserOrders] = useState([]);
 
   const fetchStats = () => {
     fetch("http://localhost:8080/api/admin/users/stats", { headers: getAuthHeaders() })
@@ -351,6 +352,17 @@ function AdminUserManagement() {
     // Populate form data
     const email = user.contact.split(" | ")[0];
     const phone = user.contact.split(" | ")[1] || "";
+
+    setSelectedUserOrders([]);
+
+    fetch(`http://localhost:8080/api/admin/users/${user.id}`, { headers: getAuthHeaders() })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.orderHistory) {
+          setSelectedUserOrders(data.orderHistory);
+        }
+      })
+      .catch((err) => console.error("Error fetching user details:", err));
 
     setFormData({
       fullName: user.name,
@@ -598,7 +610,9 @@ function AdminUserManagement() {
             <div className="modal-header">
               <h2>
                 {modalMode === "view"
-                  ? "View Details"
+                  ? formData.role === "Customer"
+                    ? "Customer Details & Order History"
+                    : "View Details"
                   : modalMode === "edit"
                     ? `Edit ${formData.role}`
                     : `Add New ${formData.role}`}
@@ -609,132 +623,200 @@ function AdminUserManagement() {
             </div>
 
             <form onSubmit={handleFormSave} className="modal-form-body">
-              {/* SECTION 1: Personal Information */}
-              <div className="form-section">
-                <h4 className="section-title">1. Personal Information</h4>
-                <div className="form-row-grid">
-                  <div className="form-group-item">
-                    <label>Full Name <span className="req">*</span></label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      placeholder="Enter full name"
-                      required
-                      disabled={modalMode === "view"}
-                    />
-                  </div>
-
-
-
-                  <div className="form-group-item">
-                    <label>Email Address <span className="req">*</span></label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="email@domain.com"
-                      required
-                      disabled={modalMode === "view" || modalMode === "edit"}
-                    />
-                  </div>
-
-                  <div className="form-group-item">
-                    <label>Phone Number <span className="req">*</span></label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="+1 (555) 000-0000"
-                      required
-                      disabled={modalMode === "view"}
-                    />
-                  </div>
-
-
-                </div>
-              </div>
-
-              {/* SECTION 2: Employment Information */}
-              <div className="form-section">
-                <h4 className="section-title">2. Employment Information</h4>
-                <div className="form-row-grid">
-                  <div className="form-group-item">
-                    <label>Role <span className="req">*</span></label>
-                    <select
-                      name="role"
-                      value={formData.role}
-                      onChange={handleInputChange}
-                      required
-                      disabled={modalMode === "view"}
-                    >
-                      <option value="Employee">Employee</option>
-                      <option value="Manager">Manager</option>
-                    </select>
-                  </div>
-
-
-
-                  <div className="form-group-item">
-                    <label>Joining Date <span className="req">*</span></label>
-                    <input
-                      type="date"
-                      name="joiningDate"
-                      value={formData.joiningDate}
-                      onChange={handleInputChange}
-                      required
-                      disabled={modalMode === "view"}
-                    />
-                  </div>
-
-                  <div className="form-group-item">
-                    <label>Employment Status <span className="req">*</span></label>
-                    <select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                      required
-                      disabled={modalMode === "view"}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                      <option value="Suspended">Suspended</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 3: Login Information */}
-              {modalMode === "add" && (
-                <div className="form-section">
-                  <h4 className="section-title">3. Login Information</h4>
-                  <div className="form-row-grid">
-                    <div className="form-group-item">
-                      <label>Password <span className="req">*</span></label>
-                      <PasswordInput
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        placeholder="Initial Password"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group-item">
-                      <label>Confirm Password <span className="req">*</span></label>
-                      <PasswordInput
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        placeholder="Confirm Password"
-                        required
-                      />
+              {modalMode === "view" && formData.role === "Customer" ? (
+                <div className="customer-view-details">
+                  {/* Customer Information */}
+                  <div className="customer-info-section">
+                    <h4 className="section-title">Personal Information</h4>
+                    <div className="customer-info-grid">
+                      <div className="info-item">
+                        <span className="info-label">Full Name</span>
+                        <span className="info-value">{formData.fullName}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Email Address</span>
+                        <span className="info-value">{formData.email}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Phone Number</span>
+                        <span className="info-value">{formData.phone || "N/A"}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Account Status</span>
+                        <div>
+                          <span className={`status-pill ${formData.status.toLowerCase()}`}>{formData.status}</span>
+                        </div>
+                      </div>
+                      {formData.joiningDate && (
+                        <div className="info-item">
+                          <span className="info-label">Registered Date</span>
+                          <span className="info-value">{formData.joiningDate}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  {/* Order History */}
+                  <div className="customer-orders-section">
+                    <h4 className="section-title">Order History ({selectedUserOrders.length})</h4>
+                    {selectedUserOrders.length === 0 ? (
+                      <div className="no-orders-msg">
+                        <p>No orders placed by this customer yet.</p>
+                      </div>
+                    ) : (
+                      <table className="customer-orders-table">
+                        <thead>
+                          <tr>
+                            <th>ORDER ID</th>
+                            <th>DATE</th>
+                            <th>TOTAL AMOUNT</th>
+                            <th>STATUS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedUserOrders.map((ord) => (
+                            <tr key={ord.id}>
+                              <td className="ord-id">{ord.orderCode || `#RS-${ord.id}`}</td>
+                              <td>{ord.orderDate ? new Date(ord.orderDate).toLocaleDateString() : "N/A"}</td>
+                              <td className="ord-amount">
+                                Rs. {Number(ord.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                              <td>
+                                <span className={`status-pill ${ord.orderStatus ? ord.orderStatus.toLowerCase() : "pending"}`}>
+                                  {ord.orderStatus || "PENDING"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
                 </div>
+              ) : (
+                <>
+                  {/* SECTION 1: Personal Information */}
+                  <div className="form-section">
+                    <h4 className="section-title">1. Personal Information</h4>
+                    <div className="form-row-grid">
+                      <div className="form-group-item">
+                        <label>Full Name <span className="req">*</span></label>
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          placeholder="Enter full name"
+                          required
+                          disabled={modalMode === "view"}
+                        />
+                      </div>
+
+                      <div className="form-group-item">
+                        <label>Email Address <span className="req">*</span></label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="email@domain.com"
+                          required
+                          disabled={modalMode === "view" || modalMode === "edit"}
+                        />
+                      </div>
+
+                      <div className="form-group-item">
+                        <label>Phone Number <span className="req">*</span></label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="+1 (555) 000-0000"
+                          required
+                          disabled={modalMode === "view"}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 2: Employment Information */}
+                  <div className="form-section">
+                    <h4 className="section-title">2. Employment Information</h4>
+                    <div className="form-row-grid">
+                      <div className="form-group-item">
+                        <label>Role <span className="req">*</span></label>
+                        <select
+                          name="role"
+                          value={formData.role}
+                          onChange={handleInputChange}
+                          required
+                          disabled={modalMode === "view"}
+                        >
+                          <option value="Employee">Employee</option>
+                          <option value="Manager">Manager</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group-item">
+                        <label>Joining Date <span className="req">*</span></label>
+                        <input
+                          type="date"
+                          name="joiningDate"
+                          value={formData.joiningDate}
+                          onChange={handleInputChange}
+                          required
+                          disabled={modalMode === "view"}
+                        />
+                      </div>
+
+                      <div className="form-group-item">
+                        <label>Employment Status <span className="req">*</span></label>
+                        <select
+                          name="status"
+                          value={formData.status}
+                          onChange={handleInputChange}
+                          required
+                          disabled={modalMode === "view"}
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                          <option value="Suspended">Suspended</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 3: Login Information */}
+                  {modalMode === "add" && (
+                    <div className="form-section">
+                      <h4 className="section-title">3. Login Information</h4>
+                      <div className="form-row-grid">
+                        <div className="form-group-item">
+                          <label>Password <span className="req">*</span></label>
+                          <PasswordInput
+                            name="password"
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            placeholder="Initial Password"
+                            required
+                          />
+                        </div>
+
+                        <div className="form-group-item">
+                          <label>Confirm Password <span className="req">*</span></label>
+                          <PasswordInput
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleInputChange}
+                            placeholder="Confirm Password"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
 
