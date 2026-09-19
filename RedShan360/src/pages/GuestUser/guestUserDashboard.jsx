@@ -8,6 +8,7 @@ import FeaturedProducts from './components/FeaturedProducts';
 //import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import api from '../../services/api';
+import { getProductImage } from '../../utils/imageHelper';
 
 import { products as initialProducts } from '../../data/products';
 
@@ -70,45 +71,72 @@ const GuestUserDashboard = () => {
       try {
         const response = await api.get('/api/products');
         const dbProducts = response.data;
-        const merged = initialProducts.map((localProd) => {
-          const dbProd = dbProducts.find((p) => p.productId === localProd.id || p.id === localProd.id);
-          const numPrice = dbProd ? (Number(dbProd.price) || 0) : (localProd.numericPrice || 15000);
-          const discountPct = dbProd ? (Number(dbProd.discountPercentage) || 0) : (localProd.discountPercent || 0);
-          let discPriceVal = null;
-          if (discountPct > 0) {
-            discPriceVal = numPrice * (1 - discountPct / 100);
-          }
+        if (Array.isArray(dbProducts) && dbProducts.length > 0) {
+          const mapped = dbProducts.map((dbProd) => {
+            const localProd = initialProducts.find((p) => p.id === dbProd.productId || p.id === dbProd.id) || {};
+            const numPrice = Number(dbProd.price) || localProd.numericPrice || 0;
+            const discountPct = Number(dbProd.discountPercentage) || localProd.discountPercent || 0;
+            let discPriceVal = null;
+            if (discountPct > 0) {
+              discPriceVal = numPrice * (1 - discountPct / 100);
+            }
 
-          // Resolve image
-          const finalImg = localProd.image || (dbProd && dbProd.imageUrl ? `http://localhost:8080/images/${dbProd.imageUrl}` : '/images/placeholder.png');
+            const realId = dbProd.productId || dbProd.id || localProd.id;
+            const computedImg = getProductImage(dbProd);
 
-          const realId = dbProd ? dbProd.productId : localProd.id;
-
-          return {
-            ...localProd,
-            id: realId,
-            productId: realId,
-            title: dbProd && dbProd.productName ? dbProd.productName : localProd.title,
-            description: dbProd && dbProd.description ? dbProd.description : localProd.description,
-            price: `Rs ${numPrice.toFixed(2)}`,
-            numericPrice: numPrice,
-            discountPercentage: discountPct,
-            discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
-            discountNumericPrice: discPriceVal,
-            stockQuantity: dbProd ? dbProd.stockQuantity : 50,
-            imageUrl: dbProd ? dbProd.imageUrl : null,
-            image: finalImg,
-            featured: dbProd ? dbProd.featured : false,
-            status: dbProd ? dbProd.status : 'ACTIVE',
-            createdAt: dbProd && dbProd.createdAt ? dbProd.createdAt : (localProd.createdAt || new Date().toISOString()),
-            categoryName: dbProd && dbProd.categoryName ? dbProd.categoryName : (localProd.category || 'silk'),
-            subCategoryName: dbProd && dbProd.subCategoryName ? dbProd.subCategoryName : (localProd.subcategory || ''),
-            rating: localProd.rating || 4.5,
-            reviewCount: localProd.reviewCount || 10,
-            colors: localProd.colors || [],
-          };
-        });
-        setProductsState(merged);
+            return {
+              ...localProd,
+              id: realId,
+              productId: realId,
+              productName: dbProd.productName || localProd.title || 'Unnamed Arrangement',
+              title: dbProd.productName || localProd.title || 'Unnamed Arrangement',
+              description: dbProd.description || localProd.description || '',
+              price: `Rs ${numPrice.toFixed(2)}`,
+              numericPrice: numPrice,
+              discountPercentage: discountPct,
+              discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
+              discountNumericPrice: discPriceVal,
+              stockQuantity: dbProd.stockQuantity !== undefined ? dbProd.stockQuantity : 50,
+              imageUrl: dbProd.imageUrl || null,
+              image: computedImg,
+              featured: dbProd.featured !== undefined ? dbProd.featured : false,
+              status: dbProd.status || 'ACTIVE',
+              createdAt: dbProd.createdAt || localProd.createdAt || new Date().toISOString(),
+              categoryName: dbProd.categoryName || localProd.category || 'silk',
+              subCategoryName: dbProd.subCategoryName || localProd.subcategory || '',
+              rating: localProd.rating || 4.8,
+              reviewCount: localProd.reviewCount || 15,
+              colors: localProd.colors || [],
+            };
+          });
+          setProductsState(mapped);
+        } else {
+          const fallback = initialProducts.map((p) => {
+            const numPrice = p.numericPrice || 15000;
+            const discountPct = p.discountPercent || 0;
+            let discPriceVal = null;
+            if (discountPct > 0) {
+              discPriceVal = numPrice * (1 - discountPct / 100);
+            }
+            return {
+              ...p,
+              numericPrice: numPrice,
+              price: `Rs ${numPrice.toFixed(2)}`,
+              discountPercentage: discountPct,
+              discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
+              discountNumericPrice: discPriceVal,
+              stockQuantity: 50,
+              status: 'ACTIVE',
+              createdAt: new Date().toISOString(),
+              categoryName: p.category,
+              subCategoryName: p.subcategory || '',
+              rating: p.rating || 4.5,
+              reviewCount: p.reviewCount || 10,
+              image: getProductImage(p),
+            };
+          });
+          setProductsState(fallback);
+        }
       } catch (error) {
         console.error('Error fetching products from backend:', error);
         const fallback = initialProducts.map((p) => {
@@ -132,6 +160,7 @@ const GuestUserDashboard = () => {
             subCategoryName: p.subcategory || '',
             rating: p.rating || 4.5,
             reviewCount: p.reviewCount || 10,
+            image: getProductImage(p),
           };
         });
         setProductsState(fallback);
