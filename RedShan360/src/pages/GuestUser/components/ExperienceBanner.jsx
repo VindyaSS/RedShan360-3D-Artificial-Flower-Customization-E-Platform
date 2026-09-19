@@ -44,7 +44,7 @@ const ExperienceBanner = () => {
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#8c5e5e] shadow-sm">
                   <ZoomIn size={16} />
                 </div>
-                <p className="text-sm text-[#1a1a1a]/90 font-medium">Precision Zoom up to 10x magnification</p>
+                <p className="text-sm text-[#1a1a1a]/90 font-medium">Precision Zoom up to magnification</p>
               </div>
               <div className="flex items-center gap-3.5">
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#8c5e5e] shadow-sm">
@@ -52,12 +52,7 @@ const ExperienceBanner = () => {
                 </div>
                 <p className="text-sm text-[#1a1a1a]/90 font-medium">Fluid 360-degree rotation control</p>
               </div>
-              <div className="flex items-center gap-3.5">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#8c5e5e] shadow-sm">
-                  <Sun size={16} />
-                </div>
-                <p className="text-sm text-[#1a1a1a]/90 font-medium">Simulated daylight and evening lighting modes</p>
-              </div>
+
             </div>
 
             <button
