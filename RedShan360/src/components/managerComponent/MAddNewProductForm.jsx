@@ -535,14 +535,20 @@ export default function MAddNewProductForm({ onClose, onSubmit }) {
     try {
 
 
-      const response = await axios.post(
+      const token = localStorage.getItem('token');
 
+      const response = await axios.post(
 
         "http://localhost:8080/api/products/add",
 
 
-        multipartData
+        multipartData,
 
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
 
       );
 

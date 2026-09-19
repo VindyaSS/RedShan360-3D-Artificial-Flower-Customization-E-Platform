@@ -67,31 +67,31 @@ const FIXED_CUSTOMIZATION_OPTIONS = [
     description: 'Delicate branching feathery deep green fern'
   },
   {
-    id: 'velvet-ribbon',
-    name: 'Velvet Burgundy Ribbon',
+    id: 'botanical-toile',
+    name: 'Vintage Botanical Toile Paper',
     category: 'wrapping-accents',
-    price: 2100.00,
-    image: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=150&h=150&q=80',
-    color: '#5c2c2c',
-    description: 'Plush velvet ribbon around the vase neck'
+    price: 220.00,
+    image: '/images/wrapping/green_botanical.png',
+    color: '#1c3a27',
+    description: '3-Layer wrap with Dark Green, Light Green & Onyx Black paper'
   },
   {
     id: 'kraft-paper',
-    name: 'Light Red Wrapping Paper',
+    name: 'Sunset Red & Gold Paper',
     category: 'wrapping-accents',
-    price: 1200.00,
-    image: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=150&h=150&q=80',
-    color: '#e27b7b',
-    description: 'Soft romantic light red tissue wrap'
+    price: 200.00,
+    image: '/images/wrapping/red_yellow.png',
+    color: '#d43f3f',
+    description: '3-Layer wrap with Rich Red, Sunflower Yellow & Dark Brown paper'
   },
   {
-    id: 'luxury-mesh',
-    name: 'White Wrapping Paper',
+    id: 'gold-paper',
+    name: 'Royal Gold Satin Paper',
     category: 'wrapping-accents',
-    price: 1800.00,
-    image: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=150&h=150&q=80',
-    color: '#ffffff',
-    description: 'Elegant minimalist matte white wrap'
+    price: 250.00,
+    image: '/images/wrapping/gold_white_black.png',
+    color: '#d4af37',
+    description: '3-Layer wrap with Royal Gold, Crisp White & Onyx Black paper'
   }
 ];
 
@@ -110,7 +110,9 @@ const OCCASION_OPTIONS = [
 
 export default function BoquetCustomization() {
   // Page states
-  const [selectedStems, setSelectedStems] = useState([]); // Array of { stemId, quantity }
+  const [selectedStems, setSelectedStems] = useState([
+    { stemId: 'botanical-toile', quantity: 1 }
+  ]); // Array of { stemId, quantity }
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOccasion, setSelectedOccasion] = useState('ANNIVERSARY');
   const [bouquetSize, setBouquetSize] = useState('MEDIUM');
@@ -219,9 +221,9 @@ export default function BoquetCustomization() {
 
   const [activeCategory, setActiveCategory] = useState({
     'premium-blooms': true,
-    'bouquet-styles': false,
+    'wrapping-accents': true,
     'decorative-foliage': false,
-    'wrapping-accents': false
+    'bouquet-styles': false
   });
 
   // 3D Canvas states
@@ -362,9 +364,9 @@ export default function BoquetCustomization() {
   const wrappingId = useMemo(() => {
     const wrap = selectedStems.find(s => {
       const dbItem = stemsDatabase.find(item => String(item.id) === String(s.stemId));
-      return dbItem?.category === 'wrapping-accents' && s.stemId !== 'velvet-ribbon';
+      return dbItem?.category === 'wrapping-accents';
     });
-    return wrap ? wrap.stemId : null;
+    return wrap ? wrap.stemId : 'botanical-toile';
   }, [selectedStems, stemsDatabase]);
 
   const ribbonId = useMemo(() => {
@@ -579,13 +581,11 @@ export default function BoquetCustomization() {
       return;
     }
     setSelectedStems(prev => {
-      const wrappingIds = ['kraft-paper', 'luxury-mesh'];
+      const wrappingIds = ['botanical-toile', 'kraft-paper', 'gold-paper'];
       const filtered = prev.filter(item => !wrappingIds.includes(item.stemId));
 
-      const isAlreadySelected = prev.some(item => item.stemId === id);
-      if (isAlreadySelected) {
-        return filtered;
-      }
+      const itemObj = stemsDatabase.find(s => s.id === id);
+      triggerToast(`Wrapping selected: ${itemObj?.name || 'Wrapping Paper'}`);
       return [...filtered, { stemId: id, quantity: 1 }];
     });
   };
@@ -598,7 +598,7 @@ export default function BoquetCustomization() {
     const newId = generateCustomBouquetId();
     setCustomizationId(newId);
     setIsCustomizationFinished(false);
-    setSelectedStems([]);
+    setSelectedStems([{ stemId: 'botanical-toile', quantity: 1 }]);
     setFlowers([]);
     setSelectedFlowerId(null);
     setIsSwapMode(false);
@@ -748,25 +748,25 @@ export default function BoquetCustomization() {
       />
 
       {/* MAIN CONTAINER */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 md:px-12 lg:px-16 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <main className="flex-grow max-w-[1440px] w-full mx-auto px-4 sm:px-6 md:px-8 py-5 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
         {/* LEFT PANEL: BOTANICALS SELECTOR */}
-        <section className="lg:col-span-3 order-2 lg:order-1 bg-white rounded-[24px] border border-[#f0ebe4] p-4 sm:p-6 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-6 self-stretch">
+        <section className="lg:col-span-3 order-2 lg:order-1 bg-white rounded-[20px] border border-[#f0ebe4] p-3.5 sm:p-4 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-4 self-stretch">
           <div>
-            <h2 className="text-2xl sm:text-[26px] font-bold text-[#563c37] mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-xl sm:text-2xl font-bold text-[#563c37] mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
               Botanicals
             </h2>
-            <p className="text-xs text-[#563c37]/60 leading-relaxed font-medium">
+            <p className="text-[11px] text-[#563c37]/60 leading-relaxed font-medium">
               Select individual stems to curate your piece.
             </p>
           </div>
 
           {/* Bouquet Size Selector */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[10px] font-extrabold tracking-[0.15em] uppercase text-[#563c37]/60">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[9px] font-extrabold tracking-[0.15em] uppercase text-[#563c37]/60">
               Bouquet Size
             </span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {Object.keys(BOUQUET_SIZE_CONFIG).map((sizeKey) => {
                 const config = BOUQUET_SIZE_CONFIG[sizeKey];
                 const isActive = bouquetSize === sizeKey;
@@ -775,12 +775,12 @@ export default function BoquetCustomization() {
                     key={sizeKey}
                     type="button"
                     onClick={() => handleSizeChange(sizeKey)}
-                    className={`flex flex-col text-left p-2.5 rounded-xl border transition-all duration-300 ${isActive
-                      ? 'bg-[#563c37] text-white border-[#563c37] shadow-sm'
+                    className={`flex flex-col text-left p-2 rounded-lg border transition-all duration-300 ${isActive
+                      ? 'bg-[#563c37] text-white border-[#563c37] shadow-xs'
                       : 'bg-[#fdfbf9]/40 border-[#ece7e2] text-[#563c37] hover:border-[#8c5e5e]/30'
                       }`}
                   >
-                    <span className="text-xs font-bold">{config.label}</span>
+                    <span className="text-[11px] font-bold leading-snug">{config.label}</span>
                     <span className={`text-[9px] mt-0.5 ${isActive ? 'text-white/70' : 'text-[#563c37]/50'}`}>
                       Up to {config.maxFlowers} flowers
                     </span>
@@ -794,15 +794,15 @@ export default function BoquetCustomization() {
           </div>
 
           {/* Occasion Selection Buttons */}
-          <div className="flex gap-2 p-1 bg-[#fdfbf9] border border-[#ece7e2] rounded-xl">
+          <div className="flex gap-1.5 p-1 bg-[#fdfbf9] border border-[#ece7e2] rounded-lg">
             {OCCASION_OPTIONS.map((option) => {
               const isActive = selectedOccasion === option.key;
               return (
                 <button
                   key={option.key}
                   onClick={() => setSelectedOccasion(option.key)}
-                  className={`flex-1 text-[10px] font-bold py-2 px-1 rounded-lg transition-all duration-300 ${isActive
-                    ? 'bg-[#563c37] text-white shadow-sm'
+                  className={`flex-1 text-[10px] font-bold py-1.5 px-1 rounded-md transition-all duration-300 ${isActive
+                    ? 'bg-[#563c37] text-white shadow-xs'
                     : 'text-[#563c37]/60 hover:text-[#563c37] hover:bg-[#f5efeb]/40'
                     }`}
                 >
@@ -813,11 +813,11 @@ export default function BoquetCustomization() {
           </div>
 
           {/* Search bar */}
-          <div className="relative flex items-center bg-[#fdfbf9] border border-[#ece7e2] rounded-lg px-3 py-2.5">
-            <Search size={14} className="text-[#563c37]/40 mr-2" />
+          <div className="relative flex items-center bg-[#fdfbf9] border border-[#ece7e2] rounded-lg px-2.5 py-1.5">
+            <Search size={13} className="text-[#563c37]/40 mr-2 shrink-0" />
             <input
               type="text"
-              placeholder="Search stems"
+              placeholder="Search stems..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent outline-none text-xs text-[#563c37] placeholder:text-[#563c37]/40"
@@ -859,45 +859,63 @@ export default function BoquetCustomization() {
                             <p className="text-[11px] text-[#563c37]/60 italic py-1">No flowers match your search.</p>
                           )
                         ) : (
-                          <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1.5 scroll-smooth custom-scrollbar">
+                          <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-1 scroll-smooth custom-scrollbar">
                             {categoryStems.map((stem) => {
+                              const isWrappingCategory = stem.category === 'wrapping-accents';
                               const quantitySelected = selectedStems.find(s => s.stemId === stem.id)?.quantity || 0;
+                              const isSelected = quantitySelected > 0;
 
                               return (
-                                <div key={stem.id} className="flex items-center gap-3 bg-[#fdfbf9]/70 p-2 rounded-xl border border-[#f5efeb] hover:border-[#8c5e5e]/25 transition-all">
+                                <div key={stem.id} className={`flex items-center gap-2.5 p-1.5 rounded-lg border transition-all ${
+                                  isSelected ? 'bg-[#563c37]/5 border-[#8c5e5e]/40 shadow-xs' : 'bg-[#fdfbf9]/70 border-[#f5efeb] hover:border-[#8c5e5e]/25'
+                                }`}>
                                   <img
                                     src={stem.image}
                                     alt={stem.name}
-                                    className="w-12 h-12 rounded-lg object-cover bg-gray-100 shadow-sm border border-[#ece7e2]"
+                                    className="w-10 h-10 rounded-md object-cover bg-gray-100 shadow-xs border border-[#ece7e2] shrink-0"
                                   />
                                   <div className="flex-grow min-w-0">
-                                    <h4 className="text-xs font-bold text-[#563c37] truncate">{stem.name}</h4>
-                                    <p className="text-[10px] text-[#563c37]/50 leading-tight truncate">{stem.description}</p>
-                                    <span className="text-xs font-semibold text-[#8c5e5e] mt-1 inline-block">
+                                    <h4 className="text-[11px] font-bold text-[#563c37] truncate leading-tight">{stem.name}</h4>
+                                    <span className="text-[10px] font-semibold text-[#8c5e5e] block leading-tight mt-0.5">
                                       +Rs {stem.price.toFixed(2)}
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    {quantitySelected > 0 && (
-                                      <>
-                                        <button
-                                          onClick={() => handleRemoveStem(stem.id)}
-                                          className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
-                                          aria-label="Decrease quantity"
-                                        >
-                                          <Minus size={12} />
-                                        </button>
-                                        <span className="text-xs font-bold text-[#563c37] w-4 text-center">{quantitySelected}</span>
-                                      </>
-                                    )}
+
+                                  {isWrappingCategory ? (
                                     <button
-                                      onClick={() => handleAddStem(stem.id)}
-                                      className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-sm sm:text-xs text-[#563c37] active:scale-95"
-                                      aria-label="Add stem"
+                                      type="button"
+                                      onClick={() => handleSelectWrapping(stem.id)}
+                                      className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all active:scale-95 ${
+                                        isSelected || (!selectedStems.some(s => ['botanical-toile', 'kraft-paper', 'gold-paper'].includes(s.stemId)) && stem.id === 'botanical-toile')
+                                          ? 'bg-[#563c37] text-white shadow-xs'
+                                          : 'bg-[#f5efeb] text-[#563c37] hover:bg-[#8c5e5e] hover:text-white'
+                                      }`}
                                     >
-                                      <Plus size={12} />
+                                      {isSelected || (!selectedStems.some(s => ['botanical-toile', 'kraft-paper', 'gold-paper'].includes(s.stemId)) && stem.id === 'botanical-toile') ? 'Selected ✓' : 'Select'}
                                     </button>
-                                  </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      {quantitySelected > 0 && (
+                                        <>
+                                          <button
+                                            onClick={() => handleRemoveStem(stem.id)}
+                                            className="w-6 h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-xs text-[#563c37] active:scale-95"
+                                            aria-label="Decrease quantity"
+                                          >
+                                            <Minus size={11} />
+                                          </button>
+                                          <span className="text-[11px] font-bold text-[#563c37] w-3.5 text-center">{quantitySelected}</span>
+                                        </>
+                                      )}
+                                      <button
+                                        onClick={() => handleAddStem(stem.id)}
+                                        className="w-6 h-6 rounded-full border border-[#ece7e2] flex items-center justify-center hover:bg-[#563c37] hover:text-white hover:border-[#563c37] transition-colors text-xs text-[#563c37] active:scale-95"
+                                        aria-label="Add stem"
+                                      >
+                                        <Plus size={11} />
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}
@@ -932,6 +950,8 @@ export default function BoquetCustomization() {
                 flowers={flowers}
                 wrappingId={wrappingId}
                 ribbonId={ribbonId}
+                bouquetSize={bouquetSize}
+                sizeConfig={activeSizeConfig}
                 stemsDatabase={stemsDatabase}
                 selectedFlowerId={isCustomizationFinished ? null : selectedFlowerId}
                 selectedSwapFlowerId={selectedSwapFlowerId}
@@ -1041,18 +1061,92 @@ export default function BoquetCustomization() {
               </p>
             )}
           </div>
+
+          {/* BOUQUET WRAPPING & RIBBONS SELECTION CARD */}
+          <div className="w-full bg-white rounded-[20px] border border-[#f0ebe4] p-3.5 sm:p-4 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-[#563c37]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Bouquet Wrapping & Ribbons
+                </h3>
+                <p className="text-[11px] text-[#563c37]/60 font-medium">
+                  Select your preferred wrapping paper style & artisan ribbon
+                </p>
+              </div>
+              <span className="text-[9px] font-extrabold tracking-wider uppercase bg-[#f5efeb] text-[#8c5e5e] px-2 py-0.5 rounded-full border border-[#ece3dc]">
+                3-Layer Paper
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {stemsDatabase
+                .filter(s => s.category === 'wrapping-accents')
+                .map((wrapItem) => {
+                  const isExplicitlySelected = selectedStems.some(s => s.stemId === wrapItem.id);
+                  const isDefaultSelected = !selectedStems.some(s => ['botanical-toile', 'kraft-paper', 'gold-paper'].includes(s.stemId)) && wrapItem.id === 'botanical-toile';
+                  const isSelected = isExplicitlySelected || isDefaultSelected;
+
+                  return (
+                    <button
+                      key={wrapItem.id}
+                      type="button"
+                      disabled={isCustomizationFinished}
+                      onClick={() => handleSelectWrapping(wrapItem.id)}
+                      className={`relative flex flex-col items-start p-2.5 rounded-xl border text-left transition-all duration-300 ${
+                        isSelected
+                          ? 'bg-[#563c37]/5 border-[#8c5e5e] shadow-xs ring-1 ring-[#8c5e5e]/40'
+                          : 'bg-[#fdfbf9]/60 border-[#f5efeb] hover:border-[#8c5e5e]/30 hover:bg-white'
+                      } ${isCustomizationFinished ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}
+                    >
+                      <div className="w-full relative mb-2 overflow-hidden rounded-lg">
+                        <img
+                          src={wrapItem.image}
+                          alt={wrapItem.name}
+                          className="w-full h-20 object-cover rounded-lg border border-[#ece7e2] shadow-xs transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div
+                          className="absolute top-1.5 right-1.5 w-4.5 h-4.5 rounded-full border border-white/80 shadow-md ring-1 ring-black/10"
+                          style={{ backgroundColor: wrapItem.color }}
+                          title={`Primary accent: ${wrapItem.name}`}
+                        />
+                      </div>
+
+                      <h4 className="text-[11px] font-bold text-[#563c37] leading-snug line-clamp-1">
+                        {wrapItem.name}
+                      </h4>
+                      <p className="text-[10px] text-[#563c37]/60 mt-0.5 line-clamp-2 leading-tight flex-grow">
+                        {wrapItem.description}
+                      </p>
+
+                      <div className="w-full flex items-center justify-between mt-2.5 pt-1.5 border-t border-[#f5efeb]">
+                        <span className="text-[11px] font-semibold text-[#8c5e5e]">
+                          +Rs {wrapItem.price.toFixed(2)}
+                        </span>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md transition-colors ${
+                          isSelected
+                            ? 'bg-[#563c37] text-white'
+                            : 'bg-[#f5efeb] text-[#563c37]'
+                        }`}>
+                          {isSelected ? 'Selected ✓' : 'Select'}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
         </section>
 
         {/* RIGHT PANEL: ARRANGEMENT SUMMARY */}
-        <section className="lg:col-span-3 order-3 lg:order-3 flex flex-col gap-6 self-start">
+        <section className="lg:col-span-3 order-3 lg:order-3 flex flex-col gap-4 self-start">
 
           {/* Main summary card */}
-          <div className="bg-white rounded-[24px] border border-[#f0ebe4] p-4 sm:p-6 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-6">
+          <div className="bg-white rounded-[20px] border border-[#f0ebe4] p-3.5 sm:p-4 shadow-[0_4px_20px_rgba(86,60,55,0.02)] flex flex-col gap-4">
             <div>
-              <h2 className="text-2xl sm:text-[26px] font-bold text-[#563c37] mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#563c37] mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Arrangement
               </h2>
-              <p className="text-xs text-[#563c37]/60 font-medium">
+              <p className="text-[11px] text-[#563c37]/60 font-medium">
                 Artisanal Curation
               </p>
             </div>
@@ -1061,39 +1155,38 @@ export default function BoquetCustomization() {
             <div className="flex flex-col justify-start">
               {selectedStems.length === 0 ? (
                 // Empty state
-                <div className="flex flex-col items-center justify-center py-8 px-4 border border-dashed border-[#e8dfd8] rounded-2xl bg-[#fdfbf9]/60 my-auto text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-[#f5efeb] flex items-center justify-center mb-3 text-[#8c5e5e]/80">
-                    {/* Flower/leaf simple outline icon */}
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-60">
+                <div className="flex flex-col items-center justify-center py-6 px-3 border border-dashed border-[#e8dfd8] rounded-xl bg-[#fdfbf9]/60 my-auto text-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#f5efeb] flex items-center justify-center mb-2 text-[#8c5e5e]/80">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-60">
                       <path d="M12 2C8 2 5 5 5 9C5 14 12 22 12 22C12 22 19 14 19 9C19 5 16 2 12 2ZM12 11C10.9 11 10 10.1 10 9C10 7.9 10.9 7 12 7C13.1 7 14 7.9 14 9C14 10.1 13.1 11 12 11Z" fill="currentColor" fillOpacity="0.05" />
                     </svg>
                   </div>
-                  <p className="text-xs font-semibold italic text-[#563c37]/50 leading-relaxed max-w-[170px]">
+                  <p className="text-[11px] font-semibold italic text-[#563c37]/50 leading-relaxed max-w-[170px]">
                     Your canvas is waiting. Add some stems to begin your piece.
                   </p>
                 </div>
               ) : (
                 // List of selection items
-                <div className="flex flex-col gap-3 max-h-[220px] overflow-y-auto pr-1">
+                <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto pr-1">
                   {selectedStems.map((item) => {
                     const dbItem = stemsDatabase.find(s => String(s.id) === String(item.stemId));
                     if (!dbItem) return null;
 
                     return (
-                      <div key={item.stemId} className="flex justify-between items-center py-2 border-b border-[#fdfbf9] last:border-0">
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-bold text-[#563c37] truncate">{dbItem.name}</h4>
-                          <span className="text-[10px] text-[#563c37]/55 uppercase tracking-wide">
+                      <div key={item.stemId} className="flex justify-between items-center py-1.5 border-b border-[#fdfbf9] last:border-0">
+                        <div className="min-w-0 pr-2">
+                          <h4 className="text-[11px] font-bold text-[#563c37] truncate">{dbItem.name}</h4>
+                          <span className="text-[9px] text-[#563c37]/55 uppercase tracking-wide block mt-0.5">
                             {item.quantity} × Rs {dbItem.price.toFixed(2)}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-[#563c37]">
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <span className="text-[11px] font-bold text-[#563c37]">
                             Rs {(dbItem.price * item.quantity).toFixed(2)}
                           </span>
                           <button
                             onClick={() => handleClearStem(item.stemId)}
-                            className="text-[#563c37]/40 hover:text-[#8c5e5e] transition-colors"
+                            className="text-[#563c37]/40 hover:text-[#8c5e5e] transition-colors p-1"
                             aria-label={`Remove all ${dbItem.name}`}
                           >
                             <Trash2 size={12} />
@@ -1106,30 +1199,36 @@ export default function BoquetCustomization() {
               )}
             </div>
 
-            <div className="border-t border-[#fdfbf9] pt-4 flex flex-col gap-3">
+            <div className="border-t border-[#fdfbf9] pt-3 flex flex-col gap-2">
               {/* Pricing list */}
-              <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
+              <div className="flex justify-between text-[10px] font-bold tracking-wider text-[#563c37]/65">
                 <span>FLOWER SUBTOTAL</span>
                 <span className="text-[#563c37]">{formatCurrency(priceBreakdown.flowerSubtotal)}</span>
               </div>
-              <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
+              <div className="flex justify-between text-[10px] font-bold tracking-wider text-[#563c37]/65">
                 <span>BOUQUET SIZE</span>
                 <span className="text-[#563c37] uppercase">{priceBreakdown.sizeLabel} ({priceBreakdown.sizeMultiplier}X)</span>
               </div>
-              <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
+              <div className="flex justify-between text-[10px] font-bold tracking-wider text-[#563c37]/65">
                 <span>SIZE ADJUSTMENT</span>
                 <span className="text-[#563c37]">{formatCurrency(priceBreakdown.sizeAdjustment)}</span>
               </div>
-              <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
+              <div className="flex justify-between text-[10px] font-bold tracking-wider text-[#563c37]/65">
                 <span>ADJUSTED FLOWER TOTAL</span>
                 <span className="text-[#563c37]">{formatCurrency(priceBreakdown.scaledFlowerTotal)}</span>
               </div>
-              <div className="flex justify-between text-[11px] font-bold tracking-wider text-[#563c37]/65">
+              {priceBreakdown.wrappingPrice > 0 && (
+                <div className="flex justify-between text-[10px] font-bold tracking-wider text-[#563c37]/65">
+                  <span>WRAPPING PAPER</span>
+                  <span className="text-[#563c37]">{formatCurrency(priceBreakdown.wrappingPrice)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-[10px] font-bold tracking-wider text-[#563c37]/65">
                 <span>SERVICE CHARGE</span>
                 <span className="text-[#563c37]">{formatCurrency(priceBreakdown.serviceCharge)}</span>
               </div>
 
-              <div className="border-t border-[#fdfbf9] my-1" />
+              <div className="border-t border-[#fdfbf9] my-0.5" />
 
               {/* Total price */}
               <div className="flex justify-between items-center">
@@ -1137,13 +1236,13 @@ export default function BoquetCustomization() {
                   <span className="text-[9px] font-extrabold tracking-wider uppercase text-[#563c37]/50 block mb-0.5">
                     Estimated Total
                   </span>
-                  <span className="text-3xl font-extrabold text-[#563c37] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <span className="text-2xl sm:text-[26px] font-extrabold text-[#563c37] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                     {formatCurrency(priceBreakdown.grandTotal)}
                   </span>
                 </div>
 
                 {/* Free shipping badge */}
-                <div className="bg-[#f5efeb] text-[#563c37] text-[8px] font-extrabold tracking-widest uppercase rounded-full px-3 py-1.5 flex items-center gap-1.5 border border-[#ece3dc]">
+                <div className="bg-[#f5efeb] text-[#563c37] text-[8px] font-extrabold tracking-widest uppercase rounded-full px-2.5 py-1 flex items-center gap-1 border border-[#ece3dc]">
                   <Truck size={10} className="text-[#8c5e5e]" />
                   <span>Complimentary Shipping</span>
                 </div>
@@ -1151,16 +1250,16 @@ export default function BoquetCustomization() {
             </div>
 
             {/* Action button */}
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               <button
                 onClick={handleAddToCart}
-                className="w-full bg-[#563c37] hover:bg-[#4a322e] text-white text-xs uppercase tracking-[0.2em] font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-[#563c37]/5"
+                className="w-full bg-[#563c37] hover:bg-[#4a322e] text-white text-xs uppercase tracking-[0.18em] font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm"
               >
                 <span>Add to Cart</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={13} />
               </button>
 
-              <span className="text-[9px] font-extrabold tracking-[0.18em] text-[#563c37]/45 text-center uppercase block mt-1">
+              <span className="text-[9px] font-extrabold tracking-[0.16em] text-[#563c37]/45 text-center uppercase block mt-0.5">
                 Secure Artisanal Delivery Guaranteed
               </span>
             </div>

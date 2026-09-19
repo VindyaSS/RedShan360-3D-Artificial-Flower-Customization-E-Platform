@@ -48,6 +48,8 @@ export default function BouquetCanvas({
   flowers = [],
   wrappingId = null,
   ribbonId = null,
+  bouquetSize = 'MEDIUM',
+  sizeConfig = null,
   stemsDatabase = [],
   selectedFlowerId = null,
   selectedSwapFlowerId = null,
@@ -128,6 +130,8 @@ export default function BouquetCanvas({
             flowers={flowers}
             wrappingId={wrappingId}
             ribbonId={ribbonId}
+            bouquetSize={bouquetSize}
+            sizeConfig={sizeConfig}
             stemsDatabase={stemsDatabase}
             selectedFlowerId={selectedFlowerId}
             selectedSwapFlowerId={selectedSwapFlowerId}

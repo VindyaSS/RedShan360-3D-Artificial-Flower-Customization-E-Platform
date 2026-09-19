@@ -34,10 +34,14 @@ export default function MCompletedOrderTable(props) {
             setDispatchingOrderId(orderId);
 
             const dispatchURL = `${API_BASE_URL}/orders/${orderId}/dispatch`;
+            const token = localStorage.getItem('token');
 
             const response = await fetch(dispatchURL, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" }
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
             });
 
             // ---------------- Handle Error Response ----------------
@@ -88,6 +92,8 @@ export default function MCompletedOrderTable(props) {
                         <th>{props.t1}</th>
                         <th>{props.t2}</th>
                         <th>{props.t3}</th>
+                        <th>{props.t4}</th>
+                        <th>{props.t5}</th>
                         <th colSpan="2">Action</th>
                     </tr>
                 </thead>
@@ -99,6 +105,8 @@ export default function MCompletedOrderTable(props) {
                                 <td>{completedorder?.orderId ?? "-"}</td>
                                 <td>{completedorder?.customerName ?? "-"}</td>
                                 <td>{completedorder?.totalAmount ?? "-"}</td>
+                                <td>{completedorder?.address ?? "-"}</td>
+                                <td>{completedorder?.phone ?? "-"}</td>
                                 <td colSpan="2">
                                     <button
                                         className="btn-dispatch"
@@ -114,7 +122,7 @@ export default function MCompletedOrderTable(props) {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
+                            <td colSpan="7" style={{ textAlign: "center", padding: "20px" }}>
                                 No Completed Orders Found
                             </td>
                         </tr>
