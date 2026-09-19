@@ -672,22 +672,7 @@ const ProductDetails = () => {
               </div>
 
               {/* Nav arrows */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => scrollCarousel('left')}
-                  className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
-                  aria-label="Scroll left"
-                >
-                  <ArrowLeft size={14} className="text-[#1a1a1a]/70" />
-                </button>
-                <button
-                  onClick={() => scrollCarousel('right')}
-                  className="w-9 h-9 border border-[#d9d2d0] rounded-full hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 flex items-center justify-center transition-all duration-300"
-                  aria-label="Scroll right"
-                >
-                  <ArrowRight size={14} className="text-[#1a1a1a]/70" />
-                </button>
-              </div>
+
             </div>
 
             {/* Related Products Slider list */}
