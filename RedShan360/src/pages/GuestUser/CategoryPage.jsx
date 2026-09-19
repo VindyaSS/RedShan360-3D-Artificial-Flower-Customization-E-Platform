@@ -265,29 +265,29 @@ const CategoryPage = () => {
       />
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-6 sm:pt-8 md:pt-10 pb-20">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-1 md:pt-2 pb-16">
 
         {/* Breadcrumb */}
         {slug === 'bouquets' ? (
-          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-2 uppercase text-left">
             <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
             <span className="text-[#1a1a1a]/30">&gt;</span>
             <span className="text-[#8c5e5e]">Bouquets</span>
           </nav>
         ) : slug === 'head-dresses' ? (
-          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-2 uppercase text-left">
             <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
             <span className="text-[#1a1a1a]/30">&gt;</span>
             <span className="text-[#8c5e5e]">Head Dresses</span>
           </nav>
         ) : slug === 'individual-flowers' ? (
-          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-2 uppercase text-left">
             <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
             <span className="text-[#1a1a1a]/30">&gt;</span>
             <span className="text-[#8c5e5e]">Individual Flowers</span>
           </nav>
         ) : (
-          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-8 uppercase text-left">
+          <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-2 uppercase text-left">
             <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
             <span>/</span>
             <span className="text-[#8c5e5e]">{categoryDetails.title}</span>
@@ -296,37 +296,37 @@ const CategoryPage = () => {
 
         {/* Category Banner */}
         {(slug === 'bouquets' || slug === 'head-dresses' || slug === 'individual-flowers') ? (
-          <div className="relative rounded-sm overflow-hidden mb-12 min-h-[480px] flex items-center shadow-sm border border-[#d9d2d0]/20 bg-[#170e0d] bg-cover bg-center md:bg-contain md:bg-right md:bg-no-repeat text-left" style={{ backgroundImage: slug === 'bouquets' ? "url('/images/luxury_bouquets_banner.png')" : slug === 'head-dresses' ? "url('/images/luxury_headdress_banner.png')" : "url('/images/3flowers.png')" }}>
+          <div className="relative rounded-sm overflow-hidden mb-5 md:mb-6 min-h-[200px] md:min-h-[220px] flex items-center shadow-sm border border-[#d9d2d0]/20 bg-[#170e0d] bg-cover bg-center md:bg-contain md:bg-right md:bg-no-repeat text-left" style={{ backgroundImage: slug === 'bouquets' ? "url('/images/luxury_bouquets_banner.png')" : slug === 'head-dresses' ? "url('/images/luxury_headdress_banner.png')" : "url('/images/3flowers.png')" }}>
             {/* Overlay */}
             <div className="absolute inset-0 bg-[#170e0d]/60 md:bg-transparent md:bg-gradient-to-r md:from-[#170e0d] md:via-[#170e0d]/90 md:to-transparent backdrop-blur-[0.5px]" />
             {/* Banner Content */}
-            <div className="relative z-10 p-8 md:p-12 lg:p-16 max-w-3xl text-white">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#f5e6e8] font-bold mb-3">
+            <div className="relative z-10 p-5 md:p-6 lg:p-8 max-w-2xl text-white">
+              <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#f5e6e8] font-bold mb-1">
                 {categoryDetails.tagline}
               </p>
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2 text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
                 {categoryDetails.title}
               </h1>
-              <p className="text-sm text-white/95 leading-relaxed font-light mb-6">
+              <p className="text-xs md:text-sm text-white/95 leading-relaxed font-light mb-3 max-w-xl">
                 {categoryDetails.description}
               </p>
-              <p className="text-[11px] uppercase tracking-wider font-semibold text-white/85 bg-white/10 backdrop-blur-sm rounded-full py-1 px-4 inline-block">
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-white/85 bg-white/10 backdrop-blur-sm rounded-full py-0.5 px-3 inline-block">
                 Showing {displayProducts.length} premium arrangements
               </p>
             </div>
           </div>
         ) : (
-          <div className="pb-8 border-b border-[#d9d2d0]/30 text-left mb-12">
-            <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-2">
+          <div className="pb-4 border-b border-[#d9d2d0]/30 text-left mb-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-1">
               {categoryDetails.tagline}
             </p>
-            <h1 className="text-3xl md:text-5xl font-bold text-[#1a1a1a] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#1a1a1a] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
               {categoryDetails.title}
             </h1>
-            <p className="text-sm text-[#1a1a1a]/70 mt-3 max-w-2xl leading-relaxed">
+            <p className="text-xs md:text-sm text-[#1a1a1a]/70 mt-2 max-w-2xl leading-relaxed">
               {categoryDetails.description}
             </p>
-            <p className="text-xs font-semibold text-[#1a1a1a]/55 mt-4">
+            <p className="text-[11px] font-semibold text-[#1a1a1a]/55 mt-2">
               Showing {displayProducts.length} premium arrangements
             </p>
           </div>
@@ -334,38 +334,35 @@ const CategoryPage = () => {
 
         {/* Subcategories Section */}
         {(slug === 'bouquets' || slug === 'head-dresses' || slug === 'individual-flowers') && (
-          <div className="mb-12">
-            <h2 className="text-xs uppercase tracking-[0.15em] font-bold text-[#1a1a1a]/55 mb-6 text-left">
+          <div className="mb-6">
+            <h2 className="text-[11px] uppercase tracking-[0.15em] font-bold text-[#1a1a1a]/55 mb-3 text-left">
               Shop {slug === 'bouquets' ? 'Bouquet' : slug === 'head-dresses' ? 'Head Dress' : 'Individual Flower'} Subcategory
             </h2>
 
-            {/* Desktop and Tablet grid, Mobile scrollable flex row */}
-            <div className="flex flex-wrap justify-center gap-6">
+            {/* Compact Subcategory Buttons */}
+            <div className="flex flex-wrap justify-start gap-2.5 sm:gap-3">
               {subcategories.map((sub, idx) => {
                 const isActive = activeSubcategory === sub.value;
                 return (
                   <button
                     key={idx}
                     onClick={() => setActiveSubcategory(isActive ? null : sub.value)}
-                    className={`w-[180px] h-[52px] rounded-full border-[1.5px] flex items-center justify-center font-poppins font-semibold text-base transition-all duration-300
+                    className={`px-4 py-1.5 h-[36px] md:h-[38px] rounded-full border flex items-center justify-center font-sans font-semibold text-xs md:text-sm transition-all duration-300 cursor-pointer
                       ${isActive
-                        ? 'bg-[#6A8F72] text-white font-bold shadow-[0_4px_6px_rgba(0,0,0,0.08)] transform scale-105'
-                        : 'bg-[#EAF4EC] border-[#C7D9CC] text-[#2F3E34] hover:bg-[#D7EBD9] hover:border-[#8FB89A] hover:shadow-[0_4px_6px_rgba(0,0,0,0.08)] hover:-translate-y-1'}
+                        ? 'bg-[#6A8F72] text-white border-[#6A8F72] font-bold shadow-xs scale-105'
+                        : 'bg-[#EAF4EC] border-[#C7D9CC] text-[#2F3E34] hover:bg-[#D7EBD9] hover:border-[#8FB89A] hover:shadow-xs'}
                     `}
                   >
                     {sub.name}
                   </button>
                 );
               })}
-            </div>
-            <div className="flex sm:hidden justify-between items-center text-[10px] text-[#1a1a1a]/40 mt-2">
-              <span>← Swipe to view categories →</span>
               {activeSubcategory && (
                 <button
                   onClick={() => setActiveSubcategory(null)}
-                  className="text-[#8c5e5e] font-semibold hover:underline"
+                  className="px-3 py-1.5 text-xs text-[#8c5e5e] font-semibold hover:underline border border-[#8c5e5e]/30 rounded-full bg-white"
                 >
-                  Clear filter
+                  Clear Filter ×
                 </button>
               )}
             </div>
@@ -374,34 +371,34 @@ const CategoryPage = () => {
 
         {/* Filtered Product Grid */}
         {loadingProducts ? (
-          <div className="text-center py-24 flex flex-col items-center justify-center">
+          <div className="text-center py-16 flex flex-col items-center justify-center">
             <div className="w-8 h-8 border-4 border-[#8c5e5e]/30 border-t-[#8c5e5e] rounded-full animate-spin mb-3"></div>
             <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Loading Arrangements...</p>
           </div>
         ) : displayProducts.length === 0 ? (
-          <div className="text-center py-20 bg-[#faf8f6] rounded-sm border border-[#d9d2d0]/10 mt-8">
-            <Heart size={40} className="mx-auto text-[#1a1a1a]/20 mb-3" />
-            <p className="text-sm font-medium text-[#1a1a1a]/55">
+          <div className="text-center py-16 bg-[#faf8f6] rounded-sm border border-[#d9d2d0]/10 mt-4">
+            <Heart size={36} className="mx-auto text-[#1a1a1a]/20 mb-2" />
+            <p className="text-xs md:text-sm font-medium text-[#1a1a1a]/55">
               No arrangements found in this category.
             </p>
             <Link
               to="/shop"
-              className="mt-4 px-5 py-2.5 rounded-sm bg-[#8c5e5e] hover:bg-[#7d4d50] text-white font-medium text-xs tracking-wider uppercase transition-all duration-300 inline-block"
+              className="mt-3 px-4 py-2 rounded-sm bg-[#8c5e5e] hover:bg-[#7d4d50] text-white font-medium text-xs tracking-wider uppercase transition-all inline-block"
             >
               Explore Shop
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {displayProducts.map((product) => (
-              <div key={product.productId} className="group flex flex-col font-sans relative">
+              <div key={product.productId} className="group flex flex-col font-sans relative bg-white rounded-md p-2.5 sm:p-3 border border-[#d9d2d0]/25 shadow-xs hover:shadow-sm transition-all">
                 {/* Product Image Container */}
-                <div className="relative overflow-hidden bg-[#f4f0ed] rounded-sm aspect-[3/4] mb-4 border border-[#d9d2d0]/15 shadow-sm">
+                <div className="relative overflow-hidden bg-[#f4f0ed] rounded-sm aspect-square mb-2.5 border border-[#d9d2d0]/15">
                   <Link to={`/product/${product.productId}`} className="block w-full h-full">
                     <img
                       src={product.image}
                       alt={product.title}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                       loading="lazy"
                     />
                   </Link>
@@ -413,11 +410,11 @@ const CategoryPage = () => {
                       e.stopPropagation();
                       toggleWishlist(product.productId);
                     }}
-                    className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white flex items-center justify-center transition-colors duration-300 z-10"
+                    className="absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/85 backdrop-blur-sm shadow-xs hover:bg-white flex items-center justify-center transition-colors duration-300 z-10"
                     aria-label="Add to Wishlist"
                   >
                     <Heart
-                      size={16}
+                      size={14}
                       className={`transition-colors duration-300 ${wishlist[product.productId]
                         ? 'fill-[#8c5e5e] text-[#8c5e5e]'
                         : 'text-[#1a1a1a]/75 hover:text-[#8c5e5e]'
@@ -427,34 +424,34 @@ const CategoryPage = () => {
                 </div>
 
                 {/* Product Info */}
-                <div className="flex justify-between items-start gap-2 mb-1">
-                  <Link to={`/product/${product.productId}`} className="hover:text-[#8c5e5e] transition-colors min-w-0">
-                    <h3 className="font-semibold text-[15px] text-[#1a1a1a] tracking-tight leading-snug truncate group-hover:text-[#8c5e5e] transition-colors">
+                <div className="flex justify-between items-start gap-1 mb-1 text-left">
+                  <Link to={`/product/${product.productId}`} className="hover:text-[#8c5e5e] transition-colors min-w-0 flex-1">
+                    <h3 className="font-bold text-xs sm:text-sm text-[#1a1a1a] tracking-tight leading-snug truncate group-hover:text-[#8c5e5e] transition-colors">
                       {product.title}
                     </h3>
                   </Link>
 
                   {/* Rating */}
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-[#1a1a1a]/80 shrink-0">
-                    <Star size={12} className="fill-[#8c5e5e] text-[#8c5e5e]" />
+                  <div className="flex items-center gap-0.5 text-[10px] font-bold text-[#1a1a1a]/80 shrink-0">
+                    <Star size={11} className="fill-[#8c5e5e] text-[#8c5e5e]" />
                     <span>{product.rating.toFixed(1)}</span>
                   </div>
                 </div>
 
-                <p className="text-xs font-semibold text-[#1a1a1a]/50 mb-2">
+                <p className="text-[10px] font-medium text-[#1a1a1a]/55 mb-2 truncate text-left">
                   {product.subtitle}
                 </p>
 
                 {/* Price & Add to Cart Button Container */}
-                <div className="flex justify-between items-center mt-auto pt-3 border-t border-[#d9d2d0]/20">
-                  <p className="text-sm font-bold text-[#8c5e5e]">
+                <div className="flex justify-between items-center mt-auto pt-2 border-t border-[#d9d2d0]/20">
+                  <p className="text-xs sm:text-sm font-bold text-[#8c5e5e]">
                     {product.price}
                   </p>
 
                   {/* Add to Cart Button */}
                   <button
                     onClick={() => handleAddToCart(product)}
-                    className="px-3 py-1.5 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 active:scale-95"
+                    className="px-2.5 sm:px-3 py-1.5 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 active:scale-95 shrink-0"
                   >
                     Add to Cart
                   </button>
