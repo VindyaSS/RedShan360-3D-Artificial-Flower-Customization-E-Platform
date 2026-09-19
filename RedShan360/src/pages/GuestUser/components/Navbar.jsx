@@ -289,8 +289,13 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 w-full h-full flex items-center">
           <div className="flex justify-between items-center w-full h-full gap-4">
-            <Link to="/guestUserDashboard" className="flex-shrink-0 flex items-center">
-              <h1 className="text-[24px] md:text-[26px] font-bold tracking-tight text-[#1a1a1a] font-playfair leading-none">
+            <Link to="/guestUserDashboard" className="flex-shrink-0 flex items-center gap-3 group">
+              <img
+                src="/images/logo-icon-square.jpeg"
+                alt="Redshan Flora Logo"
+                className="h-11 w-11 md:h-12 md:w-12 object-contain rounded-full shadow-md group-hover:scale-105 transition-transform duration-300"
+              />
+              <h1 className="text-[22px] md:text-[25px] font-bold tracking-tight text-[#1a1a1a] font-playfair leading-none">
                 Redshan Flora
               </h1>
             </Link>
