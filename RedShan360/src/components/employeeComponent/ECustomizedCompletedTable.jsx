@@ -95,7 +95,7 @@ export default function ECustomizedCompletedTable({ orders, onItemClick }) {
                         'var(--color-primary, #744F51)',
                     }}
                   >
-                    {order.orderId}
+                    {order.orderId ? `#RS-000${order.orderId}` : '-'}
                   </td>
 
                   <td

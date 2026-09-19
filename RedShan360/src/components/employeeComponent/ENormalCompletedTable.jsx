@@ -146,7 +146,7 @@ export default function ENormalCompletedTable({
                 <tr>
 
                   <td style={{ fontWeight: '700', color: 'var(--color-primary, #744F51)' }}>
-                    {orderId}
+                    {orderId ? `#RS-000${orderId}` : "-"}
                   </td>
 
                   <td style={{ fontWeight: '600' }}>
