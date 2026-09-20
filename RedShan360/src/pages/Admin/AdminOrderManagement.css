@@ -13,7 +13,7 @@
 /* KPI Cards */
 .order-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   margin: 30px 0;
 }
@@ -31,6 +31,7 @@
 .order-kpi-card.pending h2 { color: #f39c12; }
 .order-kpi-card.processing h2 { color: #2980b9; }
 .order-kpi-card.completed h2 { color: #27ae60; }
+.order-kpi-card.dispatched h2 { color: #8e24aa; }
 .order-kpi-card.cancelled h2 { color: #c0392b; }
 
 /* Filters + Actions */
@@ -84,7 +85,26 @@
 .status.pending { background: #fff4e6; color: #f39c12; }
 .status.processing { background: #eaf4ff; color: #2980b9; }
 .status.completed { background: #e8f9f0; color: #27ae60; }
+.status.dispatched { background: #f3e8ff; color: #7e22ce; }
 .status.cancelled { background: #fdecea; color: #c0392b; }
+
+/* Interactive Status Select Dropdown in Table & Modal */
+.status-select {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: auto;
+}
+.status-select.pending { background: #fff4e6; color: #d35400; border-color: #f39c12; }
+.status-select.processing { background: #eaf4ff; color: #1f618d; border-color: #2980b9; }
+.status-select.completed { background: #e8f9f0; color: #1e8449; border-color: #27ae60; }
+.status-select.dispatched { background: #f3e8ff; color: #6b21a8; border-color: #a855f7; }
+.status-select:hover { filter: brightness(0.95); }
 
 /* Actions with icons */
 .actions button {
