@@ -9,10 +9,23 @@ import api, { cartApi } from '../../../services/api';
 import { getProductImage } from '../../../utils/imageHelper';
 import MyOrdersModal from './MyOrdersModal';
 
-const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWishlistClick }) => {
+const DEFAULT_NAV_ITEMS = ['Home', 'Shop', 'Customization', 'About', 'Contact'];
+
+const Navbar = ({
+  isScrolled = true,
+  mobileMenuOpen: externalMobileMenuOpen,
+  setMobileMenuOpen: externalSetMobileMenuOpen,
+  navItems = DEFAULT_NAV_ITEMS,
+  onWishlistClick
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchContainerRef = useRef(null);
+
+  const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState(false);
+  const mobileMenuOpen = externalMobileMenuOpen !== undefined ? externalMobileMenuOpen : internalMobileMenuOpen;
+  const setMobileMenuOpen = externalSetMobileMenuOpen || setInternalMobileMenuOpen;
+  const safeNavItems = Array.isArray(navItems) && navItems.length > 0 ? navItems : DEFAULT_NAV_ITEMS;
 
   // Dynamic state
   const [cartCount, setCartCount] = useState(0);
@@ -302,7 +315,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
 
             {/* Desktop Nav Links (lg breakpoint: >=1024px) */}
             <div className="hidden lg:flex items-center gap-8 h-full">
-              {navItems.map((item) => (
+              {(safeNavItems || []).map((item) => (
                 <Link
                   key={item}
                   to={getRoute(item)}
@@ -418,7 +431,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                     <button
                       onClick={() => {
                         setIsProfileOpen(false);
-                        setIsMyOrdersOpen(true);
+                        navigate('/orders');
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-[#f4f0ed] hover:text-[#8c5e5e] transition-colors duration-200"
                     >
@@ -536,7 +549,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
           <div className="lg:hidden fixed top-[80px] left-0 w-full bg-[#faf8f6] border-t border-[#d9d2d0]/40 shadow-2xl z-50 max-h-[calc(100vh-80px)] overflow-y-auto py-5 px-6 animate-slide-down text-left">
             {/* Nav Items */}
             <div className="flex flex-col space-y-3">
-              {navItems.map((item) => (
+              {(safeNavItems || []).map((item) => (
                 <Link
                   key={item}
                   to={getRoute(item)}
@@ -559,7 +572,7 @@ const Navbar = ({ isScrolled, mobileMenuOpen, setMobileMenuOpen, navItems, onWis
                     return (
                       <div className="flex flex-col space-y-2">
                         <button
-                          onClick={() => { setMobileMenuOpen(false); setIsMyOrdersOpen(true); }}
+                          onClick={() => { setMobileMenuOpen(false); navigate('/orders'); }}
                           className="text-left text-xs uppercase tracking-wider font-semibold text-[#1a1a1a]/85 py-1.5 hover:text-[#8c5e5e]"
                         >
                           My Orders
