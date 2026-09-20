@@ -18,6 +18,7 @@ const ProductDetails = () => {
 
   // Gallery states
   const [quantity, setQuantity] = useState(1);
+  const [stockMessage, setStockMessage] = useState('');
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistId, setWishlistId] = useState(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -70,7 +71,7 @@ const ProductDetails = () => {
             discountPercentage: discountPct,
             discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
             discountNumericPrice: discPriceVal,
-            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 100,
+            stockQuantity: p.stockQuantity !== undefined && p.stockQuantity !== null ? Number(p.stockQuantity) : 0,
             imageUrl: getProductImage(p),
             modelUrl: p.modelUrl || '',
             categoryName: p.categoryName || '',
@@ -88,20 +89,28 @@ const ProductDetails = () => {
           };
 
           setProduct(mappedProduct);
-          setQuantity(1);
+          setQuantity(mappedProduct.stockQuantity > 0 ? 1 : 0);
+          setStockMessage('');
 
           // Set 3D model path dynamically from backend modelUrl
           setModelPath(mappedProduct.modelUrl || "");
 
-          // Load reviews
-          const savedReviews = localStorage.getItem(`redshan360_reviews_${productId}`);
-          if (savedReviews) {
-            setReviewsList(JSON.parse(savedReviews));
-          } else {
-            setReviewsList([
-              { id: 1, name: "Vindya S.", verified: true, date: "2 days ago", rating: 5, text: "Absolutely stunning lifelike detail! It coordinates perfectly in my living room." },
-              { id: 2, name: "Harshana K.", verified: true, date: "1 week ago", rating: 4, text: "Excellent craftsmanship. The color options make it very customizable." }
-            ]);
+          // Load reviews from PostgreSQL database via REST API
+          try {
+            const reviewsRes = await api.get(`/api/products/reviews/${productId}`);
+            if (reviewsRes.data && Array.isArray(reviewsRes.data)) {
+              const formattedReviews = reviewsRes.data.map((r) => ({
+                id: r.reviewId,
+                name: r.customerName || 'Verified Customer',
+                verified: true,
+                date: r.reviewDate ? new Date(r.reviewDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Recently',
+                rating: r.rating,
+                text: r.comment
+              }));
+              setReviewsList(formattedReviews);
+            }
+          } catch (reviewErr) {
+            console.error('Error fetching reviews from backend:', reviewErr);
           }
 
           // Fetch related products based on same category/subcategory
@@ -223,9 +232,41 @@ const ProductDetails = () => {
     }
   };
 
+  const handleQuantityIncrease = () => {
+    if (!product) return;
+    const maxStock = Number(product.stockQuantity) || 0;
+    if (quantity < maxStock) {
+      setQuantity((prev) => prev + 1);
+      setStockMessage('');
+    } else {
+      setStockMessage(`Only ${maxStock} items are available in stock.`);
+    }
+  };
+
+  const handleQuantityDecrease = () => {
+    if (!product) return;
+    setQuantity((prev) => {
+      const next = Math.max(1, prev - 1);
+      if (next < (Number(product.stockQuantity) || 0)) {
+        setStockMessage('');
+      }
+      return next;
+    });
+  };
+
   // Add to Cart
   const handleAddToCart = async () => {
     if (!product) return;
+    const maxStock = Number(product.stockQuantity) || 0;
+    if (maxStock <= 0) {
+      alert('This product is currently out of stock.');
+      return;
+    }
+    if (quantity > maxStock) {
+      alert(`Cannot add to cart. Only ${maxStock} items are available in stock.`);
+      return;
+    }
+
     const savedUser = localStorage.getItem('user');
     let currentUser = null;
     if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
@@ -257,28 +298,53 @@ const ProductDetails = () => {
     }
   };
 
-  // Review submission
-  const handleReviewSubmit = (e) => {
+  // Review submission to backend database
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!newReviewName.trim() || !newReviewText.trim()) return;
+    if (!newReviewText.trim()) return;
 
-    const newReview = {
-      id: Date.now(),
-      name: newReviewName,
-      verified: true,
-      date: 'Just now',
-      rating: newReviewRating,
-      text: newReviewText,
-    };
+    const savedUser = localStorage.getItem('user');
+    let currentUser = null;
+    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+      try {
+        currentUser = JSON.parse(savedUser);
+      } catch (err) {
+        console.error('Failed to parse user from localStorage in review submit:', err);
+      }
+    }
 
-    const updatedReviews = [newReview, ...reviewsList];
-    setReviewsList(updatedReviews);
-    localStorage.setItem(`redshan360_reviews_${productId}`, JSON.stringify(updatedReviews));
+    const userId = currentUser ? (currentUser.id || currentUser.userId) : null;
 
-    setNewReviewName('');
-    setNewReviewText('');
-    setNewReviewRating(5);
-    setShowReviewModal(false);
+    try {
+      await api.post('/api/products/reviews', {
+        userId: userId ? Number(userId) : null,
+        productId: Number(productId),
+        rating: newReviewRating,
+        comment: newReviewText
+      });
+
+      // Refresh reviews list from backend database
+      const reviewsRes = await api.get(`/api/products/reviews/${productId}`);
+      if (reviewsRes.data && Array.isArray(reviewsRes.data)) {
+        const formattedReviews = reviewsRes.data.map((r) => ({
+          id: r.reviewId,
+          name: r.customerName || 'Verified Customer',
+          verified: true,
+          date: r.reviewDate ? new Date(r.reviewDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Recently',
+          rating: r.rating,
+          text: r.comment
+        }));
+        setReviewsList(formattedReviews);
+      }
+
+      setNewReviewName('');
+      setNewReviewText('');
+      setNewReviewRating(5);
+      setShowReviewModal(false);
+    } catch (error) {
+      console.error('Failed to submit review to backend:', error);
+      alert(error.response?.data?.message || 'Failed to submit review. Please try again.');
+    }
   };
 
   // Auto Rotation for 360 View Modal
@@ -345,10 +411,10 @@ const ProductDetails = () => {
       <Navbar isScrolled={true} mobileMenuOpen={false} setMobileMenuOpen={() => { }} navItems={['Home', 'Shop', 'Customization', 'About', 'Contact']} />
 
       {/* Main product area */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-5 pb-24">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-0 md:pt-1 pb-10">
 
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-5 uppercase">
+        <nav className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[#1a1a1a]/50 mb-2 uppercase">
           <Link to="/guestUserDashboard" className="hover:text-[#8c5e5e] transition-colors">Home</Link>
           <span>/</span>
           <Link to="/shop" className="hover:text-[#8c5e5e] transition-colors">Shop</Link>
@@ -356,12 +422,12 @@ const ProductDetails = () => {
           <span className="text-[#8c5e5e] truncate max-w-[200px]">{product.title}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
 
           {/* Left Column: Product Image */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             {/* Main Interactive Product Image */}
-            <div className="w-full h-[380px] sm:h-[420px] md:h-[460px] bg-[#f4f0ed] rounded-sm overflow-hidden relative group shadow-sm border border-[#d9d2d0]/25 flex items-center justify-center">
+            <div className="w-full h-[300px] sm:h-[350px] lg:h-[380px] bg-[#f4f0ed] rounded-sm overflow-hidden relative group shadow-sm border border-[#d9d2d0]/25 flex items-center justify-center">
               <img
                 src={getProductImageUrl(product.imageUrl)}
                 alt={product.productName}
@@ -393,13 +459,13 @@ const ProductDetails = () => {
                   setShow360Modal(true);
                   setViewMode3D(true);
                 }}
-                className="flex items-center justify-center gap-2 mx-auto mt-1 px-5 py-2 rounded-full border border-[#d9d2d0] hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-[11px] font-bold tracking-widest text-[#1a1a1a]/70 hover:text-[#8c5e5e] transition-all duration-300 shadow-sm"
+                className="flex items-center justify-center gap-2 mx-auto mt-0.5 px-4 py-1.5 rounded-full border border-[#d9d2d0] hover:border-[#8c5e5e] hover:bg-[#8c5e5e]/5 text-[10px] font-bold tracking-widest text-[#1a1a1a]/70 hover:text-[#8c5e5e] transition-all duration-300 shadow-sm"
               >
-                <RotateCw size={14} className="animate-spin-slow" />
+                <RotateCw size={13} className="animate-spin-slow" />
                 <span>INTERACTIVE 3D VIEW</span>
               </button>
             ) : (
-              <p className="text-center text-[11px] text-[#1a1a1a]/40 font-semibold mt-1">
+              <p className="text-center text-[10px] text-[#1a1a1a]/40 font-semibold mt-0.5">
                 3D model not available.
               </p>
             )}
@@ -486,8 +552,13 @@ const ProductDetails = () => {
               </span>
               <div className="inline-flex items-center border border-[#d9d2d0] bg-white rounded-sm">
                 <button
-                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="px-3 py-1.5 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
+                  onClick={handleQuantityDecrease}
+                  disabled={quantity <= 1 || product.stockQuantity <= 0}
+                  className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
+                    quantity <= 1 || product.stockQuantity <= 0
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-[#1a1a1a]/70 hover:bg-[#f4f0ed]'
+                  }`}
                   aria-label="Decrease quantity"
                 >
                   &mdash;
@@ -496,24 +567,39 @@ const ProductDetails = () => {
                   {quantity}
                 </span>
                 <button
-                  onClick={() => setQuantity((prev) => prev + 1)}
-                  className="px-3 py-1.5 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
+                  onClick={handleQuantityIncrease}
+                  disabled={product.stockQuantity <= 0 || quantity >= product.stockQuantity}
+                  className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
+                    product.stockQuantity <= 0 || quantity >= product.stockQuantity
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-[#1a1a1a]/70 hover:bg-[#f4f0ed]'
+                  }`}
                   aria-label="Increase quantity"
                 >
                   +
                 </button>
               </div>
+              {stockMessage && (
+                <p className="text-xs text-[#8c5e5e] font-semibold mt-1.5">
+                  {stockMessage}
+                </p>
+              )}
             </div>
 
             {/* Actions: Add to Cart and Wishlist */}
             <div className="flex gap-3 mb-5 w-full">
               <button
                 onClick={handleAddToCart}
-                disabled={isAddingToCart}
-                className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-sm bg-[#8c5e5e] text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${isAddingToCart ? 'bg-[#7d4d50]/70 cursor-not-allowed' : 'hover:bg-[#7d4d50] active:scale-[0.98]'
-                  }`}
+                disabled={isAddingToCart || product.stockQuantity <= 0 || quantity > product.stockQuantity}
+                className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-sm text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${
+                  isAddingToCart || product.stockQuantity <= 0 || quantity > product.stockQuantity
+                    ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                    : 'bg-[#8c5e5e] hover:bg-[#7d4d50] active:scale-[0.98]'
+                }`}
               >
-                {isAddingToCart ? (
+                {product.stockQuantity <= 0 ? (
+                  <span>Out of Stock</span>
+                ) : isAddingToCart ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 ) : addedToCart ? (
                   <>
@@ -556,14 +642,14 @@ const ProductDetails = () => {
         </div>
 
         {/* Customer Stories Section */}
-        <section id="reviews" className="mt-16 pt-12 border-t border-[#d9d2d0]/50 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 mb-12">
+        <section id="reviews" className="mt-8 pt-6 border-t border-[#d9d2d0]/50 scroll-mt-24">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6">
             <div className="text-left">
-              <h2 className="text-3xl font-bold tracking-tight text-[#1a1a1a] mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#1a1a1a] mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Customer Stories
               </h2>
               <div className="flex items-center gap-3">
-                <span className="text-4xl font-extrabold text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <span className="text-3xl font-extrabold text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
                   {averageRating}
                 </span>
                 <div className="flex flex-col">
@@ -593,21 +679,22 @@ const ProductDetails = () => {
                   }
                 }
                 if (currentUser) {
+                  setNewReviewName(currentUser.name || '');
                   setShowReviewModal(true);
                 } else {
                   window.dispatchEvent(new Event('show-login-required'));
                 }
               }}
-              className="px-6 py-3 border border-[#8c5e5e] text-[#8c5e5e] hover:bg-[#8c5e5e] hover:text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-sm shrink-0"
+              className="px-5 py-2.5 border border-[#8c5e5e] text-[#8c5e5e] hover:bg-[#8c5e5e] hover:text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-sm shrink-0"
             >
               Write a Review
             </button>
           </div>
 
           {/* Customer Reviews Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
             {reviewsList.slice(0, visibleReviewsCount).map((review) => (
-              <div key={review.id} className="p-8 rounded-sm bg-[#faf8f6] border border-[#d9d2d0]/20 flex flex-col justify-between shadow-sm relative animate-fade-in hover:shadow-md transition-shadow duration-300">
+              <div key={review.id} className="p-5 rounded-sm bg-[#faf8f6] border border-[#d9d2d0]/20 flex flex-col justify-between shadow-sm relative animate-fade-in hover:shadow-md transition-shadow duration-300">
                 <div>
                   <div className="flex justify-between items-start gap-4 mb-4">
                     <div className="flex items-center gap-3">
@@ -662,11 +749,11 @@ const ProductDetails = () => {
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (
-          <section className="mt-16 pt-12 border-t border-[#d9d2d0]/50 relative">
-            <div className="flex justify-between items-end gap-6 mb-12">
+          <section className="mt-8 pt-6 border-t border-[#d9d2d0]/50 relative">
+            <div className="flex justify-between items-end gap-4 mb-6">
               <div className="text-left">
-                <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-3">Harmonious Pairings</p>
-                <h2 className="text-3xl font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <p className="text-xs uppercase tracking-[0.2em] text-[#8c5e5e] font-semibold mb-1">Harmonious Pairings</p>
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Related Products
                 </h2>
               </div>
