@@ -18,6 +18,7 @@ const ProductDetails = () => {
 
   // Gallery states
   const [quantity, setQuantity] = useState(1);
+  const [stockMessage, setStockMessage] = useState('');
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistId, setWishlistId] = useState(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -70,7 +71,7 @@ const ProductDetails = () => {
             discountPercentage: discountPct,
             discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
             discountNumericPrice: discPriceVal,
-            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 100,
+            stockQuantity: p.stockQuantity !== undefined && p.stockQuantity !== null ? Number(p.stockQuantity) : 0,
             imageUrl: getProductImage(p),
             modelUrl: p.modelUrl || '',
             categoryName: p.categoryName || '',
@@ -88,7 +89,8 @@ const ProductDetails = () => {
           };
 
           setProduct(mappedProduct);
-          setQuantity(1);
+          setQuantity(mappedProduct.stockQuantity > 0 ? 1 : 0);
+          setStockMessage('');
 
           // Set 3D model path dynamically from backend modelUrl
           setModelPath(mappedProduct.modelUrl || "");
@@ -223,9 +225,41 @@ const ProductDetails = () => {
     }
   };
 
+  const handleQuantityIncrease = () => {
+    if (!product) return;
+    const maxStock = Number(product.stockQuantity) || 0;
+    if (quantity < maxStock) {
+      setQuantity((prev) => prev + 1);
+      setStockMessage('');
+    } else {
+      setStockMessage(`Only ${maxStock} items are available in stock.`);
+    }
+  };
+
+  const handleQuantityDecrease = () => {
+    if (!product) return;
+    setQuantity((prev) => {
+      const next = Math.max(1, prev - 1);
+      if (next < (Number(product.stockQuantity) || 0)) {
+        setStockMessage('');
+      }
+      return next;
+    });
+  };
+
   // Add to Cart
   const handleAddToCart = async () => {
     if (!product) return;
+    const maxStock = Number(product.stockQuantity) || 0;
+    if (maxStock <= 0) {
+      alert('This product is currently out of stock.');
+      return;
+    }
+    if (quantity > maxStock) {
+      alert(`Cannot add to cart. Only ${maxStock} items are available in stock.`);
+      return;
+    }
+
     const savedUser = localStorage.getItem('user');
     let currentUser = null;
     if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
@@ -486,8 +520,13 @@ const ProductDetails = () => {
               </span>
               <div className="inline-flex items-center border border-[#d9d2d0] bg-white rounded-sm">
                 <button
-                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="px-3 py-1.5 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
+                  onClick={handleQuantityDecrease}
+                  disabled={quantity <= 1 || product.stockQuantity <= 0}
+                  className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
+                    quantity <= 1 || product.stockQuantity <= 0
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-[#1a1a1a]/70 hover:bg-[#f4f0ed]'
+                  }`}
                   aria-label="Decrease quantity"
                 >
                   &mdash;
@@ -496,24 +535,39 @@ const ProductDetails = () => {
                   {quantity}
                 </span>
                 <button
-                  onClick={() => setQuantity((prev) => prev + 1)}
-                  className="px-3 py-1.5 hover:bg-[#f4f0ed] text-sm text-[#1a1a1a]/70 font-semibold transition-colors"
+                  onClick={handleQuantityIncrease}
+                  disabled={product.stockQuantity <= 0 || quantity >= product.stockQuantity}
+                  className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
+                    product.stockQuantity <= 0 || quantity >= product.stockQuantity
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-[#1a1a1a]/70 hover:bg-[#f4f0ed]'
+                  }`}
                   aria-label="Increase quantity"
                 >
                   +
                 </button>
               </div>
+              {stockMessage && (
+                <p className="text-xs text-[#8c5e5e] font-semibold mt-1.5">
+                  {stockMessage}
+                </p>
+              )}
             </div>
 
             {/* Actions: Add to Cart and Wishlist */}
             <div className="flex gap-3 mb-5 w-full">
               <button
                 onClick={handleAddToCart}
-                disabled={isAddingToCart}
-                className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-sm bg-[#8c5e5e] text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${isAddingToCart ? 'bg-[#7d4d50]/70 cursor-not-allowed' : 'hover:bg-[#7d4d50] active:scale-[0.98]'
-                  }`}
+                disabled={isAddingToCart || product.stockQuantity <= 0 || quantity > product.stockQuantity}
+                className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-sm text-white font-medium text-xs tracking-wider uppercase transition-all duration-500 shadow-md ${
+                  isAddingToCart || product.stockQuantity <= 0 || quantity > product.stockQuantity
+                    ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                    : 'bg-[#8c5e5e] hover:bg-[#7d4d50] active:scale-[0.98]'
+                }`}
               >
-                {isAddingToCart ? (
+                {product.stockQuantity <= 0 ? (
+                  <span>Out of Stock</span>
+                ) : isAddingToCart ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 ) : addedToCart ? (
                   <>

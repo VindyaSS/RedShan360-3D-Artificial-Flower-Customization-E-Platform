@@ -295,7 +295,7 @@ const Shop = () => {
             discountPercentage: discountPct,
             discountPrice: discPriceVal ? `Rs ${discPriceVal.toFixed(2)}` : null,
             discountNumericPrice: discPriceVal,
-            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 100,
+            stockQuantity: p.stockQuantity !== undefined && p.stockQuantity !== null ? Number(p.stockQuantity) : 0,
             imageUrl: getProductImage(p),
             image: getProductImage(p),
             featured: false,
@@ -369,6 +369,13 @@ const Shop = () => {
   };
 
   const handleAddToCart = async (product) => {
+    if (!product) return;
+    const maxStock = Number(product.stockQuantity) || 0;
+    if (maxStock <= 0) {
+      alert('This product is currently out of stock.');
+      return;
+    }
+
     const savedUser = localStorage.getItem('user');
     let currentUser = null;
     if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {

@@ -160,8 +160,8 @@ export default function LoginPage() {
         {/* Left Side Visual Panel */}
         <div className="login-visual-panel">
           <div className="glass-overlay">
-            <h1 className="glass-title">Curated Botanicals.</h1>
-            <p className="glass-quote">
+            <h1 className="glass-title text-[#1f1f1f]">Curated Botanicals.</h1>
+            <p className="glass-quote text-[#1f1f1f]">
               "Step into a world where artificial flora meets everlasting elegance."
             </p>
           </div>

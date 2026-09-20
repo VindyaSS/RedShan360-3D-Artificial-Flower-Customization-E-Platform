@@ -101,6 +101,13 @@ const Wishlist = () => {
 
   // Handle Add to Cart
   const handleAddToCart = async (product) => {
+    if (!product) return;
+    const maxStock = product.stockQuantity !== undefined && product.stockQuantity !== null ? Number(product.stockQuantity) : null;
+    if (maxStock !== null && maxStock <= 0) {
+      alert('This product is currently out of stock.');
+      return;
+    }
+
     // Determine default color (first color in array or Default)
     const defaultColor = product.colors && product.colors.length > 0 ? product.colors[0].name : 'Default';
 
@@ -250,10 +257,15 @@ const Wishlist = () => {
                     {/* Add to Cart button */}
                     <button
                       onClick={() => handleAddToCart(product)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-[11px] font-bold tracking-wider uppercase rounded-sm shadow-sm transition-all duration-300 active:scale-[0.99]"
+                      disabled={product.stockQuantity !== undefined && product.stockQuantity <= 0}
+                      className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 text-white text-[11px] font-bold tracking-wider uppercase rounded-sm shadow-sm transition-all duration-300 ${
+                        product.stockQuantity !== undefined && product.stockQuantity <= 0
+                          ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                          : 'bg-[#8c5e5e] hover:bg-[#7d4d50] active:scale-[0.99]'
+                      }`}
                     >
                       <ShoppingBag size={13} />
-                      <span>Add to Cart</span>
+                      <span>{product.stockQuantity !== undefined && product.stockQuantity <= 0 ? 'Out of Stock' : 'Add to Cart'}</span>
                     </button>
 
                     {/* View details & delete bar */}
