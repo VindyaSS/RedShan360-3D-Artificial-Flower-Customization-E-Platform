@@ -531,6 +531,13 @@
   .table-toolbar input {
     width: 100%;
   }
+  .tab-container {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .customer-info-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Customer View Modal Styles */

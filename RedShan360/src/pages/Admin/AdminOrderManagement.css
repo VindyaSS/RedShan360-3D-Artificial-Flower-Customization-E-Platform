@@ -193,9 +193,17 @@
 
 /* Responsive Breakpoints */
 @media (max-width: 1024px) {
+  .admin-content {
+    margin-left: 0;
+    padding: 16px;
+  }
   .orders-table th,
   .orders-table td {
     font-size: 14px;
+  }
+  .orders-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -203,10 +211,33 @@
   .dashboard-header h1 {
     font-size: 28px;
   }
+  .order-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .order-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
   .orders-table th,
   .orders-table td {
     padding: 8px;
     font-size: 13px;
+  }
+}
+
+@media (max-width: 650px) {
+  .order-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .details-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .details-info-card.full-width {
+    grid-column: span 1;
+  }
+  .order-details-modal-wrapper {
+    width: 96vw;
+    padding: 10px;
   }
 }
 

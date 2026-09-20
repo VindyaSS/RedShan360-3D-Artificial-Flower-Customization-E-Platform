@@ -214,7 +214,100 @@ function RibbonTailMesh({ controlPoints, width = 0.16, color = '#b86b76' }) {
   );
 }
 
-export default function VaseModel({ wrappingId, bouquetSize = 'MEDIUM', sizeConfig = null }) {
+/**
+ * Helper: Generates a single continuous 360-degree florist sleeve geometry
+ * with a subtle front overlap fold, irregular scalloped peaks, vertical fold creases,
+ * and a gathered stem waist.
+ */
+function createContinuousFloristSleeveGeometry({
+  rTop = 1.4,
+  rBottom = 0.4,
+  height = 2.2,
+  targetBloomBaseY = 2.9,
+  overlapAngle = Math.PI * 0.15, // ~27 deg subtle front overlap fold
+  peakHeightScale = 0.26,
+  creaseDepth = 0.05,
+  asymmetrySeed = 0,
+  radialSegments = 36,
+  heightSegments = 16
+}) {
+  const positions = [];
+  const uvs = [];
+  const indices = [];
+
+  // Arc starts at back (-Z) wrapping full 360 deg to front (+Z) with subtle overlap
+  const arcStart = -Math.PI * 0.95;
+  const arcTotal = Math.PI * 1.90 + overlapAngle;
+
+  for (let j = 0; j <= heightSegments; j++) {
+    const v = j / heightSegments; // 0 at waist bottom, 1 at top rim
+    const baseR = rBottom + (rTop - rBottom) * Math.pow(v, 1.15);
+    const currentY = (v - 0.5) * height;
+
+    for (let i = 0; i <= radialSegments; i++) {
+      const u = i / radialSegments; // 0 to 1 around circumference
+      const angle = arcStart + u * arcTotal;
+
+      // 1. Organic peak height modulation (pronounced at top v -> 1)
+      const wave1 = Math.sin(angle * 3 + asymmetrySeed) * peakHeightScale;
+      const wave2 = Math.cos(angle * 5 + asymmetrySeed * 1.5) * (peakHeightScale * 0.4);
+      // Back wall taller, front scoop lower
+      const backWallTilt = -Math.cos(angle) * 0.16;
+      
+      let deltaY = v * v * (wave1 + wave2 + backWallTilt);
+      // Safety clamp: top rim never exceeds bloom base height
+      if (currentY + deltaY > targetBloomBaseY - 0.25) {
+        deltaY = targetBloomBaseY - 0.25 - currentY;
+      }
+
+      // 2. Vertical fold creases & subtle seam radial offset for overlap
+      const creaseWave = Math.sin(angle * 6 + asymmetrySeed * 2) * creaseDepth;
+      
+      // Subtle radial step for overlapping front flap
+      let seamOffset = 0;
+      if (u > 0.85) {
+        seamOffset = (u - 0.85) * 0.04;
+      }
+
+      const currentR = baseR + v * creaseWave + seamOffset;
+
+      // Final vertex positions
+      const x = Math.sin(angle) * currentR;
+      const y = currentY + deltaY;
+      const z = Math.cos(angle) * currentR;
+
+      positions.push(x, y, z);
+      uvs.push(u, v);
+    }
+  }
+
+  // Generate indices for triangles
+  for (let j = 0; j < heightSegments; j++) {
+    for (let i = 0; i < radialSegments; i++) {
+      const first = j * (radialSegments + 1) + i;
+      const second = first + radialSegments + 1;
+
+      indices.push(first, second, first + 1);
+      indices.push(second, second + 1, first + 1);
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+
+  return geo;
+}
+
+export default function VaseModel({
+  wrappingId,
+  bouquetSize = 'MEDIUM',
+  sizeConfig = null,
+  bouquetRadius = 1.45,
+  bloomBaseY = 2.3
+}) {
   const botanicalTexture = useMemo(() => createBotanicalToileTexture(), []);
   const woodTexture = useMemo(() => createWoodTexture(), []);
 
@@ -228,6 +321,60 @@ export default function VaseModel({ wrappingId, bouquetSize = 'MEDIUM', sizeConf
     return [rMult, hMult, rMult];
   }, [bouquetSize, sizeConfig]);
 
+  // Derive dynamic layer top radii directly from bouquetRadius with modest offsets:
+  // inner: 1.01, middle: 1.04, outer: 1.08
+  const baseR = Number(bouquetRadius) || 1.4;
+  const innerTopR = baseR * 1.01;
+  const middleTopR = baseR * 1.04;
+  const outerTopR = baseR * 1.08;
+
+  // Calculate vertical frustum height so paper rim comes up right to lower bloom cluster, eliminating empty stem gap
+  const targetBloomBaseY = Number(bloomBaseY) || 2.9;
+  const wrapH = Math.max(2.0, Math.min(2.8, targetBloomBaseY - 0.65));
+  const wrapY = 1.05 + wrapH * 0.5;
+
+  // Layer 1: Primary Continuous Outer Florist Sleeve
+  const layer1Geo = useMemo(() => {
+    return createContinuousFloristSleeveGeometry({
+      rTop: outerTopR,
+      rBottom: 0.42,
+      height: wrapH + 0.15,
+      targetBloomBaseY,
+      overlapAngle: Math.PI * 0.15,
+      peakHeightScale: 0.28,
+      creaseDepth: 0.05,
+      asymmetrySeed: 5.2
+    });
+  }, [outerTopR, wrapH, targetBloomBaseY]);
+
+  // Layer 2: Lightweight Middle Contrast Accent Rim
+  const layer2Geo = useMemo(() => {
+    return createContinuousFloristSleeveGeometry({
+      rTop: middleTopR,
+      rBottom: 0.40,
+      height: wrapH,
+      targetBloomBaseY,
+      overlapAngle: Math.PI * 0.12,
+      peakHeightScale: 0.22,
+      creaseDepth: 0.04,
+      asymmetrySeed: 3.5
+    });
+  }, [middleTopR, wrapH, targetBloomBaseY]);
+
+  // Layer 3: Lightweight Innermost Soft Tissue Collar
+  const layer3Geo = useMemo(() => {
+    return createContinuousFloristSleeveGeometry({
+      rTop: innerTopR,
+      rBottom: 0.38,
+      height: wrapH - 0.08,
+      targetBloomBaseY,
+      overlapAngle: Math.PI * 0.10,
+      peakHeightScale: 0.20,
+      creaseDepth: 0.03,
+      asymmetrySeed: 0.8
+    });
+  }, [innerTopR, wrapH, targetBloomBaseY]);
+
   // Config for 3 Distinct Wrapping Paper Layers with Red, Yellow, and Dark Brown!
   const paperConfig = useMemo(() => {
     switch (activePaperId) {
@@ -237,8 +384,8 @@ export default function VaseModel({ wrappingId, bouquetSize = 'MEDIUM', sizeConf
           middleColor: '#f5b82e', // Layer 2: Vibrant Sunflower Yellow (Middle)
           innerColor: '#3d261a',  // Layer 3: Deep Mocha Dark Brown (Inner)
           useTexture: true,       // Vintage Botanical toile print decoration
-          roughness: 0.80,
-          metalness: 0.05,
+          roughness: 0.85,
+          metalness: 0.02,
           ribbonColor: '#f5b82e'  // Warm Yellow Satin Ribbon
         };
       case 'gold-paper':
@@ -247,8 +394,8 @@ export default function VaseModel({ wrappingId, bouquetSize = 'MEDIUM', sizeConf
           middleColor: '#f8f8f8', // Layer 2: Pure Crisp White (Middle)
           innerColor: '#141414',  // Layer 3: Onyx Black (Inner)
           useTexture: true,       // Vintage Botanical toile print decoration
-          roughness: 0.35,
-          metalness: 0.35,
+          roughness: 0.40,
+          metalness: 0.30,
           ribbonColor: '#d4af37'  // Gold Satin Ribbon
         };
       case 'botanical-toile':
@@ -258,8 +405,8 @@ export default function VaseModel({ wrappingId, bouquetSize = 'MEDIUM', sizeConf
           middleColor: '#82be72', // Layer 2: Light Green (Middle)
           innerColor: '#121212',  // Layer 3: Onyx Black (Inner)
           useTexture: true,       // Vintage Botanical toile print decoration
-          roughness: 0.80,
-          metalness: 0.05,
+          roughness: 0.85,
+          metalness: 0.02,
           ribbonColor: '#82be72'  // Light Green Satin Ribbon
         };
     }
@@ -303,9 +450,9 @@ export default function VaseModel({ wrappingId, bouquetSize = 'MEDIUM', sizeConf
       {/* Main Bouquet Wrapper Structure (Scales dynamically with bouquet size) */}
       <group position={[0, 0, 0]} scale={scaleVector}>
 
-        {/* STEM HANDLE BASE (Paper naturally gathered down to standing base) */}
-        <mesh castShadow receiveShadow position={[0, 0.55, 0]}>
-          <cylinderGeometry args={[0.44, 0.35, 1.1, 16]} />
+        {/* STEM HANDLE BASE (Paper gathered down to standing base) */}
+        <mesh castShadow receiveShadow position={[0, 0.52, 0]}>
+          <cylinderGeometry args={[0.42, 0.34, 1.05, 16]} />
           <meshStandardMaterial
             map={paperConfig.useTexture ? botanicalTexture : null}
             color={paperConfig.outerColor}
@@ -316,12 +463,11 @@ export default function VaseModel({ wrappingId, bouquetSize = 'MEDIUM', sizeConf
         </mesh>
 
         {/* ========================================================================= */}
-        {/* LAYER 3 (INNERMOST TISSUE LAYER - COLOR 3: Warm Ivory Tissue)              */}
-        {/* Directly cradles flower stems peeking out highest under blooms           */}
+        {/* LAYER 3 (INNERMOST TISSUE COLLAR - Soft dark tissue lining flower stems)   */}
+        {/* Soft tissue collar peeking out right beneath lower blooms                */}
         {/* ========================================================================= */}
-        <group position={[0, 2.32, -0.05]} rotation={[-0.08, 0.02, 0]}>
-          <mesh castShadow receiveShadow>
-            <cylinderGeometry args={[1.82, 0.44, 2.25, 14, 1, true]} />
+        <group position={[0, wrapY - 0.05, 0]} rotation={[-0.04, -0.15, 0.03]}>
+          <mesh geometry={layer3Geo} castShadow receiveShadow>
             <meshStandardMaterial
               color={paperConfig.innerColor}
               roughness={0.92}
@@ -329,150 +475,35 @@ export default function VaseModel({ wrappingId, bouquetSize = 'MEDIUM', sizeConf
               side={THREE.DoubleSide}
             />
           </mesh>
-          {/* Innermost soft tissue ruffles */}
-          <mesh position={[-0.4, 0.6, 0.4]} rotation={[0.2, 0.2, -0.1]} castShadow>
-            <planeGeometry args={[1.0, 1.0]} />
-            <meshStandardMaterial color={paperConfig.innerColor} roughness={0.92} side={THREE.DoubleSide} />
-          </mesh>
-          <mesh position={[0.4, 0.62, 0.4]} rotation={[0.2, -0.2, 0.1]} castShadow>
-            <planeGeometry args={[1.0, 1.0]} />
-            <meshStandardMaterial color={paperConfig.innerColor} roughness={0.92} side={THREE.DoubleSide} />
-          </mesh>
         </group>
 
         {/* ========================================================================= */}
-        {/* LAYER 2 (MIDDLE CONTRAST ACCENT PAPER - COLOR 2: Dusty Rose / Accent)     */}
-        {/* Staggered framing layer visible clearly between Layer 1 & Layer 3         */}
+        {/* LAYER 2 (MIDDLE CONTRAST ACCENT RIM - Lightweight contrast border)         */}
+        {/* Continuous accent rim peeking between tissue collar and outer envelope   */}
         {/* ========================================================================= */}
-        <group position={[0, 2.42, -0.20]} rotation={[-0.12, -0.02, -0.01]}>
-          {/* Middle Back Fan Panel (Protrudes slightly wider than Layer 1 to create visible border) */}
-          <mesh castShadow receiveShadow>
-            <cylinderGeometry args={[2.05, 0.45, 2.45, 16, 1, true, -Math.PI * 0.72, Math.PI * 1.44]} />
+        <group position={[0, wrapY - 0.02, 0]} rotation={[-0.06, 0.10, -0.02]}>
+          <mesh geometry={layer2Geo} castShadow receiveShadow>
             <meshStandardMaterial
               map={paperConfig.useTexture ? botanicalTexture : null}
               color={paperConfig.middleColor}
               roughness={paperConfig.roughness}
               metalness={paperConfig.metalness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-
-          {/* Middle Layer Left Origami Ear */}
-          <mesh position={[-1.2, 1.15, -0.04]} rotation={[0.12, 0.32, -0.34]} castShadow>
-            <planeGeometry args={[1.35, 1.45]} />
-            <meshStandardMaterial
-              map={paperConfig.useTexture ? botanicalTexture : null}
-              color={paperConfig.middleColor}
-              roughness={paperConfig.roughness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-
-          {/* Middle Layer Right Origami Ear */}
-          <mesh position={[1.15, 1.18, -0.04]} rotation={[0.10, -0.26, 0.30]} castShadow>
-            <planeGeometry args={[1.30, 1.38]} />
-            <meshStandardMaterial
-              map={paperConfig.useTexture ? botanicalTexture : null}
-              color={paperConfig.middleColor}
-              roughness={paperConfig.roughness}
               side={THREE.DoubleSide}
             />
           </mesh>
         </group>
 
         {/* ========================================================================= */}
-        {/* LAYER 1 (OUTER MAIN PAPER WRAPPER - COLOR 1: Vintage Toile / Kraft / Gold) */}
-        {/* Broadest outer fan envelope extending around back, sides, and front      */}
+        {/* LAYER 1 (PRIMARY CONTINUOUS OUTER FLORIST SLEEVE)                         */}
+        {/* Full 360-degree continuous tapered sleeve with subtle front overlap fold   */}
         {/* ========================================================================= */}
-        <group position={[0, 2.50, -0.32]} rotation={[-0.16, -0.03, -0.02]}>
-          {/* Main Outer Broad Back Fan Panel */}
-          <mesh castShadow receiveShadow>
-            <cylinderGeometry args={[2.25, 0.46, 2.65, 18, 1, true, -Math.PI * 0.75, Math.PI * 1.5]} />
+        <group position={[0, wrapY, 0]} rotation={[-0.08, 0, 0]}>
+          <mesh geometry={layer1Geo} castShadow receiveShadow>
             <meshStandardMaterial
               map={paperConfig.useTexture ? botanicalTexture : null}
               color={paperConfig.outerColor}
               roughness={paperConfig.roughness}
               metalness={paperConfig.metalness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-
-          {/* Outer Layer Left Flared Ear */}
-          <mesh position={[-1.32, 1.32, -0.05]} rotation={[0.14, 0.35, -0.38]} castShadow>
-            <planeGeometry args={[1.45, 1.55]} />
-            <meshStandardMaterial
-              map={paperConfig.useTexture ? botanicalTexture : null}
-              color={paperConfig.outerColor}
-              roughness={paperConfig.roughness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-
-          {/* Outer Layer Right Flared Ear */}
-          <mesh position={[1.22, 1.25, -0.05]} rotation={[0.10, -0.28, 0.32]} castShadow>
-            <planeGeometry args={[1.38, 1.45]} />
-            <meshStandardMaterial
-              map={paperConfig.useTexture ? botanicalTexture : null}
-              color={paperConfig.outerColor}
-              roughness={paperConfig.roughness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-
-          {/* Outer Top Peak */}
-          <mesh position={[0.15, 1.48, -0.15]} rotation={[0.18, 0.05, 0.04]} castShadow>
-            <planeGeometry args={[1.5, 1.4]} />
-            <meshStandardMaterial
-              map={paperConfig.useTexture ? botanicalTexture : null}
-              color={paperConfig.outerColor}
-              roughness={paperConfig.roughness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        </group>
-
-        {/* FRONT CRADLING ENVELOPE COLLAR (OUTER & MIDDLE FOLDS VISIBLE IN FRONT) */}
-        <group position={[0, 1.88, 0.24]} rotation={[0.18, 0.02, 0]}>
-          {/* Outer Envelope Front Cuff */}
-          <mesh castShadow receiveShadow>
-            <cylinderGeometry args={[1.68, 0.46, 1.75, 14, 1, true, -Math.PI * 0.35, Math.PI * 0.7]} />
-            <meshStandardMaterial
-              map={paperConfig.useTexture ? botanicalTexture : null}
-              color={paperConfig.outerColor}
-              roughness={paperConfig.roughness}
-              metalness={paperConfig.metalness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-
-          {/* Middle Layer Accent Cuff peeking out in front */}
-          <mesh position={[0, 0.12, -0.04]} castShadow receiveShadow>
-            <cylinderGeometry args={[1.62, 0.45, 1.70, 14, 1, true, -Math.PI * 0.32, Math.PI * 0.64]} />
-            <meshStandardMaterial
-              color={paperConfig.middleColor}
-              roughness={paperConfig.roughness}
-              metalness={paperConfig.metalness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-
-          {/* Front Left Overlapping Fold */}
-          <mesh position={[-0.68, 0.32, 0.34]} rotation={[0.22, 0.45, -0.3]} castShadow>
-            <planeGeometry args={[1.15, 1.15]} />
-            <meshStandardMaterial
-              map={paperConfig.useTexture ? botanicalTexture : null}
-              color={paperConfig.outerColor}
-              roughness={paperConfig.roughness}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-
-          {/* Front Right Overlapping Fold */}
-          <mesh position={[0.60, 0.36, 0.30]} rotation={[0.20, -0.38, 0.25]} castShadow>
-            <planeGeometry args={[1.08, 1.12]} />
-            <meshStandardMaterial
-              color={paperConfig.middleColor}
-              roughness={paperConfig.roughness}
               side={THREE.DoubleSide}
             />
           </mesh>
