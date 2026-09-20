@@ -27,49 +27,26 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const AdminSettingsService = {
   /**
-   * Retrieves profile details.
+   * Retrieves profile details from backend database API.
    */
   getProfile: async () => {
-    await delay(100);
-    const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
-    if (data) {
-      return JSON.parse(data);
-    }
-
-    // Default fallback reads directly from logged-in admin user object returned by database on login
-    let dbName = DEFAULT_PROFILE.fullName;
-    let dbEmail = DEFAULT_PROFILE.email;
-    try {
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        const u = JSON.parse(userStr);
-        if (u.name) dbName = u.name;
-        else if (u.fullName) dbName = u.fullName;
-        if (u.email) dbEmail = u.email;
-      }
-    } catch (e) {
-      console.error("Failed to parse user from localStorage:", e);
-    }
-
-    return {
-      ...DEFAULT_PROFILE,
-      fullName: dbName,
-      email: dbEmail,
-    };
+    const response = await api.get("/api/admin/settings");
+    return response.data;
   },
 
   /**
-   * Updates profile text fields.
+   * Updates profile text fields in backend database API.
    */
   updateProfile: async (profileData) => {
-    await delay(400);
-    const current = await AdminSettingsService.getProfile();
-    const updated = { ...current, ...profileData };
-    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(updated));
-
-    // Dispatch a custom event to notify other components (e.g. AdminTopbar) to update instantly
+    const payload = {
+      name: profileData.name || profileData.fullName,
+      email: profileData.email,
+      phone: profileData.phone,
+    };
+    const response = await api.put("/api/admin/settings", payload);
+    const updated = response.data;
     window.dispatchEvent(new CustomEvent("adminProfileUpdated", { detail: updated }));
-    return { success: true, message: "Profile updated successfully.", data: updated };
+    return updated;
   },
 
   /**
@@ -99,18 +76,16 @@ export const AdminSettingsService = {
   },
 
   /**
-   * Updates administrator password.
+   * Updates administrator password in backend database API.
    */
-  changePassword: async (currentPassword, newPassword) => {
-    await delay(500);
-    if (!currentPassword) {
-      throw new Error("Current password is required.");
-    }
-    if (newPassword.length < 6) {
-      throw new Error("New password must be at least 6 characters long.");
-    }
-    // Simulate successful password change
-    return { success: true, message: "Password updated successfully." };
+  changePassword: async (currentPassword, newPassword, confirmPassword) => {
+    const payload = {
+      currentPassword,
+      newPassword,
+      confirmPassword: confirmPassword || newPassword,
+    };
+    const response = await api.put("/api/admin/settings?action=password", payload);
+    return response.data;
   },
 
   /**

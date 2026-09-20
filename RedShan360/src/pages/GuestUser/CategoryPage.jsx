@@ -184,7 +184,7 @@ const CategoryPage = () => {
             reviewCount: 15,
             imageUrl: p.imageUrl,
             image: getProductImageUrl(p.imageUrl),
-            stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity : 10,
+            stockQuantity: p.stockQuantity !== undefined && p.stockQuantity !== null ? Number(p.stockQuantity) : 0,
             categoryName: p.categoryName || '',
             subCategoryName: p.subCategoryName || ''
           };
@@ -205,6 +205,13 @@ const CategoryPage = () => {
   const displayProducts = dbProducts;
 
   const handleAddToCart = async (product) => {
+    if (!product) return;
+    const maxStock = Number(product.stockQuantity) || 0;
+    if (maxStock <= 0) {
+      alert('This product is currently out of stock.');
+      return;
+    }
+
     const savedUser = localStorage.getItem('user');
     let currentUser = null;
     if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
@@ -451,9 +458,14 @@ const CategoryPage = () => {
                   {/* Add to Cart Button */}
                   <button
                     onClick={() => handleAddToCart(product)}
-                    className="px-2.5 sm:px-3 py-1.5 bg-[#8c5e5e] hover:bg-[#7d4d50] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 active:scale-95 shrink-0"
+                    disabled={product.stockQuantity <= 0}
+                    className={`px-2.5 sm:px-3 py-1.5 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 shrink-0 ${
+                      product.stockQuantity <= 0
+                        ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                        : 'bg-[#8c5e5e] hover:bg-[#7d4d50] active:scale-95'
+                    }`}
                   >
-                    Add to Cart
+                    {product.stockQuantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
                   </button>
                 </div>
               </div>
