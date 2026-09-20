@@ -4,7 +4,6 @@ import React, {
     useRef,
     useCallback
 } from "react";
-import { Search } from "lucide-react";
 
 import "../../css/manager.css";
 
@@ -215,16 +214,6 @@ export default function MTabs() {
                 <div className="manage-orders-title-group">
                     <h1>Manage Orders</h1>
                     <p>Track, filter, and dispatch customer orders through each fulfillment stage.</p>
-                </div>
-
-                <div className="order-search-box">
-                    <Search size={16} className="search-icon" />
-                    <input
-                        type="text"
-                        placeholder="Search by Order ID or Customer..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
                 </div>
             </div>
 
