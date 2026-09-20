@@ -127,10 +127,10 @@ const Wishlist = () => {
       />
 
       {/* Main Wishlist Section */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-16 pt-[130px] pb-24 text-left">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-16 text-left">
         
         {/* Header Title */}
-        <div className="border-b border-[#d9d2d0]/30 pb-5 mb-10">
+        <div className="border-b border-[#d9d2d0]/30 pb-4 mb-6">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#1a1a1a]" style={{ fontFamily: 'Playfair Display, serif' }}>
             My Wishlist
           </h1>
