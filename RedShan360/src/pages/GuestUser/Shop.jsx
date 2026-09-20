@@ -559,11 +559,11 @@ const Shop = () => {
         navItems={navItems}
       />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-6 sm:pt-8 md:pt-10 pb-6 sm:pb-8">
-        <div className="flex flex-col lg:flex-row gap-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 lg:h-[calc(100vh-80px)] lg:overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-10 lg:h-full">
 
           {/* Filters Sidebar - Desktop view */}
-          <aside className="hidden lg:block w-64 shrink-0 text-left">
+          <aside className="hidden lg:block w-64 shrink-0 text-left lg:h-full lg:overflow-y-auto custom-scrollbar py-6 sm:py-8 md:py-10 pr-4">
             <div className="flex justify-between items-center pb-4 border-b border-[#d9d2d0]/50 mb-6">
               <h2 className="text-xl font-bold tracking-tight text-[#1a1a1a] font-playfair" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Filters
@@ -686,7 +686,7 @@ const Shop = () => {
           </aside>
 
           {/* Products Column */}
-          <main className="flex-1">
+          <main className="flex-1 lg:h-full lg:overflow-y-auto custom-scrollbar py-6 sm:py-8 md:py-10 pr-2">
             {/* Header info / Sort dropdown */}
             <div id="shop-products-header" className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-4 border-b border-[#d9d2d0]/30 mb-8 text-left">
               <div>
@@ -1036,22 +1036,7 @@ const Shop = () => {
                   {activeQuickViewProduct.description}
                 </p>
 
-                {/* Colors */}
-                {activeQuickViewProduct.colors?.length > 0 && (
-                  <div className="mb-6">
-                    <span className="text-xs uppercase tracking-wider font-bold text-[#1a1a1a]/60 block mb-2">Available Colors</span>
-                    <div className="flex gap-2">
-                      {activeQuickViewProduct.colors.map((color, index) => (
-                        <span
-                          key={index}
-                          className="w-5 h-5 rounded-full border border-gray-300 shadow-xs"
-                          style={{ backgroundColor: color.hex }}
-                          title={color.name}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
+
               </div>
 
               {/* Action Button */}
