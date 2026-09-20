@@ -8,7 +8,7 @@ import { getProductImageUrl } from "../../utils/imageHelper";
 
 function AdminOrderManagement() {
   const [orders, setOrders] = useState([]);
-  const [stats, setStats] = useState({ pending: 0, processing: 0, completed: 0 });
+  const [stats, setStats] = useState({ pending: 0, processing: 0, completed: 0, dispatched: 0 });
   const [loading, setLoading] = useState(true);
 
   const [filterType, setFilterType] = useState("All Orders");
@@ -27,8 +27,54 @@ function AdminOrderManagement() {
     const statusUpper = backendStatus.toUpperCase();
     if (statusUpper === "ORDER_CONFIRMED" || statusUpper === "PENDING") return "Pending";
     if (statusUpper === "PROCESSING") return "Processing";
-    if (statusUpper === "ORDER_COMPLETED" || statusUpper === "COMPLETED" || statusUpper === "DISPATCHED_TO_COURIER") return "Completed";
+    if (statusUpper === "ORDER_COMPLETED" || statusUpper === "COMPLETED") return "Completed";
+    if (statusUpper === "DISPATCHED_TO_COURIER" || statusUpper === "DISPATCHED") return "Dispatched to Courier";
     return backendStatus;
+  };
+
+  const getStatusClass = (backendStatus) => {
+    if (!backendStatus) return "pending";
+    const statusUpper = backendStatus.toUpperCase();
+    if (statusUpper === "ORDER_CONFIRMED" || statusUpper === "PENDING") return "pending";
+    if (statusUpper === "PROCESSING") return "processing";
+    if (statusUpper === "ORDER_COMPLETED" || statusUpper === "COMPLETED") return "completed";
+    if (statusUpper === "DISPATCHED_TO_COURIER" || statusUpper === "DISPATCHED") return "dispatched";
+    return "pending";
+  };
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      if (newStatus === "DISPATCHED_TO_COURIER") {
+        await api.put(`/api/orders/${orderId}/dispatch`);
+      } else {
+        await api.put(`/api/admin/orders/${orderId}/status?status=${newStatus}`);
+      }
+
+      setOrders((prevOrders) =>
+        prevOrders.map((o) => {
+          if (o.rawId === orderId) {
+            return {
+              ...o,
+              rawStatus: newStatus,
+              status: mapOrderStatusLabel(newStatus),
+            };
+          }
+          return o;
+        })
+      );
+
+      if (selectedOrderDetails && selectedOrderDetails.orderId === orderId) {
+        setSelectedOrderDetails((prev) => ({
+          ...prev,
+          orderStatus: newStatus,
+        }));
+      }
+
+      fetchOrderStats();
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+      alert(error?.response?.data?.message || "Failed to update order status.");
+    }
   };
 
   const fetchOrderStats = async () => {
@@ -39,6 +85,7 @@ function AdminOrderManagement() {
           pending: response.data.pending || 0,
           processing: response.data.processing || 0,
           completed: response.data.completed || 0,
+          dispatched: response.data.dispatched || 0,
         });
       }
     } catch (error) {
@@ -52,7 +99,7 @@ function AdminOrderManagement() {
       await fetchOrderStats();
       const response = await api.get("/api/admin/orders");
       const data = response.data || [];
-      
+
       const formatted = data.map((o) => ({
         id: `#RS-${String(o.orderId).padStart(5, "0")}`,
         rawId: o.orderId,
@@ -110,7 +157,7 @@ function AdminOrderManagement() {
       );
     }
 
-    // 2. Second dropdown filter (Today, Last 7 Days, Last Month, Processing List, Completed List)
+    // 2. Second dropdown filter (Today, Last 7 Days, Last Month, Processing List, Completed List, Dispatched List)
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -129,8 +176,14 @@ function AdminOrderManagement() {
         (o) =>
           o.status === "Completed" ||
           o.rawStatus === "COMPLETED" ||
-          o.rawStatus === "ORDER_COMPLETED" ||
-          o.rawStatus === "DISPATCHED_TO_COURIER"
+          o.rawStatus === "ORDER_COMPLETED"
+      );
+    } else if (secondDropdownSelection === "Dispatched List") {
+      result = result.filter(
+        (o) =>
+          o.status === "Dispatched to Courier" ||
+          o.rawStatus === "DISPATCHED_TO_COURIER" ||
+          o.rawStatus === "DISPATCHED"
       );
     }
 
@@ -181,6 +234,10 @@ function AdminOrderManagement() {
             <h4>Completed</h4>
             <h2>{stats.completed.toLocaleString()}</h2>
           </div>
+          <div className="order-kpi-card dispatched">
+            <h4>Dispatched to Courier</h4>
+            <h2>{stats.dispatched.toLocaleString()}</h2>
+          </div>
         </div>
 
         {/* Filters + Actions */}
@@ -211,6 +268,7 @@ function AdminOrderManagement() {
             <option value="Last Month">Last Month</option>
             <option value="Processing List">Processing List</option>
             <option value="Completed List">Completed List</option>
+            <option value="Dispatched List">Dispatched List</option>
           </select>
 
           <button className="export-btn" onClick={fetchOrders}>
@@ -248,7 +306,7 @@ function AdminOrderManagement() {
                     </td>
                     <td>{order.amount}</td>
                     <td>
-                      <span className={`status ${order.status.toLowerCase()}`}>
+                      <span className={`status ${getStatusClass(order.rawStatus)}`}>
                         {order.status}
                       </span>
                     </td>
@@ -353,7 +411,7 @@ function AdminOrderManagement() {
                       </div>
                       <div className="info-row">
                         <span className="info-label">Order Status:</span>
-                        <span className={`status ${mapOrderStatusLabel(selectedOrderDetails.orderStatus).toLowerCase()}`}>
+                        <span className={`status ${getStatusClass(selectedOrderDetails.orderStatus)}`}>
                           {mapOrderStatusLabel(selectedOrderDetails.orderStatus)}
                         </span>
                       </div>

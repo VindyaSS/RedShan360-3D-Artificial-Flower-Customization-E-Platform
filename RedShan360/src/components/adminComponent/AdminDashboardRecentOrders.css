@@ -129,6 +129,11 @@
   color: #27ae60;
 }
 
+.status-pill.dispatched {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
 .status-pill.processing {
   background: #fff4e6;
   color: #f39c12;
