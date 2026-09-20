@@ -45,7 +45,9 @@ function RecentOrders({ data, loading }) {
       case "COMPLETED":
         return { label: "COMPLETED", className: "completed" };
       case "DISPATCHED_TO_COURIER":
-        return { label: "DISPATCHED", className: "dispatched" };
+      case "DISPATCHED":
+        return { label: "DISPATCHED TO COURIER", className: "dispatched" };
+
       case "PROCESSING":
         return { label: "PROCESSING", className: "processing" };
       case "ORDER_CONFIRMED":
@@ -60,7 +62,7 @@ function RecentOrders({ data, loading }) {
     {
       id: "#RS-2091",
       customer: "Marc-Antoine Bernard",
-      status: "ORDER_COMPLETED",
+      status: "DISPATCHED_TO_COURIER",
       date: "2024-06-12T12:00:00Z",
     },
     {
