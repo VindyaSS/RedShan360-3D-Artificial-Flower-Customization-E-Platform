@@ -93,15 +93,22 @@ const ProductDetails = () => {
           // Set 3D model path dynamically from backend modelUrl
           setModelPath(mappedProduct.modelUrl || "");
 
-          // Load reviews
-          const savedReviews = localStorage.getItem(`redshan360_reviews_${productId}`);
-          if (savedReviews) {
-            setReviewsList(JSON.parse(savedReviews));
-          } else {
-            setReviewsList([
-              { id: 1, name: "Vindya S.", verified: true, date: "2 days ago", rating: 5, text: "Absolutely stunning lifelike detail! It coordinates perfectly in my living room." },
-              { id: 2, name: "Harshana K.", verified: true, date: "1 week ago", rating: 4, text: "Excellent craftsmanship. The color options make it very customizable." }
-            ]);
+          // Load reviews from PostgreSQL database via REST API
+          try {
+            const reviewsRes = await api.get(`/api/products/reviews/${productId}`);
+            if (reviewsRes.data && Array.isArray(reviewsRes.data)) {
+              const formattedReviews = reviewsRes.data.map((r) => ({
+                id: r.reviewId,
+                name: r.customerName || 'Verified Customer',
+                verified: true,
+                date: r.reviewDate ? new Date(r.reviewDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Recently',
+                rating: r.rating,
+                text: r.comment
+              }));
+              setReviewsList(formattedReviews);
+            }
+          } catch (reviewErr) {
+            console.error('Error fetching reviews from backend:', reviewErr);
           }
 
           // Fetch related products based on same category/subcategory
@@ -257,28 +264,53 @@ const ProductDetails = () => {
     }
   };
 
-  // Review submission
-  const handleReviewSubmit = (e) => {
+  // Review submission to backend database
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!newReviewName.trim() || !newReviewText.trim()) return;
+    if (!newReviewText.trim()) return;
 
-    const newReview = {
-      id: Date.now(),
-      name: newReviewName,
-      verified: true,
-      date: 'Just now',
-      rating: newReviewRating,
-      text: newReviewText,
-    };
+    const savedUser = localStorage.getItem('user');
+    let currentUser = null;
+    if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+      try {
+        currentUser = JSON.parse(savedUser);
+      } catch (err) {
+        console.error('Failed to parse user from localStorage in review submit:', err);
+      }
+    }
 
-    const updatedReviews = [newReview, ...reviewsList];
-    setReviewsList(updatedReviews);
-    localStorage.setItem(`redshan360_reviews_${productId}`, JSON.stringify(updatedReviews));
+    const userId = currentUser ? (currentUser.id || currentUser.userId) : null;
 
-    setNewReviewName('');
-    setNewReviewText('');
-    setNewReviewRating(5);
-    setShowReviewModal(false);
+    try {
+      await api.post('/api/products/reviews', {
+        userId: userId ? Number(userId) : null,
+        productId: Number(productId),
+        rating: newReviewRating,
+        comment: newReviewText
+      });
+
+      // Refresh reviews list from backend database
+      const reviewsRes = await api.get(`/api/products/reviews/${productId}`);
+      if (reviewsRes.data && Array.isArray(reviewsRes.data)) {
+        const formattedReviews = reviewsRes.data.map((r) => ({
+          id: r.reviewId,
+          name: r.customerName || 'Verified Customer',
+          verified: true,
+          date: r.reviewDate ? new Date(r.reviewDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Recently',
+          rating: r.rating,
+          text: r.comment
+        }));
+        setReviewsList(formattedReviews);
+      }
+
+      setNewReviewName('');
+      setNewReviewText('');
+      setNewReviewRating(5);
+      setShowReviewModal(false);
+    } catch (error) {
+      console.error('Failed to submit review to backend:', error);
+      alert(error.response?.data?.message || 'Failed to submit review. Please try again.');
+    }
   };
 
   // Auto Rotation for 360 View Modal
@@ -593,6 +625,7 @@ const ProductDetails = () => {
                   }
                 }
                 if (currentUser) {
+                  setNewReviewName(currentUser.name || '');
                   setShowReviewModal(true);
                 } else {
                   window.dispatchEvent(new Event('show-login-required'));
