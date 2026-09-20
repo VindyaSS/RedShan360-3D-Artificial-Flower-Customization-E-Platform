@@ -47,6 +47,7 @@ function RecentOrders({ data, loading }) {
       case "DISPATCHED_TO_COURIER":
       case "DISPATCHED":
         return { label: "DISPATCHED TO COURIER", className: "dispatched" };
+
       case "PROCESSING":
         return { label: "PROCESSING", className: "processing" };
       case "ORDER_CONFIRMED":
