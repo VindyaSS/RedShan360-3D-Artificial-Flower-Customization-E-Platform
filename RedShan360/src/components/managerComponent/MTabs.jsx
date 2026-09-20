@@ -4,6 +4,7 @@ import React, {
     useRef,
     useCallback
 } from "react";
+import { Search } from "lucide-react";
 
 import "../../css/manager.css";
 
@@ -215,10 +216,23 @@ export default function MTabs() {
                     <h1>Manage Orders</h1>
                     <p>Track, filter, and dispatch customer orders through each fulfillment stage.</p>
                 </div>
+
+
+                <div className="order-search-box">
+                    <Search size={16} className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Search by Order ID or Customer..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
             </div>
 
             {/* ---------------- Tabs Container ---------------- */}
             <div className="tabs-container">
+
 
                 {/* ---------------- Tab Header ---------------- */}
                 <div className="tabs-header">
@@ -254,6 +268,7 @@ export default function MTabs() {
                         <span className="tab-badge">{dispatchedorders.length}</span>
                     </button>
                 </div>
+
 
 
                 {/* ---------------- Tab Content ---------------- */}
