@@ -1587,6 +1587,19 @@
 }
 
 @media (max-width: 1024px) {
+  .product-mgmt-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .product-kpi-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
   .report-summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1595,9 +1608,32 @@
   }
 }
 
+@media (max-width: 768px) {
+  .product-kpi-row {
+    grid-template-columns: 1fr;
+  }
+  .category-filter-pills {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 8px;
+  }
+  .admin-edit-modal {
+    width: 95vw;
+    padding: 16px;
+    max-height: 90vh;
+  }
+}
+
 @media (max-width: 640px) {
+  .header-text h1 {
+    font-size: 26px;
+  }
   .report-summary-grid {
     grid-template-columns: 1fr;
+  }
+  .export-report-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 

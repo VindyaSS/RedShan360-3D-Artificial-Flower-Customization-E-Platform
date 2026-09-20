@@ -130,6 +130,7 @@
 
 
 
+import { useState, useEffect } from "react";
 import "./AdminSidebar.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import dashboardIcon from "../../assets/adminDashboard.png";
@@ -137,11 +138,25 @@ import usersIcon from "../../assets/adminUsers.png";
 import productsIcon from "../../assets/adminProducts.png";
 import ordersIcon from "../../assets/adminOrders.png";
 import reportsIcon from "../../assets/adminReports.png";
-import settingsIcon from "../../assets/adminSetting.png"; // ✅ correct filename
+import settingsIcon from "../../assets/adminSetting.png";
 import logoutIcon from "../../assets/adminLogout.png";
 
 function AdminSidebar() {
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleToggle = () => setMobileOpen((prev) => !prev);
+    const handleClose = () => setMobileOpen(false);
+
+    window.addEventListener("toggleAdminSidebar", handleToggle);
+    window.addEventListener("closeAdminSidebar", handleClose);
+
+    return () => {
+      window.removeEventListener("toggleAdminSidebar", handleToggle);
+      window.removeEventListener("closeAdminSidebar", handleClose);
+    };
+  }, []);
 
   const menuItems = [
     { name: "Dashboard", icon: dashboardIcon, path: "/adminDashboard" },
@@ -153,6 +168,7 @@ function AdminSidebar() {
   ];
 
   const handleLogout = () => {
+    setMobileOpen(false);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("auth-updated"));
@@ -160,41 +176,53 @@ function AdminSidebar() {
   };
 
   return (
-    <div className="admin-sidebar">
-      {/* Logo Section */}
-      <div className="sidebar-logo">
-        <h1>RedShan Flora</h1>
-        <p>Luxury Admin</p>
-      </div>
+    <>
+      {/* Mobile Drawer Backdrop */}
+      {mobileOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileOpen(false)}
+          title="Close Navigation Menu"
+        />
+      )}
 
-      {/* Menu */}
-      <div className="sidebar-menu">
-        {menuItems.map((item, index) => (
-          <NavLink
-            key={index}
-            to={item.path}
-            className={({ isActive }) =>
-              isActive ? "menu-item active" : "menu-item"
-            }
-          >
+      <div className={`admin-sidebar ${mobileOpen ? "mobile-open" : ""}`}>
+        {/* Logo Section */}
+        <div className="sidebar-logo">
+          <h1>RedShan Flora</h1>
+          <p>Luxury Admin</p>
+        </div>
+
+        {/* Menu */}
+        <div className="sidebar-menu">
+          {menuItems.map((item, index) => (
+            <NavLink
+              key={index}
+              to={item.path}
+              onClick={() => setMobileOpen(false)}
+              className={({ isActive }) =>
+                isActive ? "menu-item active" : "menu-item"
+              }
+            >
+              <div className="menu-icon">
+                <img src={item.icon} alt={item.name} />
+              </div>
+              <span>{item.name}</span>
+            </NavLink>
+          ))}
+        </div>
+
+        {/* Logout at bottom */}
+        <div className="sidebar-logout">
+          <div className="menu-item logout" onClick={handleLogout} style={{ cursor: "pointer" }}>
             <div className="menu-icon">
-              <img src={item.icon} alt={item.name} />
+              <img src={logoutIcon} alt="Logout" />
             </div>
-            <span>{item.name}</span>
-          </NavLink>
-        ))}
-      </div>
-
-      {/* Logout at bottom */}
-      <div className="sidebar-logout">
-        <div className="menu-item logout" onClick={handleLogout} style={{ cursor: "pointer" }}>
-          <div className="menu-icon">
-            <img src={logoutIcon} alt="Logout" />
+            <span>Logout</span>
           </div>
-          <span>Logout</span>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
