@@ -217,6 +217,7 @@ export default function MTabs() {
                     <p>Track, filter, and dispatch customer orders through each fulfillment stage.</p>
                 </div>
 
+
                 <div className="order-search-box">
                     <Search size={16} className="search-icon" />
                     <input
@@ -226,10 +227,12 @@ export default function MTabs() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+
             </div>
 
             {/* ---------------- Tabs Container ---------------- */}
             <div className="tabs-container">
+
 
                 {/* ---------------- Tab Header ---------------- */}
                 <div className="tabs-header">
@@ -265,6 +268,7 @@ export default function MTabs() {
                         <span className="tab-badge">{dispatchedorders.length}</span>
                     </button>
                 </div>
+
 
 
                 {/* ---------------- Tab Content ---------------- */}
