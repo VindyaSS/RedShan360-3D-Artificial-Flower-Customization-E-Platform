@@ -111,7 +111,7 @@ export default function MCompletedOrderTable(props) {
                                         ? `Rs. ${Number(completedorder.totalAmount).toFixed(2)}`
                                         : "-"}
                                 </td>
-                                <td style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                <td style={{ minWidth: "200px", whiteSpace: "normal", wordBreak: "break-word" }}>
                                     {completedorder?.address ?? "-"}
                                 </td>
                                 <td>{completedorder?.phone ?? "-"}</td>
